@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.ProductMapper">
+  <resultMap id="BaseResultMap1" type="com.example.demo.model.entity.Product">
+    <constructor>
+      <idArg column="ID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="GUID" javaType="java.lang.String" jdbcType="CHAR" />
+      <arg column="StockID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="BarCodeID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="SkuID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="ProductName" javaType="java.lang.String" jdbcType="NVARCHAR" />
+      <arg column="ProductStyle" javaType="java.lang.String" jdbcType="NVARCHAR" />
+      <arg column="Price" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <arg column="CreateTime" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="Status" javaType="java.lang.Short" jdbcType="SMALLINT" />
+      <arg column="Count" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="ModifyTime" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+    </constructor>
+  </resultMap>
+  <resultMap id="ProductTable" type="com.example.demo.model.entity.Product">
+    <constructor>
+      <idArg column="ID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="GUID" javaType="java.lang.String" jdbcType="CHAR" />
+      <arg column="StockID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="BarCodeID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="SkuID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="ProductName" javaType="java.lang.String" jdbcType="NVARCHAR" />
+      <arg column="ProductStyle" javaType="java.lang.String" jdbcType="NVARCHAR" />
+      <arg column="Price" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <arg column="CreateTime" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="Status" javaType="java.lang.Short" jdbcType="SMALLINT" />
+      <arg column="Count" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="ModifyTime" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <!--java.lang.Byte[]报错-->
+      <arg column="TimeStamp" javaType="Byte[]" jdbcType="BINARY" />
+    </constructor>
+  </resultMap>
+  <!--<sql id="Base_Column_List">-->
+    <!--ID, GUID, StockID, BarCodeID, SkuID, ProductName, ProductStyle, Price, CreateTime,-->
+    <!--Status, Count, ModifyTime-->
+  <!--</sql>-->
+  <!--<sql id="Blob_Column_List">-->
+    <!--TimeStamp-->
+  <!--</sql>-->
+  <!--<select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="Product">-->
+    <!--select-->
+    <!--<include refid="Base_Column_List" />-->
+    <!--,-->
+    <!--<include refid="Blob_Column_List" />-->
+    <!--from Product-->
+    <!--where ID = #{id,jdbcType=INTEGER}-->
+  <!--</select>-->
+  <!--<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">-->
+    <!--delete from Product-->
+    <!--where ID = #{id,jdbcType=INTEGER}-->
+  <!--</delete>-->
+  <!--<insert id="insert" parameterType="Product">-->
+    <!--insert into Product (ID, GUID, StockID,-->
+      <!--BarCodeID, SkuID, ProductName,-->
+      <!--ProductStyle, Price, CreateTime,-->
+      <!--Status, Count, ModifyTime,-->
+      <!--TimeStamp)-->
+    <!--values (#{id,jdbcType=INTEGER}, #{guid,jdbcType=CHAR}, #{stockid,jdbcType=INTEGER},-->
+      <!--#{barcodeid,jdbcType=INTEGER}, #{skuid,jdbcType=INTEGER}, #{productname,jdbcType=NVARCHAR},-->
+      <!--#{productstyle,jdbcType=NVARCHAR}, #{price,jdbcType=DECIMAL}, #{createtime,jdbcType=TIMESTAMP},-->
+      <!--#{status,jdbcType=SMALLINT}, #{count,jdbcType=INTEGER}, #{modifytime,jdbcType=TIMESTAMP},-->
+      <!--#{timestamp,jdbcType=BINARY})-->
+  <!--</insert>-->
+  <!--<insert id="insertSelective" parameterType="Product">-->
+    <!--insert into Product-->
+    <!--<trim prefix="(" suffix=")" suffixOverrides=",">-->
+      <!--<if test="id != null">-->
+        <!--ID,-->
+      <!--</if>-->
+      <!--<if test="guid != null">-->
+        <!--GUID,-->
+      <!--</if>-->
+      <!--<if test="stockid != null">-->
+        <!--StockID,-->
+      <!--</if>-->
+      <!--<if test="barcodeid != null">-->
+        <!--BarCodeID,-->
+      <!--</if>-->
+      <!--<if test="skuid != null">-->
+        <!--SkuID,-->
+      <!--</if>-->
+      <!--<if test="productname != null">-->
+        <!--ProductName,-->
+      <!--</if>-->
+      <!--<if test="productstyle != null">-->
+        <!--ProductStyle,-->
+      <!--</if>-->
+      <!--<if test="price != null">-->
+        <!--Price,-->
+      <!--</if>-->
+      <!--<if test="createtime != null">-->
+        <!--CreateTime,-->
+      <!--</if>-->
+      <!--<if test="status != null">-->
+        <!--Status,-->
+      <!--</if>-->
+      <!--<if test="count != null">-->
+        <!--Count,-->
+      <!--</if>-->
+      <!--<if test="modifytime != null">-->
+        <!--ModifyTime,-->
+      <!--</if>-->
+      <!--<if test="timestamp != null">-->
+        <!--TimeStamp,-->
+      <!--</if>-->
+    <!--</trim>-->
+    <!--<trim prefix="values (" suffix=")" suffixOverrides=",">-->
+      <!--<if test="id != null">-->
+        <!--#{id,jdbcType=INTEGER},-->
+      <!--</if>-->
+      <!--<if test="guid != null">-->
+        <!--#{guid,jdbcType=CHAR},-->
+      <!--</if>-->
+      <!--<if test="stockid != null">-->
+        <!--#{stockid,jdbcType=INTEGER},-->
+      <!--</if>-->
+      <!--<if test="barcodeid != null">-->
+        <!--#{barcodeid,jdbcType=INTEGER},-->
+      <!--</if>-->
+      <!--<if test="skuid != null">-->
+        <!--#{skuid,jdbcType=INTEGER},-->
+      <!--</if>-->
+      <!--<if test="productname != null">-->
+        <!--#{productname,jdbcType=NVARCHAR},-->
+      <!--</if>-->
+      <!--<if test="productstyle != null">-->
+        <!--#{productstyle,jdbcType=NVARCHAR},-->
+      <!--</if>-->
+      <!--<if test="price != null">-->
+        <!--#{price,jdbcType=DECIMAL},-->
+      <!--</if>-->
+      <!--<if test="createtime != null">-->
+        <!--#{createtime,jdbcType=TIMESTAMP},-->
+      <!--</if>-->
+      <!--<if test="status != null">-->
+        <!--#{status,jdbcType=SMALLINT},-->
+      <!--</if>-->
+      <!--<if test="count != null">-->
+        <!--#{count,jdbcType=INTEGER},-->
+      <!--</if>-->
+      <!--<if test="modifytime != null">-->
+        <!--#{modifytime,jdbcType=TIMESTAMP},-->
+      <!--</if>-->
+      <!--<if test="timestamp != null">-->
+        <!--#{timestamp,jdbcType=BINARY},-->
+      <!--</if>-->
+    <!--</trim>-->
+  <!--</insert>-->
+  <!--<update id="updateByPrimaryKeySelective" parameterType="Product">-->
+    <!--update Product-->
+    <!--<set>-->
+      <!--<if test="guid != null">-->
+        <!--GUID = #{guid,jdbcType=CHAR},-->
+      <!--</if>-->
+      <!--<if test="stockid != null">-->
+        <!--StockID = #{stockid,jdbcType=INTEGER},-->
+      <!--</if>-->
+      <!--<if test="barcodeid != null">-->
+        <!--BarCodeID = #{barcodeid,jdbcType=INTEGER},-->
+      <!--</if>-->
+      <!--<if test="skuid != null">-->
+        <!--SkuID = #{skuid,jdbcType=INTEGER},-->
+      <!--</if>-->
+      <!--<if test="productname != null">-->
+        <!--ProductName = #{productname,jdbcType=NVARCHAR},-->
+      <!--</if>-->
+      <!--<if test="productstyle != null">-->
+        <!--ProductStyle = #{productstyle,jdbcType=NVARCHAR},-->
+      <!--</if>-->
+      <!--<if test="price != null">-->
+        <!--Price = #{price,jdbcType=DECIMAL},-->
+      <!--</if>-->
+      <!--<if test="createtime != null">-->
+        <!--CreateTime = #{createtime,jdbcType=TIMESTAMP},-->
+      <!--</if>-->
+      <!--<if test="status != null">-->
+        <!--Status = #{status,jdbcType=SMALLINT},-->
+      <!--</if>-->
+      <!--<if test="count != null">-->
+        <!--Count = #{count,jdbcType=INTEGER},-->
+      <!--</if>-->
+      <!--<if test="modifytime != null">-->
+        <!--ModifyTime = #{modifytime,jdbcType=TIMESTAMP},-->
+      <!--</if>-->
+      <!--<if test="timestamp != null">-->
+        <!--TimeStamp = #{timestamp,jdbcType=BINARY},-->
+      <!--</if>-->
+    <!--</set>-->
+    <!--where ID = #{id,jdbcType=INTEGER}-->
+  <!--</update>-->
+  <!--<update id="updateByPrimaryKeyWithBLOBs" parameterType="Product">-->
+    <!--update Product-->
+    <!--set GUID = #{guid,jdbcType=CHAR},-->
+      <!--StockID = #{stockid,jdbcType=INTEGER},-->
+      <!--BarCodeID = #{barcodeid,jdbcType=INTEGER},-->
+      <!--SkuID = #{skuid,jdbcType=INTEGER},-->
+      <!--ProductName = #{productname,jdbcType=NVARCHAR},-->
+      <!--ProductStyle = #{productstyle,jdbcType=NVARCHAR},-->
+      <!--Price = #{price,jdbcType=DECIMAL},-->
+      <!--CreateTime = #{createtime,jdbcType=TIMESTAMP},-->
+      <!--Status = #{status,jdbcType=SMALLINT},-->
+      <!--Count = #{count,jdbcType=INTEGER},-->
+      <!--ModifyTime = #{modifytime,jdbcType=TIMESTAMP},-->
+      <!--TimeStamp = #{timestamp,jdbcType=BINARY}-->
+    <!--where ID = #{id,jdbcType=INTEGER}-->
+  <!--</update>-->
+  <update id="updateByPrimaryKey" parameterType="Product">
+    update Product set
+      ProductName = #{productname,jdbcType=NVARCHAR},
+      Price = #{price,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+
+  <!--存储过程-->
+  <!-- 参数名称和实体类中字段名称保持一致,不然用对象做参数，反射找不到getter，parameterType既可用java.util.HashMap也可以用实体对象，用实体对象省事-->
+  <!--resultType="Product"  和resultMap="ProductTable" 都可以，切记类型对应-->
+  <select id="getProductProc" parameterType="com.example.demo.model.entity.Product" statementType="CALLABLE" resultMap="ProductTable">
+    <!--<![CDATA[-->
+          { CALL GetProductProc (
+                                #{price, mode=IN, jdbcType=DECIMAL},
+                                #{productname, mode=IN, jdbcType=NVARCHAR}
+                               )}
+     <!--]]>-->
+
+
+    </select>
+
+<!--分页查询-->
+  <select id="getPageData" parameterType="com.example.demo.model.viewModel.ProductVM" resultType="com.example.demo.model.viewModel.ProductVM">
+    select  *  from [dbo].[Product] p
+    join [dbo].[Stock] s on p.StockID=s.ID
+    left  join [dbo].[BarCode] b on p.BarCodeID=b.ID
+    join [dbo].[Sku]  sk on p.SkuID=sk.ID
+    where 1=1
+    <if test="productname != null">
+      and  Productname LIKE CONCAT('%',#{productname},'%')
+    </if>
+    <if test="price != null">
+    and price>=#{price,jdbcType=DECIMAL}
+    </if>
+    <if test="createtime != null">
+    and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
+    </if>
+    ORDER BY 1
+    OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+  </select>
+</mapper>

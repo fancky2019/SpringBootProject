@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.UserMapper">
+  <!--<resultMap id="BaseResultMap" type="User">-->
+    <!--<constructor>-->
+      <!--<idArg column="ID" javaType="java.lang.Integer" jdbcType="INTEGER" />-->
+      <!--<arg column="Account" javaType="java.lang.String" jdbcType="VARCHAR" />-->
+      <!--<arg column="Password" javaType="java.lang.String" jdbcType="VARCHAR" />-->
+      <!--<arg column="Status" javaType="java.lang.Short" jdbcType="SMALLINT" />-->
+      <!--<arg column="CreateTime" javaType="java.util.Date" jdbcType="TIMESTAMP" />-->
+      <!--<arg column="ModityTime" javaType="java.util.Date" jdbcType="TIMESTAMP" />-->
+    <!--</constructor>-->
+  <!--</resultMap>-->
+  <!--<resultMap id="ResultMapWithBLOBs" type="User">-->
+    <!--<constructor>-->
+      <!--<idArg column="ID" javaType="java.lang.Integer" jdbcType="INTEGER" />-->
+      <!--<arg column="Account" javaType="java.lang.String" jdbcType="VARCHAR" />-->
+      <!--<arg column="Password" javaType="java.lang.String" jdbcType="VARCHAR" />-->
+      <!--<arg column="Status" javaType="java.lang.Short" jdbcType="SMALLINT" />-->
+      <!--<arg column="CreateTime" javaType="java.util.Date" jdbcType="TIMESTAMP" />-->
+      <!--<arg column="ModityTime" javaType="java.util.Date" jdbcType="TIMESTAMP" />-->
+      <!--<arg column="TimeStamp" javaType="_byte[]" jdbcType="BINARY" />-->
+    <!--</constructor>-->
+  <!--</resultMap>-->
+  <!--<sql id="Base_Column_List">-->
+    <!--ID, Account, Password, Status, CreateTime, ModityTime-->
+  <!--</sql>-->
+  <!--<sql id="Blob_Column_List">-->
+    <!--TimeStamp-->
+  <!--</sql>-->
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.User">
+    select *  from Users
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <!--<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">-->
+    <!--delete from Users-->
+    <!--where ID = #{id,jdbcType=INTEGER}-->
+  <!--</delete>-->
+  <!--<insert id="insert" parameterType="User">-->
+    <!--insert into Users (ID, Account, Password, -->
+      <!--Status, CreateTime, ModityTime, -->
+      <!--TimeStamp)-->
+    <!--values (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, -->
+      <!--#{status,jdbcType=SMALLINT}, #{createtime,jdbcType=TIMESTAMP}, #{moditytime,jdbcType=TIMESTAMP}, -->
+      <!--#{timestamp,jdbcType=BINARY})-->
+  <!--</insert>-->
+  <!--<insert id="insertSelective" parameterType="User">-->
+    <!--insert into Users-->
+    <!--<trim prefix="(" suffix=")" suffixOverrides=",">-->
+      <!--<if test="id != null">-->
+        <!--ID,-->
+      <!--</if>-->
+      <!--<if test="account != null">-->
+        <!--Account,-->
+      <!--</if>-->
+      <!--<if test="password != null">-->
+        <!--Password,-->
+      <!--</if>-->
+      <!--<if test="status != null">-->
+        <!--Status,-->
+      <!--</if>-->
+      <!--<if test="createtime != null">-->
+        <!--CreateTime,-->
+      <!--</if>-->
+      <!--<if test="moditytime != null">-->
+        <!--ModityTime,-->
+      <!--</if>-->
+      <!--<if test="timestamp != null">-->
+        <!--TimeStamp,-->
+      <!--</if>-->
+    <!--</trim>-->
+    <!--<trim prefix="values (" suffix=")" suffixOverrides=",">-->
+      <!--<if test="id != null">-->
+        <!--#{id,jdbcType=INTEGER},-->
+      <!--</if>-->
+      <!--<if test="account != null">-->
+        <!--#{account,jdbcType=VARCHAR},-->
+      <!--</if>-->
+      <!--<if test="password != null">-->
+        <!--#{password,jdbcType=VARCHAR},-->
+      <!--</if>-->
+      <!--<if test="status != null">-->
+        <!--#{status,jdbcType=SMALLINT},-->
+      <!--</if>-->
+      <!--<if test="createtime != null">-->
+        <!--#{createtime,jdbcType=TIMESTAMP},-->
+      <!--</if>-->
+      <!--<if test="moditytime != null">-->
+        <!--#{moditytime,jdbcType=TIMESTAMP},-->
+      <!--</if>-->
+      <!--<if test="timestamp != null">-->
+        <!--#{timestamp,jdbcType=BINARY},-->
+      <!--</if>-->
+    <!--</trim>-->
+  <!--</insert>-->
+  <!--<update id="updateByPrimaryKeySelective" parameterType="User">-->
+    <!--update Users-->
+    <!--<set>-->
+      <!--<if test="account != null">-->
+        <!--Account = #{account,jdbcType=VARCHAR},-->
+      <!--</if>-->
+      <!--<if test="password != null">-->
+        <!--Password = #{password,jdbcType=VARCHAR},-->
+      <!--</if>-->
+      <!--<if test="status != null">-->
+        <!--Status = #{status,jdbcType=SMALLINT},-->
+      <!--</if>-->
+      <!--<if test="createtime != null">-->
+        <!--CreateTime = #{createtime,jdbcType=TIMESTAMP},-->
+      <!--</if>-->
+      <!--<if test="moditytime != null">-->
+        <!--ModityTime = #{moditytime,jdbcType=TIMESTAMP},-->
+      <!--</if>-->
+      <!--<if test="timestamp != null">-->
+        <!--TimeStamp = #{timestamp,jdbcType=BINARY},-->
+      <!--</if>-->
+    <!--</set>-->
+    <!--where ID = #{id,jdbcType=INTEGER}-->
+  <!--</update>-->
+  <!--<update id="updateByPrimaryKeyWithBLOBs" parameterType="User">-->
+    <!--update Users-->
+    <!--set Account = #{account,jdbcType=VARCHAR},-->
+      <!--Password = #{password,jdbcType=VARCHAR},-->
+      <!--Status = #{status,jdbcType=SMALLINT},-->
+      <!--CreateTime = #{createtime,jdbcType=TIMESTAMP},-->
+      <!--ModityTime = #{moditytime,jdbcType=TIMESTAMP},-->
+      <!--TimeStamp = #{timestamp,jdbcType=BINARY}-->
+    <!--where ID = #{id,jdbcType=INTEGER}-->
+  <!--</update>-->
+  <!--<update id="updateByPrimaryKey" parameterType="User">-->
+    <!--update Users-->
+    <!--set Account = #{account,jdbcType=VARCHAR},-->
+      <!--Password = #{password,jdbcType=VARCHAR},-->
+      <!--Status = #{status,jdbcType=SMALLINT},-->
+      <!--CreateTime = #{createtime,jdbcType=TIMESTAMP},-->
+      <!--ModityTime = #{moditytime,jdbcType=TIMESTAMP}-->
+    <!--where ID = #{id,jdbcType=INTEGER}-->
+  <!--</update>-->
+</mapper>

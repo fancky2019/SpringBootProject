@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.OrderDetailMapper">
+  <resultMap id="BaseResultMap" type="com.example.demo.model.entity.OrderDetail">
+    <constructor>
+      <idArg column="ID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="GUID" javaType="java.lang.String" jdbcType="CHAR" />
+      <arg column="OrderID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="ProductID" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="Count" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="DealPrice" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <arg column="Status" javaType="java.lang.Short" jdbcType="SMALLINT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    ID, GUID, OrderID, ProductID, [Count], DealPrice, Status
+  </sql>
+  <select id="select" parameterType="com.example.demo.model.entity.OrderDetail" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from OrderDetail
+    where 1=1
+    <if test="orderid != null">
+      AND OrderID =#{orderid,jdbcType=INTEGER}
+    </if>
+    <if test="id != null">
+      AND ID= #{id,jdbcType=INTEGER}
+    </if>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from OrderDetail
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByOrderId" parameterType="com.example.demo.model.entity.Order">
+    delete from OrderDetail
+    where orderid = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.example.demo.model.entity.OrderDetail" useGeneratedKeys="true" keyProperty="id">
+    insert into OrderDetail ( [GUID], OrderID,
+      ProductID, [Count], DealPrice,
+      Status)
+    values ( #{guid,jdbcType=CHAR}, #{orderid,jdbcType=INTEGER},
+      #{productid,jdbcType=INTEGER}, #{count,jdbcType=INTEGER}, #{dealprice,jdbcType=DECIMAL}, 
+      #{status,jdbcType=SMALLINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.example.demo.model.entity.OrderDetail">
+    insert into OrderDetail
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="guid != null">
+        GUID,
+      </if>
+      <if test="orderid != null">
+        OrderID,
+      </if>
+      <if test="productid != null">
+        ProductID,
+      </if>
+      <if test="count != null">
+        Count,
+      </if>
+      <if test="dealprice != null">
+        DealPrice,
+      </if>
+      <if test="status != null">
+        Status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="guid != null">
+        #{guid,jdbcType=CHAR},
+      </if>
+      <if test="orderid != null">
+        #{orderid,jdbcType=INTEGER},
+      </if>
+      <if test="productid != null">
+        #{productid,jdbcType=INTEGER},
+      </if>
+      <if test="count != null">
+        #{count,jdbcType=INTEGER},
+      </if>
+      <if test="dealprice != null">
+        #{dealprice,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=SMALLINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.OrderDetail">
+    update OrderDetail
+    <set>
+      <if test="guid != null">
+        GUID = #{guid,jdbcType=CHAR},
+      </if>
+      <if test="orderid != null">
+        OrderID = #{orderid,jdbcType=INTEGER},
+      </if>
+      <if test="productid != null">
+        ProductID = #{productid,jdbcType=INTEGER},
+      </if>
+      <if test="count != null">
+        Count = #{count,jdbcType=INTEGER},
+      </if>
+      <if test="dealprice != null">
+        DealPrice = #{dealprice,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null">
+        Status = #{status,jdbcType=SMALLINT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.OrderDetail">
+    update OrderDetail
+    set GUID = #{guid,jdbcType=CHAR},
+      OrderID = #{orderid,jdbcType=INTEGER},
+      ProductID = #{productid,jdbcType=INTEGER},
+      Count = #{count,jdbcType=INTEGER},
+      DealPrice = #{dealprice,jdbcType=DECIMAL},
+      Status = #{status,jdbcType=SMALLINT}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
