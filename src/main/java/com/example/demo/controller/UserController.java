@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.model.entity.User;
 import com.example.demo.service.UserService;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
