@@ -20,7 +20,7 @@ public class UserController {
     private String username;
 
  private static Logger logger = LogManager.getLogger(UserController.class);
-   // private static Logger logger = LogManager.getLogger("bussiness");
+   // private static Logger logger = LogManager.getLogger("business");
 
 //  @RequestMapping("/getUser") 通用
     //SpringMVC的自动装箱（实体类接收参数）
