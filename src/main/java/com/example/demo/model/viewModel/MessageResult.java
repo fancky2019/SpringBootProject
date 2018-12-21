@@ -31,7 +31,7 @@ public class MessageResult<T> {
         return data;
     }
 
-    public  void setData(List<T> data) {
+    public void setData(List<T> data) {
         this.data = data;
     }
 }

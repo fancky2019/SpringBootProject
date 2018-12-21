@@ -72,40 +72,38 @@ public class OrderManagerService {
             return messageResult;
         }
     }
-        @Transactional(rollbackFor = Exception.class)
-        public MessageResult<Void> deleteOrder( Order order)
-        {
-            MessageResult<Void> messageResult = new MessageResult<>();
-            try {
+
+    @Transactional(rollbackFor = Exception.class)
+    public MessageResult<Void> deleteOrder(Order order) {
+        MessageResult<Void> messageResult = new MessageResult<>();
+        try {
 //                OrderDetail orderDetail=new OrderDetail();
 //                orderDetail.setOrderid(order.getId());
 //                List<OrderDetail> orderDetailList=orderDetailMapper.select(orderDetail);
-                Integer result = orderMapper.deleteByPrimaryKey(order.getId());
-                if (result <= 0) {
-                    messageResult.setMessage("删除失败");
-                    messageResult.setSuccess(false);
-                    return messageResult;
-                }
-                Integer re=orderDetailMapper.deleteByOrderId(order);
-                if(re<=0)
-                {
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    messageResult.setMessage("删除失败");
-                    messageResult.setSuccess(false);
-                    return messageResult;
-                }
-                messageResult.setSuccess(true);
-            } catch (Exception ex) {
-                messageResult.setMessage(ex.getMessage());
+            Integer result = orderMapper.deleteByPrimaryKey(order.getId());
+            if (result <= 0) {
+                messageResult.setMessage("删除失败");
                 messageResult.setSuccess(false);
-                //事务回滚
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-
-            } finally {
                 return messageResult;
             }
-        }
+            Integer re = orderDetailMapper.deleteByOrderId(order);
+            if (re <= 0) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                messageResult.setMessage("删除失败");
+                messageResult.setSuccess(false);
+                return messageResult;
+            }
+            messageResult.setSuccess(true);
+        } catch (Exception ex) {
+            messageResult.setMessage(ex.getMessage());
+            messageResult.setSuccess(false);
+            //事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 
+        } finally {
+            return messageResult;
+        }
+    }
 
 
 }

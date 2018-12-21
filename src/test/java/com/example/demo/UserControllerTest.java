@@ -33,7 +33,7 @@ public class UserControllerTest {
     public void getUser() {
         try {
             MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/user/getUser").accept(MediaType.APPLICATION_JSON)
-                    .param("id","1"))
+                    .param("id", "1"))
 //                    .param("date","2017-7-18 00:00:00")
 //                    .param("pageNum","1")
 //                    .param("pageSize","10"))
@@ -41,13 +41,9 @@ public class UserControllerTest {
                     .andDo(MockMvcResultHandlers.print())
                     .andReturn();
             System.out.println("输出 :" + mvcResult.getResponse().getContentAsString());
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
         }
     }
-
-
-
 
 
 }

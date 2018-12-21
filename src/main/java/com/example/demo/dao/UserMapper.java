@@ -3,7 +3,7 @@ package com.example.demo.dao;
 import com.example.demo.model.entity.User;
 
 public interface UserMapper {
-//    int deleteByPrimaryKey(Integer id);
+    //    int deleteByPrimaryKey(Integer id);
 //
 //    int insert(User record);
 //

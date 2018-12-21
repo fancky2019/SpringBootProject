@@ -18,15 +18,13 @@ public class OrderManagerController {
     private OrderManagerService orderManagerService;
 
     @RequestMapping("/addOrder")
-    public MessageResult<Void> addOrder(@RequestBody OrderManagerVM orderManagerVM)
-    {
-        return  orderManagerService.addOrder(orderManagerVM);
+    public MessageResult<Void> addOrder(@RequestBody OrderManagerVM orderManagerVM) {
+        return orderManagerService.addOrder(orderManagerVM);
     }
 
     @PostMapping("/deleteOrder")
-    public MessageResult<Void> deleteOrder(@RequestBody Order order)
-    {
-        return  orderManagerService.deleteOrder(order);
+    public MessageResult<Void> deleteOrder(@RequestBody Order order) {
+        return orderManagerService.deleteOrder(order);
     }
 
 }

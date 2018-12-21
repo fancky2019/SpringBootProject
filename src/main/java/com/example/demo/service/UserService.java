@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired
     UserMapper userMapper;
+
     public User selectByPrimaryKey(int id) {
         return userMapper.selectByPrimaryKey(id);
     }

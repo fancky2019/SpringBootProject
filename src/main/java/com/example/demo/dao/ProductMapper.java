@@ -22,7 +22,8 @@ public interface ProductMapper {
     int updateByPrimaryKey(Product record);
 
     //HashMap
-    List<Product> getProductProc(HashMap<String,Object> map);
+    List<Product> getProductProc(HashMap<String, Object> map);
+
     //对象
     List<Product> getProductProc(Product Product);
 

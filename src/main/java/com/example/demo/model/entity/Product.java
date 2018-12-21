@@ -28,7 +28,7 @@ public class Product {
 
     private Date modifytime;
 
-    private Byte[]  timestamp;
+    private Byte[] timestamp;
 
     public Product(Integer id, String guid, Integer stockid, Integer barcodeid, Integer skuid, String productname, String productstyle, BigDecimal price, Date createtime, Short status, Integer count, Date modifytime) {
         this.id = id;
@@ -45,7 +45,7 @@ public class Product {
         this.modifytime = modifytime;
     }
 
-    public Product(Integer id, String guid, Integer stockid, Integer barcodeid, Integer skuid, String productname, String productstyle, BigDecimal price, Date createtime, Short status, Integer count, Date modifytime,Byte[] timestamp) {
+    public Product(Integer id, String guid, Integer stockid, Integer barcodeid, Integer skuid, String productname, String productstyle, BigDecimal price, Date createtime, Short status, Integer count, Date modifytime, Byte[] timestamp) {
         this.id = id;
         this.guid = guid;
         this.stockid = stockid;

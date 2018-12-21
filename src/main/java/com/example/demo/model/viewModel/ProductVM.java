@@ -21,7 +21,7 @@ public class ProductVM extends Page {
     private Integer count;
     private Date modifytime;
     private String modifytimeStr;
-    private Byte[]  timestamp;
+    private Byte[] timestamp;
 
     public Integer getId() {
         return id;

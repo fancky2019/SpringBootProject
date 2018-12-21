@@ -8,7 +8,8 @@
     <properties resource="mybatisGenerator.properties"/>
 
     <!-- 指定数据连接驱动jar地址 -->
-    <classPathEntry location="C:\Users\Administrator\.m2\repository\com\microsoft\sqlserver\mssql-jdbc\6.4.0.jre8\mssql-jdbc-6.4.0.jre8.jar"/>
+    <classPathEntry
+            location="C:\Users\Administrator\.m2\repository\com\microsoft\sqlserver\mssql-jdbc\6.4.0.jre8\mssql-jdbc-6.4.0.jre8.jar"/>
 
     <context id="context" targetRuntime="MyBatis3">
         <commentGenerator>
@@ -67,29 +68,29 @@
             domainObjectName:指定了实体类的名称
         -->
         <!--<table tableName="Authorities" domainObjectName="Authorities"-->
-               <!--enableCountByExample="false" enableUpdateByExample="false"-->
-               <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-               <!--selectByExampleQueryId="false">-->
+        <!--enableCountByExample="false" enableUpdateByExample="false"-->
+        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
+        <!--selectByExampleQueryId="false">-->
         <!--</table>-->
         <!--<table tableName="Menus" domainObjectName="Menus"-->
-               <!--enableCountByExample="false" enableUpdateByExample="false"-->
-               <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-               <!--selectByExampleQueryId="false">-->
+        <!--enableCountByExample="false" enableUpdateByExample="false"-->
+        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
+        <!--selectByExampleQueryId="false">-->
         <!--</table>-->
         <!--<table tableName="RoleMenuAuthorities" domainObjectName="RoleMenuAuthorities"-->
-               <!--enableCountByExample="false" enableUpdateByExample="false"-->
-               <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-               <!--selectByExampleQueryId="false">-->
+        <!--enableCountByExample="false" enableUpdateByExample="false"-->
+        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
+        <!--selectByExampleQueryId="false">-->
         <!--</table>-->
         <!--<table tableName="RoleMenus" domainObjectName="RoleMenus"-->
-               <!--enableCountByExample="false" enableUpdateByExample="false"-->
-               <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-               <!--selectByExampleQueryId="false">-->
+        <!--enableCountByExample="false" enableUpdateByExample="false"-->
+        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
+        <!--selectByExampleQueryId="false">-->
         <!--</table>-->
         <!--<table tableName="Roles" domainObjectName="Roles"-->
-               <!--enableCountByExample="false" enableUpdateByExample="false"-->
-               <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-               <!--selectByExampleQueryId="false">-->
+        <!--enableCountByExample="false" enableUpdateByExample="false"-->
+        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
+        <!--selectByExampleQueryId="false">-->
         <!--</table>-->
         <table tableName="Order" domainObjectName="Order"
                enableCountByExample="false" enableUpdateByExample="false"

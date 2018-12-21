@@ -1,4 +1,3 @@
-
 #注意每个属性：（冒号）后要有一个空格
 
 #thymeleaf模板
@@ -17,11 +16,11 @@ mybatis:
 #开发配置
 spring:
   datasource:
-      url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS
-#      url: jdbc:sqlserver://localhost:1433;DatabaseName=Test
-      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-      username: sa
-      password: 123456
+    url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS
+    #      url: jdbc:sqlserver://localhost:1433;DatabaseName=Test
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: sa
+    password: 123456
 logging:
   config: classpath:log4j2.yml
 
