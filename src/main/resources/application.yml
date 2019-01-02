@@ -21,6 +21,27 @@ spring:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     username: sa
     password: 123456
+  redis:
+    #  数据库索引
+    database: 5
+    # 远程服务器地址
+    host: 127.0.0.1
+    # 远程服务器端口
+    port: 6379
+    # 验证码
+    password: fancky123456
+    jedis:
+      pool:
+        # 最大空闲连接
+        max-idle: 8
+        # 最小空闲链接
+        min-idle: 0
+        # 最大连接数（负数表示没有限制）
+        max-active: 8
+        # 最大阻塞等待时间（负数表示没有限制）
+        max-wait: 0
+    # 链接超时时间（毫秒）
+    timeout: 50
 logging:
   config: classpath:log4j2.yml
 
