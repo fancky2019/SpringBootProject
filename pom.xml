@@ -73,6 +73,7 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
+
         <!-- 对象与JSON之间相互转换 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -88,6 +89,8 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.52</version>
         </dependency>
+
+
 
     </dependencies>
 
