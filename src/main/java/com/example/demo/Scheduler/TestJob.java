@@ -4,7 +4,8 @@ package com.example.demo.Scheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-@Component
+//注释不加载，就不执行
+//@Component
 public class TestJob {
 
     /**

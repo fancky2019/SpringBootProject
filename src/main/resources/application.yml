@@ -15,12 +15,16 @@ mybatis:
 
 #开发配置
 spring:
+  application:
+    name: SpringBootProject
+
   datasource:
     url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS
     #      url: jdbc:sqlserver://localhost:1433;DatabaseName=Test
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     username: sa
     password: 123456
+
   redis:
     #  数据库索引
     database: 5
@@ -42,6 +46,41 @@ spring:
         max-wait: 0
     # 链接超时时间（毫秒）
     timeout: 50
+
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: fancky
+    password: 123456
+    #发布确认
+    publisher-confirms: true
+    # 开启发送失败退回
+    publisher-returns: true
+    virtual-host: /
+    #开启手动Axk
+    listener.direct.acknowledge-mode: manual
+    listener.simple.acknowledge-mode: manual
+
+    #    listener:
+    #      direct:
+    #        acknowledge-mode: manual
+    #        #默认是1
+    #        prefetch: 1
+
+#    template:
+#      mandatory: true
+#      #消费端
+#    listener:
+#      simple:
+#        acknowledge-mode: manual
+#        #初始连接数量
+#        concurrency: 5
+#        #最大连接数量
+#        max-concurrency: 10
+#        #公平分发模式
+#        prefetch: 1
+
+
 logging:
   config: classpath:log4j2.yml
 
