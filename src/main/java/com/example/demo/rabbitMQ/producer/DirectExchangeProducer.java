@@ -1,7 +1,11 @@
 package com.example.demo.rabbitMQ.producer;
 
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.amqp.core.Message;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
+import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.example.demo.model.viewModel.Person;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,7 +29,17 @@ public class DirectExchangeProducer {
         String msg = "MSG_DirectExchangeProducer";
         //参数：队列名称,消息内容（可以为可序列化的对象）
 //        this.amqpTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
-        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
+//        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
+        Person person = new Person();
+        person.setName("rabbitmq");
+
+        String jsonStr = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
+        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, jsonStr);
+
+        //json转换
+        String jsonStr1 =   JSON.toJSONString(person);
+        Person p=JSON.parseObject(jsonStr1,Person.class);
+        Integer m=0;
     }
 
 }
