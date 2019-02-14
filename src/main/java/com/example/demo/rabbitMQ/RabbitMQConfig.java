@@ -57,7 +57,7 @@ public class RabbitMQConfig {
 //    @Autowired
 //    private ConnectionFactory connectionFactory;
 
-
+    //@Bean注解的方法的参数可以任意加，反射会自动添加对应参数
     @Bean
     public RabbitTemplate RabbitTemplate(ConnectionFactory connectionFactory) {
         //公平分发模式在Spring-amqp中是默认的
