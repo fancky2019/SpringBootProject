@@ -1,6 +1,8 @@
 package com.example.demo.rabbitMQ.consumer;
 
 
+import com.alibaba.fastjson.JSON;
+import com.example.demo.model.viewModel.Person;
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -23,8 +25,11 @@ public class DirectExchangeConsumer {
     @RabbitListener(queues = DIRECT_QUEUE_NAME)//参数为队列名称
     public void receivedMsg(String receivedMessage, Channel channel, Message message) {
         try {
+          //  System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
+
+            Person person = JSON.parseObject(receivedMessage, Person.class);
             System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
-            //手动Ack
+           //手动Ack
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
             e.printStackTrace();

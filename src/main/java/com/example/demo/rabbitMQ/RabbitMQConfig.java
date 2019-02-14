@@ -2,9 +2,13 @@ package com.example.demo.rabbitMQ;
 
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -50,14 +54,15 @@ public class RabbitMQConfig {
 
     //endregion
 
-    @Autowired
-    private ConnectionFactory connectionFactory;
+//    @Autowired
+//    private ConnectionFactory connectionFactory;
 
 
     @Bean
-    public RabbitTemplate RabbitTemplate() {
+    public RabbitTemplate RabbitTemplate(ConnectionFactory connectionFactory) {
         //公平分发模式在Spring-amqp中是默认的
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+
         // 消息返回, yml需要配置 publisher-returns: true
         rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
             System.out.println("消息失败返回成功 ");
@@ -73,6 +78,7 @@ public class RabbitMQConfig {
 
         return rabbitTemplate;
     }
+
 
     //region 配置交换机、队列、RoutingKey
 
