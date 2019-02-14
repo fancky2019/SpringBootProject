@@ -6,6 +6,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.example.demo.model.viewModel.Person;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,13 +36,14 @@ public class DirectExchangeProducer {
         Person person = new Person();
         person.setName("rabbitmq");
 
-        String jsonStr = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
-        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, jsonStr);
+        msg = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
 
-        //json转换
-        String jsonStr1 =   JSON.toJSONString(person);
-        Person p=JSON.parseObject(jsonStr1,Person.class);
-        Integer m=0;
+       rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
+
+//        //json转换
+//        String jsonStr1 =   JSON.toJSONString(person);
+//        Person p=JSON.parseObject(jsonStr1,Person.class);
+//        Integer m=0;
     }
 
 }
