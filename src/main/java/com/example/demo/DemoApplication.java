@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @MapperScan("com.example.demo.dao")
@@ -14,6 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching   //redis
 @EnableScheduling //quartz
 @EnableRabbit     //EnableRabbit
+@EnableSwagger2  //EnableSwagger2  http://localhost:8080/swagger-ui.html
 public class DemoApplication {
 
     public static void main(String[] args) {
