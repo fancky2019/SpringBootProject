@@ -18,16 +18,17 @@ spring:
   application:
     name: SpringBootProject
   thymeleaf:
-#    view:
-#      prefix: /
-#      suffix: .html
-   # html
- #   prefix: classpath:/templates/
-#    #图片
-#  resources:
-#    static-locations: classpath:/
+  #    view:
+  #      prefix: /
+  #      suffix: .html
+  # html
+  #   prefix: classpath:/templates/
+  #    #图片
+  #  resources:
+  #    static-locations: classpath:/
   datasource:
-#    url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS
+    # url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS
+   # url: jdbc:sqlserver://localhost:1433;DatabaseName=RABC
     url: jdbc:sqlserver://localhost:1433;DatabaseName=Test
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     username: sa

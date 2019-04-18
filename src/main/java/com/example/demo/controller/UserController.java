@@ -31,12 +31,13 @@ public class UserController {
     private static Logger logger = LogManager.getLogger(UserController.class);
     // private static Logger logger = LogManager.getLogger("business");
 
+
+    //http://localhost:8080/user/getUser?id=1
     //  @RequestMapping("/getUser") 通用
     //SpringMVC的自动装箱（实体类接收参数）
     //get请求：url  传参
-  //  @RequestMapping("/getUser")
-
-//     @RequestMapping(value = "/getUser",method = RequestMethod.GET)
+    //@RequestMapping("/getUser")
+    //@RequestMapping(value = "/getUser",method = RequestMethod.GET)
     @GetMapping("/getUser")
     @ResponseBody//当使用@Controller返回数据必须要加上@ResponseBody
     public User getUser(User user) {
@@ -47,7 +48,7 @@ public class UserController {
 
         logger.info("dssdsdsd");
         logger.error("dssdsdsd");
-        User re= userService.selectByPrimaryKey(user.getId());
+        User re = userService.selectByPrimaryKey(user.getId());
         return re;
     }
 
@@ -69,19 +70,21 @@ public class UserController {
      * 2.@RestController注解，相当于@Controller+@ResponseBody两个注解的结合，
      * 返回json数据不需要在方法前面加@ResponseBody注解了，
      * 但使用@RestController这个注解，就不能返回jsp,html页面，视图解析器无法解析jsp,html页面
+     *
      * @param map
      * @return
      */
     @RequestMapping("")
-   // @ResponseBody// 就是返回字符串了
+    // @ResponseBody// 就是返回字符串了
     public String index(HashMap<String, Object> map) {
-    //返回值给页面
+        //返回值给页面
         map.put("hello", "fanckyrrr");
         return "user/index";
     }
+
     @RequestMapping("/hello")
     public String helloHtml(HashMap<String, Object> map, Model model) {
-        model.addAttribute("say","欢迎欢迎,热烈欢迎");
+        model.addAttribute("say", "欢迎欢迎,热烈欢迎");
         map.put("hello", "欢迎进入HTML页面");
         return "index";
     }
