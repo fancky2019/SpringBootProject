@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.dao.OrderDetailMapper">
-    <resultMap id="BaseResultMap" type="com.example.demo.model.entity.OrderDetail">
+<mapper namespace="com.example.demo.dao.wms.OrderDetailMapper">
+    <resultMap id="BaseResultMap" type="com.example.demo.model.entity.wms.OrderDetail">
         <constructor>
             <idArg column="ID" javaType="java.lang.Integer" jdbcType="INTEGER"/>
             <arg column="GUID" javaType="java.lang.String" jdbcType="CHAR"/>
@@ -15,7 +15,7 @@
     <sql id="Base_Column_List">
         ID, GUID, OrderID, ProductID, [Count], DealPrice, Status
     </sql>
-    <select id="select" parameterType="com.example.demo.model.entity.OrderDetail" resultMap="BaseResultMap">
+    <select id="select" parameterType="com.example.demo.model.entity.wms.OrderDetail" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from OrderDetail
@@ -33,11 +33,11 @@
         where ID = #{id,jdbcType=INTEGER}
     </delete>
 
-    <delete id="deleteByOrderId" parameterType="com.example.demo.model.entity.Order">
+    <delete id="deleteByOrderId" parameterType="com.example.demo.model.entity.wms.Order">
         delete from OrderDetail
         where orderid = #{id,jdbcType=INTEGER}
     </delete>
-    <insert id="insert" parameterType="com.example.demo.model.entity.OrderDetail" useGeneratedKeys="true"
+    <insert id="insert" parameterType="com.example.demo.model.entity.wms.OrderDetail" useGeneratedKeys="true"
             keyProperty="id">
         insert into OrderDetail ( [GUID], OrderID,
         ProductID, [Count], DealPrice,
@@ -46,7 +46,7 @@
         #{productid,jdbcType=INTEGER}, #{count,jdbcType=INTEGER}, #{dealprice,jdbcType=DECIMAL},
         #{status,jdbcType=SMALLINT})
     </insert>
-    <insert id="insertSelective" parameterType="com.example.demo.model.entity.OrderDetail">
+    <insert id="insertSelective" parameterType="com.example.demo.model.entity.wms.OrderDetail">
         insert into OrderDetail
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -95,7 +95,7 @@
             </if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.OrderDetail">
+    <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.wms.OrderDetail">
         update OrderDetail
         <set>
             <if test="guid != null">
@@ -119,7 +119,7 @@
         </set>
         where ID = #{id,jdbcType=INTEGER}
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.OrderDetail">
+    <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.wms.OrderDetail">
         update OrderDetail
         set GUID = #{guid,jdbcType=CHAR},
         OrderID = #{orderid,jdbcType=INTEGER},

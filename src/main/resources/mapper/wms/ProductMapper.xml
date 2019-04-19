@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.dao.ProductMapper">
-    <resultMap id="BaseResultMap1" type="com.example.demo.model.entity.Product">
+<mapper namespace="com.example.demo.dao.wms.ProductMapper">
+    <resultMap id="BaseResultMap1" type="com.example.demo.model.entity.wms.Product">
         <constructor>
             <idArg column="ID" javaType="java.lang.Integer" jdbcType="INTEGER"/>
             <arg column="GUID" javaType="java.lang.String" jdbcType="CHAR"/>
@@ -17,7 +17,7 @@
             <arg column="ModifyTime" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         </constructor>
     </resultMap>
-    <resultMap id="ProductTable" type="com.example.demo.model.entity.Product">
+    <resultMap id="ProductTable" type="com.example.demo.model.entity.wms.Product">
         <constructor>
             <idArg column="ID" javaType="java.lang.Integer" jdbcType="INTEGER"/>
             <arg column="GUID" javaType="java.lang.String" jdbcType="CHAR"/>
@@ -219,7 +219,7 @@
     <!--存储过程-->
     <!-- 参数名称和实体类中字段名称保持一致,不然用对象做参数，反射找不到getter，parameterType既可用java.util.HashMap也可以用实体对象，用实体对象省事-->
     <!--resultType="Product"  和resultMap="ProductTable" 都可以，切记类型对应-->
-    <select id="getProductProc" parameterType="com.example.demo.model.entity.Product" statementType="CALLABLE"
+    <select id="getProductProc" parameterType="com.example.demo.model.entity.wms.Product" statementType="CALLABLE"
             resultMap="ProductTable">
         <!--<![CDATA[-->
         { CALL GetProductProc (

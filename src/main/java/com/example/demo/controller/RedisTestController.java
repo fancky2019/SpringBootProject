@@ -1,14 +1,11 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.entity.Order;
-import com.example.demo.model.entity.User;
 import com.example.demo.model.viewModel.MessageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 @RestController

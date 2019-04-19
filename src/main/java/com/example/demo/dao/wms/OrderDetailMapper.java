@@ -1,7 +1,7 @@
-package com.example.demo.dao;
+package com.example.demo.dao.wms;
 
-import com.example.demo.model.entity.Order;
-import com.example.demo.model.entity.OrderDetail;
+import com.example.demo.model.entity.wms.Order;
+import com.example.demo.model.entity.wms.OrderDetail;
 
 import java.util.List;
 

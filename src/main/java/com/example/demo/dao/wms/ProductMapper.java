@@ -1,6 +1,6 @@
-package com.example.demo.dao;
+package com.example.demo.dao.wms;
 
-import com.example.demo.model.entity.Product;
+import com.example.demo.model.entity.wms.Product;
 import com.example.demo.model.viewModel.ProductVM;
 
 import java.util.HashMap;

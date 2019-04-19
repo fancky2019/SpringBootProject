@@ -1,17 +1,18 @@
 package com.example.demo.service;
 
-import com.example.demo.dao.UserMapper;
-import com.example.demo.model.entity.User;
+import com.example.demo.dao.rabc.UsersMapper;
+import com.example.demo.model.entity.rabc.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class UserService {
-    @Autowired
-    UserMapper userMapper;
 
-    public User selectByPrimaryKey(int id) {
-        return userMapper.selectByPrimaryKey(id);
+    @Autowired
+    UsersMapper usersMapper;
+
+    public Users selectByPrimaryKey(int id) {
+        return usersMapper.selectByPrimaryKey(id);
     }
 }

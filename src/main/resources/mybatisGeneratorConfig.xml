@@ -33,7 +33,7 @@
             targetPackage     指定生成的model生成所在的包名
             targetProject     指定在该项目下所在的路径
         -->
-        <javaModelGenerator targetPackage="com.example.demo.model.entity"
+        <javaModelGenerator targetPackage="com.example.demo.model.entity.rabc"
                             targetProject="src/main/java">
 
             <!-- 是否允许子包，即targetPackage.schemaName.tableName -->
@@ -48,7 +48,7 @@
 
         <!--Mapper映射文件生成所在的目录 为每一个数据库的表生成对应的SqlMap文件 -->
         <!--生成映射文件mapper存放位置-->
-        <sqlMapGenerator targetPackage="mapper"
+        <sqlMapGenerator targetPackage="mapper.rabc"
                          targetProject="src/main/resources">
             <property name="enableSubPackages" value="false"/>
         </sqlMapGenerator>
@@ -59,7 +59,7 @@
                 type="XMLMAPPER",生成SQLMap XML文件和独立的Mapper接口
         -->
         <!--生成Dao类存放位置-->
-        <javaClientGenerator targetPackage="com.example.demo.dao"
+        <javaClientGenerator targetPackage="com.example.demo.dao.rabc"
                              targetProject="src/main/java" type="XMLMAPPER">
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
@@ -67,41 +67,53 @@
         <!--tableName:指定了表名
             domainObjectName:指定了实体类的名称
         -->
-        <!--<table tableName="Authorities" domainObjectName="Authorities"-->
-        <!--enableCountByExample="false" enableUpdateByExample="false"-->
-        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-        <!--selectByExampleQueryId="false">-->
-        <!--</table>-->
-        <!--<table tableName="Menus" domainObjectName="Menus"-->
-        <!--enableCountByExample="false" enableUpdateByExample="false"-->
-        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-        <!--selectByExampleQueryId="false">-->
-        <!--</table>-->
-        <!--<table tableName="RoleMenuAuthorities" domainObjectName="RoleMenuAuthorities"-->
-        <!--enableCountByExample="false" enableUpdateByExample="false"-->
-        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-        <!--selectByExampleQueryId="false">-->
-        <!--</table>-->
-        <!--<table tableName="RoleMenus" domainObjectName="RoleMenus"-->
-        <!--enableCountByExample="false" enableUpdateByExample="false"-->
-        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-        <!--selectByExampleQueryId="false">-->
-        <!--</table>-->
-        <!--<table tableName="Roles" domainObjectName="Roles"-->
-        <!--enableCountByExample="false" enableUpdateByExample="false"-->
-        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-        <!--selectByExampleQueryId="false">-->
-        <!--</table>-->
-        <table tableName="Order" domainObjectName="Order"
+        <table tableName="Authorities" domainObjectName="Authorities"
+        enableCountByExample="false" enableUpdateByExample="false"
+        enableDeleteByExample="false" enableSelectByExample="false"
+        selectByExampleQueryId="false">
+        </table>
+        <table tableName="Menus" domainObjectName="Menus"
+        enableCountByExample="false" enableUpdateByExample="false"
+        enableDeleteByExample="false" enableSelectByExample="false"
+        selectByExampleQueryId="false">
+        </table>
+        <table tableName="RoleMenuAuthorities" domainObjectName="RoleMenuAuthorities"
+        enableCountByExample="false" enableUpdateByExample="false"
+        enableDeleteByExample="false" enableSelectByExample="false"
+        selectByExampleQueryId="false">
+        </table>
+        <table tableName="RoleMenus" domainObjectName="RoleMenus"
+        enableCountByExample="false" enableUpdateByExample="false"
+        enableDeleteByExample="false" enableSelectByExample="false"
+        selectByExampleQueryId="false">
+        </table>
+        <table tableName="Roles" domainObjectName="Roles"
+        enableCountByExample="false" enableUpdateByExample="false"
+        enableDeleteByExample="false" enableSelectByExample="false"
+        selectByExampleQueryId="false">
+        </table>
+        <table tableName="UserRoles" domainObjectName="UserRoles"
                enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false">
         </table>
-        <table tableName="OrderDetail" domainObjectName="OrderDetail"
+        <table tableName="Users" domainObjectName="Users"
                enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false">
         </table>
+
+
+        <!--<table tableName="Order" domainObjectName="Order"-->
+               <!--enableCountByExample="false" enableUpdateByExample="false"-->
+               <!--enableDeleteByExample="false" enableSelectByExample="false"-->
+               <!--selectByExampleQueryId="false">-->
+        <!--</table>-->
+        <!--<table tableName="OrderDetail" domainObjectName="OrderDetail"-->
+               <!--enableCountByExample="false" enableUpdateByExample="false"-->
+               <!--enableDeleteByExample="false" enableSelectByExample="false"-->
+               <!--selectByExampleQueryId="false">-->
+        <!--</table>-->
         <!--如果生成n个表，那就将上面的那段table代码copy n份-->
     </context>
 
