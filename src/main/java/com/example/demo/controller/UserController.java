@@ -1,19 +1,18 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.entity.User;
+import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
 
-//调试测Controller注意切换配置文件里的数据库配置:数据库Test
+//调试测Controller注意切换配置文件里的数据库配置:数据库RABC
 
 
 //@RestController:@RestController注解，相当于@Controller+@ResponseBody两个注解的结合
@@ -40,7 +39,7 @@ public class UserController {
     //@RequestMapping(value = "/getUser",method = RequestMethod.GET)
     @GetMapping("/getUser")
     @ResponseBody//当使用@Controller返回数据必须要加上@ResponseBody
-    public User getUser(User user) {
+    public Users getUser(Users user) {
 //        User user = new User();
 //        user.setName("test");
 //        return user;
@@ -48,7 +47,7 @@ public class UserController {
 
         logger.info("dssdsdsd");
         logger.error("dssdsdsd");
-        User re = userService.selectByPrimaryKey(user.getId());
+        Users re = userService.selectByPrimaryKey(user.getId());
         return re;
     }
 
@@ -58,7 +57,7 @@ public class UserController {
     // @RequestMapping(value = "/addUser",method = RequestMethod.POST)
     @PostMapping("/addUser")
     @ResponseBody
-    public void addUser(@RequestBody User user) {
+    public void addUser(@RequestBody Users user) {
         try {
             int a = user.getId();
         } catch (Exception ex) {

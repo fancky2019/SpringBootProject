@@ -1,22 +1,19 @@
-package com.example.demo.model.entity;
+package com.example.demo.model.entity.rabc;
 
-public class RoleMenuAuthorities {
+public class RoleMenus {
     private Integer id;
-
-    private Integer authorityid;
 
     private Integer roleid;
 
     private Integer menuid;
 
-    public RoleMenuAuthorities(Integer id, Integer authorityid, Integer roleid, Integer menuid) {
+    public RoleMenus(Integer id, Integer roleid, Integer menuid) {
         this.id = id;
-        this.authorityid = authorityid;
         this.roleid = roleid;
         this.menuid = menuid;
     }
 
-    public RoleMenuAuthorities() {
+    public RoleMenus() {
         super();
     }
 
@@ -26,14 +23,6 @@ public class RoleMenuAuthorities {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getAuthorityid() {
-        return authorityid;
-    }
-
-    public void setAuthorityid(Integer authorityid) {
-        this.authorityid = authorityid;
     }
 
     public Integer getRoleid() {

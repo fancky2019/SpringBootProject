@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.dao.OrderMapper">
-    <resultMap id="BaseResultMap" type="com.example.demo.model.entity.Order">
+<mapper namespace="com.example.demo.dao.wms.OrderMapper">
+    <resultMap id="BaseResultMap" type="com.example.demo.model.entity.wms.Order">
         <constructor>
             <idArg column="ID" javaType="java.lang.Integer" jdbcType="INTEGER"/>
             <arg column="GUID" javaType="java.lang.String" jdbcType="CHAR"/>
@@ -25,14 +25,14 @@
         where ID = #{id,jdbcType=INTEGER}
     </delete>
     <!--useGeneratedKeys="true" keyProperty="id" 获取自增主键-->
-    <insert id="insert" parameterType="com.example.demo.model.entity.Order" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.example.demo.model.entity.wms.Order" useGeneratedKeys="true" keyProperty="id">
         insert into [Order]([GUID],OrderNumber,CreateTime, OrderType, [Status])
         values (#{guid,jdbcType=CHAR}, #{ordernumber,jdbcType=NVARCHAR},
         #{createtime,jdbcType=TIMESTAMP}, #{ordertype,jdbcType=INTEGER}, #{status,jdbcType=SMALLINT}
         )
     </insert>
 
-    <insert id="insertSelective" parameterType="com.example.demo.model.entity.Order" useGeneratedKeys="true"
+    <insert id="insertSelective" parameterType="com.example.demo.model.entity.wms.Order" useGeneratedKeys="true"
             keyProperty="id">
         insert into Order
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -76,7 +76,7 @@
             </if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.Order">
+    <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.wms.Order">
         update Order
         <set>
             <if test="guid != null">
@@ -97,7 +97,7 @@
         </set>
         where ID = #{id,jdbcType=INTEGER}
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.Order">
+    <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.wms.Order">
         update [Order]
         set GUID = #{guid,jdbcType=CHAR},
         OrderNumber = #{ordernumber,jdbcType=NVARCHAR},

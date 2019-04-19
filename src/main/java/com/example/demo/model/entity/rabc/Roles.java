@@ -1,22 +1,24 @@
-package com.example.demo.model.entity;
+package com.example.demo.model.entity.rabc;
 
-public class Authorities {
+import java.util.Date;
+
+public class Roles {
     private Integer id;
-
-    private Integer menuid;
 
     private String name;
 
+    private Date createtime;
+
     private String remark;
 
-    public Authorities(Integer id, Integer menuid, String name, String remark) {
+    public Roles(Integer id, String name, Date createtime, String remark) {
         this.id = id;
-        this.menuid = menuid;
         this.name = name;
+        this.createtime = createtime;
         this.remark = remark;
     }
 
-    public Authorities() {
+    public Roles() {
         super();
     }
 
@@ -28,20 +30,20 @@ public class Authorities {
         this.id = id;
     }
 
-    public Integer getMenuid() {
-        return menuid;
-    }
-
-    public void setMenuid(Integer menuid) {
-        this.menuid = menuid;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name == null ? null : name.trim();
+    }
+
+    public Date getCreatetime() {
+        return createtime;
+    }
+
+    public void setCreatetime(Date createtime) {
+        this.createtime = createtime;
     }
 
     public String getRemark() {

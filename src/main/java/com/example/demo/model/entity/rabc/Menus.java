@@ -1,4 +1,4 @@
-package com.example.demo.model.entity;
+package com.example.demo.model.entity.rabc;
 
 public class Menus {
     private Integer id;

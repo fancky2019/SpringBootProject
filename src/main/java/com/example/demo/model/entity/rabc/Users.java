@@ -1,8 +1,8 @@
-package com.example.demo.model.entity;
+package com.example.demo.model.entity.rabc;
 
 import java.util.Date;
 
-public class User {
+public class Users {
     private Integer id;
 
     private String account;
@@ -14,10 +14,12 @@ public class User {
     private Date createtime;
 
     private Date moditytime;
+/*
+   注意：修改mapper文件的_byte为Byte
+ */
+    private Byte[] timestamp;
 
-    private byte[] timestamp;
-
-    public User(Integer id, String account, String password, Short status, Date createtime, Date moditytime) {
+    public Users(Integer id, String account, String password, Short status, Date createtime, Date moditytime) {
         this.id = id;
         this.account = account;
         this.password = password;
@@ -26,7 +28,7 @@ public class User {
         this.moditytime = moditytime;
     }
 
-    public User(Integer id, String account, String password, Short status, Date createtime, Date moditytime, byte[] timestamp) {
+    public Users(Integer id, String account, String password, Short status, Date createtime, Date moditytime, Byte[] timestamp) {
         this.id = id;
         this.account = account;
         this.password = password;
@@ -36,7 +38,7 @@ public class User {
         this.timestamp = timestamp;
     }
 
-    public User() {
+    public Users() {
         super();
     }
 
@@ -88,11 +90,11 @@ public class User {
         this.moditytime = moditytime;
     }
 
-    public byte[] getTimestamp() {
+    public Byte[] getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(byte[] timestamp) {
+    public void setTimestamp(Byte[] timestamp) {
         this.timestamp = timestamp;
     }
 }

@@ -1,6 +1,6 @@
-package com.example.demo.dao;
+package com.example.demo.dao.rabc;
 
-import com.example.demo.model.entity.UserRoles;
+import com.example.demo.model.entity.rabc.UserRoles;
 
 public interface UserRolesMapper {
     int deleteByPrimaryKey(Integer id);

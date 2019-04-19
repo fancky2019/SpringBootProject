@@ -1,7 +1,7 @@
 package com.example.demo;
 
 import com.alibaba.fastjson.JSONObject;
-import com.example.demo.model.entity.Product;
+import com.example.demo.model.entity.wms.Product;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

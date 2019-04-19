@@ -1,12 +1,11 @@
 package com.example.demo.service;
 
-import com.example.demo.dao.ProductMapper;
-import com.example.demo.model.entity.Product;
+import com.example.demo.dao.wms.ProductMapper;
+import com.example.demo.model.entity.wms.Product;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ProductVM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.HashMap;
 import java.util.List;

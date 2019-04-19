@@ -1,16 +1,11 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.entity.Order;
+import com.example.demo.model.entity.wms.Order;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.OrderManagerVM;
 import com.example.demo.service.OrderManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
 
 @RestController
 @RequestMapping("/ordermanager")

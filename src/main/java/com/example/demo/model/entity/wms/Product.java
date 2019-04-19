@@ -1,4 +1,4 @@
-package com.example.demo.model.entity;
+package com.example.demo.model.entity.wms;
 
 import java.math.BigDecimal;
 import java.util.Date;

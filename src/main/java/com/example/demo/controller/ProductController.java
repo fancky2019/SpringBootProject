@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.entity.Product;
+import com.example.demo.model.entity.wms.Product;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.service.ProductService;
@@ -19,7 +19,7 @@ public class ProductController {
     private ProductService productService;
 
 
-    //http://localhost:8080/product/getProductProc?price=10&productname=jd
+    //http://localhost:8080/product/getProductProc?price=10&productname=p
     @RequestMapping("/getProductProc")
     public List<Product> getProductProc(Product product) {
 

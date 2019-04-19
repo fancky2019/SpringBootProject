@@ -1,6 +1,6 @@
 package com.example.demo.model.viewModel;
 
-import com.example.demo.model.entity.OrderDetail;
+import com.example.demo.model.entity.wms.OrderDetail;
 
 import java.util.List;
 
