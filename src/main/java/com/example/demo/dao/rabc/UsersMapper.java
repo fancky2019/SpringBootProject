@@ -1,6 +1,10 @@
 package com.example.demo.dao.rabc;
 
 import com.example.demo.model.entity.rabc.Users;
+import com.example.demo.model.viewModel.ProductVM;
+import com.example.demo.model.viewModel.rabc.UsersVM;
+
+import java.util.List;
 
 public interface UsersMapper {
     int deleteByPrimaryKey(Integer id);
@@ -14,4 +18,6 @@ public interface UsersMapper {
     int updateByPrimaryKeySelective(Users record);
 
     int updateByPrimaryKey(Users record);
+
+    List<UsersVM> getPageData(UsersVM viewModel);
 }

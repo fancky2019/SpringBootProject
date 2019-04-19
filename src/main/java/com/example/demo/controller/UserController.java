@@ -36,6 +36,7 @@ public class UserController {
     //SpringMVC的自动装箱（实体类接收参数）
     //get请求：url  传参
     //@RequestMapping("/getUser")
+    //如果不指定方法，会出现;GET、HEAD、POST、PUT、DELETE、OPTIONS、PATCH方法。
     //@RequestMapping(value = "/getUser",method = RequestMethod.GET)
     @GetMapping("/getUser")
     @ResponseBody//当使用@Controller返回数据必须要加上@ResponseBody
