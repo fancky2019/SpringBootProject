@@ -8,6 +8,7 @@
   <sql id="Blob_Column_List">
     TimeStamp
   </sql>
+
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.rabc.Users">
     select 
     <include refid="Base_Column_List" />
@@ -21,12 +22,10 @@
     where ID = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.example.demo.model.entity.rabc.Users">
-    insert into Users (ID, Account, Password, 
-      Status, CreateTime, ModityTime, 
-      TimeStamp)
-    values (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
-      #{status,jdbcType=SMALLINT}, #{createtime,jdbcType=TIMESTAMP}, #{moditytime,jdbcType=TIMESTAMP}, 
-      #{timestamp,jdbcType=BINARY})
+    insert into Users ( Account, Password,
+      Status, CreateTime, ModityTime)
+    values ( #{account,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+      #{status,jdbcType=SMALLINT}, #{createtime,jdbcType=TIMESTAMP}, #{moditytime,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="com.example.demo.model.entity.rabc.Users">
     insert into Users
@@ -101,27 +100,29 @@
     </set>
     where ID = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.example.demo.model.entity.rabc.Users">
-    update Users
-    set Account = #{account,jdbcType=VARCHAR},
-      Password = #{password,jdbcType=VARCHAR},
-      Status = #{status,jdbcType=SMALLINT},
-      CreateTime = #{createtime,jdbcType=TIMESTAMP},
-      ModityTime = #{moditytime,jdbcType=TIMESTAMP},
-      TimeStamp = #{timestamp,jdbcType=BINARY}
-    where ID = #{id,jdbcType=INTEGER}
-  </update>
   <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.rabc.Users">
     update Users
     set Account = #{account,jdbcType=VARCHAR},
       Password = #{password,jdbcType=VARCHAR},
       Status = #{status,jdbcType=SMALLINT},
-      CreateTime = #{createtime,jdbcType=TIMESTAMP},
       ModityTime = #{moditytime,jdbcType=TIMESTAMP}
     where ID = #{id,jdbcType=INTEGER}
   </update>
-
-
-
-
+  <!--分页查询-->
+  <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.UsersVM"
+          resultType="com.example.demo.model.viewModel.rabc.UsersVM">
+    SELECT  [ID] ,[Account] ,[Password]
+    ,[Status] ,[CreateTime]
+    ,[ModityTime]  ,[TimeStamp]
+    FROM [RABC].[dbo].[Users]
+    where 1=1
+    <if test="account != null">
+      and Account LIKE CONCAT('%',#{account},'%')
+    </if>
+    <if test="createtime != null">
+      and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
+    </if>
+    ORDER BY 1
+    OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+  </select>
 </mapper>
