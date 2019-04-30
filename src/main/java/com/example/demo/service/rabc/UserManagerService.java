@@ -3,6 +3,7 @@ package com.example.demo.service.rabc;
 import com.example.demo.dao.rabc.UsersMapper;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.model.viewModel.PageData;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.model.viewModel.rabc.UsersVM;
 import org.apache.logging.log4j.LogManager;
@@ -28,7 +29,7 @@ public class UserManagerService {
             Users users = usersMapper.selectByPrimaryKey(id);
 //          List<Users> list= new LinkedList<>();
 //            list.add(users);
-            messageResult.setData(Arrays.asList(users));
+            messageResult.setData(users);
             messageResult.setSuccess(true);
         } catch (Exception ex) {
             messageResult.setMessage(ex.getMessage());
@@ -81,8 +82,27 @@ public class UserManagerService {
         }
     }
 
-    public MessageResult<UsersVM> getPageData(UsersVM viewModel) {
-        MessageResult<UsersVM> message = new MessageResult<>();
+    public MessageResult<PageData<UsersVM>> getPageDataWithCount(UsersVM viewModel) {
+        MessageResult<PageData<UsersVM>> message = new MessageResult<>();
+        try {
+            PageData<UsersVM> paegData=new PageData<>() ;
+            Integer count= usersMapper.getPageDataCount(viewModel);
+            paegData.setCount(count);
+            List<UsersVM> list = usersMapper.getPageData(viewModel);
+            paegData.setData(list);
+            message.setData(paegData);
+            message.setSuccess(true);
+        } catch (Exception ex) {
+            message.setSuccess(false);
+            message.setMessage(ex.getMessage());
+            logger.error(ex.toString());
+        } finally {
+            return message;
+        }
+    }
+
+    public MessageResult<List<UsersVM>> getPageData(UsersVM viewModel) {
+        MessageResult<List<UsersVM>> message = new MessageResult<>();
         try {
             List<UsersVM> list = usersMapper.getPageData(viewModel);
             message.setData(list);
@@ -95,5 +115,7 @@ public class UserManagerService {
             return message;
         }
     }
+
+
 
 }

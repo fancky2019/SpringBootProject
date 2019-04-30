@@ -1,6 +1,7 @@
 package com.example.demo.dao.rabc;
 
 import com.example.demo.model.entity.rabc.Users;
+import com.example.demo.model.viewModel.PageData;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.model.viewModel.rabc.UsersVM;
 
@@ -20,4 +21,6 @@ public interface UsersMapper {
     int updateByPrimaryKey(Users record);
 
     List<UsersVM> getPageData(UsersVM viewModel);
+
+    Integer getPageDataCount(UsersVM viewModel);
 }

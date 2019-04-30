@@ -9,7 +9,7 @@ public class MessageResult<T> {
      */
     private Boolean success;
     private String message;
-    private List<T> data;
+    private T data;
 
     public Boolean getSuccess() {
         return success;
@@ -17,6 +17,14 @@ public class MessageResult<T> {
 
     public void setSuccess(Boolean success) {
         this.success = success;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 
     public String getMessage() {
@@ -27,11 +35,5 @@ public class MessageResult<T> {
         this.message = message;
     }
 
-    public List<T> getData() {
-        return data;
-    }
 
-    public void setData(List<T> data) {
-        this.data = data;
-    }
 }

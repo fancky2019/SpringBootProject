@@ -3,6 +3,7 @@ package com.example.demo.controller.rabc;
 import com.example.demo.controller.UserController;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.model.viewModel.PageData;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.model.viewModel.rabc.UsersVM;
 import com.example.demo.service.UserService;
@@ -41,9 +42,22 @@ public class UserManagerController {
         }
     }
 
-    @RequestMapping(value = "/getPageData",method = RequestMethod.GET)
-    public MessageResult<UsersVM> getPageData(UsersVM viewModel) {
-        MessageResult<UsersVM> message = new MessageResult<>();
+    @RequestMapping(value = "/getPageDataWithCount", method = RequestMethod.GET)
+    public MessageResult<PageData<UsersVM>> getPageDataWithCount(UsersVM viewModel) {
+        MessageResult<PageData<UsersVM>> message = new MessageResult<>();
+        try {
+            message = userManagerService.getPageDataWithCount(viewModel);
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        } finally {
+            return message;
+        }
+    }
+
+    @RequestMapping(value = "/getPageData", method = RequestMethod.GET)
+    public MessageResult<List<UsersVM>> getPageData(UsersVM viewModel) {
+        MessageResult<List<UsersVM>> message = new MessageResult<>();
         try {
             message = userManagerService.getPageData(viewModel);
         } catch (Exception e) {
@@ -53,7 +67,6 @@ public class UserManagerController {
             return message;
         }
     }
-
 
     // @RequestMapping("/addUser")
     // @RequestMapping(value = "/addUser",method = RequestMethod.POST)
@@ -72,7 +85,7 @@ public class UserManagerController {
     }
 
     //如果不指定方法，会出现;GET、HEAD、POST、PUT、DELETE、OPTIONS、PATCH方法。
-    @RequestMapping(value = "/deleteUser",method = RequestMethod.POST)
+    @RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
     public MessageResult<Void> deleteUser(@RequestBody Integer id) {
         MessageResult<Void> message = new MessageResult<>();
         try {

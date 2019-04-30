@@ -109,6 +109,7 @@
     where ID = #{id,jdbcType=INTEGER}
   </update>
   <!--分页查询-->
+<!--data-->
   <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.UsersVM"
           resultType="com.example.demo.model.viewModel.rabc.UsersVM">
     SELECT  [ID] ,[Account] ,[Password]
@@ -125,4 +126,19 @@
     ORDER BY 1
     OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
   </select>
+<!--count-->
+    <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.UsersVM"
+            resultType="java.lang.Integer">
+        SELECT  Count(ID)
+        FROM [RABC].[dbo].[Users]
+        where 1=1
+        <if test="account != null">
+            and Account LIKE CONCAT('%',#{account},'%')
+        </if>
+        <if test="createtime != null">
+            and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
+        </if>
+        ORDER BY 1
+        OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+    </select>
 </mapper>

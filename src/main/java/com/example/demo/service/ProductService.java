@@ -3,7 +3,12 @@ package com.example.demo.service;
 import com.example.demo.dao.wms.ProductMapper;
 import com.example.demo.model.entity.wms.Product;
 import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.model.viewModel.PageData;
 import com.example.demo.model.viewModel.ProductVM;
+import com.example.demo.model.viewModel.rabc.UsersVM;
+import com.example.demo.service.rabc.UserManagerService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +19,7 @@ import java.util.List;
 public class ProductService {
     @Autowired
     ProductMapper productMapper;
-
+    private static Logger logger = LogManager.getLogger(UserManagerService.class);
     //    public  int deleteByPrimaryKey(Integer id)
 //    {
 //        return 0;
@@ -73,13 +78,23 @@ public class ProductService {
         }
     }
 
-    public List<ProductVM> getPageData(ProductVM viewModel) {
+    public MessageResult<PageData<ProductVM>> getPageData(ProductVM viewModel) {
+        MessageResult<PageData<ProductVM>> message = new MessageResult<>();
         try {
-            return productMapper.getPageData(viewModel);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            List<ProductVM> list = productMapper.getPageData(viewModel);
+            PageData<ProductVM> paegData = new PageData<>();
+            paegData.setData(list);
+            message.setData(paegData);
+            message.setSuccess(true);
+        } catch (Exception ex) {
+            message.setSuccess(false);
+            message.setMessage(ex.getMessage());
+            logger.error(ex.toString());
+        }
+        finally {
+            return message;
         }
     }
+
 
 }
