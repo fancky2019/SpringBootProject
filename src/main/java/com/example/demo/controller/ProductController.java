@@ -2,7 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.model.entity.wms.Product;
 import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.model.viewModel.PageData;
 import com.example.demo.model.viewModel.ProductVM;
+import com.example.demo.model.viewModel.rabc.UsersVM;
 import com.example.demo.service.ProductService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,15 +38,11 @@ public class ProductController {
     }
 
     @RequestMapping("/getPageData")
-    public MessageResult<ProductVM> getPageData(ProductVM viewModel) {
-        MessageResult<ProductVM> message = new MessageResult<>();
+    public MessageResult<PageData<ProductVM>> getPageData(ProductVM viewModel) {
+        MessageResult<PageData<ProductVM>> message = new MessageResult<>();
         try {
-            List<ProductVM> list = productService.getPageData(viewModel);
-            message.setData(list);
-            message.setSuccess(true);
-
+            message = productService.getPageData(viewModel);
         } catch (Exception e) {
-            e.printStackTrace();
             message.setSuccess(false);
             message.setMessage(e.getMessage());
         } finally {
