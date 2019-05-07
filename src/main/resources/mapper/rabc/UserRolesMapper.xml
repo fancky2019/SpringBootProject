@@ -65,5 +65,37 @@
     where ID = #{id,jdbcType=INTEGER}
   </update>
 
-
+  <!--分页查询-->
+  <!--data-->
+  <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.UserRolesVM"
+          resultType="com.example.demo.model.viewModel.rabc.UserRolesVM">
+    SELECT ur.[ID] , ur.[UserID] , ur.[RoleID], u.Account,r.Name
+    FROM [RABC].[dbo].[UserRoles] ur
+    join [RABC].[dbo].[Users] u on ur.UserID=u.ID
+    join [RABC].[dbo].[Roles] r on ur.RoleID=r.ID
+    where 1=1
+    <if test="account != null">
+      and u.Account LIKE CONCAT('%',#{account,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="name != null">
+      and r.Name  LIKE CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+    </if>
+    ORDER BY 1
+    OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+  </select>
+  <!--count-->
+  <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.UserRolesVM"
+          resultType="java.lang.Integer">
+    SELECT  Count(ur.ID)
+    FROM [RABC].[dbo].[UserRoles] ur
+    join [RABC].[dbo].[Users] u on ur.UserID=u.ID
+    join [RABC].[dbo].[Roles] r on ur.RoleID=r.ID
+    where 1=1
+    <if test="account != null">
+      and u.Account LIKE CONCAT('%',#{account,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="name != null">
+      and r.Name  LIKE CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+    </if>
+   </select>
 </mapper>

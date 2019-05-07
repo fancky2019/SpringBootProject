@@ -16,57 +16,12 @@
     where ID = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.example.demo.model.entity.rabc.Roles">
-    insert into Roles (ID, Name, CreateTime, 
+    insert into Roles (Name, CreateTime,
       Remark)
-    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, 
+    values ( #{name,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP},
       #{remark,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.example.demo.model.entity.rabc.Roles">
-    insert into Roles
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        ID,
-      </if>
-      <if test="name != null">
-        Name,
-      </if>
-      <if test="createtime != null">
-        CreateTime,
-      </if>
-      <if test="remark != null">
-        Remark,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        #{id,jdbcType=INTEGER},
-      </if>
-      <if test="name != null">
-        #{name,jdbcType=VARCHAR},
-      </if>
-      <if test="createtime != null">
-        #{createtime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="remark != null">
-        #{remark,jdbcType=VARCHAR},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.rabc.Roles">
-    update Roles
-    <set>
-      <if test="name != null">
-        Name = #{name,jdbcType=VARCHAR},
-      </if>
-      <if test="createtime != null">
-        CreateTime = #{createtime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="remark != null">
-        Remark = #{remark,jdbcType=VARCHAR},
-      </if>
-    </set>
-    where ID = #{id,jdbcType=INTEGER}
-  </update>
+
   <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.rabc.Roles">
     update Roles
     set Name = #{name,jdbcType=VARCHAR},
@@ -75,5 +30,28 @@
     where ID = #{id,jdbcType=INTEGER}
   </update>
 
+  <!--分页查询-->
+  <!--data-->
+  <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.RolesVM"
+          resultType="com.example.demo.model.viewModel.rabc.RolesVM">
+    SELECT  [ID] ,[Name]  ,[CreateTime] ,[Remark]
+    FROM [RABC].[dbo].[Roles]
+    where 1=1
+    <if test="name != null">
+      and Name LIKE CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+    </if>
+    ORDER BY 1
+    OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+  </select>
+  <!--count-->
+  <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.RolesVM"
+          resultType="java.lang.Integer">
+    SELECT  Count(ID)
+    FROM [RABC].[dbo].[Roles]
+    where 1=1
+    <if test="name != null">
+      and Name LIKE CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+    </if>
+ </select>
 
 </mapper>
