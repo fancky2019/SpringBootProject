@@ -8,6 +8,24 @@ public class RoleMenusVM extends Page {
     private Integer roleid;
 
     private Integer menuid;
+    private String formname;
+    private String name;
+
+    public String getFormname() {
+        return formname;
+    }
+
+    public void setFormname(String formname) {
+        this.formname = formname;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Integer getId() {
         return id;
