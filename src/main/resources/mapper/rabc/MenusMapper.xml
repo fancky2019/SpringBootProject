@@ -107,5 +107,34 @@
     where ID = #{id,jdbcType=INTEGER}
   </update>
 
+  <!--分页查询-->
+  <!--data-->
+  <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.MenusVM"
+          resultType="com.example.demo.model.viewModel.rabc.MenusVM">
+    SELECT  [ID] ,[ParentID],[FormName],[TabHeaderText],[SortCode] ,[Remark] ,[Status]
+    FROM [RABC].[dbo].[Menus]
+    where 1=1
+    <if test="formname != null">
+      and FormName LIKE CONCAT('%',#{formname,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="tabheadertext != null">
+      and TabHeaderText LIKE CONCAT('%',#{tabheadertext,jdbcType=VARCHAR},'%')
+    </if>
+    ORDER BY 1
+    OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+  </select>
+  <!--count-->
+  <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.MenusVM"
+          resultType="java.lang.Integer">
+    SELECT  Count(ID)
+    FROM [RABC].[dbo].[Menus]
+    where 1=1
+    <if test="formname != null">
+      and FormName LIKE CONCAT('%',#{formname,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="tabheadertext != null">
+      and TabHeaderText LIKE CONCAT('%',#{tabheadertext,jdbcType=VARCHAR},'%')
+    </if>
 
+  </select>
 </mapper>
