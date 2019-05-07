@@ -75,6 +75,36 @@
     where ID = #{id,jdbcType=INTEGER}
   </update>
 
-
+  <!--分页查询-->
+  <!--data-->
+  <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.RoleMenusVM"
+          resultType="com.example.demo.model.viewModel.rabc.RoleMenusVM">
+    SELECT a.[ID] ,a.[MenuID] ,a.[Name] ,a.[Remark],m.FormName
+    FROM [RABC].[dbo].[Authorities] a
+    join [RABC].[dbo].[Menus] m on a.MenuID=m.ID
+    where 1=1
+    <if test="name != null">
+      and a.Name LIKE CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="formname != null">
+      and m.FormName LIKE CONCAT('%',#{formname,jdbcType=VARCHAR},'%')
+    </if>
+    ORDER BY 1
+    OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+  </select>
+  <!--count-->
+  <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.RoleMenusVM"
+          resultType="java.lang.Integer">
+    SELECT  Count(a.ID)
+    FROM [RABC].[dbo].[Authorities] a
+    join [RABC].[dbo].[Menus] m on a.MenuID=m.ID
+    where 1=1
+    <if test="name != null">
+      and a.Name LIKE CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="formname != null">
+      and m.FormName LIKE CONCAT('%',#{formname,jdbcType=VARCHAR},'%')
+    </if>
+  </select>
 
 </mapper>
