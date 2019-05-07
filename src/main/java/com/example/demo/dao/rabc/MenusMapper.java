@@ -18,6 +18,7 @@ public interface MenusMapper {
     int updateByPrimaryKeySelective(Menus record);
 
     int updateByPrimaryKey(Menus record);
+
     List<MenusVM> getPageData(MenusVM viewModel);
 
     Integer getPageDataCount(MenusVM viewModel);

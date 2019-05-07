@@ -18,6 +18,7 @@ public interface RoleMenuAuthoritiesMapper {
     int updateByPrimaryKeySelective(RoleMenuAuthorities record);
 
     int updateByPrimaryKey(RoleMenuAuthorities record);
+
     List<RoleMenuAuthoritiesVM> getPageData(RoleMenuAuthoritiesVM viewModel);
 
     Integer getPageDataCount(RoleMenuAuthoritiesVM viewModel);
