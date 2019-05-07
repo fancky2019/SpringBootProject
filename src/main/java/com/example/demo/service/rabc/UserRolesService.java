@@ -36,7 +36,7 @@ public class UserRolesService {
         }
     }
 
-    public MessageResult<Void> addRoles(UserRoles userRoles) {
+    public MessageResult<Void> addUserRoles(UserRoles userRoles) {
         MessageResult<Void> messageResult = new MessageResult<>();
         try {
             Integer result = userRolesMapper.insert(userRoles);

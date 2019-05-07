@@ -16,9 +16,9 @@
     where ID = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.example.demo.model.entity.rabc.RoleMenuAuthorities">
-    insert into RoleMenuAuthorities (ID, AuthorityID, RoleID, 
+    insert into RoleMenuAuthorities (AuthorityID, RoleID,
       MenuID)
-    values (#{id,jdbcType=INTEGER}, #{authorityid,jdbcType=INTEGER}, #{roleid,jdbcType=INTEGER}, 
+    values ( #{authorityid,jdbcType=INTEGER}, #{roleid,jdbcType=INTEGER},
       #{menuid,jdbcType=INTEGER})
   </insert>
   <insert id="insertSelective" parameterType="com.example.demo.model.entity.rabc.RoleMenuAuthorities">

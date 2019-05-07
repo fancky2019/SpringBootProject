@@ -16,10 +16,10 @@
     where ID = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.example.demo.model.entity.rabc.Menus">
-    insert into Menus (ID, ParentID, FormName, 
+    insert into Menus (ParentID, FormName,
       TabHeaderText, SortCode, Remark, 
       Status)
-    values (#{id,jdbcType=INTEGER}, #{parentid,jdbcType=INTEGER}, #{formname,jdbcType=VARCHAR}, 
+    values ( #{parentid,jdbcType=INTEGER}, #{formname,jdbcType=VARCHAR},
       #{tabheadertext,jdbcType=VARCHAR}, #{sortcode,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, 
       #{status,jdbcType=SMALLINT})
   </insert>
