@@ -75,4 +75,47 @@
     where ID = #{id,jdbcType=INTEGER}
   </update>
 
+
+  <!--分页查询-->
+  <!--data-->
+  <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.RoleMenuAuthoritiesVM"
+          resultType="com.example.demo.model.viewModel.rabc.RoleMenuAuthoritiesVM">
+    SELECT rma.[ID] ,rma.[AuthorityID] ,rma.[RoleID],rma.[MenuID],a.Name AuthorityName,m.FormName MenuName,r.Name RoleName
+    FROM [RABC].[dbo].[RoleMenuAuthorities] rma
+    join [RABC].[dbo].[Authorities] a on rma.AuthorityID=a.ID
+    join [RABC].[dbo].[Menus] m on rma.MenuID=m.ID
+    join [RABC].[dbo].[Roles] r on rma.RoleID=r.ID
+    where 1=1
+    <if test="authorityName != null">
+      and a.Name LIKE CONCAT('%',#{authorityName,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="menuName != null">
+      and m.FormName LIKE CONCAT('%',#{menuName,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="roleName != null">
+      and r.Name LIKE CONCAT('%',#{roleName,jdbcType=VARCHAR},'%')
+    </if>
+    ORDER BY 1
+    OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+  </select>
+  <!--count-->
+  <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.RoleMenuAuthoritiesVM"
+          resultType="java.lang.Integer">
+    SELECT  Count(rma.ID)
+    FROM [RABC].[dbo].[RoleMenuAuthorities] rma
+    join [RABC].[dbo].[Authorities] a on rma.AuthorityID=a.ID
+    join [RABC].[dbo].[Menus] m on rma.MenuID=m.ID
+    join [RABC].[dbo].[Roles] r on rma.RoleID=r.ID
+    where 1=1
+    <if test="authorityName != null">
+      and a.Name LIKE CONCAT('%',#{authorityName,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="menuName != null">
+      and m.FormName LIKE CONCAT('%',#{menuName,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="roleName != null">
+      and r.Name LIKE CONCAT('%',#{roleName,jdbcType=VARCHAR},'%')
+    </if>
+  </select>
+
 </mapper>

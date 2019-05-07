@@ -18,6 +18,7 @@ public interface AuthoritiesMapper {
     int updateByPrimaryKeySelective(Authorities record);
 
     int updateByPrimaryKey(Authorities record);
+
     List<AuthoritiesVM> getPageData(AuthoritiesVM viewModel);
 
     Integer getPageDataCount(AuthoritiesVM viewModel);

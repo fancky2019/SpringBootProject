@@ -11,6 +11,34 @@ public class RoleMenuAuthoritiesVM extends Page {
 
     private Integer menuid;
 
+    private  String authorityName;
+    private  String menuName;
+    private  String roleName;
+
+    public String getAuthorityName() {
+        return authorityName;
+    }
+
+    public void setAuthorityName(String authorityName) {
+        this.authorityName = authorityName;
+    }
+
+    public String getMenuName() {
+        return menuName;
+    }
+
+    public void setMenuName(String menuName) {
+        this.menuName = menuName;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
     public Integer getId() {
         return id;
     }
