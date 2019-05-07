@@ -1,6 +1,10 @@
 package com.example.demo.dao.rabc;
 
 import com.example.demo.model.entity.rabc.Roles;
+import com.example.demo.model.viewModel.rabc.RolesVM;
+import com.example.demo.model.viewModel.rabc.UsersVM;
+
+import java.util.List;
 
 public interface RolesMapper {
     int deleteByPrimaryKey(Integer id);
@@ -14,4 +18,8 @@ public interface RolesMapper {
     int updateByPrimaryKeySelective(Roles record);
 
     int updateByPrimaryKey(Roles record);
+
+    List<RolesVM> getPageData(RolesVM viewModel);
+
+    Integer getPageDataCount(RolesVM viewModel);
 }

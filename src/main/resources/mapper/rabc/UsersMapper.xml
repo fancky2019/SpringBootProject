@@ -118,7 +118,7 @@
     FROM [RABC].[dbo].[Users]
     where 1=1
     <if test="account != null">
-      and Account LIKE CONCAT('%',#{account},'%')
+      and Account LIKE CONCAT('%',#{account,jdbcType=VARCHAR},'%')
     </if>
     <if test="createtime != null">
       and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
@@ -133,12 +133,11 @@
         FROM [RABC].[dbo].[Users]
         where 1=1
         <if test="account != null">
-            and Account LIKE CONCAT('%',#{account},'%')
+            and Account LIKE CONCAT('%',#{account,jdbcType=VARCHAR},'%')
         </if>
         <if test="createtime != null">
             and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
         </if>
-        ORDER BY 1
-        OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+
     </select>
 </mapper>
