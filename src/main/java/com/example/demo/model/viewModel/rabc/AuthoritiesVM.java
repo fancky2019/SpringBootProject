@@ -10,6 +10,15 @@ public class AuthoritiesVM extends Page {
     private String name;
 
     private String remark;
+    private String formname;
+
+    public String getFormname() {
+        return formname;
+    }
+
+    public void setFormname(String formname) {
+        this.formname = formname;
+    }
 
     public Integer getId() {
         return id;
