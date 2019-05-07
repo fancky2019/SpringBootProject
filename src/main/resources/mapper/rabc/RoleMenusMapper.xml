@@ -65,5 +65,38 @@
     where ID = #{id,jdbcType=INTEGER}
   </update>
 
+  <!--分页查询-->
+  <!--data-->
+  <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.RoleMenusVM"
+          resultType="com.example.demo.model.viewModel.rabc.RoleMenusVM">
+    SELECT  rm.[ID] ,rm.[RoleID] ,rm.[MenuID],m.FormName,r.Name
+    FROM [RABC].[dbo].[RoleMenus] rm
+    join [RABC].[dbo].[Roles] r on rm.RoleID=r.ID
+    join [RABC].[dbo].[Menus] m on rm.MenuID=m.ID
+    where 1=1
+    <if test="name != null">
+      and r.Name LIKE CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="formname != null">
+      and m.FormName LIKE CONCAT('%',#{formname,jdbcType=VARCHAR},'%')
+    </if>
+    ORDER BY 1
+    OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+  </select>
+  <!--count-->
+  <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.RoleMenusVM"
+          resultType="java.lang.Integer">
+    SELECT  Count(rm.ID)
+    FROM [RABC].[dbo].[RoleMenus] rm
+    join [RABC].[dbo].[Roles] r on rm.RoleID=r.ID
+    join [RABC].[dbo].[Menus] m on rm.MenuID=m.ID
+    where 1=1
+    <if test="name != null">
+      and r.Name LIKE CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="formname != null">
+      and m.FormName LIKE CONCAT('%',#{formname,jdbcType=VARCHAR},'%')
+    </if>
+  </select>
 
 </mapper>
