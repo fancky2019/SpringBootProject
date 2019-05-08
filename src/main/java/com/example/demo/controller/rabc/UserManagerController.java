@@ -99,6 +99,20 @@ public class UserManagerController {
         }
     }
 
+    @PostMapping("/batchDeleteByID")
+    public MessageResult<Void> batchDeleteByID(@RequestBody List<Integer> list) {
+        MessageResult<Void> message = new MessageResult<>();
+        try {
+            message = userManagerService.batchDeleteByID(list);
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+            logger.error(e.toString());
+        } finally {
+            return message;
+        }
+    }
+
     @PostMapping("/updateUser")
     public MessageResult<Void> updateUser(@RequestBody Users user) {
         MessageResult<Void> message = new MessageResult<>();

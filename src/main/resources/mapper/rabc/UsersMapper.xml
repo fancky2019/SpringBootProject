@@ -108,6 +108,13 @@
       ModityTime = #{moditytime,jdbcType=TIMESTAMP}
     where ID = #{id,jdbcType=INTEGER}
   </update>
+  <delete id="batchDeleteByID"  parameterType = "java.util.List">
+    delete from [RABC].[dbo].[Users] where ID in
+    <foreach collection="list"  item="item" open="(" separator="," close=")"  >
+           #{item}
+    </foreach>
+  </delete>
+
   <!--分页查询-->
 <!--data-->
   <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.UsersVM"
