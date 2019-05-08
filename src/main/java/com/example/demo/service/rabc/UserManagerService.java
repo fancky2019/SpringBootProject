@@ -82,6 +82,20 @@ public class UserManagerService {
         }
     }
 
+    public MessageResult<Void> batchDeleteByID(List<Integer> list) {
+        MessageResult<Void> messageResult = new MessageResult<>();
+        try {
+            Integer result = usersMapper.batchDeleteByID(list);
+            messageResult.setSuccess(result > 0);
+        } catch (Exception ex) {
+            messageResult.setMessage(ex.getMessage());
+            messageResult.setSuccess(false);
+            logger.error(ex.toString());
+        } finally {
+            return messageResult;
+        }
+    }
+
     public MessageResult<PageData<UsersVM>> getPageDataWithCount(UsersVM viewModel) {
         MessageResult<PageData<UsersVM>> message = new MessageResult<>();
         try {

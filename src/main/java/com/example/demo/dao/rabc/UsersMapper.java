@@ -20,6 +20,8 @@ public interface UsersMapper {
 
     int updateByPrimaryKey(Users record);
 
+    int batchDeleteByID(List<Integer> list);
+
     List<UsersVM> getPageData(UsersVM viewModel);
 
     Integer getPageDataCount(UsersVM viewModel);
