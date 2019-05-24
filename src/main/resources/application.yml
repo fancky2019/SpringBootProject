@@ -89,8 +89,6 @@ spring:
 #        max-concurrency: 10
 #        #公平分发模式
 #        prefetch: 1
-
-
 logging:
   config: classpath:log4j2.yml
 
