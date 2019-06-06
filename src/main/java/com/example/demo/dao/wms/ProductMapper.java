@@ -2,10 +2,15 @@ package com.example.demo.dao.wms;
 
 import com.example.demo.model.entity.wms.Product;
 import com.example.demo.model.viewModel.ProductVM;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.List;
 
+/*
+Mapper加@Repository注解Service层依赖注入ProductMapper就不会报错红丝波浪线（其实没有错）。
+ */
+@Repository
 public interface ProductMapper {
     int deleteByPrimaryKey(Integer id);
 
