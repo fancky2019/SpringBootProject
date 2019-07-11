@@ -12,6 +12,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @MapperScan("com.example.demo.dao")
 //@ComponentScan(basePackages = {"com.example.demo.service"})
+//@ComponentScan({"com.operations.project.seed","com.operations.project.message.server"})
 @EnableCaching   //redis
 @EnableScheduling //quartz
 @EnableRabbit     //EnableRabbit
