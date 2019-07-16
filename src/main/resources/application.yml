@@ -1,10 +1,7 @@
 #注意每个属性：（冒号）后要有一个空格
 
-#thymeleaf模板
-
-#server.port: 8080
-#server.servlet.context-path: /fancky
-#server.address: localhost
+server:
+  port: 8081
 
 
 #公共配置与profiles选择无关 mapperLocations指的路径是src/main/resources
@@ -77,18 +74,44 @@ spring:
     #        #默认是1
     #        prefetch: 1
 
-#    template:
-#      mandatory: true
-#      #消费端
-#    listener:
-#      simple:
-#        acknowledge-mode: manual
-#        #初始连接数量
-#        concurrency: 5
-#        #最大连接数量
-#        max-concurrency: 10
-#        #公平分发模式
-#        prefetch: 1
+
+  #    template:
+  #      mandatory: true
+  #      #消费端
+  #    listener:
+  #      simple:
+  #        acknowledge-mode: manual
+  #        #初始连接数量
+  #        concurrency: 5
+  #        #最大连接数量
+  #        max-concurrency: 10
+  #        #公平分发模式
+  #        prefetch: 1
+
+
+#Feign  开启熔断
+#注意：节点不在spring内
+#如果页面显示异常信息，说明熔断没有开启成功
+feign:
+  hystrix:
+    enabled: true
+ribbon:
+  OkToRetryOnAllOperations: false #对所有操作请求都进行重试,默认false
+  ReadTimeout: 5000   #负载均衡超时时间，默认值5000
+  ConnectTimeout: 3000 #ribbon请求连接的超时时间，默认值2000
+  MaxAutoRetries: 0     #对当前实例的重试次数，默认0
+  MaxAutoRetriesNextServer: 1 #对切换实例的重试次数，默认1
+
+hystrix:
+  command:
+    default:  #default全局有效，service id指定应用有效
+      execution:
+        timeout:
+          #如果enabled设置为false，则请求超时交给ribbon控制,为true,则超时作为熔断根据
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 1000 #断路器超时时间，默认1000ms
 logging:
   config: classpath:log4j2.yml
 demo:
