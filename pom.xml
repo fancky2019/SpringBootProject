@@ -49,6 +49,21 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
+         <!-- 注册中心：spring-boot-starter注意版本号和其他版本一致-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+            <version>2.1.0.RELEASE</version>
+        </dependency>
+
+        <!--  FeignClient：注意版本号和其他版本一致-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <!--注意此处的依赖是SpringBoot2.0以后专用的，如果您使用的SpringBoot版本低于2.0请使用spring-cloud-starter-feign-->
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>2.1.0.RELEASE</version>
+        </dependency>
+
         <!--  mybatis-->
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
