@@ -11,6 +11,7 @@
     <name>demo</name>
     <description>Demo project for Spring Boot</description>
 
+    <!--Maven springboot管理：不使用标签进行导入-->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -22,12 +23,26 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
+        <!--Maven springboot管理：不使用标签进行导入-->
+        <!-- <springboot.version>2.1.0.RELEASE</springboot.version>-->
     </properties>
+
 
     <dependencies>
         <!-- Maven会自动导入依赖包-->
         <!--Maven Repository 地址-->
         <!--https://mvnrepository.com/-->
+
+        <!--Maven springboot管理：不使用标签进行导入-->
+<!--        <dependency>-->
+<!--            &lt;!&ndash; 不使用parent标签引入 &ndash;&gt;-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-dependencies</artifactId>-->
+<!--            <version>${springboot.version}</version>-->
+<!--            <type>pom</type>-->
+<!--            <scope>import</scope>-->
+<!--        </dependency>-->
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -40,7 +55,6 @@
                 </exclusion>
             </exclusions>
 
-
         </dependency>
 
         <!--访问静态资源-->
@@ -49,7 +63,7 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-         <!-- 注册中心：spring-boot-starter注意版本号和其他版本一致-->
+        <!-- 注册中心：spring-boot-starter注意版本号和其他版本一致-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
@@ -103,12 +117,12 @@
             <version>3.8.1</version>
         </dependency>
 
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>io.jsonwebtoken</groupId>-->
-<!--            <artifactId>jjwt</artifactId>-->
-<!--            <version>0.9.1</version>-->
-<!--        </dependency>-->
+        <!--        &lt;!&ndash; https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt &ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.jsonwebtoken</groupId>-->
+        <!--            <artifactId>jjwt</artifactId>-->
+        <!--            <version>0.9.1</version>-->
+        <!--        </dependency>-->
 
 
         <!--添加log4j2依赖-->
@@ -136,7 +150,6 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.52</version>
         </dependency>
-
 
 
         <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
@@ -167,13 +180,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-
-
                 <!--热部署：该配置必须-->
                 <configuration>
                     <fork>true</fork>
                 </configuration>
-
 
             </plugin>
 

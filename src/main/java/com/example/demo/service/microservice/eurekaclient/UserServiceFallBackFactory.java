@@ -23,7 +23,7 @@ public class UserServiceFallBackFactory implements FallbackFactory<UserService> 
         return (name) ->
         {
             String errorMessage = throwable.getMessage();
-            return "返回异常默认值";
+            return "FeignClient微服务调用熔断：返回异常默认值";
         };
     }
 
