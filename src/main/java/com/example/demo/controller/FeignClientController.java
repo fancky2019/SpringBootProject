@@ -18,8 +18,11 @@ public class FeignClientController {
     //@Autowired:按照byType自动注入。
 
 
-    //  @Resource
-    @Autowired
+    /**
+     *通过微服务调用熔断：重写整个服务接口，进行熔断处理
+     */
+    //  @Resource  //java 的 IOC
+    @Autowired    //spring mvc 的IOC
     private UserService userService;
 
     @GetMapping("")
@@ -32,5 +35,4 @@ public class FeignClientController {
     public String testParam(@RequestParam String name) {
         return userService.home(name);
     }
-
 }

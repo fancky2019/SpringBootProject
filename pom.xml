@@ -34,14 +34,14 @@
         <!--https://mvnrepository.com/-->
 
         <!--Maven springboot管理：不使用标签进行导入-->
-<!--        <dependency>-->
-<!--            &lt;!&ndash; 不使用parent标签引入 &ndash;&gt;-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-dependencies</artifactId>-->
-<!--            <version>${springboot.version}</version>-->
-<!--            <type>pom</type>-->
-<!--            <scope>import</scope>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            &lt;!&ndash; 不使用parent标签引入 &ndash;&gt;-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-dependencies</artifactId>-->
+        <!--            <version>${springboot.version}</version>-->
+        <!--            <type>pom</type>-->
+        <!--            <scope>import</scope>-->
+        <!--        </dependency>-->
 
 
         <dependency>
@@ -77,6 +77,26 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
             <version>2.1.0.RELEASE</version>
         </dependency>
+
+        <!-- 熔断仪表盘-->
+        <!--熔断器 健康检查-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!--熔断器 Dashboard-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+            <version>2.1.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix-dashboard</artifactId>
+            <version>2.1.0.RELEASE</version>
+        </dependency>
+
+
 
         <!--  mybatis-->
         <dependency>

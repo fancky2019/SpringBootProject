@@ -32,6 +32,7 @@ public class AuthorityMangerController {
         } catch (Exception e) {
             message.setSuccess(false);
             message.setMessage(e.getMessage());
+            logger.error(e.toString());
         } finally {
             return message;
         }
@@ -45,6 +46,7 @@ public class AuthorityMangerController {
         } catch (Exception e) {
             message.setSuccess(false);
             message.setMessage(e.getMessage());
+            logger.error(e.toString());
         } finally {
             return message;
         }
@@ -58,6 +60,7 @@ public class AuthorityMangerController {
         } catch (Exception e) {
             message.setSuccess(false);
             message.setMessage(e.getMessage());
+            logger.error(e.toString());
         } finally {
             return message;
         }
