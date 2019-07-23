@@ -2,139 +2,140 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.dao.rabc.MenusMapper">
 
-  <sql id="Base_Column_List">
-    ID, ParentID, FormName, TabHeaderText, SortCode, Remark, Status
-  </sql>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.rabc.Menus">
-    select 
-    <include refid="Base_Column_List" />
-    from Menus
-    where ID = #{id,jdbcType=INTEGER}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from Menus
-    where ID = #{id,jdbcType=INTEGER}
-  </delete>
-  <insert id="insert" parameterType="com.example.demo.model.entity.rabc.Menus">
-    insert into Menus (ParentID, FormName,
-      TabHeaderText, SortCode, Remark, 
-      Status)
-    values ( #{parentid,jdbcType=INTEGER}, #{formname,jdbcType=VARCHAR},
-      #{tabheadertext,jdbcType=VARCHAR}, #{sortcode,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, 
-      #{status,jdbcType=SMALLINT})
-  </insert>
-  <insert id="insertSelective" parameterType="com.example.demo.model.entity.rabc.Menus">
-    insert into Menus
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        ID,
-      </if>
-      <if test="parentid != null">
-        ParentID,
-      </if>
-      <if test="formname != null">
-        FormName,
-      </if>
-      <if test="tabheadertext != null">
-        TabHeaderText,
-      </if>
-      <if test="sortcode != null">
-        SortCode,
-      </if>
-      <if test="remark != null">
-        Remark,
-      </if>
-      <if test="status != null">
-        Status,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        #{id,jdbcType=INTEGER},
-      </if>
-      <if test="parentid != null">
-        #{parentid,jdbcType=INTEGER},
-      </if>
-      <if test="formname != null">
-        #{formname,jdbcType=VARCHAR},
-      </if>
-      <if test="tabheadertext != null">
-        #{tabheadertext,jdbcType=VARCHAR},
-      </if>
-      <if test="sortcode != null">
-        #{sortcode,jdbcType=INTEGER},
-      </if>
-      <if test="remark != null">
-        #{remark,jdbcType=VARCHAR},
-      </if>
-      <if test="status != null">
-        #{status,jdbcType=SMALLINT},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.rabc.Menus">
-    update Menus
-    <set>
-      <if test="parentid != null">
-        ParentID = #{parentid,jdbcType=INTEGER},
-      </if>
-      <if test="formname != null">
+    <sql id="Base_Column_List">
+        ID, ParentID, FormName, TabHeaderText, SortCode, Remark, Status
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer"
+            resultType="com.example.demo.model.entity.rabc.Menus">
+        select
+        <include refid="Base_Column_List"/>
+        from Menus
+        where ID = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from Menus
+        where ID = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.example.demo.model.entity.rabc.Menus">
+        insert into Menus (ParentID, FormName,
+        TabHeaderText, SortCode, Remark,
+        Status)
+        values ( #{parentid,jdbcType=INTEGER}, #{formname,jdbcType=VARCHAR},
+        #{tabheadertext,jdbcType=VARCHAR}, #{sortcode,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR},
+        #{status,jdbcType=SMALLINT})
+    </insert>
+    <insert id="insertSelective" parameterType="com.example.demo.model.entity.rabc.Menus">
+        insert into Menus
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="parentid != null">
+                ParentID,
+            </if>
+            <if test="formname != null">
+                FormName,
+            </if>
+            <if test="tabheadertext != null">
+                TabHeaderText,
+            </if>
+            <if test="sortcode != null">
+                SortCode,
+            </if>
+            <if test="remark != null">
+                Remark,
+            </if>
+            <if test="status != null">
+                Status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="parentid != null">
+                #{parentid,jdbcType=INTEGER},
+            </if>
+            <if test="formname != null">
+                #{formname,jdbcType=VARCHAR},
+            </if>
+            <if test="tabheadertext != null">
+                #{tabheadertext,jdbcType=VARCHAR},
+            </if>
+            <if test="sortcode != null">
+                #{sortcode,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=SMALLINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.rabc.Menus">
+        update Menus
+        <set>
+            <if test="parentid != null">
+                ParentID = #{parentid,jdbcType=INTEGER},
+            </if>
+            <if test="formname != null">
+                FormName = #{formname,jdbcType=VARCHAR},
+            </if>
+            <if test="tabheadertext != null">
+                TabHeaderText = #{tabheadertext,jdbcType=VARCHAR},
+            </if>
+            <if test="sortcode != null">
+                SortCode = #{sortcode,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                Remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                Status = #{status,jdbcType=SMALLINT},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.rabc.Menus">
+        update Menus
+        set ParentID = #{parentid,jdbcType=INTEGER},
         FormName = #{formname,jdbcType=VARCHAR},
-      </if>
-      <if test="tabheadertext != null">
         TabHeaderText = #{tabheadertext,jdbcType=VARCHAR},
-      </if>
-      <if test="sortcode != null">
         SortCode = #{sortcode,jdbcType=INTEGER},
-      </if>
-      <if test="remark != null">
         Remark = #{remark,jdbcType=VARCHAR},
-      </if>
-      <if test="status != null">
-        Status = #{status,jdbcType=SMALLINT},
-      </if>
-    </set>
-    where ID = #{id,jdbcType=INTEGER}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.rabc.Menus">
-    update Menus
-    set ParentID = #{parentid,jdbcType=INTEGER},
-      FormName = #{formname,jdbcType=VARCHAR},
-      TabHeaderText = #{tabheadertext,jdbcType=VARCHAR},
-      SortCode = #{sortcode,jdbcType=INTEGER},
-      Remark = #{remark,jdbcType=VARCHAR},
-      Status = #{status,jdbcType=SMALLINT}
-    where ID = #{id,jdbcType=INTEGER}
-  </update>
+        Status = #{status,jdbcType=SMALLINT}
+        where ID = #{id,jdbcType=INTEGER}
+    </update>
 
-  <!--分页查询-->
-  <!--data-->
-  <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.MenusVM"
-          resultType="com.example.demo.model.viewModel.rabc.MenusVM">
-    SELECT  [ID] ,[ParentID],[FormName],[TabHeaderText],[SortCode] ,[Remark] ,[Status]
-    FROM [RABC].[dbo].[Menus]
-    where 1=1
-    <if test="formname != null">
-      and FormName LIKE CONCAT('%',#{formname,jdbcType=VARCHAR},'%')
-    </if>
-    <if test="tabheadertext != null">
-      and TabHeaderText LIKE CONCAT('%',#{tabheadertext,jdbcType=VARCHAR},'%')
-    </if>
-    ORDER BY 1
-    OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
-  </select>
-  <!--count-->
-  <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.MenusVM"
-          resultType="java.lang.Integer">
-    SELECT  Count(ID)
-    FROM [RABC].[dbo].[Menus]
-    where 1=1
-    <if test="formname != null">
-      and FormName LIKE CONCAT('%',#{formname,jdbcType=VARCHAR},'%')
-    </if>
-    <if test="tabheadertext != null">
-      and TabHeaderText LIKE CONCAT('%',#{tabheadertext,jdbcType=VARCHAR},'%')
-    </if>
+    <!--分页查询-->
+    <!--data-->
+    <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.MenusVM"
+            resultType="com.example.demo.model.viewModel.rabc.MenusVM">
+        SELECT [ID] ,[ParentID],[FormName],[TabHeaderText],[SortCode] ,[Remark] ,[Status]
+        FROM [RABC].[dbo].[Menus]
+        where 1=1
+        <if test="formname != null">
+            and FormName LIKE CONCAT('%',#{formname,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="tabheadertext != null">
+            and TabHeaderText LIKE CONCAT('%',#{tabheadertext,jdbcType=VARCHAR},'%')
+        </if>
+        ORDER BY 1
+        OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+    </select>
+    <!--count-->
+    <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.MenusVM"
+            resultType="java.lang.Integer">
+        SELECT Count(ID)
+        FROM [RABC].[dbo].[Menus]
+        where 1=1
+        <if test="formname != null">
+            and FormName LIKE CONCAT('%',#{formname,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="tabheadertext != null">
+            and TabHeaderText LIKE CONCAT('%',#{tabheadertext,jdbcType=VARCHAR},'%')
+        </if>
 
-  </select>
+    </select>
 </mapper>

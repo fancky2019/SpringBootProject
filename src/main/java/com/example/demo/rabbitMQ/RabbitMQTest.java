@@ -15,8 +15,8 @@ public class RabbitMQTest {
     private FanoutExchangeProducer fanoutExchangeProducer;
     @Autowired
     private TopicExchangeProducer topicExchangeProducer;
-    public  void  test()
-    {
+
+    public void test() {
         //DEMO  链接：http://www.rabbitmq.com/getstarted.html
         //NuGet添加RabbitMQ.Client引用
         //RabbitMQ UI管理:http://localhost:15672/   账号:guest 密码:guest
@@ -28,8 +28,7 @@ public class RabbitMQTest {
         //http://www.rabbitmq.com/tutorials/tutorial-three-dotnet.html
 
 
-
-       // 公平分发模式在Spring-amqp中是默认的
+        // 公平分发模式在Spring-amqp中是默认的
 
         directExchangeProducer.producer();
         fanoutExchangeProducer.producer();

@@ -1,7 +1,6 @@
 package com.example.demo.utility;
 
-public enum AuthorizeType
-{
+public enum AuthorizeType {
     Authorize,
     UnAuthorize
 }

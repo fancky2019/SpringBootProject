@@ -83,8 +83,8 @@ public class RoleManagerService {
     public MessageResult<PageData<RolesVM>> getPageDataWithCount(RolesVM viewModel) {
         MessageResult<PageData<RolesVM>> message = new MessageResult<>();
         try {
-            PageData<RolesVM> paegData=new PageData<>() ;
-            Integer count= rolesMapper.getPageDataCount(viewModel);
+            PageData<RolesVM> paegData = new PageData<>();
+            Integer count = rolesMapper.getPageDataCount(viewModel);
             paegData.setCount(count);
             List<RolesVM> list = rolesMapper.getPageData(viewModel);
             paegData.setData(list);

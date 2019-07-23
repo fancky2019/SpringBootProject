@@ -16,17 +16,17 @@ import java.util.Date;
 另一个开源框架：io.jsonwebtoken
  */
 @Component
-public  class JWTUtility {
+public class JWTUtility {
 
 
     //SECRET key 最好做配置，要经常变动
 //    private static final String SECRET = "GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk";
 //    private static final String SECRET1 = "GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBr";
     @Value("${demo.JWTSecretKey}")
-    private  String  jWTSecretKey;
+    private String jWTSecretKey;
 
 
-    public  String getToken(Users user) {
+    public String getToken(Users user) {
         //60秒过期
         Date expireDate = new Date(System.currentTimeMillis() + 60 * 1000);
         String token = JWT.create()
@@ -39,7 +39,7 @@ public  class JWTUtility {
                 //.withClaim("exp",expireDate.toString())
                 .withClaim("userID", user.getId().toString())
                 .withClaim("userName", "fancky")
-                .withClaim("role","administrator")
+                .withClaim("role", "administrator")
                 .sign(Algorithm.HMAC256(jWTSecretKey));
         return token;
     }
@@ -50,7 +50,6 @@ public  class JWTUtility {
         JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(jWTSecretKey)).build();
         return jwtVerifier.verify(token);
     }
-
 
 
 }

@@ -14,7 +14,6 @@ public class RolesVM extends Page {
     private String remark;
 
 
-
     public RolesVM() {
         super();
     }

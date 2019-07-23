@@ -25,7 +25,8 @@
         where ID = #{id,jdbcType=INTEGER}
     </delete>
     <!--useGeneratedKeys="true" keyProperty="id" 获取自增主键-->
-    <insert id="insert" parameterType="com.example.demo.model.entity.wms.Order" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.example.demo.model.entity.wms.Order" useGeneratedKeys="true"
+            keyProperty="id">
         insert into [Order]([GUID],OrderNumber,CreateTime, OrderType, [Status])
         values (#{guid,jdbcType=CHAR}, #{ordernumber,jdbcType=NVARCHAR},
         #{createtime,jdbcType=TIMESTAMP}, #{ordertype,jdbcType=INTEGER}, #{status,jdbcType=SMALLINT}

@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.TYPE;
 
-@Target({ElementType.TYPE,ElementType.METHOD,})//注解目标，只加在类上
+@Target({ElementType.TYPE, ElementType.METHOD,})//注解目标，只加在类上
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Authorize {
-    public  AuthorizeType value() default AuthorizeType.UnAuthorize;
+    public AuthorizeType value() default AuthorizeType.UnAuthorize;
 }

@@ -38,7 +38,7 @@ public class DirectExchangeProducer {
 
         msg = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
 
-       rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
+        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
 
 //        //json转换
 //        String jsonStr1 =   JSON.toJSONString(person);

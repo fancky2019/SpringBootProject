@@ -25,7 +25,7 @@ OpenFeign:服务之间的调用，集成了Ribbon和Hystrix。
  */
 //@FeignClient("server")//不开启熔断的回调
 //server 只能一个服务指定。
-@FeignClient(value = "server", fallbackFactory=UserServiceFallBackFactory.class)//开启回调
+@FeignClient(value = "server", fallbackFactory = UserServiceFallBackFactory.class)//开启回调
 public interface UserService {
     @RequestMapping(value = "/user")
     String home(@RequestParam String name);

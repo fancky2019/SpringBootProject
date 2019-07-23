@@ -12,23 +12,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class MybatisAnnotationService {
 
     //int insert(Users user);
 
 
-   // int batchInsert(List<Users> list);
+    // int batchInsert(List<Users> list);
 
 
-  //  Users selectById(@Param("id") Integer id);
+    //  Users selectById(@Param("id") Integer id);
 
 
-  //  int batchDelete(List<> list);
+    //  int batchDelete(List<> list);
 
 
-  //  List<Users> selectAll();
-  private static Logger logger = LogManager.getLogger(MybatisAnnotationService.class);
+    //  List<Users> selectAll();
+    private static Logger logger = LogManager.getLogger(MybatisAnnotationService.class);
 
     @Autowired
     MybatisAnnotationMapper mybatisAnnotationMapper;
@@ -93,19 +94,19 @@ public class MybatisAnnotationService {
     }
 
 
-        public MessageResult<List<Users>> selectAll() {
-            MessageResult<List<Users>> message = new MessageResult<>();
-            try {
-                List<Users> list = mybatisAnnotationMapper.selectAll();
-                message.setData(list);
-                message.setSuccess(true);
-            } catch (Exception ex) {
-                message.setSuccess(false);
-                message.setMessage(ex.getMessage());
-                logger.error(ex.toString());
-            } finally {
-                return message;
-            }
+    public MessageResult<List<Users>> selectAll() {
+        MessageResult<List<Users>> message = new MessageResult<>();
+        try {
+            List<Users> list = mybatisAnnotationMapper.selectAll();
+            message.setData(list);
+            message.setSuccess(true);
+        } catch (Exception ex) {
+            message.setSuccess(false);
+            message.setMessage(ex.getMessage());
+            logger.error(ex.toString());
+        } finally {
+            return message;
         }
+    }
 
 }

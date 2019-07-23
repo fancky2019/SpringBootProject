@@ -18,7 +18,7 @@ public class RabbitMQController {
         try {
             rabbitMQTest.test();
         } catch (Exception ex) {
-           System.out.println(ex.getMessage());
+            System.out.println(ex.getMessage());
         }
         return null;
     }
