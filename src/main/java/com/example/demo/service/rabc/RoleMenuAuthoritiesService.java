@@ -83,8 +83,8 @@ public class RoleMenuAuthoritiesService {
     public MessageResult<PageData<RoleMenuAuthoritiesVM>> getPageDataWithCount(RoleMenuAuthoritiesVM viewModel) {
         MessageResult<PageData<RoleMenuAuthoritiesVM>> message = new MessageResult<>();
         try {
-            PageData<RoleMenuAuthoritiesVM> paegData=new PageData<>() ;
-            Integer count= roleMenuAuthoritiesMapper.getPageDataCount(viewModel);
+            PageData<RoleMenuAuthoritiesVM> paegData = new PageData<>();
+            Integer count = roleMenuAuthoritiesMapper.getPageDataCount(viewModel);
             paegData.setCount(count);
             List<RoleMenuAuthoritiesVM> list = roleMenuAuthoritiesMapper.getPageData(viewModel);
             paegData.setData(list);

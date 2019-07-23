@@ -4,7 +4,7 @@ import java.util.List;
 
 public class PageData<T> {
     private Integer count;
-    private List<T>  data;
+    private List<T> data;
 
     public Integer getCount() {
         return count;

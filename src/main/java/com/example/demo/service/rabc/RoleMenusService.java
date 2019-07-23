@@ -84,8 +84,8 @@ public class RoleMenusService {
     public MessageResult<PageData<RoleMenusVM>> getPageDataWithCount(RoleMenusVM viewModel) {
         MessageResult<PageData<RoleMenusVM>> message = new MessageResult<>();
         try {
-            PageData<RoleMenusVM> paegData=new PageData<>() ;
-            Integer count= roleMenusMapper.getPageDataCount(viewModel);
+            PageData<RoleMenusVM> paegData = new PageData<>();
+            Integer count = roleMenusMapper.getPageDataCount(viewModel);
             paegData.setCount(count);
             List<RoleMenusVM> list = roleMenusMapper.getPageData(viewModel);
             paegData.setData(list);
@@ -114,7 +114,6 @@ public class RoleMenusService {
             return message;
         }
     }
-
 
 
 }

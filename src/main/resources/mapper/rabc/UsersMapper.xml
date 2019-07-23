@@ -2,141 +2,142 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.dao.rabc.UsersMapper">
 
-  <sql id="Base_Column_List">
-    ID, Account, Password, Status, CreateTime, ModityTime
-  </sql>
-  <sql id="Blob_Column_List">
-    TimeStamp
-  </sql>
+    <sql id="Base_Column_List">
+        ID, Account, Password, Status, CreateTime, ModityTime
+    </sql>
+    <sql id="Blob_Column_List">
+        TimeStamp
+    </sql>
 
-  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.rabc.Users">
-    select 
-    <include refid="Base_Column_List" />
-    ,
-    <include refid="Blob_Column_List" />
-    from Users
-    where ID = #{id,jdbcType=INTEGER}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from Users
-    where ID = #{id,jdbcType=INTEGER}
-  </delete>
-  <insert id="insert" parameterType="com.example.demo.model.entity.rabc.Users">
-    insert into Users ( Account, Password,
-      Status, CreateTime, ModityTime)
-    values ( #{account,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
-      #{status,jdbcType=SMALLINT}, #{createtime,jdbcType=TIMESTAMP}, #{moditytime,jdbcType=TIMESTAMP})
-  </insert>
-  <insert id="insertSelective" parameterType="com.example.demo.model.entity.rabc.Users">
-    insert into Users
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        ID,
-      </if>
-      <if test="account != null">
-        Account,
-      </if>
-      <if test="password != null">
-        Password,
-      </if>
-      <if test="status != null">
-        Status,
-      </if>
-      <if test="createtime != null">
-        CreateTime,
-      </if>
-      <if test="moditytime != null">
-        ModityTime,
-      </if>
-      <if test="timestamp != null">
-        TimeStamp,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        #{id,jdbcType=INTEGER},
-      </if>
-      <if test="account != null">
-        #{account,jdbcType=VARCHAR},
-      </if>
-      <if test="password != null">
-        #{password,jdbcType=VARCHAR},
-      </if>
-      <if test="status != null">
-        #{status,jdbcType=SMALLINT},
-      </if>
-      <if test="createtime != null">
-        #{createtime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="moditytime != null">
-        #{moditytime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="timestamp != null">
-        #{timestamp,jdbcType=BINARY},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.rabc.Users">
-    update Users
-    <set>
-      <if test="account != null">
-        Account = #{account,jdbcType=VARCHAR},
-      </if>
-      <if test="password != null">
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer"
+            resultType="com.example.demo.model.entity.rabc.Users">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from Users
+        where ID = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from Users
+        where ID = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.example.demo.model.entity.rabc.Users">
+        insert into Users ( Account, Password,
+        Status, CreateTime, ModityTime)
+        values ( #{account,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+        #{status,jdbcType=SMALLINT}, #{createtime,jdbcType=TIMESTAMP}, #{moditytime,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" parameterType="com.example.demo.model.entity.rabc.Users">
+        insert into Users
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="account != null">
+                Account,
+            </if>
+            <if test="password != null">
+                Password,
+            </if>
+            <if test="status != null">
+                Status,
+            </if>
+            <if test="createtime != null">
+                CreateTime,
+            </if>
+            <if test="moditytime != null">
+                ModityTime,
+            </if>
+            <if test="timestamp != null">
+                TimeStamp,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="account != null">
+                #{account,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=SMALLINT},
+            </if>
+            <if test="createtime != null">
+                #{createtime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="moditytime != null">
+                #{moditytime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="timestamp != null">
+                #{timestamp,jdbcType=BINARY},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.rabc.Users">
+        update Users
+        <set>
+            <if test="account != null">
+                Account = #{account,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                Password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                Status = #{status,jdbcType=SMALLINT},
+            </if>
+            <if test="createtime != null">
+                CreateTime = #{createtime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="moditytime != null">
+                ModityTime = #{moditytime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="timestamp != null">
+                TimeStamp = #{timestamp,jdbcType=BINARY},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.rabc.Users">
+        update Users
+        set Account = #{account,jdbcType=VARCHAR},
         Password = #{password,jdbcType=VARCHAR},
-      </if>
-      <if test="status != null">
         Status = #{status,jdbcType=SMALLINT},
-      </if>
-      <if test="createtime != null">
-        CreateTime = #{createtime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="moditytime != null">
-        ModityTime = #{moditytime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="timestamp != null">
-        TimeStamp = #{timestamp,jdbcType=BINARY},
-      </if>
-    </set>
-    where ID = #{id,jdbcType=INTEGER}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.rabc.Users">
-    update Users
-    set Account = #{account,jdbcType=VARCHAR},
-      Password = #{password,jdbcType=VARCHAR},
-      Status = #{status,jdbcType=SMALLINT},
-      ModityTime = #{moditytime,jdbcType=TIMESTAMP}
-    where ID = #{id,jdbcType=INTEGER}
-  </update>
-  <delete id="batchDeleteByID"  parameterType = "java.util.List">
-    delete from [RABC].[dbo].[Users] where ID in
-    <foreach collection="list"  item="item" open="(" separator="," close=")"  >
-           #{item}
-    </foreach>
-  </delete>
+        ModityTime = #{moditytime,jdbcType=TIMESTAMP}
+        where ID = #{id,jdbcType=INTEGER}
+    </update>
+    <delete id="batchDeleteByID" parameterType="java.util.List">
+        delete from [RABC].[dbo].[Users] where ID in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+                 #{item}
+        </foreach>
+    </delete>
 
-  <!--分页查询-->
-<!--data-->
-  <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.UsersVM"
-          resultType="com.example.demo.model.viewModel.rabc.UsersVM">
-    SELECT  [ID] ,[Account] ,[Password]
-    ,[Status] ,[CreateTime]
-    ,[ModityTime]  ,[TimeStamp]
-    FROM [RABC].[dbo].[Users]
-    where 1=1
-    <if test="account != null">
-      and Account LIKE CONCAT('%',#{account,jdbcType=VARCHAR},'%')
-    </if>
-    <if test="createtime != null">
-      and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
-    </if>
-    ORDER BY 1
-    OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
-  </select>
-<!--count-->
+    <!--分页查询-->
+    <!--data-->
+    <select id="getPageData" parameterType="com.example.demo.model.viewModel.rabc.UsersVM"
+            resultType="com.example.demo.model.viewModel.rabc.UsersVM">
+        SELECT [ID] ,[Account] ,[Password]
+        ,[Status] ,[CreateTime]
+        ,[ModityTime] ,[TimeStamp]
+        FROM [RABC].[dbo].[Users]
+        where 1=1
+        <if test="account != null">
+            and Account LIKE CONCAT('%',#{account,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="createtime != null">
+            and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
+        </if>
+        ORDER BY 1
+        OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+    </select>
+    <!--count-->
     <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.UsersVM"
             resultType="java.lang.Integer">
-        SELECT  Count(ID)
+        SELECT Count(ID)
         FROM [RABC].[dbo].[Users]
         where 1=1
         <if test="account != null">

@@ -1,6 +1,6 @@
 $(function () {
 
-    	$("#btnSave").click(function () {
-            alert("sddssd");
-        });
+    $("#btnSave").click(function () {
+        alert("sddssd");
+    });
 });

@@ -68,29 +68,29 @@
             domainObjectName:指定了实体类的名称
         -->
         <table tableName="Authorities" domainObjectName="Authorities"
-        enableCountByExample="false" enableUpdateByExample="false"
-        enableDeleteByExample="false" enableSelectByExample="false"
-        selectByExampleQueryId="false">
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false">
         </table>
         <table tableName="Menus" domainObjectName="Menus"
-        enableCountByExample="false" enableUpdateByExample="false"
-        enableDeleteByExample="false" enableSelectByExample="false"
-        selectByExampleQueryId="false">
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false">
         </table>
         <table tableName="RoleMenuAuthorities" domainObjectName="RoleMenuAuthorities"
-        enableCountByExample="false" enableUpdateByExample="false"
-        enableDeleteByExample="false" enableSelectByExample="false"
-        selectByExampleQueryId="false">
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false">
         </table>
         <table tableName="RoleMenus" domainObjectName="RoleMenus"
-        enableCountByExample="false" enableUpdateByExample="false"
-        enableDeleteByExample="false" enableSelectByExample="false"
-        selectByExampleQueryId="false">
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false">
         </table>
         <table tableName="Roles" domainObjectName="Roles"
-        enableCountByExample="false" enableUpdateByExample="false"
-        enableDeleteByExample="false" enableSelectByExample="false"
-        selectByExampleQueryId="false">
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false">
         </table>
         <table tableName="UserRoles" domainObjectName="UserRoles"
                enableCountByExample="false" enableUpdateByExample="false"
@@ -105,14 +105,14 @@
 
 
         <!--<table tableName="Order" domainObjectName="Order"-->
-               <!--enableCountByExample="false" enableUpdateByExample="false"-->
-               <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-               <!--selectByExampleQueryId="false">-->
+        <!--enableCountByExample="false" enableUpdateByExample="false"-->
+        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
+        <!--selectByExampleQueryId="false">-->
         <!--</table>-->
         <!--<table tableName="OrderDetail" domainObjectName="OrderDetail"-->
-               <!--enableCountByExample="false" enableUpdateByExample="false"-->
-               <!--enableDeleteByExample="false" enableSelectByExample="false"-->
-               <!--selectByExampleQueryId="false">-->
+        <!--enableCountByExample="false" enableUpdateByExample="false"-->
+        <!--enableDeleteByExample="false" enableSelectByExample="false"-->
+        <!--selectByExampleQueryId="false">-->
         <!--</table>-->
         <!--如果生成n个表，那就将上面的那段table代码copy n份-->
     </context>

@@ -22,7 +22,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * 添加此配置类解决框架redis序列化存储乱码问题
  */
 @Configuration
-public class RedisConfig  {
+public class RedisConfig {
     @Bean
 
     @SuppressWarnings("all")

@@ -60,7 +60,7 @@ public class ProductService {
         }
     }
 
-//    @Async
+    //    @Async
     public List<Product> getProductProc(HashMap<String, Object> map) {
         try {
             return productMapper.getProductProc(map);
@@ -91,8 +91,7 @@ public class ProductService {
             message.setSuccess(false);
             message.setMessage(ex.getMessage());
             logger.error(ex.toString());
-        }
-        finally {
+        } finally {
             return message;
         }
     }

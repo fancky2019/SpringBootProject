@@ -35,7 +35,7 @@ public class MybatisAnnotationController {
     public MessageResult<Void> batchInsert(@RequestBody List<Users> list) {
         MessageResult<Void> messageResult = new MessageResult<>();
         try {
-            messageResult= mybatisAnnotationService.batchInsert(list);
+            messageResult = mybatisAnnotationService.batchInsert(list);
         } catch (Exception ex) {
             messageResult.setMessage(ex.getMessage());
             messageResult.setSuccess(false);
@@ -63,7 +63,7 @@ public class MybatisAnnotationController {
     public MessageResult<Void> batchDelete(@RequestBody List<Integer> list) {
         MessageResult<Void> messageResult = new MessageResult<>();
         try {
-            messageResult= mybatisAnnotationService.batchDelete(list);
+            messageResult = mybatisAnnotationService.batchDelete(list);
         } catch (Exception ex) {
             messageResult.setMessage(ex.getMessage());
             messageResult.setSuccess(false);

@@ -19,7 +19,7 @@ public class FeignClientController {
 
 
     /**
-     *通过微服务调用熔断：重写整个服务接口，进行熔断处理
+     * 通过微服务调用熔断：重写整个服务接口，进行熔断处理
      */
     //  @Resource  //java 的 IOC
     @Autowired    //spring mvc 的IOC

@@ -14,9 +14,9 @@ public class Users {
     private Date createtime;
 
     private Date moditytime;
-/*
-   注意：修改mapper文件的_byte为Byte
- */
+    /*
+       注意：修改mapper文件的_byte为Byte
+     */
     private Byte[] timestamp;
 
     public Users(Integer id, String account, String password, Short status, Date createtime, Date moditytime) {

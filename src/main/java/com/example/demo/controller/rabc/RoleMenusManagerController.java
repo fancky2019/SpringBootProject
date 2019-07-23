@@ -21,7 +21,7 @@ import java.util.List;
 public class RoleMenusManagerController {
     private static Logger logger = LogManager.getLogger(RoleMenusManagerController.class);
     @Resource
-    private RoleMenusService  roleMenusService;
+    private RoleMenusService roleMenusService;
 
 
     @GetMapping("/getRoleMenu")

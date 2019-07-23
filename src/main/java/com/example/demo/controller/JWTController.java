@@ -15,15 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class JWTController {
 
     @Autowired
-   private JWTUtility jWTUtility;
+    private JWTUtility jWTUtility;
 
     @GetMapping("/getToken")
-    public  String getToken()
-    {
-        Users users=new Users() ;
+    public String getToken() {
+        Users users = new Users();
         users.setId(1);
         users.setPassword("123456");
-       return jWTUtility.getToken(users);
+        return jWTUtility.getToken(users);
     }
 
     //PostMan:http 请求头(Headers)添加
@@ -31,15 +30,13 @@ public class JWTController {
     //token:        token字符串
     @Authorize(AuthorizeType.Authorize)
     @GetMapping("/authorise")
-    public String authorise()
-    {
-      return  "authorise";
+    public String authorise() {
+        return "authorise";
     }
 
     @Authorize(AuthorizeType.UnAuthorize)
     @GetMapping("/unAuthorise")
-    public String unAuthorise()
-    {
-        return  "unAuthorise";
+    public String unAuthorise() {
+        return "unAuthorise";
     }
 }
