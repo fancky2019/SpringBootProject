@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.text.MessageFormat;
 import java.util.HashMap;
 
 //调试测Controller注意切换配置文件里的数据库配置:数据库RABC
@@ -26,6 +27,10 @@ public class UserController {
     //获取配置文件的值
     @Value("${spring.datasource.username}")
     private String username;
+
+    @Value("${spring.application.name}")
+    private String applicationName;
+
 
     private static Logger logger = LogManager.getLogger(UserController.class);
     // private static Logger logger = LogManager.getLogger("business");
@@ -89,6 +94,17 @@ public class UserController {
         return "index";
     }
 
+    @GetMapping("/log")
+    @ResponseBody
+    public String log(String str) {
+        return MessageFormat.format("{0}:{1}", applicationName, str);
+    }
 
+    //http://localhost:8080/login?name=fancky&password=pas
+    @GetMapping("/login")
+    @ResponseBody
+    public String login(String name,String password) {
+        return MessageFormat.format("{0}:{1}", applicationName, name+","+password);
+    }
 }
 
