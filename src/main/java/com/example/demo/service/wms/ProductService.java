@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.wms;
 
 import com.example.demo.dao.wms.ProductMapper;
 import com.example.demo.model.entity.wms.Product;
