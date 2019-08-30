@@ -4,11 +4,14 @@ import com.example.demo.rabbitMQ.consumer.DirectExchangeConsumer;
 import com.example.demo.rabbitMQ.producer.DirectExchangeProducer;
 import com.example.demo.rabbitMQ.producer.FanoutExchangeProducer;
 import com.example.demo.rabbitMQ.producer.TopicExchangeProducer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RabbitMQTest {
+    private static Logger logger = LogManager.getLogger(RabbitMQTest.class);
     @Autowired
     private DirectExchangeProducer directExchangeProducer;
     @Autowired
@@ -30,9 +33,15 @@ public class RabbitMQTest {
 
         // 公平分发模式在Spring-amqp中是默认的
 
-        directExchangeProducer.producer();
-        fanoutExchangeProducer.producer();
-        topicExchangeProducer.producer();
+        try {
+
+
+            directExchangeProducer.producer();
+//        fanoutExchangeProducer.producer();
+//        topicExchangeProducer.producer();
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
+        }
     }
 
 }

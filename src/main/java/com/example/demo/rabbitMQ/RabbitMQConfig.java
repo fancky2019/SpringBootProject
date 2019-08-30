@@ -18,6 +18,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 
 /**
  * 声明RabbitMQ的交换机、队列、并将相应的队列、交换机、RoutingKey绑定。
@@ -30,8 +31,15 @@ public class RabbitMQConfig {
     //region DIRECT
     public static final String DIRECT_EXCHANGE_NAME = "DirectExchangeSpringBoot";
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
-    public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot.Direct";
+    public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot";
     public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
+    //endregion
+
+    //region DIRECT
+    public static final String DEAD_DIRECT_EXCHANGE_NAME = "DeadDirectExchangeSpringBoot";
+    // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
+    public static final String DEAD_DIRECT_ROUTING_KEY = "DeadDirectExchangeRoutingKeySpringBoot";
+    public static final String DEAD_DIRECT_QUEUE_NAME = "DeadDirectExchangeQueueSpringBoot";
     //endregion
 
     //region TOPIC
@@ -82,6 +90,31 @@ public class RabbitMQConfig {
 
     //region 配置交换机、队列、RoutingKey
 
+    //region DeadDirect
+
+    //    @Bean("deadLetterExchange")
+    @Bean("deadDirectExchange")
+    public DirectExchange deadDirectExchange() {
+        DirectExchange directExchange = new DirectExchange(DEAD_DIRECT_EXCHANGE_NAME);
+        return directExchange;
+    }
+
+    @Bean("deadDirectQueue")
+    public Queue deadDirectQueue() {
+        Queue queue = new Queue(DEAD_DIRECT_QUEUE_NAME);
+        return queue;
+    }
+
+    /**
+     * 绑定队列、交换机、路由Key
+     */
+    @Bean("bindingDeadDirect")
+    public Binding bindingDeadDirect() {
+        Binding binding = BindingBuilder.bind(deadDirectQueue()).to(deadDirectExchange()).with(DEAD_DIRECT_ROUTING_KEY);
+        return binding;
+    }
+    //endregion
+
     //region Direct
     @Bean
     public DirectExchange directExchange() {
@@ -91,8 +124,17 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue directQueue() {
-        Queue queue = new Queue(DIRECT_QUEUE_NAME);
-        return queue;
+
+        //设置死信队列的参数（交换机、路由key）
+        // Queue(String name, boolean durable, boolean exclusive, boolean autoDelete, Map<String, Object> arguments)
+        HashMap<String, Object> args = new HashMap<>();
+//        args.put("x-message-ttl", 30000);
+        // 设置该Queue的死信的信箱
+        args.put("x-dead-letter-exchange", DEAD_DIRECT_EXCHANGE_NAME);
+        // 设置死信routingKey
+        args.put("x-dead-letter-routing-key",DEAD_DIRECT_ROUTING_KEY);
+//        QueueBuilder.durable(DIRECT_QUEUE_NAME).withArguments(args).build();
+        return new Queue(DIRECT_QUEUE_NAME, true, false, false, args);
     }
 
     /**
@@ -104,6 +146,7 @@ public class RabbitMQConfig {
         return binding;
     }
     //endregion
+
 
     //region Topic
     @Bean
