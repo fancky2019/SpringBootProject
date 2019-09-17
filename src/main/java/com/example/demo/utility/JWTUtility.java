@@ -26,6 +26,12 @@ public class JWTUtility {
     private String jWTSecretKey;
 
 
+    /**
+     * 编码：
+     * 将用户信息生成token
+     * @param user
+     * @return
+     */
     public String getToken(Users user) {
         //60秒过期
         Date expireDate = new Date(System.currentTimeMillis() + 60 * 1000);
@@ -44,6 +50,12 @@ public class JWTUtility {
         return token;
     }
 
+    /**
+     * 解码：拦截器调用。
+     *校验成功返回DecodedJWT对象，否则内部抛出异常。
+     * @param token
+     * @return
+     */
     public DecodedJWT verifier(String token) {
         //SECRET:生成Token的key和解码、验证的key必须一样，否则报下面错误。
         //The Token's Signature resulted invalid when verified using the Algorithm: HmacSHA256
