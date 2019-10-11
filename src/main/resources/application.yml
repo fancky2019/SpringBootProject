@@ -112,6 +112,7 @@ spring:
       # 指定消息key和消息体的编解码方式
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: -1
 
     consumer:
       group-id: springbootKafkaConsumer
@@ -120,6 +121,11 @@ spring:
       # auto-commit-interval: 1000
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      max-poll-records: 10
+#      fetch-max-wait:
+#      listener:
+#        #手动提交模式
+#        ack-mode: manual
 
 #Feign  开启熔断
 #注意：节点不在spring内
