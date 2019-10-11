@@ -66,7 +66,7 @@ spring:
     virtual-host: /
     #开启手动Axk,手动无法自动加入死信队列，可以重试指定次数。
     #设置成默认的自动Ack,springboot会加入死信队列，一定设置死信队列。
-#    listener.simple.acknowledge-mode: manual
+    #    listener.simple.acknowledge-mode: manual
     listener:
       simple:
         retry:
@@ -101,6 +101,25 @@ spring:
   #        #公平分发模式
   #        prefetch: 1
 
+  kafka:
+    bootstrap-servers: localhost:9092 # 指定kafka 代理地址，可以多个
+    producer: # 生产者
+      retries: 0 # 设置大于0的值，则客户端会将发送失败的记录重新发送
+      # 每次批量发送消息的数量
+      batch-size: 16384
+      buffer-memory: 33554432
+      client-id: springbootKafkaProducer
+      # 指定消息key和消息体的编解码方式
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+    consumer:
+      group-id: springbootKafkaConsumer
+      enable-auto-commit: false
+      # 禁用自动提交下面也注释。springboot会自动管理提交
+      # auto-commit-interval: 1000
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 #Feign  开启熔断
 #注意：节点不在spring内
