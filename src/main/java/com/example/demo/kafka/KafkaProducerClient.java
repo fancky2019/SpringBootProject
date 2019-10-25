@@ -13,7 +13,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import java.text.MessageFormat;
 
 
-@Component
+//@Component
 public class KafkaProducerClient {
 
     @Autowired
