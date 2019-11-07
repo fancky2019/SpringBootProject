@@ -10,6 +10,11 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 
 /*
+Filter:servlet采用回调的方式实现，可以获取request信息，获取不到方法的参数信息。
+Interceptor:采用反射动态代理实现，可以获取request信息，获取不到方法的参数信息。
+Aspect:springboot 默认采用动态代理实现，获取不到request请求的信息，可以获取方法的参数
+ */
+/*
 @Component 的目录必须在主目录下，不然扫描不到，必须加下面注解
 @ComponentScan(basePackages = {"com.example.demo.dynamicDataSource.DynamicDataSourceAspect})
  */
