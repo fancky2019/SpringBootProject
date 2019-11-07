@@ -6,7 +6,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.DispatcherServlet;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 
 /*
@@ -21,7 +25,10 @@ Aspect:springboot 默认采用动态代理实现，获取不到request请求的�
 @Aspect
 @Component
 public class DynamicDataSourceAspect {
-
+//    HttpServlet
+   // HttpServletRequest
+//    HttpServletResponse
+//    DispatcherServlet
     @Around("@annotation(DataSourceAnnotation)")
     public Object switchDB(ProceedingJoinPoint point ) throws Throwable {
         // ...(方法执行前的逻辑)
