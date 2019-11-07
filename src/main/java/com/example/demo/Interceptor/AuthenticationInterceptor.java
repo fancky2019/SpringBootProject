@@ -20,6 +20,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 
+/*
+Filter:servlet采用回调的方式实现，可以获取request信息，获取不到方法的参数信息。
+Interceptor:采用反射动态代理实现，可以获取request信息，获取不到方法的参数信息。
+Aspect:springboot 默认采用动态代理实现，获取不到request请求的信息，可以获取方法的参数
+ */
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
     @Autowired
@@ -48,6 +53,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 // 验证 token
                 DecodedJWT decodedJWT = jwtUtility.verifier(token);
                 //获取Token中自定义信息
+                //获取角色信息，此处可做角色权限判断控制。
                 String role = decodedJWT.getClaim("role").asString();
 
                 return true;
