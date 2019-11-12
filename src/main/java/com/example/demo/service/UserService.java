@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 
+//@Service("UserService")
 @Service
 public class UserService {
 
@@ -70,9 +71,9 @@ public class UserService {
 
     /*
 
-springboot开启事务很简单，只需要一个注解@Transactional 就可以了。
-因为在springboot中已经默认对jpa、jdbc、mybatis开启了事事务，
-引入它们依赖的时候，事物就默认开启
+    springboot开启事务很简单，只需要一个注解@Transactional 就可以了。
+    因为在springboot中已经默认对jpa、jdbc、mybatis开启了事事务，
+    引入它们依赖的时候，事物就默认开启
 
 
 

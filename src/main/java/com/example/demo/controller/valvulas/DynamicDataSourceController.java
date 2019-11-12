@@ -1,6 +1,7 @@
 package com.example.demo.controller.valvulas;
 
 import com.example.demo.model.entity.valvulas.ValvulasProduct;
+import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.valvulas.ValvulasService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,5 +44,22 @@ public class DynamicDataSourceController {
             logger.error(ex.getMessage());
         }
         return list;
+    }
+
+
+    @RequestMapping("/update")
+    @ResponseBody
+    public MessageResult<Void> update(ValvulasProduct product) {
+
+        try {
+            return  valvulasService.updateByPrimaryKey(product);
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
+            MessageResult<Void> messageResult = new MessageResult<>();
+            messageResult.setMessage(ex.getMessage());
+            return messageResult;
+
+        }
+
     }
 }

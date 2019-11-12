@@ -141,15 +141,7 @@
   </update>
   <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.valvulas.ValvulasProduct">
     update product
-    set GUID = #{guid,jdbcType=VARCHAR},
-      ProductName = #{productname,jdbcType=VARCHAR},
-      ProductStyle = #{productstyle,jdbcType=VARCHAR},
-      ImagePath = #{imagepath,jdbcType=VARCHAR},
-      CreadteTime = #{creadtetime,jdbcType=TIMESTAMP},
-      ModifyTime = #{modifytime,jdbcType=TIMESTAMP},
-      Status = #{status,jdbcType=SMALLINT},
-      Description = #{description,jdbcType=VARCHAR},
-      TimeStamp = #{timestamp,jdbcType=TIMESTAMP}
+    set  ProductName = #{productname,jdbcType=VARCHAR}
     where ID = #{id,jdbcType=INTEGER}
   </update>
 
