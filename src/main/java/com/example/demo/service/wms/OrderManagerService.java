@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.util.UUID;
 
 /*
+springboot 支持单数据源事务。至于多数据源事务参照分布式事务。
 springboot开启事务很简单，只需要一个注解@Transactional 就可以了。
 因为在springboot中已经默认对jpa、jdbc、mybatis开启了事事务，
 引入它们依赖的时候，事物就默认开启

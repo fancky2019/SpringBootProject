@@ -4,6 +4,8 @@ import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,8 +23,36 @@ import java.util.HashMap;
 @Controller
 @RequestMapping("/user")
 public class UserController {
+
+    /*
+     springboot 的Bean 来源： 1）@Repository @Component @Service @Controller,spring自动扫描这些类并注册成Bean。
+                              2）@Configuration 配置文件类里的Bean。
+     */
+     /*
+    Bean同一类型的不同实例，加Bean(实例)的别名
+    @Qualifier 注解的Bean不同类型的实例,通过在类型名称上加名称(@Service("UserService"))，用@Qualifier("typeAlia")区分
+     */
+//    @Resource("UserService")
     @Resource
     private UserService userService;
+
+    /*
+    @Resource:默认按照ByName自动注入，由J2EE提供，需要导入包javax.annotation.Resource。@Resource有两个重要的属性：name和type，
+    而Spring将@Resource注解的name属性解析为bean的名字，而type属性则解析为bean的类型。所以，如果使用name属性，则使用byName的自动注入策略，
+    而使用type属性时则使用byType自动注入策略。如果既不制定name也不制定type属性，这时将通过反射机制使用byName自动注入策略。
+
+    @Autowired:spring框架提供的，是按照类型（byType）装配依赖对象，默认情况下它要求依赖对象必须存在，如果允许null值，可以设置它的required属性为false。
+    如果我们想使用按照名称（byName）来装配，可以结合@Qualifier注解一起使用。
+     @Autowired 优先加载@Primary注解的。
+     */
+//    @Autowired
+//    private UserService userService1;
+//
+//
+//    @Autowired
+//    @Qualifier("baseDao")//指定别名--当多个同一对象的Bean
+//    private UserService userService2;
+
 
     //获取配置文件的值
     @Value("${spring.datasource.username}")
@@ -103,8 +133,8 @@ public class UserController {
     //http://localhost:8080/login?name=fancky&password=pas
     @GetMapping("/login")
     @ResponseBody
-    public String login(String name,String password) {
-        return MessageFormat.format("{0}:{1}", applicationName, name+","+password);
+    public String login(String name, String password) {
+        return MessageFormat.format("{0}:{1}", applicationName, name + "," + password);
     }
 }
 

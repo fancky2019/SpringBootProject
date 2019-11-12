@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/rabbitMQ")
 public class RabbitMQController {
+
     @Autowired
     private RabbitMQTest rabbitMQTest;
 
