@@ -19,7 +19,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 //由于采用多数据源，禁用springboot默认的数据源配置，多数据源不适合微服务设计理念废弃。采用分布式事务。
 //@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @SpringBootApplication
-@MapperScan("com.example.demo.dao")
+//@MapperScan("com.example.demo.dao")
 //类不在主目录下需要指定扫描类完全限定名
 //@ComponentScan(basePackages = {"com.example.demo.service"})
 //@ComponentScan({"com.operations.project.seed","com.operations.project.message.server"})
