@@ -11,7 +11,9 @@
     <name>demo</name>
     <description>Demo project for Spring Boot</description>
 
-    <!--Maven springboot管理：不使用标签进行导入-->
+    <!--Maven springboot统一版本管理：不使用标签进行导入-->
+    <!--        springBoot maven-->
+    <!--  https://mvnrepository.com/artifact/org.springframework.boot-->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
