@@ -53,6 +53,45 @@ spring:
 #      username: root
 #      password: 123456
 
+
+    #mysql 连接池8h自动断开配置
+    #    #验证连接的有效性
+    #    spring.datasource.test-while-idle=true
+    #    #获取连接时候验证，会影响性能
+    #    spring.datasource.test-on-borrow=true
+    #    spring.datasource.validation-query=SELECT 1 FROM DUAL
+    #    #空闲连接回收的时间间隔，与test-while-idle一起使用，设置5分钟
+    #    spring.datasource.time-between-eviction-runs-millis=300000
+    #    #连接池空闲连接的有效时间 ，设置30分钟
+    #    spring.datasource.min-evictable-idle-time-millis=1800000
+    #  spring-boot默认连接池
+    #  spring-boot中，根据以下3个优先级加载连接池
+    #  1）如果classpath中有HikariCP，优先选择它
+    #  2）如果Tomcat pooling 连接池可用，就会选择它
+    #  3）如果以上都没有，则会选择Commons DBCP2连接池
+    #    dbcp2:
+    #      test-on-borrow: true
+    #      validation-query: SELECT 1
+    #      time-between-eviction-runs-millis: 300000
+    #      min-evictable-idle-time-millis: 1800000
+    #      test-while-idle: true
+    # HikariCP： springboot2.0 默认的连接池。https://github.com/brettwooldridge/HikariCP
+    #HikariCP  高并发性能优。mysql 8h 空闲断开连接可用quartz 调度定期select 1  。
+    #产生此问题DB工作就不繁忙，性能要求不高。可以用上面dbcp2的配置，采取空闲查询策略。
+
+    # Hikari will use the above plus the following to setup connection pooling
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 15
+      auto-commit: true
+      idle-timeout: 30000
+      #pool-name: HikariCP-Demo
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      #connection-test-query: SELECT 1
+
+
   redis:
     #  数据库索引
     database: 5
