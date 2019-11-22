@@ -40,13 +40,14 @@ public class JWTUtility {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String token = JWT.create()
                 //如果设置了到期时间，验证的时候会判断是否到期
-//                .withExpiresAt(expireDate)
+                .withExpiresAt(expireDate)
                 //
                 //私有的Claims,即自定义字段
 
-                //设置到期日期，此时验证时候不会判断是否过期
+           //设置key=exp 等同于设置 .withExpiresAt(expireDate)
 //                .withClaim("exp",expireDate)
-//                .withClaim("exp",  sdf.format(expireDate))
+                //设置到期日期，此时验证时候不会判断是否过期
+//                .withClaim("expireDate",expireDate)
                 .withClaim("userID", user.getId().toString())
                 .withClaim("userName", "fancky")
                 .withClaim("role", "administrator")

@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.service.UserService;
@@ -22,6 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 /*
 Filter:servlet采用回调的方式实现，可以获取request信息，获取不到方法的参数信息。
@@ -59,7 +62,26 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 try {
                     //不用校验自己手动解析
                     decodedJWT = jwtUtility.verifier(token);
-                } catch (JWTVerificationException e) {
+                }
+                catch (TokenExpiredException e)
+                {
+
+                    String loginUrl = "http://localhost:8101/user/login?name=fancky&password=pas";
+
+                   // httpServletResponse.addHeader("REDIRECT", "REDIRECT");//告诉ajax这是重定向
+
+                    //不能用Location参数，自动重定向。浏览器接收的消息头中含有Location信息回自动重定向。
+                    //此时浏览器的地址框内的地址还是重定向之前的地址。
+//        httpServletResponse.addHeader("Location", loginUrl);//重定向地址
+                    httpServletResponse.addHeader("RedirectUrl", loginUrl);//重定向地址
+                    httpServletResponse.setStatus(302);//http XMLHttpRequest.status!=200就报错：error
+
+                    returnJson(httpServletResponse,"token is expired");
+
+
+                    return  false;
+                }
+                catch (JWTVerificationException e) {
                     //返回状态码，前端根据装填码判断token 是过期。
                     returnJson(httpServletResponse,"token is expired");
 
@@ -69,7 +91,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 //获取Token中自定义信息
                 //获取角色信息，此处可做角色权限判断控制。
                 String role = decodedJWT.getClaim("role").asString();
-                String exp = decodedJWT.getClaim("exp").asString();
+                Date expireDate = decodedJWT.getClaim("expireDate").asDate();
+
 
                 return true;
             }
@@ -93,10 +116,16 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     }
     private void returnJson(HttpServletResponse response, String json) throws Exception {
+
+//        response.setHeader("Access-Control-Allow-Origin", "*");
+//        response.setHeader("Cache-Control","no-cache");
         PrintWriter writer = null;
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=utf-8");
         try {
+
+
+
             writer = response.getWriter();
             writer.print(json);
 
