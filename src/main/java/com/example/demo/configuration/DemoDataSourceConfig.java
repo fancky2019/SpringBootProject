@@ -22,9 +22,9 @@ import java.sql.SQLException;
 具体参见workspace 的项目multipledatasource
  */
 
-@Configuration
+//@Configuration
 //指定该SqlSession对象对应的dao(basePackages , dao扫包  sqlSessionFactoryRef: SqlSessionFactory对象注入到该变量中)
-@MapperScan(basePackages = "com.fancky.multipledatasource.dao.demo", sqlSessionFactoryRef = "demoSqlSessionFactory")
+//@MapperScan(basePackages = "com.fancky.multipledatasource.dao.demo", sqlSessionFactoryRef = "demoSqlSessionFactory")
 public class DemoDataSourceConfig {
 
   //  HikariDataSource

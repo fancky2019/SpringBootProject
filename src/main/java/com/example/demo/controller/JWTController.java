@@ -31,7 +31,12 @@ public class JWTController {
     @Authorize(AuthorizeType.Authorize)
     @GetMapping("/authorise")
     public String authorise() {
-        return "authorise";
+
+        try {
+            return "authorise";
+        } catch (Exception e) {
+           return e.getMessage();
+        }
     }
 
     @Authorize(AuthorizeType.UnAuthorize)

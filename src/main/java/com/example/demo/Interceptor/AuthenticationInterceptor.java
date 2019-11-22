@@ -12,12 +12,15 @@ import com.example.demo.utility.Authorize;
 import com.example.demo.utility.AuthorizeType;
 import com.example.demo.utility.JWTUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 
 /*
@@ -50,11 +53,23 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 if (token == null) {
                     throw new RuntimeException("UnAuthorize");
                 }
+                DecodedJWT decodedJWT=null;
+
                 // 验证 token
-                DecodedJWT decodedJWT = jwtUtility.verifier(token);
+                try {
+                    //不用校验自己手动解析
+                    decodedJWT = jwtUtility.verifier(token);
+                } catch (JWTVerificationException e) {
+                    //返回状态码，前端根据装填码判断token 是过期。
+                    returnJson(httpServletResponse,"token is expired");
+
+
+                    return  false;
+                }
                 //获取Token中自定义信息
                 //获取角色信息，此处可做角色权限判断控制。
                 String role = decodedJWT.getClaim("role").asString();
+                String exp = decodedJWT.getClaim("exp").asString();
 
                 return true;
             }
@@ -74,5 +89,24 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest httpServletRequest,
                                 HttpServletResponse httpServletResponse,
                                 Object o, Exception e) throws Exception {
+
+
     }
+    private void returnJson(HttpServletResponse response, String json) throws Exception {
+        PrintWriter writer = null;
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=utf-8");
+        try {
+            writer = response.getWriter();
+            writer.print(json);
+
+        } catch (IOException e) {
+            // logger.error("response error",e);
+        } finally {
+            if (writer != null)
+                writer.close();
+        }
+    }
+
+
 }

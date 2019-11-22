@@ -3,12 +3,14 @@ package com.example.demo.utility;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.demo.model.entity.rabc.Users;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -35,14 +37,16 @@ public class JWTUtility {
     public String getToken(Users user) {
         //60秒过期
         Date expireDate = new Date(System.currentTimeMillis() + 60 * 1000);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String token = JWT.create()
                 //如果设置了到期时间，验证的时候会判断是否到期
-                .withExpiresAt(expireDate)
+//                .withExpiresAt(expireDate)
                 //
                 //私有的Claims,即自定义字段
 
                 //设置到期日期，此时验证时候不会判断是否过期
-                //.withClaim("exp",expireDate.toString())
+//                .withClaim("exp",expireDate)
+//                .withClaim("exp",  sdf.format(expireDate))
                 .withClaim("userID", user.getId().toString())
                 .withClaim("userName", "fancky")
                 .withClaim("role", "administrator")
@@ -56,7 +60,7 @@ public class JWTUtility {
      * @param token
      * @return
      */
-    public DecodedJWT verifier(String token) {
+    public DecodedJWT verifier(String token) throws JWTVerificationException {
         //SECRET:生成Token的key和解码、验证的key必须一样，否则报下面错误。
         //The Token's Signature resulted invalid when verified using the Algorithm: HmacSHA256
         JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(jWTSecretKey)).build();
