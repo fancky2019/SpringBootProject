@@ -130,10 +130,25 @@ public class UserController {
         return MessageFormat.format("{0}:{1}", applicationName, str);
     }
 
-    //http://localhost:8080/login?name=fancky&password=pas
+    //http://localhost:8081/login?name=fancky&password=pas
     @GetMapping("/login")
     @ResponseBody
     public String login(String name, String password) {
+        return MessageFormat.format("{0}:{1}", applicationName, name + "," + password);
+    }
+
+    //请求格式：http://localhost:8081/user/getURlParameters1?name=getURlParameters1&password=pas
+    @GetMapping("/getURlParameters1")
+    @ResponseBody
+    public String getURlParameters1(@RequestParam("name") String name, @RequestParam(value = "password") String password) {
+        return MessageFormat.format("{0}:{1}", applicationName, name + "," + password);
+    }
+
+
+    //请求格式：http://localhost:8081/user/getURlParameters2/getURlParameters2/pas
+    @GetMapping("/getURlParameters2/{name}/{password}")
+    @ResponseBody
+    public String getURlParameters2(@PathVariable(value = "name") String name, @PathVariable(value = "password") String password) {
         return MessageFormat.format("{0}:{1}", applicationName, name + "," + password);
     }
 }
