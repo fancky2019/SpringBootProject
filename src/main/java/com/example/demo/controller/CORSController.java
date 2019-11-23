@@ -34,7 +34,7 @@ public class CORSController {
 
 
         String loginUrl = "http://localhost:8101/user/login?name=fancky&password=pas";
-//        httpServletResponse.addHeader("Content-Type", "application/json");
+
         httpServletResponse.addHeader("REDIRECT", "REDIRECT");//告诉ajax这是重定向
 
         //不能用Location参数，自动重定向。浏览器接收的消息头中含有Location信息回自动重定向。
