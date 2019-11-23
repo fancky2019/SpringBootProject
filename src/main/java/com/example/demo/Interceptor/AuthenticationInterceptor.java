@@ -68,13 +68,13 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
                     String loginUrl = "http://localhost:8101/user/login?name=fancky&password=pas";
 
-                   // httpServletResponse.addHeader("REDIRECT", "REDIRECT");//告诉ajax这是重定向
+                   // httpServletResponse.addHeader("REDIRECT", "REDIRECT");//
 
                     //不能用Location参数，自动重定向。浏览器接收的消息头中含有Location信息回自动重定向。
                     //此时浏览器的地址框内的地址还是重定向之前的地址。
-//        httpServletResponse.addHeader("Location", loginUrl);//重定向地址
+         //        httpServletResponse.addHeader("Location", loginUrl);//重定向地址
                     httpServletResponse.addHeader("RedirectUrl", loginUrl);//重定向地址
-                    httpServletResponse.setStatus(302);//http XMLHttpRequest.status!=200就报错：error
+                    httpServletResponse.setStatus(302);//http XMLHttpRequest.status!=200就报错：error。302告诉ajax这是重定向
 
                     returnJson(httpServletResponse,"token is expired");
 
