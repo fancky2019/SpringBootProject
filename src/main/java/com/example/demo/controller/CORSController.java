@@ -52,9 +52,9 @@ public class CORSController {
         return "getAuthorization fail";
     }
 
-  /*
-    返回的不是对象，ajax的dataType属性不用设置，否则前端报parse error 错
-   */
+    /*
+      返回的不是对象，ajax的dataType属性不用设置，否则前端报parse error 错
+     */
     @GetMapping("/getData")
     public String getData() {
         return "getData";
