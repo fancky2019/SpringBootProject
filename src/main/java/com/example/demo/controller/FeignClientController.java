@@ -19,6 +19,8 @@ public class FeignClientController {
 
 
     /**
+     * 其他微服务调用：
+     * Service 层封装其他微服务的调用。通过Feign指定注册中心的微服务的名称进行调用。
      * 通过微服务调用熔断：重写整个服务接口，进行熔断处理
      */
     //  @Resource  //java 的 IOC
@@ -33,6 +35,7 @@ public class FeignClientController {
     //http://localhost:8081/feignclient/testParam?name=fanckyTest1
     @RequestMapping("testParam")
     public String testParam(@RequestParam String name) {
-        return userService.home(name);
+        String re= userService.home(name);
+        return re;
     }
 }
