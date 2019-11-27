@@ -8,10 +8,17 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/*
+如果网关（spring cloud gateway ）设置了跨域，下游微服务就不要设置跨域，否则报下面的错误。
+gateway.html:1 Access to XMLHttpRequest at 'http://localhost:8080/gateway/springBootProject/jwt/authorise?_=1574837722367'
+from origin 'http://localhost:63342' has been blocked by CORS policy: The 'Access-Control-Allow-Origin' header contains multiple values
+ 'http://localhost:63342, http://localhost:63342', but only one is allowed.
+ */
+
 @Configuration
 public class CorsFilterConfig {
 
-    //拦截器中存在跨域有问题，还要再设置 response.setHeader("Access-Control-Allow-Origin", "*");
+    //此种设置有弊端：拦截器中存在跨域有问题，还要再设置 response.setHeader("Access-Control-Allow-Origin", "*");
 //    //跨域配置
 //    @Bean
     public WebMvcConfigurer corsConfigurer() {
