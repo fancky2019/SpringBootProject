@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 
 /*
-具体参见workspace 的项目multipledatasource
+具体参见workspace 的项目multipledatasource的MultipleDataSourceController
  */
 
 //@Configuration
