@@ -9,6 +9,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/*
+源码参见github:https://github.com/spring-projects/spring-amqp
+ */
 @Component
 public class RabbitMQTest {
     private static Logger logger = LogManager.getLogger(RabbitMQTest.class);
@@ -39,6 +42,10 @@ public class RabbitMQTest {
             directExchangeProducer.producer();
 //        fanoutExchangeProducer.producer();
 //        topicExchangeProducer.producer();
+
+
+//            directExchangeProducer.publishInBatch();
+
         } catch (Exception ex) {
             logger.error(ex.getMessage());
         }
