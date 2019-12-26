@@ -15,7 +15,7 @@ public class RabbitMQController {
     private RabbitMQTest rabbitMQTest;
 
     @GetMapping("")
-    public MessageResult<Void> redisTest() {
+    public MessageResult<Void> rabbitMQTest() {
         try {
             rabbitMQTest.test();
         } catch (Exception ex) {

@@ -4,8 +4,11 @@ package com.example.demo.rabbitMQ;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.core.support.BatchingStrategy;
+import org.springframework.amqp.rabbit.core.support.SimpleBatchingStrategy;
 import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -15,10 +18,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 声明RabbitMQ的交换机、队列、并将相应的队列、交换机、RoutingKey绑定。
@@ -27,6 +34,14 @@ import java.util.HashMap;
 public class RabbitMQConfig {
 
     //region 常量参数
+
+    //region batch
+    public static final String BATCH_DIRECT_EXCHANGE_NAME = "BatchSpringBoot";
+    // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
+    public static final String BATCH_DIRECT_ROUTING_KEY = "BatchRoutingKeySpringBoot";
+    public static final String BATCH_DIRECT_QUEUE_NAME = "BatchQueueSpringBoot";
+    //endregion
+
 
     //region DIRECT
     public static final String DIRECT_EXCHANGE_NAME = "DirectExchangeSpringBoot";
@@ -87,8 +102,60 @@ public class RabbitMQConfig {
         return rabbitTemplate;
     }
 
+//    @Bean
+//    public BatchingRabbitTemplate batchingRabbitTemplate(ConnectionFactory connectionFactory) {
+//        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+//        scheduler.setPoolSize(1);
+//        scheduler.initialize();
+//        SimpleBatchingStrategy batchingStrategy= new SimpleBatchingStrategy(20, Integer.MAX_VALUE, 50);
+//        BatchingRabbitTemplate batchingRabbitTemplate = new BatchingRabbitTemplate(batchingStrategy,scheduler );
+//        batchingRabbitTemplate.setConnectionFactory(connectionFactory);
+//
+//        // 消息返回, yml需要配置 publisher-returns: true
+//        batchingRabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
+//            System.out.println("消息失败返回成功 ");
+//        });
+//        // 消息确认, yml需要配置 publisher-confirms: true
+//        batchingRabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
+//            if (ack) {
+//                System.out.println("消息批量发送到交换机成功！ ");
+//            } else {
+//                System.out.println("消息批量发送到交换机失败！ ");
+//            }
+//        });
+//        return batchingRabbitTemplate;
+//    }
+
+
+    //批量 异步
+    //    private BatchingRabbitTemplate batchingRabbitTemplate;
+//    @Autowired
+//    private  AsyncRabbitTemplate asyncRabbitTemplate;
+
 
     //region 配置交换机、队列、RoutingKey
+
+//    @Bean("batchExchange")
+//    public DirectExchange batchExchange() {
+//        DirectExchange directExchange = new DirectExchange(BATCH_DIRECT_EXCHANGE_NAME);
+//        return directExchange;
+//    }
+//
+//    @Bean("batchQueue")
+//    public Queue batchQueue() {
+//        Queue queue = new Queue(BATCH_DIRECT_QUEUE_NAME);
+//        return queue;
+//    }
+//
+//    /**
+//     * 绑定队列、交换机、路由Key
+//     */
+//    @Bean("bindingBatch")
+//    public Binding bindingBatch() {
+//        Binding binding = BindingBuilder.bind(batchQueue()).to(batchExchange()).with(BATCH_DIRECT_ROUTING_KEY);
+//        return binding;
+//    }
+    //endregion
 
     //region DeadDirect
 
@@ -132,7 +199,7 @@ public class RabbitMQConfig {
         // 设置该Queue的死信的信箱
         args.put("x-dead-letter-exchange", DEAD_DIRECT_EXCHANGE_NAME);
         // 设置死信routingKey
-        args.put("x-dead-letter-routing-key",DEAD_DIRECT_ROUTING_KEY);
+        args.put("x-dead-letter-routing-key", DEAD_DIRECT_ROUTING_KEY);
 //        QueueBuilder.durable(DIRECT_QUEUE_NAME).withArguments(args).build();
         return new Queue(DIRECT_QUEUE_NAME, true, false, false, args);
     }

@@ -124,6 +124,9 @@ spring:
     publisher-confirms: true
     # 开启发送失败退回
     publisher-returns: true
+    template:
+      #设置为 true 后 消费者在消息没有被路由到合适队列情况下会被return监听，而不会自动删除
+      mandatory: true
     virtual-host: /
     #开启手动Axk,手动无法自动加入死信队列，可以重试指定次数。
     #设置成默认的自动Ack,springboot会加入死信队列，一定设置死信队列。
