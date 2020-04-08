@@ -55,10 +55,10 @@ public class UserController {
 
 
     //获取配置文件的值
-    @Value("${spring.datasource.username}")
+//    @Value("${spring.datasource.username}")
     private String username;
-
-    @Value("${spring.application.name}")
+//
+//    @Value("${spring.application.name}")
     private String applicationName;
 
 
