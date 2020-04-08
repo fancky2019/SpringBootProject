@@ -25,6 +25,8 @@ Mapper加@Repository注解Service层依赖注入ProductMapper就不会报错红�
  @Mapper不需要配置扫描地址，通过xml里面的namespace里面的接口地址，生成了Bean后注入到Service层中。
  */
 //@Repository  //@MapperScan("com.example.demo.dao")
+
+
 @Mapper
 public interface UsersMapper {
     int deleteByPrimaryKey(Integer id);

@@ -25,6 +25,13 @@ Aspect:springboot 默认采用动态代理实现，获取不到request请求的�
 
 /**
  * service 层开启事务则不能动态切换
+ *
+ *     #1、启动类设置
+ *     #//由于采用多数据源，禁用springboot默认的数据源配置，多数据源不适合微服务设计理念废弃。采用分布式事务。
+ *     #@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+ *     #2、DataSourceConfig 配置类启用。
+ *     3、默认数据库url配置注释，启用write、reader。
+ *     4、测试类ValvulasService
  */
 //@Aspect
 //@Component
