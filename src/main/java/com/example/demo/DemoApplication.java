@@ -22,7 +22,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 //@MapperScan("com.example.demo.dao")
 //类不在主目录下需要指定扫描类完全限定名
 //@ComponentScan(basePackages = {"com.example.demo.service"})
-//@ComponentScan({"com.operations.project.seed","com.operations.project.message.server"})
+
 @EnableCaching   //redis
 @EnableScheduling //quartz
 @EnableRabbit     //EnableRabbit

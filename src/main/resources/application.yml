@@ -36,7 +36,10 @@ spring:
     #password: 123456
 
     #mysql
-    #不用此默认，默认就是写库,多数据源用jdbcUrl，不是url,spring 默认用的是url，用多数据源用jdbcUrl会报错。
+    #启动类设置
+    #//由于采用多数据源，禁用springboot默认的数据源配置，多数据源不适合微服务设计理念废弃。采用分布式事务。
+    #@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+    #不用此默认，默认就是写库,多数据源用jdbcUrl，不是url,spring 默认用的是url，用多数据源用url会报错。
     url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
