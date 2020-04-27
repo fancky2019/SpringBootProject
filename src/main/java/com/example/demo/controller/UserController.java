@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.entity.rabc.Users;
+import com.example.demo.model.viewModel.Person;
 import com.example.demo.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,10 +56,10 @@ public class UserController {
 
 
     //获取配置文件的值
-//    @Value("${spring.datasource.username}")
+    @Value("${spring.datasource.username}")
     private String username;
 //
-//    @Value("${spring.application.name}")
+    @Value("${spring.application.name}")
     private String applicationName;
 
 
@@ -137,6 +138,7 @@ public class UserController {
         return MessageFormat.format("{0}:{1}", applicationName, name + "," + password);
     }
 
+    //传统URL格式
     //请求格式：http://localhost:8081/user/getURlParameters1?name=getURlParameters1&password=pas
     @GetMapping("/getURlParameters1")
     @ResponseBody
@@ -145,11 +147,23 @@ public class UserController {
     }
 
 
+    //restful 风格格式：
     //请求格式：http://localhost:8081/user/getURlParameters2/getURlParameters2/pas
-    @GetMapping("/getURlParameters2/{name}/{password}")
+    @GetMapping("/getURlParameters2/{name}/{password}")//注：参数占位符中的名称要和形参的名称一样，否则无法赋值
     @ResponseBody
     public String getURlParameters2(@PathVariable(value = "name") String name, @PathVariable(value = "password") String password) {
         return MessageFormat.format("{0}:{1}", applicationName, name + "," + password);
     }
+
+
+    //自动生成实体对象
+    //http://localhost:8081/user/getPerson/fancky/2
+    //SpringBootProject:fancky,2
+    @GetMapping("/getPerson/{name}/{age}")//注：参数占位符中的名称要和形参的名称一样，否则无法赋值
+    @ResponseBody
+    public String getPerson(Person person) {
+        return MessageFormat.format("{0}:{1}", applicationName, person.getName() + "," + person.getAge());
+    }
+
 }
 
