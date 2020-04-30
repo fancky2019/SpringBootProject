@@ -89,7 +89,8 @@ public class UserController {
     }
 
     // SpringMVC的自动装箱（实体类接收参数）
-    //post提交
+    //post提交 data:{}是一个对象，要用对象接收，类的访问级别是共有，否则MVC反射找不到报。
+    //  @ResponseBody  返回业务对象，不要返回字符串，不然前台无法转换JSON而报错，还要Json 序列化操作。
     // @RequestMapping("/addUser")
     // @RequestMapping(value = "/addUser",method = RequestMethod.POST)
     @PostMapping("/addUser")
