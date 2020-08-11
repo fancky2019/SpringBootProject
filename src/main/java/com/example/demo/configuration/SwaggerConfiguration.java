@@ -50,13 +50,14 @@ public class SwaggerConfiguration {
 
 
     private ApiInfo apiInfo() {
-        Contact contact = new Contact("王晓敏", "http://www.xiaomin2019.xyz", "18270789979@163.com");
+        //联系方式
+        Contact contact = new Contact("fancky", "http://www.xiaomin2019.xyz", "18270789979@163.com");
 
         return new ApiInfoBuilder()
                 .title("swagger-bootstrap-ui-demo RESTful APIs")
                 .description("# swagger-bootstrap-ui-demo RESTful APIs")
                 .termsOfServiceUrl("http://www.xx.com/")
-                .contact("xx@qq.com")
+                .contact(contact)
                 .version("1.0")
                 .build();
     }
