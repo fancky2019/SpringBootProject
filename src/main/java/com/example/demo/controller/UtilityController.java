@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.*;
-import  com.example.demo.model.pojo.Student;
+import com.example.demo.model.pojo.Student;
 
 @RestController
 @RequestMapping("/utility")
@@ -13,6 +13,7 @@ public class UtilityController {
      */
     @PostMapping("/addStudent")
     public void addStudentAspect(@RequestBody Student student) {
+
         System.out.println("addStudentAspect");
     }
     //endregion

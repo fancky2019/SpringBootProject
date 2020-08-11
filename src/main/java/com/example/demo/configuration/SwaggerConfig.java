@@ -14,12 +14,21 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /*
 @EnableSwagger2  //EnableSwagger2  http://localhost:8081/swagger-ui.html
+
+
+访问：
+springfox-swagger-ui:
+http://localhost:8081/swagger-ui.html
+knife4j:
+http://localhost:8081/doc.html
+
+
  */
 
 
-@Configuration
-@EnableSwagger2
-@ConditionalOnProperty(prefix = "swagger2",value = {"enable"},havingValue = "true")
+//@Configuration
+//@EnableSwagger2
+//@ConditionalOnProperty(prefix = "swagger2",value = {"enable"},havingValue = "true")
 public class SwaggerConfig {
     @Bean
     public Docket createRestApi() {
