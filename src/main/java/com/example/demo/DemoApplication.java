@@ -38,7 +38,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableHystrixDashboard //开启HystrixDashBoard
 @EnableCircuitBreaker//开启HystrixDashBoard
 
-@EnableSwagger2  //EnableSwagger2  http://localhost:8081/swagger-ui.html
+ //移动到SwaggerConfig 配置文件类处理
+//@EnableSwagger2  //EnableSwagger2  http://localhost:8081/swagger-ui.html
 public class DemoApplication {
 
     public static void main(String[] args) {

@@ -219,6 +219,9 @@ hystrix:
 
 logging:
   config: classpath:log4j2.yml
+swagger2:
+    enable: true #false (或者在pro环境下不写此配置):禁用就打不开swagger网页
+
 demo:
   JWTSecretKey: GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk
 
