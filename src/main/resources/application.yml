@@ -217,6 +217,11 @@ hystrix:
           thread:
             timeoutInMilliseconds: 1000 #断路器超时时间，默认1000ms
 
+#默认log
+#logging:
+#  #  path没起作用
+# # path:
+#  file: logs/log.log
 logging:
   config: classpath:log4j2.yml
 swagger2:
