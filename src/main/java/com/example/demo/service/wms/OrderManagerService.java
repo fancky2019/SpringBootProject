@@ -8,6 +8,8 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.OrderManagerVM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -29,6 +31,18 @@ public class OrderManagerService {
     OrderDetailMapper orderDetailMapper;
 
     /*
+    REQUIRED ：如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务。
+    SUPPORTS ：如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行。
+    MANDATORY ：如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常。
+    REQUIRES_NEW ：创建一个新的事务，如果当前存在事务，则把当前事务挂起。
+    NOT_SUPPORTED ：以非事务方式运行，如果当前存在事务，则把当前事务挂起。
+    NEVER ：以非事务方式运行，如果当前存在事务，则抛出异常。
+    NESTED ：如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行；如果当前没有事务，则该取值等价于 REQUIRED 。
+    指定方法：通过使用 propagation 属性设置，例如：@Transactional(propagation = Propagation.REQUIRED)
+     */
+
+
+    /*
     自动回滚：  在@Transactional注解中如果不配置rollbackFor属性,那么事物只会在遇到RuntimeException的时候才会回滚,
     加上rollbackFor=Exception.class,Exception还要抛出。 可以让事物在遇到非运行时异常时也回滚
 
@@ -36,6 +50,9 @@ public class OrderManagerService {
      */
     @Transactional
 //    @Transactional(rollbackFor = Exception.class)
+
+    //事务隔离级别：默认数据库的mysql repeatable read ;msql:read commit，事务传播: Propagation.REQUIRED;
+//    @Transactional(isolation = Isolation.READ_COMMITTED,propagation = Propagation.REQUIRED)
     public MessageResult<Void> addOrder(OrderManagerVM orderManagerVM) {
         MessageResult<Void> messageResult = new MessageResult<>();
         try {
