@@ -16,6 +16,18 @@ import javax.annotation.Resource;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
+
+/*
+  ResponseEntity ：标识整个http相应：状态码、头部信息、响应体内容(spring)
+  查询： ResponseEntity.ok(list);
+  增删改： ResponseEntity.ok().build(); ResponseEntity.ok(添加成功")"
+ */
+
+
+
+
+
+
 //调试测Controller注意切换配置文件里的数据库配置:数据库RABC
 
 
