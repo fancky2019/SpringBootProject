@@ -32,9 +32,11 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableScheduling //quartz
 @EnableRabbit     //EnableRabbit
 @EnableAsync     //启用异步
+
+
+//SpringCloud ：组件
 @EnableEurekaClient//注册中心
 @EnableFeignClients//微服务之间调用,服务发现
-
 @EnableHystrixDashboard //开启HystrixDashBoard
 @EnableCircuitBreaker//开启HystrixDashBoard
 
