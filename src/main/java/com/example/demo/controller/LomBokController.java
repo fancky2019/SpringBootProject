@@ -34,19 +34,18 @@ public class LomBokController {
 
 
             //注释@EqualsAndHashCode(callSuper = true)，true;启用false
-            boolean eq=lomBokSubTwo.equals(lomBokSubTwo1);
+            boolean eq = lomBokSubTwo.equals(lomBokSubTwo1);
 
-            boolean re=lomBokSubTwo==lomBokSubTwo1;
-            if(lomBokSubTwo==lomBokSubTwo1)
-            {
+            boolean re = lomBokSubTwo == lomBokSubTwo1;
+            if (lomBokSubTwo == lomBokSubTwo1) {
 
             }
 
-            Order order1 =new Order();
-            Order order2 =new Order();
+            Order order1 = new Order();
+            Order order2 = new Order();
 
-            int ho1=order1.hashCode();
-            int ho2=order2.hashCode();
+            int ho1 = order1.hashCode();
+            int ho2 = order2.hashCode();
             int m = 0;
             // kafkaTest.test();
         } catch (Exception ex) {

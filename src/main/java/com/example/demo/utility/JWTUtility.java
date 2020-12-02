@@ -31,6 +31,7 @@ public class JWTUtility {
     /**
      * 编码：
      * 将用户信息生成token
+     *
      * @param user
      * @return
      */
@@ -44,7 +45,7 @@ public class JWTUtility {
                 //
                 //私有的Claims,即自定义字段
 
-           //设置key=exp 等同于设置 .withExpiresAt(expireDate)
+                //设置key=exp 等同于设置 .withExpiresAt(expireDate)
 //                .withClaim("exp",expireDate)
                 //设置到期日期，此时验证时候不会判断是否过期
 //                .withClaim("expireDate",expireDate)
@@ -57,7 +58,8 @@ public class JWTUtility {
 
     /**
      * 解码：拦截器调用。
-     *校验成功返回DecodedJWT对象，否则内部抛出异常。
+     * 校验成功返回DecodedJWT对象，否则内部抛出异常。
+     *
      * @param token
      * @return
      */

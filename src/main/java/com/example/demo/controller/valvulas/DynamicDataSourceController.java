@@ -52,7 +52,7 @@ public class DynamicDataSourceController {
     public MessageResult<Void> update(ValvulasProduct product) {
 
         try {
-            return  valvulasService.updateByPrimaryKey(product);
+            return valvulasService.updateByPrimaryKey(product);
         } catch (Exception ex) {
             logger.error(ex.getMessage());
             MessageResult<Void> messageResult = new MessageResult<>();

@@ -44,9 +44,7 @@ public class OrderManagerController {
     public MessageResult<Void> addOrderAndOrderDetails(@RequestBody OrderManagerVM orderManagerVM) {
         try {
             return orderManagerService.addOrderAndOrderDetails(orderManagerVM);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             MessageResult<Void> messageResult = new MessageResult<>();
             messageResult.setMessage(ex.getMessage());
             return messageResult;

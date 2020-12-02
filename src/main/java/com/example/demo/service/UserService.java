@@ -92,11 +92,10 @@ public class UserService {
         //如果发生异常，抛到controller里，则不成功。
 
 
-
         //手动回滚:
         //手动回滚可解决数据库操作没有发生异常的情况，即：可以解决业务方面的异常，可手动控制异常
         //更加灵活。
-        return  messageResult;
+        return messageResult;
     }
 }
 

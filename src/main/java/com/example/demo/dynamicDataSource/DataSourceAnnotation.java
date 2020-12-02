@@ -8,5 +8,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface DataSourceAnnotation {
-     String value() default DataSourceStrings.WRITER;
+    String value() default DataSourceStrings.WRITER;
 }

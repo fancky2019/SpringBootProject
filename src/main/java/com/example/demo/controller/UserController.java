@@ -24,10 +24,6 @@ import java.util.HashMap;
  */
 
 
-
-
-
-
 //调试测Controller注意切换配置文件里的数据库配置:数据库RABC
 
 
@@ -70,7 +66,7 @@ public class UserController {
     //获取配置文件的值
     @Value("${spring.datasource.username}")
     private String username;
-//
+    //
     @Value("${spring.application.name}")
     private String applicationName;
 

@@ -1,6 +1,7 @@
 package com.example.demo.configuration;
 
 //import com.atomikos.jdbc.AtomikosDataSourceBean;
+
 import com.mysql.cj.jdbc.MysqlXADataSource;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -27,10 +28,11 @@ import java.sql.SQLException;
 //@MapperScan(basePackages = "com.fancky.multipledatasource.dao.demo", sqlSessionFactoryRef = "demoSqlSessionFactory")
 public class DemoDataSourceConfig {
 
-  //  HikariDataSource
+    //  HikariDataSource
 
     /**
      * SqlSession对象创建
+     *
      * @param dataSource
      * @return
      * @throws Exception
@@ -44,7 +46,7 @@ public class DemoDataSourceConfig {
         bean.setDataSource(dataSource);
         //指定该SqlSession对应的mapper.xml文件位置
         bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapper/demo/*.xml"));
-        SqlSessionFactory sqlSessionFactory =bean.getObject();
+        SqlSessionFactory sqlSessionFactory = bean.getObject();
         return sqlSessionFactory;
     }
 
@@ -56,13 +58,14 @@ public class DemoDataSourceConfig {
 
     /**
      * 封装数据源对象创建, 该方法就已经将数据源的各个数据封装到该对象中
-     *
+     * <p>
      * yml配置文件指定连接池类型，mybatis根据连接池生成的DataSource获取连接
+     *
      * @return
      */
     @Bean(name = "demoDataSource")
     @ConfigurationProperties(prefix = "spring.datasource.demo") //读取的数据源前缀, 跟yml文件对应
-    public DataSource demoDataSource(){
+    public DataSource demoDataSource() {
         return DataSourceBuilder.create().build();
     }
 

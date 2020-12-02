@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/kafka")
 public class KafkaController {
-  //  @Autowired
- //   private KafkaTest kafkaTest;
+    //  @Autowired
+    //   private KafkaTest kafkaTest;
 
     @GetMapping("")
     public MessageResult<Void> kafkaTest() {
         try {
-           // kafkaTest.test();
+            // kafkaTest.test();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
