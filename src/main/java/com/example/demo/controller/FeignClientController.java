@@ -35,7 +35,7 @@ public class FeignClientController {
     //http://localhost:8081/feignclient/testParam?name=fanckyTest1
     @RequestMapping("testParam")
     public String testParam(@RequestParam String name) {
-        String re= userService.home(name);
+        String re = userService.home(name);
         return re;
     }
 }

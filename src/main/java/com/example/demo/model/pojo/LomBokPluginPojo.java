@@ -1,4 +1,5 @@
 package com.example.demo.model.pojo;
+
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,14 +35,13 @@ import lombok.Data;
  * @Description
  */
 @Data
- public class LomBokPluginPojo {
+public class LomBokPluginPojo {
 
 }
 
 @Data
-class  LomBokSuper
-{
-    private  Integer age;
-    private  String name;
+class LomBokSuper {
+    private Integer age;
+    private String name;
 }
 

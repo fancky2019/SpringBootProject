@@ -35,7 +35,7 @@ public class JWTController {
         try {
             return "authorise";
         } catch (Exception e) {
-           return e.getMessage();
+            return e.getMessage();
         }
     }
 

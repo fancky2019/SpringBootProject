@@ -14,9 +14,9 @@ Configuration:
       - name: LOG_HOME
         value: log\
   #        部署在tomact的项目的目录下,window和unix一样
-#        value: ../webapps/fancky-test/log/
+  #        value: ../webapps/fancky-test/log/
   Appenders:
-    Console:  #输出到控制台
+    Console: #输出到控制台
       name: CONSOLE
       target: SYSTEM_OUT
       ThresholdFilter:

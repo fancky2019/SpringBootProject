@@ -33,10 +33,9 @@ http://localhost:8081/doc.html
 public class SwaggerConfiguration {
 
 
-
     @Bean(value = "defaultApi2")
     public Docket defaultApi2() {
-        Docket docket=new Docket(DocumentationType.SWAGGER_2)
+        Docket docket = new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
                 //分组名称
                 .groupName("2.X版本")

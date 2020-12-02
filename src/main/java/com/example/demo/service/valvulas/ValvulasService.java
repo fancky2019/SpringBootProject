@@ -27,7 +27,7 @@ public class ValvulasService {
     private static Logger logger = LogManager.getLogger(ValvulasService.class);
 
 
-//    @DataSourceAnnotation(DataSourceStrings.WRITER)
+    //    @DataSourceAnnotation(DataSourceStrings.WRITER)
     public List<ValvulasProduct> getProductsWriter(ValvulasProduct product) {
         try {
             return productMapper.getProducts(product);
@@ -37,7 +37,7 @@ public class ValvulasService {
         }
     }
 
-//    @DataSourceAnnotation(DataSourceStrings.READER)
+    //    @DataSourceAnnotation(DataSourceStrings.READER)
     public List<ValvulasProduct> getProductsReader(ValvulasProduct product) {
         try {
             return productMapper.getProducts(product);
@@ -48,9 +48,9 @@ public class ValvulasService {
     }
 
 
-//    @DataSourceAnnotation
+    //    @DataSourceAnnotation
     @Transactional(rollbackFor = Exception.class)
-    public MessageResult<Void> updateByPrimaryKey(ValvulasProduct record) throws Exception{
+    public MessageResult<Void> updateByPrimaryKey(ValvulasProduct record) throws Exception {
         MessageResult<Void> messageResult = new MessageResult<>();
         try {
             Integer result = productMapper.updateByPrimaryKey(record);
@@ -60,7 +60,7 @@ public class ValvulasService {
         } catch (Exception ex) {
             messageResult.setMessage(ex.getMessage());
             messageResult.setSuccess(false);
-            throw  ex;
+            throw ex;
         } finally {
             return messageResult;
         }

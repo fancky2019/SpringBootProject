@@ -12,7 +12,7 @@ public class KafkaConsumerClient {
 
     @KafkaListener(topics = "test_topic")
     public void processMessage(ConsumerRecord<?, ?> record) throws Exception {
-      //  Integer m=Integer.parseInt("m");
+        //  Integer m=Integer.parseInt("m");
         //spring 封装的自动commit()
         //出现异常添加redis里处理。
         System.out.printf("topic = %s, offset = %d, value = %s \n", record.topic(), record.offset(), record.value());

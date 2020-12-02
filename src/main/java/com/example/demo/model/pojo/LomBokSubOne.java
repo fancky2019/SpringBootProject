@@ -12,13 +12,11 @@ import lombok.ToString;
 @Setter
 @Getter
 //@ToString
-public class  LomBokSubOne extends LomBokSuper
-{
-  private  String JobNameOne;
+public class LomBokSubOne extends LomBokSuper {
+    private String JobNameOne;
 
-  @Override
-  public  String toString()
-  {
-      return  JobNameOne;
-  }
+    @Override
+    public String toString() {
+        return JobNameOne;
+    }
 }

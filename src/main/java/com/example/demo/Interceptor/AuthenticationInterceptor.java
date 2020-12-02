@@ -59,37 +59,34 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 if (token == null) {
                     throw new RuntimeException("UnAuthorize");
                 }
-                DecodedJWT decodedJWT=null;
+                DecodedJWT decodedJWT = null;
 
                 // 验证 token
                 try {
                     //不用校验自己手动解析
                     decodedJWT = jwtUtility.verifier(token);
-                }
-                catch (TokenExpiredException e)
-                {
+                } catch (TokenExpiredException e) {
 
                     String loginUrl = "http://localhost:8101/user/login?name=fancky&password=pas";
 
-                   // httpServletResponse.addHeader("REDIRECT", "REDIRECT");//
+                    // httpServletResponse.addHeader("REDIRECT", "REDIRECT");//
 
                     //不能用Location参数，自动重定向。浏览器接收的消息头中含有Location信息回自动重定向。
                     //此时浏览器的地址框内的地址还是重定向之前的地址。
-         //        httpServletResponse.addHeader("Location", loginUrl);//重定向地址
+                    //        httpServletResponse.addHeader("Location", loginUrl);//重定向地址
                     httpServletResponse.addHeader("RedirectUrl", loginUrl);//重定向地址
                     httpServletResponse.setStatus(302);//http XMLHttpRequest.status!=200就报错：error。302告诉ajax这是重定向
 
-                    returnJson(httpServletResponse,"token is expired");
+                    returnJson(httpServletResponse, "token is expired");
 
 
-                    return  false;
-                }
-                catch (JWTVerificationException e) {
+                    return false;
+                } catch (JWTVerificationException e) {
                     //返回状态码，前端根据装填码判断token 是过期。
-                    returnJson(httpServletResponse,"token is expired");
+                    returnJson(httpServletResponse, "token is expired");
 
 
-                    return  false;
+                    return false;
                 }
                 //获取Token中自定义信息
                 //获取角色信息，此处可做角色权限判断控制。
@@ -118,6 +115,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
 
     }
+
     private void returnJson(HttpServletResponse response, String json) throws Exception {
 
 //        response.setHeader("Access-Control-Allow-Origin", "*");
@@ -126,7 +124,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=utf-8");
         try {
-
 
 
             writer = response.getWriter();

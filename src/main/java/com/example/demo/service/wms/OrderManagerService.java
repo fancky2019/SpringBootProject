@@ -118,7 +118,7 @@ public class OrderManagerService {
 }
      */
     @Transactional(rollbackFor = Exception.class)
-    public MessageResult<Void> addOrderAndOrderDetails(OrderManagerVM orderManagerVM) throws Exception{
+    public MessageResult<Void> addOrderAndOrderDetails(OrderManagerVM orderManagerVM) throws Exception {
         MessageResult<Void> messageResult = new MessageResult<>();
 
         Order order = new Order();
@@ -129,7 +129,7 @@ public class OrderManagerService {
         order.setStatus(Short.parseShort("1"));
         Integer result = orderMapper.insert(order);
         if (result <= 0) {
-            throw  new Exception("保存失败");
+            throw new Exception("保存失败");
 //            messageResult.setMessage("保存失败");
 //            messageResult.setSuccess(false);
 //
@@ -148,11 +148,11 @@ public class OrderManagerService {
             orderDetail.setStatus(Short.parseShort("1"));
 
 
-          //  Integer m=Integer.valueOf("m");
+            //  Integer m=Integer.valueOf("m");
 
             Integer re = orderDetailMapper.insert(orderDetail);
             if (re <= 0) {
-                throw  new Exception("保存失败");
+                throw new Exception("保存失败");
 //                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 //                messageResult.setMessage("保存失败");
 //                messageResult.setSuccess(false);
@@ -167,7 +167,7 @@ public class OrderManagerService {
      自动回滚在try...catch中没有继续抛出异常不能自动回滚
      */
     @Transactional(rollbackFor = Exception.class)
-    public MessageResult<Void> addOrderAndOrderDetailsTry(OrderManagerVM orderManagerVM) throws  Exception {
+    public MessageResult<Void> addOrderAndOrderDetailsTry(OrderManagerVM orderManagerVM) throws Exception {
 
 
         MessageResult<Void> messageResult = new MessageResult<>();
@@ -217,7 +217,7 @@ public class OrderManagerService {
             messageResult.setSuccess(false);
 
             //如果不抛出异常，将不能自动回滚
-            throw  ex;
+            throw ex;
         }
 
 
