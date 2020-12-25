@@ -218,7 +218,8 @@
 
     <!--存储过程-->
     <!-- 参数名称和实体类中字段名称保持一致,不然用对象做参数，反射找不到getter，parameterType既可用java.util.HashMap也可以用实体对象，用实体对象省事-->
-    <!--resultType="Product"  和resultMap="ProductTable" 都可以，切记类型对应-->
+    <!--resultType="Product"  和resultMap="ProductTable" 都可以，切记属性对应-->
+<!--    MyBatis 会在幕后自动创建一个 ResultMap，再根据属性名来映射列到 JavaBean 的属性上。如果列名和属性名不能匹配上，可以在 SELECT 语句中设置列别名（-->
     <select id="getProductProc" parameterType="com.example.demo.model.entity.wms.Product" statementType="CALLABLE"
             resultMap="ProductTable">
         <!--<![CDATA[-->
@@ -249,6 +250,6 @@
             and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
         </if>
         ORDER BY 1
-        OFFSET 10*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
+        OFFSET #{pageSize,jdbcType=INTEGER}*(#{pageIndex,jdbcType=INTEGER}-1) ROWS FETCH NEXT #{pageSize,jdbcType=INTEGER} ROWS ONLY
     </select>
 </mapper>

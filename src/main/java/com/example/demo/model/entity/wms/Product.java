@@ -28,7 +28,8 @@ public class Product {
 
     private Date modifytime;
 
-    private Byte[] timestamp;
+    //byte[] 不能用Byte[]。因为反射赋值时候找不到对应类型。fastJson
+    private byte[] timestamp;
 
     public Product(Integer id, String guid, Integer stockid, Integer barcodeid, Integer skuid, String productname, String productstyle, BigDecimal price, Date createtime, Short status, Integer count, Date modifytime) {
         this.id = id;
@@ -45,7 +46,7 @@ public class Product {
         this.modifytime = modifytime;
     }
 
-    public Product(Integer id, String guid, Integer stockid, Integer barcodeid, Integer skuid, String productname, String productstyle, BigDecimal price, Date createtime, Short status, Integer count, Date modifytime, Byte[] timestamp) {
+    public Product(Integer id, String guid, Integer stockid, Integer barcodeid, Integer skuid, String productname, String productstyle, BigDecimal price, Date createtime, Short status, Integer count, Date modifytime, byte[] timestamp) {
         this.id = id;
         this.guid = guid;
         this.stockid = stockid;
@@ -161,11 +162,11 @@ public class Product {
         this.modifytime = modifytime;
     }
 
-    public Byte[] getTimestamp() {
+    public byte[] getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Byte[] timestamp) {
+    public void setTimestamp(byte[] timestamp) {
         this.timestamp = timestamp;
     }
 }
