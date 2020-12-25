@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.mybatissql.MybatisSqlMapper">
+
+    <!--分页查询-->
+    <select id="getPageData"  parameterType="String"  resultType="com.example.demo.model.viewModel.ProductVM">
+        ${sql}
+    </select>
+
+</mapper>
