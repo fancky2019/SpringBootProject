@@ -14,4 +14,8 @@ public interface MybatisSqlMapper {
 
     //要指定参数名称 param("mapper内名称")
     List<ProductVM> getPageData(@Param("sql") String sql);
+
+    List<ProductVM> getPageDataByHelper(ProductVM productVM);
+    List<ProductVM> getPageDataByHelperCTE(ProductVM productVM);
+
 }

@@ -36,4 +36,30 @@ public class MybatisController {
             return message;
         }
     }
+
+    @RequestMapping("/getPageDataByHelper")
+    public MessageResult<PageData<ProductVM>> getPageDataByHelper(ProductVM viewModel) {
+        MessageResult<PageData<ProductVM>> message = new MessageResult<>();
+        try {
+            message = mybatisSqlService.getPageDataByHelper(viewModel);
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        } finally {
+            return message;
+        }
+    }
+    @RequestMapping("/getPageDataByHelperCTE")
+    public MessageResult<PageData<ProductVM>> getPageDataByHelperCTE(ProductVM viewModel) {
+        MessageResult<PageData<ProductVM>> message = new MessageResult<>();
+        try {
+            message = mybatisSqlService.getPageDataByHelperCTE(viewModel);
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        } finally {
+            return message;
+        }
+    }
+
 }
