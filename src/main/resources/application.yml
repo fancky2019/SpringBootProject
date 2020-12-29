@@ -13,7 +13,15 @@ mybatis:
   #  实体类所在的包
   typeAliasesPackage: com.example.demo.model.entity
 
-#开发配置
+#mybatis 分页
+pagehelper:
+##  mysql、sqlserver2012，没找到sqlserver2008版本的
+  helperDialect: sqlserver2012
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+#开发配
 
 spring:
   application:

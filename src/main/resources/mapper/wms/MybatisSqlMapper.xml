@@ -6,5 +6,50 @@
     <select id="getPageData"  parameterType="String"  resultType="com.example.demo.model.viewModel.ProductVM">
         ${sql}
     </select>
+    <!--分页查询-->
+    <select id="getPageDataByHelper" parameterType="com.example.demo.model.viewModel.ProductVM"
+            resultType="com.example.demo.model.viewModel.ProductVM">
+        select p.* from [dbo].[Product] p
+        join [dbo].[Stock] s on p.StockID=s.ID
+        left join [dbo].[BarCode] b on p.BarCodeID=b.ID
+        join [dbo].[Sku] sk on p.SkuID=sk.ID
+        where 1=1
+        <if test="productname != null">
+            and Productname LIKE CONCAT('%',#{productname},'%')
+        </if>
+        <if test="price != null">
+            and price>=#{price,jdbcType=DECIMAL}
+        </if>
+        <if test="createtime != null">
+            and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
+        </if>
+       --  ORDER BY 1 -- pageHelper不能再分页中加排序,xml最好别有注释，helper错误处理语句
+        and 1=1
 
+  </select>
+
+    <!--分页查询 只支持select 开始的语句，不支持sql语句不是select cte-->
+    <select id="getPageDataByHelperCTE" parameterType="com.example.demo.model.viewModel.ProductVM"
+            resultType="com.example.demo.model.viewModel.ProductVM">
+        with cte as(
+        select p.* from [dbo].[Product] p
+        join [dbo].[Stock] s on p.StockID=s.ID
+        left join [dbo].[BarCode] b on p.BarCodeID=b.ID
+        join [dbo].[Sku] sk on p.SkuID=sk.ID
+        )
+        select  *  from cte
+        where 1=1
+        <if test="productname != null">
+            and Productname LIKE CONCAT('%',#{productname},'%')
+        </if>
+        <if test="price != null">
+            and price>=#{price,jdbcType=DECIMAL}
+        </if>
+        <if test="createtime != null">
+            and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
+        </if>
+        --  ORDER BY 1 -- pageHelper不能再分页中加排序,xml最好别有注释，helper错误处理语句
+        and 1=1
+
+    </select>
 </mapper>
