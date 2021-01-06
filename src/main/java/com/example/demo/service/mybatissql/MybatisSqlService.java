@@ -117,7 +117,23 @@ public class MybatisSqlService {
         }
     }
 
+    public MessageResult<PageData<ProductVM>> concatSelect(ProductVM viewModel) {
+        MessageResult<PageData<ProductVM>> message = new MessageResult<>();
+        try {
 
+            List<ProductVM> list = mybatisSqlMapper.concatSelect(viewModel);
+            PageData<ProductVM> pageData = new PageData<>();
+            pageData.setData(list);
+            message.setData(pageData);
+            message.setSuccess(true);
+        } catch (Exception ex) {
+            message.setSuccess(false);
+            message.setMessage(ex.getMessage());
+            logger.error(ex.toString());
+        } finally {
+            return message;
+        }
+    }
 
 
 
