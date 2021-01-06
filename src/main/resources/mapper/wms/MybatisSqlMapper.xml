@@ -52,4 +52,48 @@
         and 1=1
 
     </select>
+
+
+
+<!--    拼接SQL-->
+    <sql id="selectColumn">       p.[ID]
+      ,p.[GUID]
+      ,p.[StockID]
+      ,p.[BarCodeID]
+      ,p.[SkuID]
+      ,p.[ProductName]
+      ,p.[ProductStyle]
+      ,p.[Price]
+      ,p.[CreateTime]
+      ,p.[Status]
+      ,p.[Count]
+      ,p.[ModifyTime]
+      ,p.[TimeStamp]</sql>
+
+    <sql id="selectTable">
+        from [dbo].[Product] p
+      join [dbo].[Stock] s on p.StockID=s.ID
+      left join [dbo].[BarCode] b on p.BarCodeID=b.ID
+      join [dbo].[Sku] sk on p.SkuID=sk.ID
+    </sql>
+    <sql id="whereCondition">
+        where 1=1
+        <if test="productname != null">
+            and Productname LIKE CONCAT('%',#{productname},'%')
+        </if>
+        <if test="price != null">
+            and price>=#{price,jdbcType=DECIMAL}
+        </if>
+        <if test="createtime != null">
+            and CreateTime >= #{createtime,jdbcType=TIMESTAMP}
+        </if>
+    </sql>
+
+    <select id="concatSelect" parameterType="com.example.demo.model.viewModel.ProductVM"
+            resultType="com.example.demo.model.viewModel.ProductVM">
+      select
+        <include refid="selectColumn"></include>
+        <include refid="selectTable"></include>
+        <include refid="whereCondition"></include>
+   </select>
 </mapper>

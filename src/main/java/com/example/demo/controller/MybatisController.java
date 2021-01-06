@@ -61,5 +61,18 @@ public class MybatisController {
             return message;
         }
     }
+    @RequestMapping("/concatSelect")
+    public MessageResult<PageData<ProductVM>> concatSelect(ProductVM viewModel) {
+        MessageResult<PageData<ProductVM>> message = new MessageResult<>();
+        try {
+            message = mybatisSqlService.concatSelect(viewModel);
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        } finally {
+            return message;
+        }
+    }
+
 
 }

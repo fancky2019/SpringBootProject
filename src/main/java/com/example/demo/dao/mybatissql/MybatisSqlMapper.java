@@ -18,4 +18,6 @@ public interface MybatisSqlMapper {
     List<ProductVM> getPageDataByHelper(ProductVM productVM);
     List<ProductVM> getPageDataByHelperCTE(ProductVM productVM);
 
+    List<ProductVM> concatSelect(ProductVM productVM);
+
 }
