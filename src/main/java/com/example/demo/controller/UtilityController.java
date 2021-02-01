@@ -1,11 +1,15 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.entity.rabc.Users;
+import com.example.demo.model.pojo.EnumParamPojo;
+import com.example.demo.model.pojo.UnitEnum;
 import com.example.demo.model.viewModel.MessageResult;
 import org.springframework.web.bind.annotation.*;
 import com.example.demo.model.pojo.Student;
 
+import javax.print.DocFlavor;
 import java.math.BigDecimal;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/utility")
@@ -32,6 +36,7 @@ public class UtilityController {
     //region
 
     /**
+     * 注意：当@RequestBody做参数，前台参数首字母小写
      *  前端： Headers:Content-type-->application/json ,body:raw; 后端：@RequestBody
      *
      * body:raw 内容 {
@@ -49,6 +54,7 @@ public class UtilityController {
     }
 
     /**
+     *
      *  Headers:Content-type-->multipart/form-data; boundary=<calculated when request is sent>
      *  body: formdata:设置 key--value
      * @param id
@@ -65,8 +71,21 @@ public class UtilityController {
 
         return null;
     }
+
+
     //endregion
 
-    //region
+    //region 枚举测试
+    /**
+     * Jackson对枚举进行序列化,默认输出枚举的String名称。名字要对应，区分大小写。如:Zhi
+     * 前端传枚举成员名称（注：不能加双引号）给枚举字段。
+     */
+    @RequestMapping("/enumParamTest")
+    public EnumParamPojo enumParamTest(EnumParamPojo pojo) {
+
+        String zhiStr= UnitEnum.Zhi.toString();//Zhi
+        String tou=UnitEnum.Tou.toString();//TOU
+        return pojo;
+    }
     //endregion
 }
