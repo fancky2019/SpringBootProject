@@ -19,6 +19,9 @@ public class MybatisController {
     原生SQL:还是要在xml定义方法名（mapper里方法），在service里调用mapper传入sql语句，还是没有摆脱xml。
     XML方式：
      */
+    /*
+     f返回整形：不必指定resultType,指定了还报错
+     */
 
 
     @Autowired
