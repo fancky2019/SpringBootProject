@@ -45,7 +45,8 @@
         <!--            <scope>import</scope>-->
         <!--        </dependency>-->
 
-
+        <!--注：是spring-boot-starter-web不是spring-boot-starter-->
+        <!--spring-boot-starter-web： 默认集成了jackson-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
