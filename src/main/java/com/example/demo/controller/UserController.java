@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.viewModel.Person;
 import com.example.demo.service.UserService;
+import com.example.demo.service.test.InterfaceTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,26 @@ public class UserController {
 //    private UserService userService2;
 
 
+    /*
+     */
+
+
+ /*
+ *建议用@Service加别名
+ *如果类用@Component做注解而不是@Service，就不用了指定别名。
+ * 如果用@Service注解，多个类实现接口时候就要指定别名：声明@Service("InterfaceTestImpB")，调用 @Autowired、 @Qualifier("InterfaceTestImpA")
+ */
+
+    @Autowired
+    @Qualifier("InterfaceTestImpA")
+    InterfaceTest interfaceTestImpA;
+
+    @Autowired
+//    @Qualifier("InterfaceTestImpB")
+    InterfaceTest interfaceTestImpB;
+
+
+
     //获取配置文件的值
     @Value("${spring.datasource.username}")
     private String username;
@@ -73,6 +94,16 @@ public class UserController {
 
     private static Logger logger = LogManager.getLogger(UserController.class);
     // private static Logger logger = LogManager.getLogger("business");
+
+
+
+
+
+
+
+
+
+
 
 
     //http://localhost:8080/user/getUser?id=1
@@ -174,5 +205,11 @@ public class UserController {
         return MessageFormat.format("{0}:{1}", applicationName, person.getName() + "," + person.getAge());
     }
 
+    @GetMapping("/autowiredTest")
+    @ResponseBody
+    public String autowiredTest()
+    {
+       return this.interfaceTestImpA.fun()+":"+interfaceTestImpB.fun();
+    }
 }
 

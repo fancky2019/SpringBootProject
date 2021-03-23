@@ -88,19 +88,19 @@
                enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false">
-<!--            &lt;!&ndash;使用驼峰命名&ndash;&gt;-->
-<!--            <property name="useActualColumnNames" value="false"/>-->
-<!--            &lt;!&ndash; 去除前缀&ndash;&gt;-->
-<!--            <domainObjectRenamingRule searchString="^t" replaceString=""/>-->
+            <!--            &lt;!&ndash;使用驼峰命名&ndash;&gt;-->
+            <!--            <property name="useActualColumnNames" value="false"/>-->
+            <!--            &lt;!&ndash; 去除前缀&ndash;&gt;-->
+            <!--            <domainObjectRenamingRule searchString="^t" replaceString=""/>-->
         </table>
         <table tableName="t_product" domainObjectName="Product"
                enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false">
-<!--            &lt;!&ndash;使用驼峰命名&ndash;&gt;-->
-<!--            <property name="useActualColumnNames" value="false"/>-->
-<!--            &lt;!&ndash; 去除前缀&ndash;&gt;-->
-<!--            <domainObjectRenamingRule searchString="^t" replaceString=""/>-->
+            <!--            &lt;!&ndash;使用驼峰命名&ndash;&gt;-->
+            <!--            <property name="useActualColumnNames" value="false"/>-->
+            <!--            &lt;!&ndash; 去除前缀&ndash;&gt;-->
+            <!--            <domainObjectRenamingRule searchString="^t" replaceString=""/>-->
         </table>
 
 
