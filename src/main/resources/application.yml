@@ -88,7 +88,7 @@ spring:
     # HikariCP： springboot2.0 默认的连接池。https://github.com/brettwooldridge/HikariCP
     #HikariCP  高并发性能优。mysql 8h 空闲断开连接可用quartz 调度定期select 1  。
     #产生此问题DB工作就不繁忙，性能要求不高。可以用上面dbcp2的配置，采取空闲查询策略。
-
+    #要引入mybatis
     type: com.zaxxer.hikari.HikariDataSource
     # Hikari will use the above plus the following to setup connection pooling
     hikari:
