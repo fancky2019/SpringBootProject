@@ -93,6 +93,14 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
             <version>2.1.0.RELEASE</version>
+             <!-- eureka-server引入。浏览器访问返回不是json而是xml，要排除下面依赖。-->
+             <!-- 但是postman访问返回的是json-->
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-xml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--  FeignClient：注意版本号和其他版本一致-->
