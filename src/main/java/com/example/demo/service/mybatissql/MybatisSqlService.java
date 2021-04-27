@@ -1,14 +1,12 @@
 package com.example.demo.service.mybatissql;
 
 import com.example.demo.dao.mybatissql.MybatisSqlMapper;
-import com.example.demo.dao.wms.ProductMapper;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.PageData;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.service.rabc.UserManagerService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.sun.xml.internal.ws.api.message.Attachment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

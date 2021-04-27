@@ -1,15 +1,16 @@
 package com.example.demo.model.viewModel;
 
 
-import com.sun.org.glassfish.gmbal.Description;
+
+//import com.sun.org.glassfish.gmbal.Description;
 
 import java.io.Serializable;
 
 public class Person implements Serializable {
     // @SuppressWarnings("")
-    @Description("姓名")
+//    @Description("姓名")
     private String name;
-    @Description("年龄")
+//    @Description("年龄")
     private Integer age;
 
     public String getName() {
