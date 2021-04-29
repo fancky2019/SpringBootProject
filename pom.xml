@@ -310,7 +310,7 @@
             </properties>
             <activation>
                 <!--  设置开发环境为默认，每次修改值要手动刷新maven-->
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
         </profile>
         <profile>
@@ -329,7 +329,7 @@
                 <environment>prod</environment>
             </properties>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
         </profile>
     </profiles>
