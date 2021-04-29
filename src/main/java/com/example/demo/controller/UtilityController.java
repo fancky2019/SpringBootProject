@@ -10,6 +10,7 @@ import com.sun.java.swing.plaf.motif.MotifRadioButtonMenuItemUI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
@@ -36,6 +37,7 @@ public class UtilityController {
 
     @Autowired
     private ObjectMapper mapper;
+
 
     //region  切面
     /*
@@ -180,10 +182,13 @@ public class UtilityController {
         String serverName = request.getServerName();
         // 访问端口号 8081
         int port = request.getServerPort();
-        // 访问项目名：server.servlet.context-path
+        // 访问项目名：server.servlet.context-path :/sbp
         String contextPath = request.getContextPath();
         //获取请求方法: /utility/resolveUrl
         String servletPath = request.getServletPath();
+
+        /// 包含Servlet配置的路径; /sbp/utility/resolveUrl
+        String requestUri=  request.getRequestURI();
         //参数名称
         List<String> paramNames = Collections.list(request.getParameterNames());
         HashMap<String, String> paramAndValues = new HashMap<>();
@@ -259,6 +264,20 @@ public class UtilityController {
 
         List<String> listStr = null;
         boolean collectionIsNullEmpty = CollectionUtils.isEmpty(listStr);
+
+        //路由匹配
+        /*
+        ？匹配一个字符(matches one character)。
+        *匹配0个或者多个字符 (matches zero or more characters)。
+        ** 匹配url中的0个或多个子目录 (matches zero or more directories in a path)
+        {spring:[a-z]+} 匹配满足正则表达式[a-z]+的路径，这些路径赋值给变量"spring" (matches the regexp [a-z]+ as a path variable named "spring"）
+         */
+
+
+
+        AntPathMatcher antPathMatcher = new AntPathMatcher();
+        boolean isMatch = antPathMatcher.match("*/utility/getPostBody", "http://localhost:8081/sbp/utility/getPostBody");
+        isMatch = antPathMatcher.match("*/utility*", "http://localhost:8081/sbp/utility/getPostBody");
 
         return " ";
     }
