@@ -101,14 +101,12 @@ public class UtilityController {
     //endregion
 
     //region 枚举测试
-
     /**
      * Jackson对枚举进行序列化,默认输出枚举的String名称。名字要对应，区分大小写。如:Zhi
      * 前端传枚举成员名称（注：不能加双引号）给枚举字段。
      */
     @RequestMapping("/enumParamTest")
     public EnumParamPojo enumParamTest(EnumParamPojo pojo) {
-
         String zhiStr = UnitEnum.Zhi.toString();//Zhi
         String tou = UnitEnum.Tou.toString();//TOU
         return pojo;
