@@ -32,7 +32,7 @@ public class EasyPoiController {
     private static Logger logger = LogManager.getLogger(EasyPoiController.class);
 
     @GetMapping("/exportData")
-    public void exportData(HttpServletResponse response) {
+    public void exportData(EasyPoiPojo query,HttpServletResponse response) {
         try {
             List<EasyPoiPojo> list = new ArrayList<>();
             EasyPoiPojo easyPoiPojo1 = new EasyPoiPojo(1, "fancky1", 25, "chenguxyuan", "anhui");
