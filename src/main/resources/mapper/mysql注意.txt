@@ -1,0 +1,8 @@
+     /*mysql  时间 大于等于  and co.pay_time <![CDATA[ >= ]]> #{startTime,jdbcType=DATE}*/
+         <!-- 小于等于    <![CDATA[ <= ]]>-->
+
+
+       /* 如果collection是对象的一个属性直接用属性名称。如:userIds */
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
