@@ -12,3 +12,15 @@
         <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
+
+   4、 if  else
+   <choose>
+       <when test="tableCStatisticsStartDate!=null">
+      /* C表*/
+       create_at between #{tableCStatisticsStartDate,jdbcType=DATE} and DATE_ADD(#{tableCStatisticsEndDate,jdbcType=DATE},INTERVAL 1 DAY)
+       </when>
+       <otherwise>
+       create_at between #{startDate,jdbcType=DATE} and DATE_ADD(#{startDate,jdbcType=DATE},INTERVAL 1 DAY)
+       </otherwise>
+    </choose>
+
