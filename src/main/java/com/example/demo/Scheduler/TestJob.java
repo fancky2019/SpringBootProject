@@ -5,6 +5,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /*
+
+启动类加@EnableScheduling //quartz
+
 采用Cron  表达式
  */
 //注释不加载，就不执行

@@ -49,7 +49,9 @@ public class DirectExchangeProducer {
         person.setName("rabbitmq");
 
         msg = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
-
+    /*
+                     投递消息的时候指定了交换机名称：就指定了交换机的类型，路由key ：根据交换机和队列的绑定关系交换机就可以将消息投递到对应的队列
+                     */
         rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
 
 //        //json转换
@@ -63,10 +65,10 @@ public class DirectExchangeProducer {
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
     public static final String BATCH_DIRECT_ROUTING_KEY = "BatchRoutingKeySpringBoot";
     public static final String BATCH_DIRECT_QUEUE_NAME = "BatchQueueSpringBoot";
-//    //插入后的结果：多条拼接成一条，不是多条记录。
-//    //{"name":"publishInBatch0"}{"name":"publishInBatch1"}{"name":"publishInBatch2"}{"name":"publishInBatch3"}{"name":"publishInBatch4"}{"name":"publishInBatch5"}{"name":"publishInBatch6"}{"name":"publishInBatch7"}{"name":"publishInBatch8"}{"name":"publishInBatch9"}
-//    public void publishInBatch() {
-//
+    //插入后的结果：多条拼接成一条，不是多条记录。
+    //{"name":"publishInBatch0"}{"name":"publishInBatch1"}{"name":"publishInBatch2"}{"name":"publishInBatch3"}{"name":"publishInBatch4"}{"name":"publishInBatch5"}{"name":"publishInBatch6"}{"name":"publishInBatch7"}{"name":"publishInBatch8"}{"name":"publishInBatch9"}
+    public void publishInBatch() {
+
 //        //参数：队列名称,消息内容（可以为可序列化的对象）
 ////        this.amqpTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
 ////        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
@@ -90,7 +92,7 @@ public class DirectExchangeProducer {
 //        String jsonStr1 =   JSON.toJSONString(person);
 //        Person p=JSON.parseObject(jsonStr1,Person.class);
 //        Integer m=0;
-//    }
+    }
     //endregion
 
 
