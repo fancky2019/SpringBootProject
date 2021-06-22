@@ -24,6 +24,7 @@ import java.util.Map;
 public class DataSourceConfig {
     /*
     @Bean的默认名称是方法名称，@Bean同一类型的不同实例，加Bean(实例)的别名来区分。
+         @Bean(name = "dataSourceWriter") 如果指定名称就用名称，否则就用方法名称。
     @Qualifier 注解的Bean不同类型的实例,通过在类型名称上加名称(@Service("UserService"))，用@Qualifier("typeAlia")区分
      */
 

@@ -19,6 +19,10 @@ import java.util.List;
 service 层开启事务则不能动态切换数据源，
 多数据源设计就不符合微服务的理念。
 至于多个服务事务采用分布式事务管理
+
+
+ 通过加注解 @DataSourceAnnotation(DataSourceStrings.READER)
+ 反射动态切换数据源（读、写Server）
  */
 @Service
 public class ValvulasService {
