@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.java.swing.plaf.motif.MotifRadioButtonMenuItemUI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.MediaType;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
@@ -28,8 +29,31 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/*
+@Scope bean作用域
+1、singleton：单例模式 默认，在spring IoC容器仅存在一个Bean实例，Bean以单例方式存在，bean作用域范围的默认值。
+2、prototype ：原型模式，每次从容器中调用Bean时，都返回一个新的实例，即每次调用getBean()时，相当于执行newXxxBean()。
+3、request：每次HTTP请求都会创建一个新的Bean，该作用域仅适用于web的Spring WebApplicationContext环境。
+4、session：同一个HTTP Session共享一个Bean，不同Session使用不同的Bean。该作用域仅适用于web的Spring WebApplicationContext
+5、global session
+global session作用域类似于标准的HTTP Session作用域，不过它仅仅在基于portlet的web应用中才有意义。Portlet规范定义了全局Session的概念，
+它被所有构成某个 portlet web应用的各种不同的portlet所共享。在global session作用域中定义的bean被限定于全局portlet Session的生命周期范围内。
+如果你在web中使用global session作用域来标识bean，那么web会自动当成session类型来使用。
+
+
+
+一个session 可能会有多个request.session有过期时间，有点类似 keep alive,避免每次都创建，池化思想。
+<!--在tomcat的web.xml文件中设置HttpSession过期时间。 -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+<!--tomcat默认30分钟 -->
+ */
+
+
 @RestController
 @RequestMapping("/utility")
+//@Scope("prototype")
 public class UtilityController {
 
     @Value("${demo.multiEnvironment}")

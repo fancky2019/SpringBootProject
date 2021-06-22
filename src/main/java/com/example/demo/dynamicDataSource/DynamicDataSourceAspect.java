@@ -14,8 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 
 /*
+拦截启用顺序：依次是过滤器、拦截器、切片，这是服务正常的时候，服务异常时，最先捕获的是切片、ControllerAdvice注解类、拦截器、过滤器
+
 Filter:servlet采用回调的方式实现，可以获取request信息，获取不到方法的参数信息。
-Interceptor:采用反射动态代理实现，可以获取request信息，获取不到方法的参数信息。
+Interceptor:采用反射动态代理实现，可以获取request信息，还可以获取请求的类名、方法名，但拦截器无法获取请求参数的值
 Aspect:springboot 默认采用动态代理实现，获取不到request请求的信息，可以获取方法的参数
  */
 /*
@@ -25,6 +27,8 @@ Aspect:springboot 默认采用动态代理实现，获取不到request请求的�
 
 /**
  * service 层开启事务则不能动态切换
+ *  通过加注解 @DataSourceAnnotation(DataSourceStrings.READER)
+ *  反射动态切换数据源（读、写Server）
  * <p>
  * #1、启动类设置
  * #//由于采用多数据源，禁用springboot默认的数据源配置，多数据源不适合微服务设计理念废弃。采用分布式事务。
