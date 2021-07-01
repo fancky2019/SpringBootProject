@@ -50,11 +50,12 @@ public class EasyPoiController {
             String fileName = "filename-EasyPoiPojo导出.xlsx";
 //            String fileNameExportParamsWithOutType = "个人信息filename.xls";
             response.setCharacterEncoding("UTF-8");
-            response.setHeader("content-ype", "application/vnd.ms-excel");
+            response.setHeader("Content-Type", "application/vnd.ms-excel");
             response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
             workbook.write(response.getOutputStream());
 
-
+            String contentType= response.getHeader("Content-Type");
+            int m=0;
         } catch (Exception ex) {
 
         }
