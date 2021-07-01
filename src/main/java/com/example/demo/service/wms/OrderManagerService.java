@@ -31,7 +31,7 @@ public class OrderManagerService {
     OrderDetailMapper orderDetailMapper;
 
     /*
-    REQUIRED ：如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务。
+    REQUIRED ：如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务。 default Propagation.REQUIRED
     SUPPORTS ：如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行。
     MANDATORY ：如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常。
     REQUIRES_NEW ：创建一个新的事务，如果当前存在事务，则把当前事务挂起。
@@ -41,6 +41,10 @@ public class OrderManagerService {
     指定方法：通过使用 propagation 属性设置，例如：@Transactional(propagation = Propagation.REQUIRED)
      */
 
+    /*
+    Propagation propagation() default Propagation.REQUIRED;
+    Isolation isolation() default Isolation.DEFAULT;
+     */
 
     /*
     自动回滚：  在@Transactional注解中如果不配置rollbackFor属性,那么事物只会在遇到RuntimeException的时候才会回滚,
@@ -48,6 +52,7 @@ public class OrderManagerService {
 
     手动回滚：TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
      */
+   // @Transactional(isolation = Isolation.DEFAULT,propagation = Propagation.REQUIRED)//默认
     @Transactional
 //    @Transactional(rollbackFor = Exception.class)
 
