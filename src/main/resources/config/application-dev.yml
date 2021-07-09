@@ -243,5 +243,5 @@ knife4j:
 demo:
   JWTSecretKey: GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk
   multiEnvironment: multiEnvironmentDev
-
+cron: 0/5 * * * * ?
 

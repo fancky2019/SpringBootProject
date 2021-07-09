@@ -283,12 +283,33 @@
             <artifactId>okhttp</artifactId>
             <version>4.9.1</version>
         </dependency>
-       <!-- okhttp kotlin写的，不指定kotlin写的报错-->
+        <!-- okhttp kotlin写的，不指定kotlin写的报错-->
         <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
             <version>1.5.0</version>
+        </dependency>
+
+
+        <!-- SpringBoot 整合 Quartz 定时任务 -->
+<!--        <dependency>-->
+<!--        <groupId>org.springframework.boot</groupId>-->
+<!--        <artifactId>spring-boot-starter-quartz</artifactId>-->
+<!--        <version>2.3.5.RELEASE</version>-->
+<!--    </dependency>-->
+
+<!--和上面任何一个-->
+        <dependency>
+          <groupId>org.quartz-scheduler</groupId>
+          <artifactId>quartz</artifactId>
+          <version>2.3.2</version>
+        </dependency>
+
+        <dependency>
+          <groupId>org.quartz-scheduler</groupId>
+          <artifactId>quartz-jobs</artifactId>
+          <version>2.3.2</version>
         </dependency>
 
 
