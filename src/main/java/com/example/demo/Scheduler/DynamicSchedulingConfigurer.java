@@ -10,7 +10,7 @@ import org.springframework.scheduling.support.PeriodicTrigger;
 
 import java.util.Date;
 
-@Configuration
+//@Configuration
 public class DynamicSchedulingConfigurer implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
