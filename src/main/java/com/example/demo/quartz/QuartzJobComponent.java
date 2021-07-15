@@ -10,6 +10,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
+
+
+
+
+
+
+//6位 cron 表达式
+//0代表从0分开始，*代表任意字符，／代表递增。
+//   表达式中的  /  标识增量  每隔
+
+
+
+//0 0 1 * * ?     //一点执行
+//     "*/5 * * * * ?''   //5s一次  "0 */5 * * * ?''   //5min一次
+
+
+
+
+
 @Component
 public class QuartzJobComponent {
     private static Logger log = LogManager.getLogger(QuartzJobComponent.class);

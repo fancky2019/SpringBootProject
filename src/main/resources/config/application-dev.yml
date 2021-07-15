@@ -109,7 +109,7 @@ spring:
     #  数据库索引
     database: 5
     # 远程服务器地址
-    host: 127.0.0.1
+    host: 192.168.5.89
     # 远程服务器端口
     port: 6379
     # 验证码
@@ -243,5 +243,5 @@ knife4j:
 demo:
   JWTSecretKey: GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk
   multiEnvironment: multiEnvironmentDev
-cron: 0/5 * * * * ?
+cron: '0/8 * * * * ?'
 

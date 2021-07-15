@@ -1,5 +1,7 @@
 package com.example.demo.quartz;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
@@ -16,7 +18,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 public class ApplicationListenerImp implements ApplicationListener<ApplicationReadyEvent> {
     @Autowired
     private QuartzJobComponent quartzJobComponent;
-
+    private static Logger logger = LogManager.getLogger(ApplicationListenerImp.class);
 
 
 
@@ -56,8 +58,9 @@ ContextRefreshedEvent
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         try {
-            quartzJobComponent.addJob(1);
-            System.out.println("任务已经启动...");
+            logger.info("启动开始...");
+          //  quartzJobComponent.addJob(1);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

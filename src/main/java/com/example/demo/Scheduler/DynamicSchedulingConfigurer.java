@@ -28,6 +28,11 @@ public class DynamicSchedulingConfigurer implements SchedulingConfigurer {
             Runnable runnable = new ScheduleTask(student);
             Trigger trigger = (triggerContext) ->
             {
+                //6位 cron 表达式
+                //0代表从0分开始，*代表任意字符，／代表递增。
+
+                //0 0 1 * * ?     //一点执行
+                //*/5 * * * * ?   //5s一次
                 String cron = "*/5 * * * * ?";
                 CronTrigger cronTrigger = new CronTrigger(cron);
                 Date nextExecDate = cronTrigger.nextExecutionTime(triggerContext);
