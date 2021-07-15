@@ -38,7 +38,7 @@ import java.util.Date;
 @RestController
 @RequestMapping("/JdbcTemplate")
 public class JdbcTemplateController {
-    private static Logger logger = LogManager.getLogger(UserManagerService.class);
+    private static Logger logger = LogManager.getLogger(JdbcTemplateController.class);
 
     @Autowired
     JdbcTemplate jdbcTemplate;
