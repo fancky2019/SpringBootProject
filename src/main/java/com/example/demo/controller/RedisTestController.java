@@ -301,7 +301,7 @@ public class RedisTestController {
             zSetOperations.remove("zSetKey1", student2,student3);
             //当key中的值都删除，就把key也删除
             zSetOperations.remove("zSetKey2", student1, student2);
-            
+
             redisTemplate.delete("zSetKey1");
             //endregion
         } catch (Exception ex) {

@@ -14,9 +14,7 @@ Configuration:
       - name: LOG_HOME
         value: log\
       - name: log.pattern
-        #"%d{yyyy-MM-dd HH:mm:ss,SSS} %5p %c{1}:%L - %m%n"
-        #!-- 日志文件默认输出格式,另类带行号输出(对日志输出性能未知);%C:大写,类名;%M:方法名;%L:行号;%m:错误信息;%n:换行 -->
-        value: "%d{yyyy-MM-dd HH:mm:ss.SSS} %X{traceId} -%5p ${PID:-} [%15.15t] %-30.30C{1.} : %m%n"
+        value: "%d{yyyy-MM-dd HH:mm:ss.SSS} -%5p ${PID:-} [%15.15t] %-30.30C{1.} : %m%n"
 
 
   #        部署在tomact的项目的目录下,window和unix一样
@@ -30,7 +28,7 @@ Configuration:
         onMatch: ACCEPT
         onMismatch: DENY
       PatternLayout:
-        pattern: ${log.pattern}
+        pattern: "%d{yyyy-MM-dd HH:mm:ss,SSS} %5p %c{1}:%L - %m%n"
     RollingFile: # 输出到文件，超过128MB归档
       - name: info
         ignoreExceptions: false
@@ -56,7 +54,7 @@ Configuration:
           onMatch: ACCEPT
           onMismatch: DENY
         PatternLayout:
-          pattern: ${log.pattern}
+          pattern: "%d{yyyy-MM-dd HH:mm:ss,SSS} %5p %c{1}:%L - %m%n"
         Policies:
           SizeBasedTriggeringPolicy:
             size: "128 MB"
@@ -72,7 +70,7 @@ Configuration:
           onMatch: ACCEPT
           onMismatch: DENY
         PatternLayout:
-          pattern: ${log.pattern}
+          pattern: "%d{yyyy-MM-dd HH:mm:ss,SSS} %5p %c{1}:%L - %m%n"
         Policies:
           SizeBasedTriggeringPolicy:
             size: "128 MB"
