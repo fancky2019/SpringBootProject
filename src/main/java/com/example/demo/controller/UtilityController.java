@@ -5,8 +5,11 @@ import com.example.demo.model.pojo.EnumParamPojo;
 import com.example.demo.model.pojo.UnitEnum;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
+import com.example.demo.quartz.QuartzJobComponent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.java.swing.plaf.motif.MotifRadioButtonMenuItemUI;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -55,6 +58,8 @@ global session作用域类似于标准的HTTP Session作用域，不过它仅仅
 @RequestMapping("/utility")
 //@Scope("prototype")
 public class UtilityController {
+
+    private static final Logger logger = LogManager.getLogger(QuartzJobComponent.class);
 
     @Value("${demo.multiEnvironment}")
     private String multiEnvironment;
@@ -125,6 +130,7 @@ public class UtilityController {
     //endregion
 
     //region 枚举测试
+
     /**
      * Jackson对枚举进行序列化,默认输出枚举的String名称。名字要对应，区分大小写。如:Zhi
      * 前端传枚举成员名称（注：不能加双引号）给枚举字段。
@@ -210,7 +216,7 @@ public class UtilityController {
         String servletPath = request.getServletPath();
 
         /// 包含Servlet配置的路径; /sbp/utility/resolveUrl
-        String requestUri=  request.getRequestURI();
+        String requestUri = request.getRequestURI();
         //参数名称
         List<String> paramNames = Collections.list(request.getParameterNames());
         HashMap<String, String> paramAndValues = new HashMap<>();
@@ -296,7 +302,6 @@ public class UtilityController {
          */
 
 
-
         AntPathMatcher antPathMatcher = new AntPathMatcher();
         boolean isMatch = antPathMatcher.match("*/utility/getPostBody", "http://localhost:8081/sbp/utility/getPostBody");
         isMatch = antPathMatcher.match("*/utility*", "http://localhost:8081/sbp/utility/getPostBody");
@@ -304,4 +309,26 @@ public class UtilityController {
         return " ";
     }
     //endregion
+
+    //region log4j2test
+    @GetMapping(value = "/log4j2test")
+    public String log4j2Test() throws InterruptedException {
+        logger.debug("debug log4j2test ");
+        logger.info("info log4j2test ");
+        logger.error("error log4j2test ");
+        Thread.sleep(10000);
+        int m = Integer.parseInt("m");
+        return "log4j2Test";
+    }
+
+    @GetMapping(value = "/log4j2test2")
+    public String log4j2Test2() {
+        logger.debug("debug log4j2test ");
+        logger.info("info log4j2test ");
+        logger.error("error log4j2test ");
+//        int m = Integer.parseInt("m");
+        return "log4j2Test";
+    }
+    //endregion
+
 }
