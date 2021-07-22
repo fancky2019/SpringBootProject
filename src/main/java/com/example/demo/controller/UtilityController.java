@@ -8,6 +8,7 @@ import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.quartz.QuartzJobComponent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.java.swing.plaf.motif.MotifRadioButtonMenuItemUI;
+import com.sun.jersey.core.util.StringIgnoreCaseKeyComparator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -330,5 +331,12 @@ public class UtilityController {
         return "log4j2Test";
     }
     //endregion
+
+
+    @GetMapping(value = "/feignTest")
+    public String feignTest(String name)
+    {
+        return "feignTest - "+name;
+    }
 
 }

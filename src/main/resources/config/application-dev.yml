@@ -6,6 +6,12 @@ server:
     #设置项目名称，注意配置文件 dev、tes、prod的配置
     context-path: /sbp
 
+eureka:
+  client:
+    # 下面两句不注册到注册中心。Eureka会默认把自己注册到注册中心：http://localhost:8761/eureka/
+    registerWithEureka: false
+    fetchRegistry: false
+
 #公共配置与profiles选择无关 mapperLocations指的路径是src/main/resources
 #mapper路径和实体对象路径
 #要配置mybatis不然mybatis有可能无法Invalid bound statement问题
@@ -226,7 +232,7 @@ hystrix:
           enabled: true
         isolation:
           thread:
-            timeoutInMilliseconds: 1000 #断路器超时时间，默认1000ms
+            timeoutInMilliseconds: 10000 #断路器超时时间，默认1000ms
 
 #默认log
 #logging:
@@ -244,4 +250,7 @@ demo:
   JWTSecretKey: GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk
   multiEnvironment: multiEnvironmentDev
 cron: '0/8 * * * * ?'
+
+sbp:
+  ordermigratedbtoolurl: http://localhost:8101
 
