@@ -6,6 +6,12 @@ server:
     #设置项目名称，注意配置文件 dev、tes、prod的配置
     context-path: /sbp
 
+eureka:
+  client:
+    # 下面两句不注册到注册中心。Eureka会默认把自己注册到注册中心：http://localhost:8761/eureka/
+    registerWithEureka: false
+    fetchRegistry: false
+
 #公共配置与profiles选择无关 mapperLocations指的路径是src/main/resources
 #mapper路径和实体对象路径
 #要配置mybatis不然mybatis有可能无法Invalid bound statement问题
@@ -17,7 +23,7 @@ mybatis:
 
 #mybatis 分页
 pagehelper:
-##  mysql、sqlserver2012，没找到sqlserver2008版本的
+  ##  mysql、sqlserver2012，没找到sqlserver2008版本的
   helperDialect: sqlserver2012
   reasonable: true
   supportMethodsArguments: true
@@ -46,13 +52,13 @@ spring:
     username: sa
     password: 123456
 
-#    #mysql
-#    #具体参见类DynamicDataSourceAspect 说明
-#    #不用此默认，默认就是写库,多数据源用jdbcUrl，不是url,spring 默认用的是url，用多数据源用url会报错。
-#    url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    username: root
-#    password: 123456
+    #    #mysql
+    #    #具体参见类DynamicDataSourceAspect 说明
+    #    #不用此默认，默认就是写库,多数据源用jdbcUrl，不是url,spring 默认用的是url，用多数据源用url会报错。
+    #    url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    #    driver-class-name: com.mysql.cj.jdbc.Driver
+    #    username: root
+    #    password: 123456
 
     #    writer:
     #      jdbcUrl: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
@@ -109,7 +115,7 @@ spring:
     #  数据库索引
     database: 5
     # 远程服务器地址
-    host: 127.0.0.1
+    host: 192.168.5.89
     # 远程服务器端口
     port: 6379
     # 验证码
@@ -200,7 +206,7 @@ spring:
         #max-poll-records: 10
         #fetch-max-wait:
         #listener:
-        #手动提交模式
+      #手动提交模式
       #ack-mode: manual
 
 #Feign  开启熔断
@@ -226,7 +232,7 @@ hystrix:
           enabled: true
         isolation:
           thread:
-            timeoutInMilliseconds: 1000 #断路器超时时间，默认1000ms
+            timeoutInMilliseconds: 10000 #断路器超时时间，默认1000ms
 
 #默认log
 #logging:
@@ -242,6 +248,9 @@ knife4j:
   enable: true
 demo:
   JWTSecretKey: GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk
-  multiEnvironment: multiEnvironmentProd
+  multiEnvironment: multiEnvironmentDev
+cron: '0/8 * * * * ?'
 
+sbp:
+  ordermigratedbtoolurl: http://localhost:8101
 

@@ -25,6 +25,8 @@ OpenFeign:服务之间的调用，集成了Ribbon和Hystrix。
  */
 //@FeignClient("server")//不开启熔断的回调
 //server 只能一个服务指定。
+// url = 配置文件参数
+//@FeignClient(name = "onlyEasClient", url = "${online.custom.feign.eas.host}", configuration = FeignConfig.class)
 @FeignClient(value = "server", fallbackFactory = UserServiceFallBackFactory.class)//开启回调
 public interface UserService {
     @RequestMapping(value = "/user")

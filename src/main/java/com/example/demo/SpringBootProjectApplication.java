@@ -30,7 +30,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 //SpringCloud ：组件
 @EnableEurekaClient//注册中心
-@EnableFeignClients//微服务之间调用,服务发现
+@EnableFeignClients//启用feign。微服务之间调用,服务发现
 @EnableHystrixDashboard //开启HystrixDashBoard
 @EnableCircuitBreaker//开启HystrixDashBoard
 

@@ -103,6 +103,7 @@
             </exclusions>
         </dependency>
 
+        <!--        注意springboot和springcloud的版本对应：https://spring.io/projects/spring-cloud-->
         <!--  FeignClient：注意版本号和其他版本一致-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
