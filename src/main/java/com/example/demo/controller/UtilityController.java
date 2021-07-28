@@ -60,6 +60,7 @@ global session作用域类似于标准的HTTP Session作用域，不过它仅仅
 //@Scope("prototype")
 public class UtilityController {
 
+    //Lombox 的注解 @Slf4j 相当于下面语句
     private static final Logger logger = LogManager.getLogger(QuartzJobComponent.class);
 
     @Value("${demo.multiEnvironment}")
