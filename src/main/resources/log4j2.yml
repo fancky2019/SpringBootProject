@@ -19,8 +19,8 @@ Configuration:
         value: "%d{yyyy-MM-dd HH:mm:ss.SSS} %X{traceId} -%5p ${PID:-} [%15.15t] %-30.30C{1.} : %m%n"
 
 #  <!--  参见项目 ordermigratedbtool     linux指定文件文职-->
-#  <!--        <RollingFile name="RollingFile" fileName="/var/log/ordermigratedbtool/${date:yyyy-MM}/${date:yyyy-MM-dd}/log.log"-->
-#  <!--                     filePattern="/var/log/ordermigratedbtool/$${date:yyyy-MM}/$${date:yyyy-MM-dd}/info-%d{yyyy-MM-dd}-%i.log">-->
+#  <!--        <RollingFile name="RollingFile" fileName="var/log/ordermigratedbtool/${date:yyyy-MM}/${date:yyyy-MM-dd}/log.log"-->
+#  <!--                     filePattern="var/log/ordermigratedbtool/$${date:yyyy-MM}/$${date:yyyy-MM-dd}/info-%d{yyyy-MM-dd}-%i.log">-->
   #        部署在tomact的项目的目录下,window和unix一样
   #        value: ../webapps/fancky-test/log/
   Appenders:
