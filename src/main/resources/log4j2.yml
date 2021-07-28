@@ -18,7 +18,9 @@ Configuration:
         #!-- 日志文件默认输出格式,另类带行号输出(对日志输出性能未知);%C:大写,类名;%M:方法名;%L:行号;%m:错误信息;%n:换行 -->
         value: "%d{yyyy-MM-dd HH:mm:ss.SSS} %X{traceId} -%5p ${PID:-} [%15.15t] %-30.30C{1.} : %m%n"
 
-
+#  <!--  参见项目 ordermigratedbtool     linux指定文件文职-->
+#  <!--        <RollingFile name="RollingFile" fileName="/var/log/ordermigratedbtool/${date:yyyy-MM}/${date:yyyy-MM-dd}/log.log"-->
+#  <!--                     filePattern="/var/log/ordermigratedbtool/$${date:yyyy-MM}/$${date:yyyy-MM-dd}/info-%d{yyyy-MM-dd}-%i.log">-->
   #        部署在tomact的项目的目录下,window和unix一样
   #        value: ../webapps/fancky-test/log/
   Appenders:
