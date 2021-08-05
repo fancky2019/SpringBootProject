@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.MediaType;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StreamUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.example.demo.model.pojo.Student;
@@ -313,13 +310,49 @@ public class UtilityController {
     //endregion
 
     //region log4j2test
+
+    //region 配置邮件
+
+    /*
+    参考链接：https://blog.csdn.net/david_pfw/article/details/85846351
+    1、
+//       <!--        log4j2邮件-->
+//        <dependency>
+//            <groupId>javax.activation</groupId>
+//            <artifactId>activation</artifactId>
+//            <version>1.1.1</version>
+//        </dependency>
+//        <dependency>
+//            <groupId>com.sun.mail</groupId>
+//            <artifactId>javax.mail</artifactId>
+//            <version>1.5.4</version>
+//        </dependency>
+
+    2、配置qq邮箱。开启POP3/SMTP服务
+
+     邮箱--设置--POP3/IMAP/SMTP/Exchange/CardDAV/CalDAV服务--开启服务：
+     POP3/SMTP服务 (如何使用 Foxmail 等软件收发邮件？)已开启 |  关闭
+
+    3、
+    smtpHost="smtp.qq.com"
+    smtpPassword="ipxczauxtutggecb" 开通smtp服务的授权码
+            <smtp name="Mail" subject="Error Log" to="709737588@qq.com,517312606@qq.com" from="1513918351@qq.com"
+              replyTo="1513918351@qq.com" smtpHost="smtp.qq.com"  smtpDebug="false" smtpProtocol="smtps"
+              smtpUsername="1513918351@qq.com" smtpPassword="ipxczauxtutggecb" smtpPort="465" bufferSize="1024">
+              <!--定义error级别日志才发-->
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+    */
+
+
+    //endregion
+
     @GetMapping(value = "/log4j2test")
     public String log4j2Test() throws InterruptedException {
         logger.debug("debug log4j2test ");
         logger.info("info log4j2test ");
         logger.error("error log4j2test ");
-        Thread.sleep(10000);
-        int m = Integer.parseInt("m");
+//        Thread.sleep(10000);
+//        int m = Integer.parseInt("m");
         return "log4j2Test";
     }
 
@@ -334,10 +367,26 @@ public class UtilityController {
     //endregion
 
 
+    //region feign
     @GetMapping(value = "/feignTest")
     public String feignTest(String name)
     {
         return "feignTest - "+name;
     }
+    //endregion
+
+
+    //region MD5
+    @GetMapping(value = "/md5")
+    public String md5( String password)
+    {
+        //md5(Password+UserName)，即将用户名和密码字符串相加再MD5，这样的MD5摘要基本上不可反查。字母+数字，10位以上
+        //MD5加密不可逆  比较密码  和MD5加密后的字符串比较
+        //对密码进行 md5 加密
+        String md5Password = DigestUtils.md5DigestAsHex(password.getBytes());
+        return md5Password;
+    }
+    //endregion
+
 
 }

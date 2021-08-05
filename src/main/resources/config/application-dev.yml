@@ -240,7 +240,7 @@ hystrix:
 # # path:
 #  file: logs/log.log
 logging:
-  config: classpath:log4j2.yml
+  config: classpath:log4j2.xml
 swagger2:
   enable: true #false (或者在pro环境下不写此配置):禁用就打不开swagger网页
 knife4j:
