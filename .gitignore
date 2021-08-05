@@ -5,6 +5,7 @@
 .apt_generated
 .classpath
 log
+*.log
 .factorypath
 .project
 .settings
