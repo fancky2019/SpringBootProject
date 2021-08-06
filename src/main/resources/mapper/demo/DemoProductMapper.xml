@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.demo.DemoProductMapper">
+  <resultMap id="BaseResultMap" type="com.example.demo.model.entity.demo.DemoProduct">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="guid" jdbcType="VARCHAR" property="guid" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="product_style" jdbcType="VARCHAR" property="productStyle" />
+    <result column="image_path" jdbcType="VARCHAR" property="imagePath" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="timestamp" jdbcType="TIMESTAMP" property="timestamp" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, guid, product_name, product_style, image_path, create_time, modify_time, `status`, 
+    description, `timestamp`
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from demo_product
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from demo_product
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.example.demo.model.entity.demo.DemoProduct" useGeneratedKeys="true">
+    insert into demo_product (guid, product_name, product_style, 
+      image_path, create_time, modify_time, 
+      `status`, description, `timestamp`
+      )
+    values (#{guid,jdbcType=VARCHAR}, #{productName,jdbcType=VARCHAR}, #{productStyle,jdbcType=VARCHAR}, 
+      #{imagePath,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}, 
+      #{status,jdbcType=TINYINT}, #{description,jdbcType=VARCHAR}, #{timestamp,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.example.demo.model.entity.demo.DemoProduct" useGeneratedKeys="true">
+    insert into demo_product
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="guid != null">
+        guid,
+      </if>
+      <if test="productName != null">
+        product_name,
+      </if>
+      <if test="productStyle != null">
+        product_style,
+      </if>
+      <if test="imagePath != null">
+        image_path,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="modifyTime != null">
+        modify_time,
+      </if>
+      <if test="status != null">
+        `status`,
+      </if>
+      <if test="description != null">
+        description,
+      </if>
+      <if test="timestamp != null">
+        `timestamp`,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="guid != null">
+        #{guid,jdbcType=VARCHAR},
+      </if>
+      <if test="productName != null">
+        #{productName,jdbcType=VARCHAR},
+      </if>
+      <if test="productStyle != null">
+        #{productStyle,jdbcType=VARCHAR},
+      </if>
+      <if test="imagePath != null">
+        #{imagePath,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null">
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="timestamp != null">
+        #{timestamp,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.demo.DemoProduct">
+    update demo_product
+    <set>
+      <if test="guid != null">
+        guid = #{guid,jdbcType=VARCHAR},
+      </if>
+      <if test="productName != null">
+        product_name = #{productName,jdbcType=VARCHAR},
+      </if>
+      <if test="productStyle != null">
+        product_style = #{productStyle,jdbcType=VARCHAR},
+      </if>
+      <if test="imagePath != null">
+        image_path = #{imagePath,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null">
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null">
+        `status` = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="description != null">
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="timestamp != null">
+        `timestamp` = #{timestamp,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.demo.DemoProduct">
+    update demo_product
+    set guid = #{guid,jdbcType=VARCHAR},
+      product_name = #{productName,jdbcType=VARCHAR},
+      product_style = #{productStyle,jdbcType=VARCHAR},
+      image_path = #{imagePath,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      `status` = #{status,jdbcType=TINYINT},
+      description = #{description,jdbcType=VARCHAR},
+      `timestamp` = #{timestamp,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+  <!-- mysql默认接受sql的大小是1048576(1M)，即第三种方式若数据量超过1M会报如下异常：（可通过调整MySQL安装目录下的my.ini文件中[mysqld]段的＂max_allowed_packet = 1M＂）-->
+  <insert id="batchInsert" parameterType="com.example.demo.model.entity.demo.DemoProduct">
+      insert into demo_product (guid, product_name, product_style,
+      image_path, create_time, modify_time,
+      `status`, description, `timestamp`
+      )
+        values
+        <foreach collection="list" item="item" separator=",">
+      (#{item.guid,jdbcType=VARCHAR}, #{item.productName,jdbcType=VARCHAR}, #{item.productStyle,jdbcType=VARCHAR},
+      #{item.imagePath,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.modifyTime,jdbcType=TIMESTAMP},
+      #{item.status,jdbcType=TINYINT}, #{item.description,jdbcType=VARCHAR}, #{item.timestamp,jdbcType=TIMESTAMP}
+       )
+        </foreach>
+
+
+
+    </insert>
+</mapper>
