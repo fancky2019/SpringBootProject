@@ -6,6 +6,7 @@ import com.example.demo.model.pojo.UnitEnum;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.quartz.QuartzJobComponent;
+import com.example.demo.service.demo.DemoProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.java.swing.plaf.motif.MotifRadioButtonMenuItemUI;
 import com.sun.jersey.core.util.StringIgnoreCaseKeyComparator;
@@ -66,6 +67,8 @@ public class UtilityController {
     @Autowired
     private ObjectMapper mapper;
 
+    @Autowired
+    private DemoProductService demoProductService;
 
     //region  切面
     /*
@@ -369,22 +372,31 @@ public class UtilityController {
 
     //region feign
     @GetMapping(value = "/feignTest")
-    public String feignTest(String name)
-    {
-        return "feignTest - "+name;
+    public String feignTest(String name) {
+        return "feignTest - " + name;
     }
     //endregion
 
 
     //region MD5
     @GetMapping(value = "/md5")
-    public String md5( String password)
-    {
+    public String md5(String password) {
         //md5(Password+UserName)，即将用户名和密码字符串相加再MD5，这样的MD5摘要基本上不可反查。字母+数字，10位以上
         //MD5加密不可逆  比较密码  和MD5加密后的字符串比较
         //对密码进行 md5 加密
         String md5Password = DigestUtils.md5DigestAsHex(password.getBytes());
         return md5Password;
+    }
+    //endregion
+
+    //region MD5
+    @GetMapping(value = "/batchInsert")
+    public void batchInsert() {
+        //md5(Password+UserName)，即将用户名和密码字符串相加再MD5，这样的MD5摘要基本上不可反查。字母+数字，10位以上
+        //MD5加密不可逆  比较密码  和MD5加密后的字符串比较
+        //对密码进行 md5 加密
+
+          this.demoProductService.batchInsert();
     }
     //endregion
 
