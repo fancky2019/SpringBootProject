@@ -349,6 +349,7 @@ public class UtilityController {
 
     //endregion
 
+    //traceId 添加实现 参见过滤器 TraceIdFilter
     @GetMapping(value = "/log4j2test")
     public String log4j2Test() throws InterruptedException {
         logger.debug("debug log4j2test ");
@@ -358,6 +359,7 @@ public class UtilityController {
 //        int m = Integer.parseInt("m");
         return "log4j2Test";
     }
+
 
     @GetMapping(value = "/log4j2test2")
     public String log4j2Test2() {
