@@ -59,7 +59,7 @@ global session作用域类似于标准的HTTP Session作用域，不过它仅仅
 public class UtilityController {
 
     //Lombox 的注解 @Slf4j 相当于下面语句
-    private static final Logger logger = LogManager.getLogger(QuartzJobComponent.class);
+    private static final Logger logger = LogManager.getLogger(UtilityController.class);
 
     @Value("${demo.multiEnvironment}")
     private String multiEnvironment;
@@ -356,7 +356,7 @@ public class UtilityController {
         logger.info("info log4j2test ");
         logger.error("error log4j2test ");
 //        Thread.sleep(10000);
-//        int m = Integer.parseInt("m");
+        int m = Integer.parseInt("m");
         return "log4j2Test";
     }
 
@@ -366,7 +366,7 @@ public class UtilityController {
         logger.debug("debug log4j2test ");
         logger.info("info log4j2test ");
         logger.error("error log4j2test ");
-//        int m = Integer.parseInt("m");
+        int m = Integer.parseInt("m");
         return "log4j2Test";
     }
     //endregion

@@ -4,6 +4,7 @@ import com.example.demo.controller.UserController;
 import com.example.demo.model.viewModel.MessageResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,6 @@ public class GlobalExceptionHandler {
      * 404无法进入此方法。404被tomcat拦截了
      * 自定义返回数据格式
      */
-
-
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public MessageResult<Void> exceptionHandler(Exception ex, WebRequest request) {
@@ -41,8 +40,11 @@ public class GlobalExceptionHandler {
         messageResult.setCode(500);
         messageResult.setMessage(ex.getMessage());
         messageResult.setSuccess(false);
+        //     MDC.put("traceId", traceId);//traceId在过滤器的destroy()中清除
+     //   messageResult.setTraceId(MDC.get("traceId"));
 //        return ResponseEntity.ok(messageResult);
-        logger.error(ex.toString());
+//        logger.error(ex.toString());// 不会打出异常的堆栈信息
+        logger.error("",ex);//用此重载，打印异常的所有信息
         return messageResult;
     }
 
