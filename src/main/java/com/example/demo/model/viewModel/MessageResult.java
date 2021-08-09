@@ -1,5 +1,7 @@
 package com.example.demo.model.viewModel;
 
+import org.slf4j.MDC;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -11,8 +13,9 @@ public class MessageResult<T> implements Serializable {
     private Integer code;
     private Boolean success;
     private String message;
+    //  MDC.put("traceId", traceId);//traceId在过滤器的destroy()中生成、清除
+    private String traceId= MDC.get("traceId");
     private T data;
-
 
     public Boolean getSuccess() {
         return success;
@@ -45,4 +48,7 @@ public class MessageResult<T> implements Serializable {
         this.code = code;
     }
 
+    public String getTraceId() {
+        return traceId;
+    }
 }
