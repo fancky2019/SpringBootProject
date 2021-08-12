@@ -2,19 +2,31 @@ package com.example.demo.controller;
 
 import com.example.demo.model.pojo.Student;
 import com.example.demo.model.viewModel.MessageResult;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+/*
 
+ */
 @RestController
 @RequestMapping("/redisTest")
 public class RedisTestController {
-
+    private static final Logger logger = LogManager.getLogger(RedisTestController.class);
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
+    //region redis basic operation
     @GetMapping("")
     public MessageResult<Void> redisTest() {
 
@@ -310,4 +322,51 @@ public class RedisTestController {
         }
         return null;
     }
+
+    //endregion
+
+    /*
+    单Redis节点模式
+    doc:https://github.com/redisson/redisson/wiki/%E7%9B%AE%E5%BD%95
+
+    使用redisson 的配置没有成功。让redisson采用springboot的redis的配置
+     */
+    @RequestMapping("/testRedisson")
+    public String testRedisson(){
+        //获取分布式锁，只要锁的名字一样，就是同一把锁
+        RLock lock = redissonClient.getLock("redisKey_testRedisson");
+
+        //加锁（阻塞等待），默认过期时间是30秒
+//        lock.lock();
+        try{
+            boolean isLocked = lock.isLocked();
+            if (isLocked) {
+                logger.error(MessageFormat.format("Thread - {0} 获得锁失败！锁被占用！", Thread.currentThread().getId()));
+            }
+            //500MS 获取锁，3000锁维持时间
+            //内部采用信号量控制等待时间  Semaphore
+            //    public boolean tryLock(long waitTime, long leaseTime, TimeUnit unit)
+            //注：waitTime 设置时间长一点
+            //写入hash类型数据：redisKey:lock hashKey  uuid:线程id  hashValue:thread id
+            boolean lockSuccessfully = lock.tryLock(1, 30, TimeUnit.SECONDS);
+//            lock.lock();
+//            lock.lock(10, TimeUnit.SECONDS);
+            //或者直接返回
+            isLocked = lock.isLocked();
+
+            if(isLocked)
+            {
+                logger.info(MessageFormat.format("Thread - {0} 获得锁！", Thread.currentThread().getId()));
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
+            //unlock 删除key
+            lock.unlock();
+        }
+
+        return "Hello Redisson!";
+    }
+
 }

@@ -108,19 +108,20 @@ spring:
       max-lifetime: 1800000
       connection-timeout: 30000
       #connection-test-query: SELECT 1
-
-
-
   redis:
     #  数据库索引
     database: 5
     # 远程服务器地址
-    host: 192.168.5.89
+    host: 127.0.0.1
     # 远程服务器端口
     port: 6379
     # 验证码
     password: fancky123456
-    jedis:
+    redisson:
+      # 配置单点模式
+#     file: classpath:redisson.yml
+    #redis连接池 lettuce、jedis
+    lettuce:
       pool:
         # 最大空闲连接
         max-idle: 8
