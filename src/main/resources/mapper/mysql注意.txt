@@ -12,7 +12,12 @@
         <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
-
+		<if test="deptDataPermissionIds != null and deptDataPermissionIds.size() > 0 ">
+					AND co1.dept_data_permission_id IN
+					<foreach collection="deptDataPermissionIds" index="index" item="deptDataPermissionId" open="(" separator="," close=")">
+						#{deptDataPermissionId}
+					</foreach>
+				</if>
    4、 if  else
    <choose>
        <when test="tableCStatisticsStartDate!=null">
