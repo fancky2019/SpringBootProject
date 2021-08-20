@@ -1,8 +1,11 @@
 package com.example.demo;
 
+
+import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
@@ -14,8 +17,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 //默认扫描的是启动类所在的包及其子包
 //由于采用多数据源，禁用springboot默认的数据源配置，多数据源不适合微服务设计理念废弃。采用分布式事务。
 //@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-@SpringBootApplication
-
+@SpringBootApplication(exclude = {RedissonAutoConfiguration.class})//不排除， redis 将采用redisson
+//@SpringBootApplication
 
 //@MapperScan("com.example.demo.dao")
 //类不在主目录下需要指定扫描类完全限定名

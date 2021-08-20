@@ -56,6 +56,7 @@
         <logger name="org.springframework" level="INFO"></logger>
         <logger name="org.mybatis" level="INFO"></logger>
         <logger name="org.thymeleaf" level="INFO"/>
+        <logger name="org.redisson" level="INFO"/>
 
         <!--        异步-->
         <AsyncRoot level="all">

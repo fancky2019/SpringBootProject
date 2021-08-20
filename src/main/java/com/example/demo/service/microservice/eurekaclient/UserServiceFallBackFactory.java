@@ -1,10 +1,15 @@
 package com.example.demo.service.microservice.eurekaclient;
 
 import com.example.demo.controller.UserController;
-import feign.hystrix.FallbackFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
+
+/*
+ 框架2.1.1升级到2.5.4
+ 变更记录：feign.hystrix.FallbackFactory--->org.springframework.cloud.openfeign.FallbackFactory;
+ */
 
 /*
 如果页面显示异常信息，说明熔断没有开启成功

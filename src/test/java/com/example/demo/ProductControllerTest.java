@@ -2,9 +2,9 @@ package com.example.demo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.demo.model.entity.wms.Product;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -19,17 +19,17 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
 
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 @SpringBootTest
 public class ProductControllerTest {
     @Autowired
     private WebApplicationContext wac;
     private MockMvc mockMvc;
 
-    @Before
-    public void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-    }
+//    @Before
+//    public void setup() {
+//        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+//    }
 
 
     //post  测试  ：get测试 见UserControllerTest

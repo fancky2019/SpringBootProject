@@ -10,10 +10,14 @@ import org.springframework.context.annotation.Configuration;
 import java.io.IOException;
 
 /*
-配置就使用springboot 的redis 的配置。
+不能用springboot的配置，有个问题没调查明白。用此配置没问题。 把springboot 版本2.1.1升级到2.5.4没有问题
 文档：https://github.com/redisson/redisson/tree/master/redisson-spring-boot-starter
  */
-//@Configuration
+
+/*
+排除redisson的自动配置，采用此配置。
+ */
+@Configuration
 public class RedissonConfig {
     @Bean(destroyMethod = "shutdown")
     public RedissonClient redisson() throws IOException {

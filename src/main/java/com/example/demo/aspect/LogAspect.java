@@ -3,7 +3,6 @@ package com.example.demo.aspect;
 import com.alibaba.fastjson.JSON;
 import com.example.demo.model.entity.rabc.Users;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.slf4j.Logger;

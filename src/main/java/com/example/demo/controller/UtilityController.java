@@ -403,4 +403,16 @@ public class UtilityController {
     //endregion
 
 
+    //region apacheCommons
+    @GetMapping(value = "/apacheCommons")
+    public void apacheCommons() {
+        //判空不trim: cs == null || cs.length() == 0
+        org.apache.commons.lang3.StringUtils.isEmpty(" ");
+        //有判空和trim 效果 Character.isWhitespace
+        org.apache.commons.lang3.StringUtils.isBlank(" ");
+    }
+    //endregion
+
+
+
 }

@@ -109,30 +109,53 @@ spring:
       connection-timeout: 30000
       #connection-test-query: SELECT 1
   redis:
+    ##单机
     #  数据库索引
-    database: 5
+    database: 0
     # 远程服务器地址
     host: 127.0.0.1
     # 远程服务器端口
     port: 6379
-    # 验证码
+    # 集群配置也用此处写正确的密码
     password: fancky123456
-    redisson:
-      # 配置单点模式
-#     file: classpath:redisson.yml
-    #redis连接池 lettuce、jedis
+    # 链接超时时间（毫秒）
+    timeout: 30000
+
+        #redis连接池 lettuce、jedis。连接池 单机配置。默认集成lettuce
     lettuce:
       pool:
         # 最大空闲连接
-        max-idle: 8
+        max-idle: 64
         # 最小空闲链接
         min-idle: 0
         # 最大连接数（负数表示没有限制）
-        max-active: 8
+        max-active: 64
         # 最大阻塞等待时间（负数表示没有限制）
         max-wait: 0
-    # 链接超时时间（毫秒）
-    timeout: 50
+
+
+    redisson:
+    # 配置单点模式
+      file: classpath:redisson.yml
+#
+
+#    ##集群 注意：密码用上面密码配置
+#    cluster:
+#      nodes:
+#        - 127.0.0.1:7000
+#        - 127.0.0.1:7001
+#        - 127.0.0.1:7002
+#        - 127.0.0.1:7003
+#        - 127.0.0.1:7004
+#      max-redirects: 3
+
+#    ##哨兵 密码用上面密码配置
+#    sentinel:
+#      master: mymaster
+#      nodes:
+#        - 127.0.0.1:60001
+#        - 127.0.0.1:60002
+#        - 127.0.0.1:60003
 
   rabbitmq:
     host: 127.0.0.1

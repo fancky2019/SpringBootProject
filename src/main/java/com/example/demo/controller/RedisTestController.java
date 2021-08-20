@@ -4,6 +4,7 @@ import com.example.demo.model.pojo.Student;
 import com.example.demo.model.viewModel.MessageResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
 /*
 
  */
@@ -98,7 +100,7 @@ public class RedisTestController {
             //endregion
 
 
-            //region SortedSet
+            //region 数据结构ZSet--有序集合 SortedSet----zipList 、skipList
             ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
             zSetOperations.add("zSetKey1", "zSetValue1", 1);
             zSetOperations.add("zSetKey1", "zSetValue11", 11);
@@ -120,6 +122,9 @@ public class RedisTestController {
             //删除
             redisTemplate.delete("zSetKey1");
             //endregion
+
+            //region SortedSet
+
         } catch (Exception ex) {
             String msg = ex.toString();
             Integer m = 0;
@@ -246,13 +251,13 @@ public class RedisTestController {
             //                    *
 
             SetOperations<String, Student> setOperations = redisTemplate.opsForSet();
-            setOperations.add("setKey1", student1,student2,student3);
-            setOperations.add("setKey2", student1,student2);
+            setOperations.add("setKey1", student1, student2, student3);
+            setOperations.add("setKey2", student1, student2);
             setOperations.add("setKey3", student3);
             //HashSet--Set
             //取值
             Set<Student> setStr = setOperations.members("setKey1");
-            List<Student> studentList=new ArrayList<>(setStr);
+            List<Student> studentList = new ArrayList<>(setStr);
 
             Iterator<Student> stringIterator = setStr.iterator();
             while (stringIterator.hasNext()) {
@@ -269,7 +274,7 @@ public class RedisTestController {
             //endregion
 
 
-            //region SortedSet
+            //region 数据结构ZSet--有序集合 SortedSet----zipList 、skipList
 
             //数据结构
             //                                           Score
@@ -287,35 +292,54 @@ public class RedisTestController {
             //                           *                 *
 
 
-            ZSetOperations<String, Student> zSetOperations = redisTemplate.opsForZSet();
-            zSetOperations.add("zSetKey1", student1, 1);
-            zSetOperations.add("zSetKey1", student2, 11);
-            zSetOperations.add("zSetKey1", student3, 12);
-            zSetOperations.add("zSetKey2", student1, 4);
-            zSetOperations.add("zSetKey2", student2, 4);
-            zSetOperations.add("zSetKey3", student1, 3);
+            /*
+            sorted set有两种实现方式，一种是ziplist压缩表，一种是zset(dict、skiplist)，redis.conf有两个配置来控制，
+            当sorted set中的元素个数小于128时(即元素对member score的个数，共256个元素)，使用ziplist，
+            当元素对中member长度超过64个字节时使用zset。
+
+            zset配置
+            zset-max-ziplist-entries	128
+            zset-max-ziplist-value	64
+————————————————
+             */
+//            DefaultZSetOperations
+//            ZSetOperations<String, Student> zSetOperations1 = redisTemplate.opsForZSet();
+            ZSetOperations<String, Student> zSetOperations1 = redisTemplate.opsForZSet();
+            zSetOperations1.add("zSetKey1", student1, 1);
+            zSetOperations1.add("zSetKey1", student2, 11);
+            zSetOperations1.add("zSetKey1", student3, 12);
+            zSetOperations1.add("zSetKey2", student1, 4);
+            zSetOperations1.add("zSetKey2", student2, 4);
+            zSetOperations1.add("zSetKey3", student1, 3);
 
             //获取
             //取所有
-            Set<Student> zSetStr = zSetOperations.range("zSetKey1", 0, -1);
+            Set<Student> zSetStr = zSetOperations1.range("zSetKey1", 0, -1);
             //取三个
-            Set<Student> zSetStr1 = zSetOperations.range("zSetKey1", 0, 2);
-            studentList=new ArrayList<>(zSetStr1);
+            Set<Student> zSetStr1 = zSetOperations1.range("zSetKey1", 0, 2);
+            studentList = new ArrayList<>(zSetStr1);
             Iterator<Student> zSetStringIterator = zSetStr.iterator();
             while (zSetStringIterator.hasNext()) {
                 Student str = zSetStringIterator.next();
                 Integer n = 0;
-            };
-
+            }
 
             //删除
             //删除指定Key中的值
-            zSetOperations.remove("zSetKey1", student2,student3);
+            zSetOperations1.remove("zSetKey1", student2, student3);
             //当key中的值都删除，就把key也删除
-            zSetOperations.remove("zSetKey2", student1, student2);
+            zSetOperations1.remove("zSetKey2", student1, student2);
 
             redisTemplate.delete("zSetKey1");
             //endregion
+
+
+            redisTemplate.opsForValue().set("stringKey", "value");
+
+            int id1=1,id2=2;
+            redisTemplate.opsForValue().setBit("bitMapKey1",id1,true);
+            redisTemplate.opsForValue().setBit("bitMapKey2",id2,false);
+
         } catch (Exception ex) {
             String msg = ex.toString();
             Integer m = 0;
@@ -325,6 +349,8 @@ public class RedisTestController {
 
     //endregion
 
+    //region Redisson
+    //配置集群的时候;@SpringBootApplication(exclude = {RedissonAutoConfiguration.class})
     /*
     单Redis节点模式
     doc:https://github.com/redisson/redisson/wiki/%E7%9B%AE%E5%BD%95
@@ -332,13 +358,13 @@ public class RedisTestController {
     使用redisson 的配置没有成功。让redisson采用springboot的redis的配置
      */
     @RequestMapping("/testRedisson")
-    public String testRedisson(){
+    public String testRedisson() {
         //获取分布式锁，只要锁的名字一样，就是同一把锁
         RLock lock = redissonClient.getLock("redisKey_testRedisson");
 
         //加锁（阻塞等待），默认过期时间是30秒
 //        lock.lock();
-        try{
+        try {
             boolean isLocked = lock.isLocked();
             if (isLocked) {
                 logger.error(MessageFormat.format("Thread - {0} 获得锁失败！锁被占用！", Thread.currentThread().getId()));
@@ -354,8 +380,7 @@ public class RedisTestController {
             //或者直接返回
             isLocked = lock.isLocked();
 
-            if(isLocked)
-            {
+            if (isLocked) {
                 logger.info(MessageFormat.format("Thread - {0} 获得锁！", Thread.currentThread().getId()));
             }
         } catch (InterruptedException e) {
@@ -368,5 +393,5 @@ public class RedisTestController {
 
         return "Hello Redisson!";
     }
-
+    //endregion
 }
