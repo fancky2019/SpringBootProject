@@ -2,7 +2,10 @@ package com.example.demo.service.api;
 
 import com.example.demo.model.entity.newclassadmin.UserInfo;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 /**
@@ -41,6 +44,12 @@ public interface FeignClientTest {
     @GetMapping("/test/getUser")
     String getUser(@RequestParam String name);
 
+
+    @GetMapping("/test/getUser")
+    String getMinorDept(@RequestParam("userId")long userId, @RequestHeader("token")String token);
+
+
+//    String getUser(@RequestParam("name") String name);
     /**
      * 参数前要加 @RequestParam 或post @RequestBody
      *
@@ -49,4 +58,7 @@ public interface FeignClientTest {
      */
     @PostMapping("/test/addUser")
     String addUser(@RequestBody UserInfo userInfo);
+
+    @PostMapping("/test/addUser1")
+    String addUser1(@RequestBody @Validated UserInfo request, @RequestHeader("token") String token);
 }
