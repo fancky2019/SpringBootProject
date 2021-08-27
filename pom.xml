@@ -361,6 +361,7 @@
     </dependencies>
 
 
+<!--    整理非org.springframework.boot的版本依赖-->
     <dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -420,7 +421,6 @@
 
             </plugin>
 
-
             <!-- mybatis逆向工程 -->
             <plugin>
                 <groupId>org.mybatis.generator</groupId>
@@ -435,6 +435,7 @@
                     <overwrite>true</overwrite>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>
