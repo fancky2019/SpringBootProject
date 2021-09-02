@@ -67,6 +67,10 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
                 // 验证 token
                 try {
+                    //crm登录时候会把token做key将登录信息放入redis退出删除key，根据token到redis取值，如果没取到就登录，反之登录成功。
+                    // 但是这就是永久有效，没有有效期的限制了。
+
+
                     //不用校验自己手动解析
                     decodedJWT = jwtUtility.verifier(token);
                 } catch (TokenExpiredException e) {
