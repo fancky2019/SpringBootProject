@@ -29,3 +29,5 @@
        </otherwise>
     </choose>
 
+    5、    <insert id="insert" keyProperty="id" useGeneratedKeys="true"> 插入数据后生成的自增id自动添加到model的id属性中.
+
