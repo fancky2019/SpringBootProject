@@ -302,6 +302,9 @@ public class UtilityController {
         ** 匹配url中的0个或多个子目录 (matches zero or more directories in a path)
         {spring:[a-z]+} 匹配满足正则表达式[a-z]+的路径，这些路径赋值给变量"spring" (matches the regexp [a-z]+ as a path variable named "spring"）
          */
+        String strBlan = " ";
+        boolean res = org.apache.commons.lang3.StringUtils.isBlank(strBlan); //会trim
+        boolean res1 = org.apache.commons.lang3.StringUtils.isNotEmpty(strBlan); //不会trim
 
 
         AntPathMatcher antPathMatcher = new AntPathMatcher();
@@ -398,7 +401,7 @@ public class UtilityController {
         //MD5加密不可逆  比较密码  和MD5加密后的字符串比较
         //对密码进行 md5 加密
 
-          this.demoProductService.batchInsert();
+        this.demoProductService.batchInsert();
     }
     //endregion
 
@@ -412,7 +415,6 @@ public class UtilityController {
         org.apache.commons.lang3.StringUtils.isBlank(" ");
     }
     //endregion
-
 
 
 }
