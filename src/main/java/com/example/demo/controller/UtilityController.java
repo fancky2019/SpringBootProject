@@ -219,6 +219,9 @@ public class UtilityController {
 
         /// 包含Servlet配置的路径; /sbp/utility/resolveUrl
         String requestUri = request.getRequestURI();
+        //请求头
+        String value = request.getHeader("Content-Type");
+        List<String> headerNames = Collections.list(request.getHeaderNames());
         //参数名称
         List<String> paramNames = Collections.list(request.getParameterNames());
         HashMap<String, String> paramAndValues = new HashMap<>();
@@ -241,7 +244,9 @@ public class UtilityController {
     @PostMapping(value = "/getPostBody")
     public Student getPostBody(HttpServletRequest request) throws Exception {
 
-
+        //请求头
+        String value = request.getHeader("Content-Type");
+        List<String> headerNames = Collections.list(request.getHeaderNames());
         String bodyString = getBodyString(request);
         //“”   request.getReader(); c
         //String re = getBodyString(request);
@@ -287,6 +292,7 @@ public class UtilityController {
     //region utils
     @GetMapping(value = "/springUtils")
     public String springUtils(HttpServletRequest request) {
+
         String str = " sd 1 ";
         boolean isNullOrEmpty = StringUtils.isEmpty(str);
         //C# trim
@@ -413,6 +419,8 @@ public class UtilityController {
         org.apache.commons.lang3.StringUtils.isEmpty(" ");
         //有判空和trim 效果 Character.isWhitespace
         org.apache.commons.lang3.StringUtils.isBlank(" ");
+        List<String> list=new ArrayList<>();
+        org.apache.commons.collections4.CollectionUtils.isEmpty(list);
     }
     //endregion
 
