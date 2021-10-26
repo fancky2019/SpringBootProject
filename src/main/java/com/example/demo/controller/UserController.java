@@ -14,8 +14,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 
 /*
@@ -68,11 +73,11 @@ public class UserController {
      */
 
 
- /*
- *建议用@Service加别名
- *如果类用@Component做注解而不是@Service，就不用了指定别名。
- * 如果用@Service注解，多个类实现接口时候就要指定别名：声明@Service("InterfaceTestImpB")，调用 @Autowired、 @Qualifier("InterfaceTestImpA")
- */
+    /*
+     *建议用@Service加别名
+     *如果类用@Component做注解而不是@Service，就不用了指定别名。
+     * 如果用@Service注解，多个类实现接口时候就要指定别名：声明@Service("InterfaceTestImpB")，调用 @Autowired、 @Qualifier("InterfaceTestImpA")
+     */
 
     @Autowired
     @Qualifier("InterfaceTestImpA")
@@ -81,7 +86,6 @@ public class UserController {
     @Autowired
 //    @Qualifier("InterfaceTestImpB")
     InterfaceTest interfaceTestImpB;
-
 
 
     //获取配置文件的值
@@ -94,16 +98,6 @@ public class UserController {
 
     private static Logger logger = LogManager.getLogger(UserController.class);
     // private static Logger logger = LogManager.getLogger("business");
-
-
-
-
-
-
-
-
-
-
 
 
     //http://localhost:8080/user/getUser?id=1
@@ -205,11 +199,28 @@ public class UserController {
         return MessageFormat.format("{0}:{1}", applicationName, person.getName() + "," + person.getAge());
     }
 
+    //不能在参数前加注解@RequestParam或@RequestBody
+    //自动生成实体对象
+    //http://localhost:8081/user/getPerson/fancky/2
+    //SpringBootProject:fancky,2
+    @GetMapping("/getPersonRequestParam")//注：参数占位符中的名称要和形参的名称一样，否则无法赋值
+    @ResponseBody
+    public String getPersonRequestParam(Person person, HttpServletRequest request,HttpServletResponse response) {
+
+//         org.apache.catalina.connector.RequestFacade
+//        public class RequestFacade implements HttpServletRequest
+//         org.apache.catalina.connector.ResponseFacade
+//        public class ResponseFacade implements HttpServletResponse
+                //请求头
+        String value = request.getHeader("Content-Type");
+        List<String> headerNames = Collections.list(request.getHeaderNames());
+        return MessageFormat.format("{0}:{1}", applicationName, person.getName() + "," + person.getAge());
+    }
+
     @GetMapping("/autowiredTest")
     @ResponseBody
-    public String autowiredTest()
-    {
-       return this.interfaceTestImpA.fun()+":"+interfaceTestImpB.fun();
+    public String autowiredTest() {
+        return this.interfaceTestImpA.fun() + ":" + interfaceTestImpB.fun();
     }
 }
 
