@@ -34,6 +34,10 @@ import java.util.List;
 
 
 //@RestController:@RestController注解，相当于@Controller+@ResponseBody两个注解的结合
+//                 @Controller 返回传统视图 html
+//                @ResponseBody 返回json或xml格式
+//
+
 //用@RestController这个注解，就不能返回jsp,html页面，视图解析器无法解析jsp,html页面
 @Controller
 @RequestMapping("/user")

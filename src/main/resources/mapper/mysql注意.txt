@@ -31,3 +31,7 @@
 
     5、    <insert id="insert" keyProperty="id" useGeneratedKeys="true"> 插入数据后生成的自增id自动添加到model的id属性中.
 
+    6、   一级缓存：要开启事务，在同一事务内两次查询利用缓存。实际没多大用
+          二级缓存 <select id="getPageData" useCache="true" resultType="com.example.demo.model.viewModel.ProductVM" >
+          resultType 要实现Serializable接口，可序列化。
+

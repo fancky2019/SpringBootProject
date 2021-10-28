@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
+/*
+https://mybatis.org/mybatis-3/zh/sqlmap-xml.html
+ */
 @RestController
 @RequestMapping("/mybatis")
 public class MybatisController {
@@ -23,6 +26,24 @@ public class MybatisController {
      f返回整形：不必指定resultType,指定了还报错
      */
 
+    /*
+    ${}变量占位符：的功能是直接进行字符串拼接,将参数替换${param}。一般用于数据库基础连接配置。
+    #{}参数占位符，变量会被变异成？。
+     */
+
+
+    /*
+         一级缓存：要开启事务，在同一事务内两次查询利用缓存。实际没多大用
+          二级缓存 <select id="getPageData" useCache="true" resultType="com.example.demo.model.viewModel.ProductVM" >
+          resultType 要实现Serializable接口，可序列化。
+
+         二级缓存：
+         demo  wms.ProductMapper
+         Cache Hit
+        mapper设置  <cache eviction="LRU" flushInterval="100000" readOnly="true" size="1024"/>
+        查询语句设置  <select id="getPageData" useCache="true" resultType="com.example.demo.model.viewModel.ProductVM" >
+
+     */
 
     @Autowired
     private MybatisSqlService mybatisSqlService;

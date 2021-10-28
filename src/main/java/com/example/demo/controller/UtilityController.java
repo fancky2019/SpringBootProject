@@ -32,7 +32,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /*
-@Scope bean作用域
+在service类上加注解@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+ConfigurableBeanFactory.SCOPE_PROTOTYPE，即“prototype”
+ConfigurableBeanFactory.SCOPE_SINGLETON，即“singleton”
+WebApplicationContext.SCOPE_REQUEST，即“request”
+WebApplicationContext.SCOPE_SESSION，即“session”
+
+
+@Scope bean作用域 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 1、singleton：单例模式 默认，在spring IoC容器仅存在一个Bean实例，Bean以单例方式存在，bean作用域范围的默认值。
 2、prototype ：原型模式，每次从容器中调用Bean时，都返回一个新的实例，即每次调用getBean()时，相当于执行newXxxBean()。
 3、request：每次HTTP请求都会创建一个新的Bean，该作用域仅适用于web的Spring WebApplicationContext环境。

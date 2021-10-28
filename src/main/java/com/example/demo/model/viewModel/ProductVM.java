@@ -1,9 +1,11 @@
 package com.example.demo.model.viewModel;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class ProductVM extends Page {
+
+public class ProductVM extends Page implements Serializable {
     private Integer id;
     private String guid;
     private Integer stockid;
