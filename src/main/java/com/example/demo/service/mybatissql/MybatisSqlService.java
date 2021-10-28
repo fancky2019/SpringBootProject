@@ -41,7 +41,7 @@ public class MybatisSqlService {
         } catch (Exception ex) {
             message.setSuccess(false);
             message.setMessage(ex.getMessage());
-            logger.error(ex.toString());
+            logger.error("",ex);
         } finally {
             return message;
         }
@@ -72,7 +72,7 @@ public class MybatisSqlService {
         } catch (Exception ex) {
             message.setSuccess(false);
             message.setMessage(ex.getMessage());
-            logger.error(ex.toString());
+            logger.error("",ex);
         } finally {
             return message;
         }
@@ -109,7 +109,7 @@ public class MybatisSqlService {
         } catch (Exception ex) {
             message.setSuccess(false);
             message.setMessage(ex.getMessage());
-            logger.error(ex.toString());
+            logger.error("",ex);
         } finally {
             return message;
         }
@@ -127,7 +127,7 @@ public class MybatisSqlService {
         } catch (Exception ex) {
             message.setSuccess(false);
             message.setMessage(ex.getMessage());
-            logger.error(ex.toString());
+            logger.error("",ex);
         } finally {
             return message;
         }
