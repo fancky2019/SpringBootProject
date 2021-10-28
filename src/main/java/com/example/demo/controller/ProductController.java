@@ -41,6 +41,8 @@ public class ProductController {
         MessageResult<PageData<ProductVM>> message = new MessageResult<>();
         try {
             message = productService.getPageData(viewModel);
+//            Thread.sleep(10*1000);
+//            message = productService.getPageData(viewModel);//查看缓存问题
         } catch (Exception e) {
             message.setSuccess(false);
             message.setMessage(e.getMessage());
