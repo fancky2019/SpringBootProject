@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sun.reflect.generics.tree.VoidDescriptor;
 
+import java.text.MessageFormat;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
@@ -32,8 +33,10 @@ public class UserService {
     @Async
     public void asyncFun() {
         try {
-            Thread.sleep(2000);
-            System.out.println("completed!");
+            long threadId = Thread.currentThread().getId();
+            System.out.println(MessageFormat.format("thread - {0} execute!", threadId));
+            Thread.sleep(20000);
+            System.out.println(MessageFormat.format("thread {0} completed!", threadId));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
