@@ -9,6 +9,13 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
+
+/*
+    参见SpringCloud 项目
+     微服务注册到注册中心的名称一样，网关路由转发会采用负载均衡
+     #会用自带的负载均衡：http://localhost:8080/gateway1/user?name=a
+      # 客户端负载均衡实现：两个微服务注册到注册中心的名称一样，ip和端口不一样
+ */
 @RestController
 @RequestMapping("/feignclient")
 public class FeignClientController {

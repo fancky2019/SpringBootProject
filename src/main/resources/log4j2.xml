@@ -24,7 +24,7 @@
         <!--        smtpPassword:设置QQ邮件客户端时候的授权码-->
         <smtp name="Mail" subject="Error Log" to="709737588@qq.com,517312606@qq.com" from="1513918351@qq.com"
               replyTo="1513918351@qq.com" smtpHost="smtp.qq.com" smtpDebug="false" smtpProtocol="smtps"
-              smtpUsername="1513918351@qq.com" smtpPassword="ipxczauxtutggecb" smtpPort="465" bufferSize="1024">
+              smtpUsername="1513918351@qq.com" smtpPassword="ifxoxskborkojeea" smtpPort="465" bufferSize="1024">
               <!--定义error级别日志才发-->
             <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
 		</smtp>
@@ -53,10 +53,13 @@
     </appenders>
 
     <loggers>
+<!--        过滤框架的debug-->
         <logger name="org.springframework" level="INFO"></logger>
         <logger name="org.mybatis" level="INFO"></logger>
         <logger name="org.thymeleaf" level="INFO"/>
         <logger name="org.redisson" level="INFO"/>
+        <logger name="com.zaxxer.hikari" level="INFO"/>
+        <logger name="io.lettuce.core" level="INFO"/>
 
         <!--        异步-->
         <AsyncRoot level="all">
