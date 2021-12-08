@@ -41,6 +41,17 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 //@EnableSwagger2  //EnableSwagger2  http://localhost:8081/swagger-ui.html
 public class SpringBootProjectApplication {
 
+    /*
+    @SpringBootApplication 继承多个注解
+    
+    @SpringBootConfiguration
+    @EnableAutoConfiguration
+    @ComponentScan
+    @Filter
+     */
+
+
+
     public static void main(String[] args) {
         SpringApplication.run(SpringBootProjectApplication.class, args);
     }
