@@ -43,7 +43,7 @@ public class SpringBootProjectApplication {
 
     /*
     @SpringBootApplication 继承多个注解
-    
+
     @SpringBootConfiguration
     @EnableAutoConfiguration
     @ComponentScan
