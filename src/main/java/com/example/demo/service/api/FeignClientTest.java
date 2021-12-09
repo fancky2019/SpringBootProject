@@ -31,7 +31,7 @@ import java.util.List;
 //<version>2.1.0.RELEASE</version>
 //</dependency>
 //2、启动类@EnableFeignClients//启用feign。微服务之间调用,服务发现
-
+//不能识别服务中有没有请求的路径方法。
 @FeignClient(name = "feignClientTest", url = "${sbp.ordermigratedbtoolurl}")
 public interface FeignClientTest {
 
