@@ -13,6 +13,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -100,6 +101,24 @@ public class RabbitMQConfig {
 
         return rabbitTemplate;
     }
+
+    /*
+    多线程消费
+     */
+    @Bean("customContainerFactory")
+    public SimpleRabbitListenerContainerFactory containerFactory(SimpleRabbitListenerContainerFactoryConfigurer configurer, ConnectionFactory connectionFactory) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConcurrentConsumers(10);  //设置线程数
+        factory.setMaxConcurrentConsumers(10); //最大线程数
+        configurer.configure(factory, connectionFactory);
+        return factory;
+    }
+
+
+
+
+
+
 
 //    @Bean
 //    public BatchingRabbitTemplate batchingRabbitTemplate(ConnectionFactory connectionFactory) {
