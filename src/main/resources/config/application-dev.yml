@@ -23,7 +23,7 @@ mybatis:
 
 #mybatis 分页
 pagehelper:
-##  mysql、sqlserver2012，没找到sqlserver2008版本的
+  ##  mysql、sqlserver2012，没找到sqlserver2008版本的
   helperDialect: sqlserver2012
   reasonable: true
   supportMethodsArguments: true
@@ -45,12 +45,12 @@ spring:
   #    static-locations: classpath:/
 
   datasource:
-#    # sqlserver
-#    url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS
-#    #url: jdbc:sqlserver://localhost:1433;DatabaseName=RABC
-#    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-#    username: sa
-#    password: 123456
+    #    # sqlserver
+    #    url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS
+    #    #url: jdbc:sqlserver://localhost:1433;DatabaseName=RABC
+    #    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    #    username: sa
+    #    password: 123456
 
     #mysql
     #具体参见类DynamicDataSourceAspect 说明
@@ -121,7 +121,7 @@ spring:
     # 链接超时时间（毫秒）
     timeout: 30000
 
-        #redis连接池 lettuce、jedis。连接池 单机配置。默认集成lettuce
+    #redis连接池 lettuce、jedis。连接池 单机配置。默认集成lettuce
     lettuce:
       pool:
         # 最大空闲连接
@@ -135,27 +135,27 @@ spring:
 
 
     redisson:
-    # 配置单点模式
+      # 配置单点模式
       file: classpath:redisson.yml
-#
+  #
 
-#    ##集群 注意：密码用上面密码配置
-#    cluster:
-#      nodes:
-#        - 127.0.0.1:7000
-#        - 127.0.0.1:7001
-#        - 127.0.0.1:7002
-#        - 127.0.0.1:7003
-#        - 127.0.0.1:7004
-#      max-redirects: 3
+  #    ##集群 注意：密码用上面密码配置
+  #    cluster:
+  #      nodes:
+  #        - 127.0.0.1:7000
+  #        - 127.0.0.1:7001
+  #        - 127.0.0.1:7002
+  #        - 127.0.0.1:7003
+  #        - 127.0.0.1:7004
+  #      max-redirects: 3
 
-#    ##哨兵 密码用上面密码配置
-#    sentinel:
-#      master: mymaster
-#      nodes:
-#        - 127.0.0.1:60001
-#        - 127.0.0.1:60002
-#        - 127.0.0.1:60003
+  #    ##哨兵 密码用上面密码配置
+  #    sentinel:
+  #      master: mymaster
+  #      nodes:
+  #        - 127.0.0.1:60001
+  #        - 127.0.0.1:60002
+  #        - 127.0.0.1:60003
 
   rabbitmq:
     host: 127.0.0.1
@@ -230,7 +230,7 @@ spring:
         #max-poll-records: 10
         #fetch-max-wait:
         #listener:
-        #手动提交模式
+      #手动提交模式
       #ack-mode: manual
 
 #Feign  开启熔断
@@ -278,3 +278,26 @@ cron: '0/8 * * * * ?'
 sbp:
   ordermigratedbtoolurl: http://localhost:8101
 
+#配置文件不要用駝峰写法 单词全小写或者用短横线连接 如：config.configmodel 或config.config-model
+#在竖线位置粘贴
+config:
+  configmodel:
+    fist-Name: fancky
+    address: 上海市
+    salary: 20
+    array: #数组
+      - cat
+      - dog
+      - pig
+    pets: [ cat,dog,pig ]
+    maps: { k1: v1,k2: 12 } #map写法
+    persons: #d对象数组
+      - { name: 张三,age: 12 }
+      - { name: li,age: 13 }
+      - name: fancky1
+        age: 27
+      - name: fancky2
+        age: 28
+      - name: fancky3
+        age: 29
+    conditional-on-property: false
