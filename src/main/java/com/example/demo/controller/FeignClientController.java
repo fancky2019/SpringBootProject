@@ -23,6 +23,13 @@ public class FeignClientController {
     //@Resource:如果既不制定name也不制定type属性，这时将通过反射机制使用byName自动注入策略
     //@Autowired:按照byType自动注入。
 
+   /*
+      Client 接口默认方法execute
+      HttpURLConnection connection = this.convertAndSend(request, options);
+
+      OkHttpClient
+      execute
+     */
 
     /**
      * 其他微服务调用：
