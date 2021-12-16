@@ -136,6 +136,14 @@
 <!--              <version>3.0.3</version>-->
         </dependency>
 
+        <!--用okhttp 代替默认的  HTTP Client，JDK 原生的 URLConnection 发送HTTP请求，没有连接池-->
+        <!-- https://mvnrepository.com/artifact/io.github.openfeign/feign-okhttp -->
+        <dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-okhttp</artifactId>
+            <!--			<version>11.7</version>-->
+		</dependency>
+
         <!-- 熔断仪表盘-->
         <!--熔断器 健康检查-->
         <dependency>
