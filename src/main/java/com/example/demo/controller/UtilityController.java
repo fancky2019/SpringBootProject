@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.pojo.EnumParamPojo;
 import com.example.demo.model.pojo.UnitEnum;
@@ -7,6 +8,7 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.quartz.QuartzJobComponent;
 import com.example.demo.service.demo.DemoProductService;
+import com.example.demo.service.demo.PersonService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.java.swing.plaf.motif.MotifRadioButtonMenuItemUI;
 import com.sun.jersey.core.util.StringIgnoreCaseKeyComparator;
@@ -29,6 +31,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /*
@@ -76,6 +79,10 @@ public class UtilityController {
 
     @Autowired
     private DemoProductService demoProductService;
+
+    @Autowired
+    private PersonService personService;
+
 
     //region  切面
     /*
@@ -426,10 +433,36 @@ public class UtilityController {
         org.apache.commons.lang3.StringUtils.isEmpty(" ");
         //有判空和trim 效果 Character.isWhitespace
         org.apache.commons.lang3.StringUtils.isBlank(" ");
-        List<String> list=new ArrayList<>();
+        List<String> list = new ArrayList<>();
         org.apache.commons.collections4.CollectionUtils.isEmpty(list);
     }
     //endregion
 
+
+    //region 事务传播
+
+    /*
+    REQUIRED： 没有事务就开启，有事务就加入，不指定的话默认为该类型
+    SUPPORTS： 有事务就加入，没有就无事务运行
+    MANDATORY： 加入当前事务，如果不存在则抛出异常
+    REQUIRES_NEW： 没有就开启，有了挂起原来的，开启新的
+    NOT_SUPPORTED： 有了挂起，没有就无事务运行
+    NEVER： 以非事务方式执行，如果存在事务则抛出异常
+    NESTED： 如果当前事务存在，则在嵌套事务中执行，否则行为类似于REQUIRED
+     */
+    @GetMapping(value = "/propagation")
+    public void propagation() {
+        try {
+            Person person = new Person();
+            person.setName("fancky");
+            person.setAge(27);
+            person.setBirthday(LocalDateTime.now());
+            personService.insert(person);
+        } catch (Exception e) {
+            logger.error("", e);
+        }
+
+    }
+    //endregion
 
 }

@@ -65,7 +65,7 @@
         <AsyncRoot level="all">
             <appender-ref ref="Console"/>
             <appender-ref ref="RollingFile"/>
-            <appender-ref ref="Mail"/>
+<!--            <appender-ref ref="Mail"/>-->
         </AsyncRoot>
 
         <!--        同步-->
