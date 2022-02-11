@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.rabc.Users;
+import com.example.demo.model.pojo.BeanLife;
 import com.example.demo.model.pojo.EnumParamPojo;
 import com.example.demo.model.pojo.UnitEnum;
 import com.example.demo.model.viewModel.MessageResult;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.MediaType;
 import org.springframework.util.*;
@@ -83,6 +85,8 @@ public class UtilityController {
     @Autowired
     private PersonService personService;
 
+//    @Autowired
+//    private BeanLife beanLife;
 
     //region  切面
     /*
@@ -464,5 +468,19 @@ public class UtilityController {
 
     }
     //endregion
+
+    //region BeanLife
+
+    @GetMapping(value = "/beanLifeTest")
+    public void beanLifeTest() {
+        try {
+
+        } catch (Exception e) {
+            logger.error("", e);
+        }
+
+    }
+    //endregion
+
 
 }
