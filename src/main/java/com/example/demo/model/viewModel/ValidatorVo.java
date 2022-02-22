@@ -31,10 +31,10 @@ JSR提供的校验注解：
 
 
 Hibernate Validator提供的校验注解：
-@NotBlank(message =)   验证字符串非null，且长度必须大于0
+@NotBlank(message =)   验证字符串非null也不为“”，且长度必须大于0
 @Email  被注释的元素必须是电子邮箱地址
 @Length(min=,max=)  被注释的字符串的大小必须在指定的范围内
-@NotEmpty   被注释的字符串的必须非空
+@NotEmpty   被注释的字符串的必须不为null和“”
 @Range(min=,max=,message=)  被注释的元素必须在合适的范围内
  */
 @Getter

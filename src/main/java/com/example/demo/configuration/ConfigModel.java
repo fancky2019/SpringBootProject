@@ -1,4 +1,4 @@
-package com.example.demo.model.config;
+package com.example.demo.configuration;
 
 import com.example.demo.model.viewModel.Person;
 import lombok.Data;
@@ -47,7 +47,7 @@ public @interface ConditionalOnProperty {
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "config.config-model") //prefix= "配置项"
+@ConfigurationProperties(prefix = "config.config-model") //prefix= "配置项"   读取并与 bean 绑定。
 
 //@ConditionalOnProperty(name = "config.config-model.conditional-on-property", matchIfMissing = false)// name 没有配置就不加载
 //@ConditionalOnProperty(name = "config.config-model.conditional-on-property", havingValue = "true", matchIfMissing = true)// name + havingValue 控制配置bean 是否加载

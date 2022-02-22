@@ -7,6 +7,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class BeanLifeTestConfig {
+
+    //@ConfigurationProperties(prefix = "library")  读取并与 bean 绑定。
+
     /**
      * 指定initMethod和destroyMethod 在BeanLife内的方法
      * @return
