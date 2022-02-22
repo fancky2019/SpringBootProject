@@ -52,6 +52,7 @@ public class UserController {
     @Qualifier 注解的Bean不同类型的实例,通过在类型名称上加名称(@Service("UserService"))，用@Qualifier("typeAlia")区分
      */
 //    @Resource("UserService")
+    @Qualifier("typeAlia")
     @Resource
     private UserService userService;
 

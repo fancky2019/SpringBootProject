@@ -6,6 +6,8 @@ import com.example.demo.model.entity.wms.Order;
 import com.example.demo.model.entity.wms.OrderDetail;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.OrderManagerVM;
+import com.example.demo.service.demo.PersonService;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -17,12 +19,20 @@ import java.sql.Timestamp;
 import java.util.UUID;
 
 /*
+编程式事务:TransactionManager 手动管理事务
+声明式事务:@Transactional
+
+
+@Transactional 注解一般可以作用在类或者方法上。 作用于类：当把@Transactional 注解放在类上时，表示所有该类的 public 方法都配置相同的事务属性信息。
+ 作用于方法：当类配置了@Transactional，方法也配置了@Transactional，方法的事务会覆盖类的事务配置信息。
+
 springboot 支持单数据源事务。至于多数据源事务参照分布式事务。
 springboot开启事务很简单，只需要一个注解@Transactional 就可以了。
 因为在springboot中已经默认对jpa、jdbc、mybatis开启了事事务，
 引入它们依赖的时候，事物就默认开启
  */
 @Service
+// @Transactional(rollbackFor = Exception.class)
 public class OrderManagerService {
 
     @Autowired
@@ -60,6 +70,9 @@ public class OrderManagerService {
 //    @Transactional(isolation = Isolation.READ_COMMITTED,propagation = Propagation.REQUIRED)
     public MessageResult<Void> addOrder(OrderManagerVM orderManagerVM) {
         MessageResult<Void> messageResult = new MessageResult<>();
+
+        //获取当前类的代理对象
+//        OrderManagerService orderManagerService = (OrderManagerService) AopContext.currentProxy();
         try {
             Order order = new Order();
             order.setGuid(UUID.randomUUID().toString());

@@ -395,7 +395,9 @@ public class RedisTestController {
         //获取分布式锁，只要锁的名字一样，就是同一把锁
         RLock lock = redissonClient.getLock("redisKey_testRedisson");
 
-        //加锁（阻塞等待），默认过期时间是30秒
+        //使用默认看门狗延期机制    this.lockWatchdogTimeout = 30000L;
+       // lock.lock();
+        //加锁（阻塞等待），默认过期时间是30秒。   this.lockWatchdogTimeout = 30000L;
 //        lock.lock();
         try {
             boolean isLocked = lock.isLocked();

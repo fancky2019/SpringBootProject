@@ -17,10 +17,16 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
+ *
  * 该类放在单独一个文件夹
  * 只能捕捉进入controller里异常的代码。
- * <p>
+ *
  * extends ResponseEntityExceptionHandler
+ *
+ *
+ * @ControllerAdvice :注解定义全局异常处理类
+ * @ExceptionHandler :注解声明异常处理方法
+ *
  */
 @ControllerAdvice
 //@RestControllerAdvice
@@ -40,6 +46,7 @@ public class GlobalExceptionHandler {
         messageResult.setCode(500);
         messageResult.setMessage(ex.getMessage());
         messageResult.setSuccess(false);
+//        Void.class
         //     MDC.put("traceId", traceId);//traceId在过滤器的destroy()中清除
      //   messageResult.setTraceId(MDC.get("traceId"));
 //        return ResponseEntity.ok(messageResult);
