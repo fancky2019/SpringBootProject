@@ -2,36 +2,27 @@ package com.example.demo.controller;
 
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.rabc.Users;
-import com.example.demo.model.pojo.BeanLife;
 import com.example.demo.model.pojo.EnumParamPojo;
 import com.example.demo.model.pojo.UnitEnum;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
-import com.example.demo.quartz.QuartzJobComponent;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.PersonService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.java.swing.plaf.motif.MotifRadioButtonMenuItemUI;
-import com.sun.jersey.core.util.StringIgnoreCaseKeyComparator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Scope;
-import org.springframework.http.MediaType;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.example.demo.model.pojo.Student;
 
-import javax.print.DocFlavor;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -154,11 +145,23 @@ public class UtilityController {
     /**
      * Jackson对枚举进行序列化,默认输出枚举的String名称。名字要对应，区分大小写。如:Zhi
      * 前端传枚举成员名称（注：不能加双引号）给枚举字段。
+     *
+     *
+     * spring 默认根据枚举名称来映射字段。
      */
     @RequestMapping("/enumParamTest")
     public EnumParamPojo enumParamTest(EnumParamPojo pojo) {
-        String zhiStr = UnitEnum.Zhi.toString();//Zhi
-        String tou = UnitEnum.Tou.toString();//TOU
+        //名称要对应
+        UnitEnum unitEnum=   UnitEnum.fromString("ZHi");
+        UnitEnum unitEnum1=   UnitEnum.fromString("Tou");
+
+        //如果后端用数据接收。此种使用
+        if(1==UnitEnum.TOU.getValue())
+        {
+
+        }
+        String zhiStr = UnitEnum.ZHI.toString();//Zhi
+        String tou = UnitEnum.TOU.toString();//TOU
         return pojo;
     }
     //endregion
