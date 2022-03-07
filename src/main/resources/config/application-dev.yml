@@ -283,6 +283,33 @@ cron: '0/8 * * * * ?'
 sbp:
   ordermigratedbtoolurl: http://localhost:8101
 
+elasticjob:
+  tracing:
+    type: RDB  #日志跟踪，利用springboot的数据库配置，在数据库建两张表 job_execution_log和job_status_trace_log
+  regCenter:
+    serverLists: localhost:2181
+    namespace: elasticjob-lite-springboot
+  jobs:
+    simpleJob: #job名称不能重复
+      elasticJobClass: com.example.demo.jobs.SpringBootSimpleJob
+      cron: 0/20 * * * * ?   #秒分钟小时
+      shardingTotalCount: 3 #3个分片，三台机器执行次任务
+      shardingItemParameters: 0=Beijing,1=Shanghai,2=Guangzhou
+      job-parameter: fanckytest
+      overwrite: true #否则job接收不到参数
+      props:
+        script.command.line: "echo SCRIPT Job: "
+    testSimpleJob:
+      elasticJobClass: com.example.demo.jobs.TestSimpleJob
+      cron: 0/10 * * * * ?
+      shardingTotalCount: 1
+      overwrite: true #否则job接收不到参数
+  dump:
+    port: 9889
+    enabled: true
+
+
+
 #配置文件不要用駝峰写法 单词全小写或者用短横线连接 如：config.configmodel 或config.config-model
 #在竖线位置粘贴
 config:
