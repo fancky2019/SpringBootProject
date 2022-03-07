@@ -54,12 +54,14 @@
 
     <loggers>
 <!--        过滤框架的debug-->
-        <logger name="org.springframework" level="INFO"></logger>
-        <logger name="org.mybatis" level="INFO"></logger>
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="org.mybatis" level="INFO"/>
         <logger name="org.thymeleaf" level="INFO"/>
         <logger name="org.redisson" level="INFO"/>
         <logger name="com.zaxxer.hikari" level="INFO"/>
         <logger name="io.lettuce.core" level="INFO"/>
+        <logger name="org.apache" level="INFO"/>
+        <logger name="io.netty.channel.nio" level="INFO"/>
 
         <!--        异步-->
         <AsyncRoot level="all">
