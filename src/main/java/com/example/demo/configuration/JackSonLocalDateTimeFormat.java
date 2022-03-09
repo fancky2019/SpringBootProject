@@ -1,4 +1,4 @@
-package com.onlyedu.ordermigratedbtool.configuration;
+package com.example.demo.configuration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;

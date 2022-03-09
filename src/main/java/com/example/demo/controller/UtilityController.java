@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.dto.JacksonDto;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.pojo.EnumParamPojo;
@@ -8,6 +9,7 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.PersonService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -145,19 +147,18 @@ public class UtilityController {
     /**
      * Jackson对枚举进行序列化,默认输出枚举的String名称。名字要对应，区分大小写。如:Zhi
      * 前端传枚举成员名称（注：不能加双引号）给枚举字段。
-     *
-     *
+     * <p>
+     * <p>
      * spring 默认根据枚举名称来映射字段。
      */
     @RequestMapping("/enumParamTest")
     public EnumParamPojo enumParamTest(EnumParamPojo pojo) {
         //名称要对应
-        UnitEnum unitEnum=   UnitEnum.fromString("ZHi");
-        UnitEnum unitEnum1=   UnitEnum.fromString("Tou");
+        UnitEnum unitEnum = UnitEnum.fromString("ZHi");
+        UnitEnum unitEnum1 = UnitEnum.fromString("Tou");
 
         //如果后端用数据接收。此种使用
-        if(1==UnitEnum.TOU.getValue())
-        {
+        if (1 == UnitEnum.TOU.getValue()) {
 
         }
         String zhiStr = UnitEnum.ZHI.toString();//Zhi
@@ -482,6 +483,36 @@ public class UtilityController {
             logger.error("", e);
         }
 
+    }
+    //endregion
+
+    //region Jackson
+
+    @GetMapping(value = "/jacksonTest")
+    public JacksonDto jacksonTest() {
+
+        JacksonDto jacksonDto = new JacksonDto();
+        jacksonDto.setId(1);
+        jacksonDto.setCityName("shanghai");
+        jacksonDto.setGrade("高二");
+        jacksonDto.setCreateTime(LocalDateTime.now());
+        jacksonDto.setBirthday(new Date());
+
+        List<Person> people = new ArrayList<>();
+        people.add(new Person(1L, "fancky1", 27, LocalDateTime.now()));
+        people.add(new Person(2L, "fancky2", 27, LocalDateTime.now()));
+        jacksonDto.setPerson(people);
+
+        try {
+            String json = mapper.writeValueAsString(jacksonDto);
+            JacksonDto dto = mapper.readValue(json, JacksonDto.class);
+            int m=0;
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+
+        return jacksonDto;
     }
     //endregion
 

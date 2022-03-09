@@ -34,6 +34,10 @@ pagehelper:
 spring:
   application:
     name: SpringBootProject
+#  jackson: # 无法处理LocalDateTime格式化问题，使用代码配置类
+#    date-format: yyyy-MM-dd HH:mm:ss
+#    time-zone: GMT+8
+#    default-property-inclusion: non_null
   thymeleaf:
   #    view:
   #      prefix: /
