@@ -64,7 +64,7 @@ global session作用域类似于标准的HTTP Session作用域，不过它仅仅
 public class UtilityController {
 
     //Lombox 的注解 @Slf4j 相当于下面语句
-    private static final Logger logger = LogManager.getLogger(UtilityController.class);
+    private static final Logger LOGGER = LogManager.getLogger(UtilityController.class);
 
     @Value("${demo.multiEnvironment}")
     private String multiEnvironment;
@@ -383,9 +383,9 @@ public class UtilityController {
     //traceId 添加实现 参见过滤器 TraceIdFilter
     @GetMapping(value = "/log4j2test")
     public String log4j2Test() throws InterruptedException {
-        logger.debug("debug log4j2test ");
-        logger.info("info log4j2test ");
-        logger.error("error log4j2test ");
+        LOGGER.debug("debug log4j2test ");
+        LOGGER.info("info log4j2test ");
+        LOGGER.error("error log4j2test ");
 //        Thread.sleep(10000);
         int m = Integer.parseInt("m");
         return "log4j2Test";
@@ -394,9 +394,9 @@ public class UtilityController {
 
     @GetMapping(value = "/log4j2test2")
     public String log4j2Test2() {
-        logger.debug("debug log4j2test ");
-        logger.info("info log4j2test ");
-        logger.error("error log4j2test ");
+        LOGGER.debug("debug log4j2test ");
+        LOGGER.info("info log4j2test ");
+        LOGGER.error("error log4j2test ");
         int m = Integer.parseInt("m");
         return "log4j2Test";
     }
@@ -467,7 +467,7 @@ public class UtilityController {
             person.setBirthday(LocalDateTime.now());
             personService.insert(person);
         } catch (Exception e) {
-            logger.error("", e);
+            LOGGER.error("", e);
         }
 
     }
@@ -480,7 +480,7 @@ public class UtilityController {
         try {
 
         } catch (Exception e) {
-            logger.error("", e);
+            LOGGER.error("", e);
         }
 
     }

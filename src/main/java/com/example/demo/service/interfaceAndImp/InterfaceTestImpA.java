@@ -1,6 +1,5 @@
-package com.example.demo.service.test;
+package com.example.demo.service.interfaceAndImp;
 
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 
@@ -10,11 +9,12 @@ import org.springframework.stereotype.Service;
  * 如果用@Service注解，多个类实现接口时候就要指定别名：声明@Service("InterfaceTestImpB")，调用 @Autowired、 @Qualifier("InterfaceTestImpA")
  */
 //@Service
-//@Service("InterfaceTestImpB")
-@Component
-public class InterfaceTestImpB implements InterfaceTest {
+@Service("InterfaceTestImpA")
+//@Component
+public class InterfaceTestImpA implements InterfaceTest{
+
     @Override
     public String fun() {
-        return "InterfaceTestImpB";
+        return "InterfaceTestImpA";
     }
 }

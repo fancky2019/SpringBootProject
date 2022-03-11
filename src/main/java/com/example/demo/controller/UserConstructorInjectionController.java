@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.service.test.InterfaceTest;
-import com.example.demo.service.test.InterfaceTestImpA;
-import com.example.demo.service.test.InterfaceTestImpB;
+import com.example.demo.service.interfaceAndImp.InterfaceTest;
+import com.example.demo.service.interfaceAndImp.InterfaceTestImpA;
+import com.example.demo.service.interfaceAndImp.InterfaceTestImpB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /*
