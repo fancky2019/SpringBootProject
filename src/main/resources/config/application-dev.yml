@@ -29,6 +29,8 @@ pagehelper:
   supportMethodsArguments: true
   params: count=countSql
 
+
+
 #开发配
 
 spring:
@@ -236,6 +238,9 @@ spring:
         #listener:
       #手动提交模式
       #ack-mode: manual
+
+
+
 
 #Feign  开启熔断
 #注意：节点不在spring内
