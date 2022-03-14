@@ -291,6 +291,7 @@ cron: '0/8 * * * * ?'
 
 sbp:
   ordermigratedbtoolurl: http://localhost:8101
+  ESCertPath: D:\work\software\es\elasticsearch-8.0.0\config\certs\http_ca.crt
 
 elasticjob:
   tracing:
