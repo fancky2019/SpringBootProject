@@ -73,13 +73,6 @@ public class ESDemoProductService {
      */
 
 
-
-
-
-
-
-
-
     /*
     matchPhraseQuery和matchQuery等的区别，在使用matchQuery等时，在执行查询时，搜索的词会被分词器分词，而使用matchPhraseQuery时，
     不会被分词器分词， 而是直接以一个短语的形式查询，而如果你在创建索引所使用的field的value中没有这么一个短语（顺序无差，且连接在一起），
@@ -139,10 +132,60 @@ public class ESDemoProductService {
 
 
          */
+
+
+        //多个字段and
+//        NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
+//                //查询条件:es支持分词查询，最小是一个词，要精确匹配分词
+//                .withQuery(QueryBuilders.queryStringQuery("china fancky").defaultField("product_name"))
+//                .withQuery(QueryBuilders.rangeQuery("price").from("5").to("9"))//多个条件and 的关系
+//                //分页
+//                .withPageable(PageRequest.of(0, 5))
+//                //排序
+//                .withSort(SortBuilders.fieldSort("id").order(SortOrder.DESC))
+//                //高亮字段显示
+////                .withHighlightFields(new HighlightBuilder.Field("product_name"))
+//                .build();
+//        SearchHits<DemoProduct> search = elasticsearchRestTemplate.search(nativeSearchQuery, DemoProduct.class);
+//        List<DemoProduct> products1=search.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
+
+
+//        //查询title字段中，包含 ”开发”、“开放" 这个字符串的document；相当于把"浦东开发开放"分词了，再查询；
+//        QueryBuilders.queryStringQuery("开发开放").defaultField("title");
+//        //不指定feild，查询范围为所有feild
+//        QueryBuilders.queryStringQuery("青春");
+//       //指定多个feild
+//        QueryBuilders.queryStringQuery("青春").field("title").field("content");
+//
+//
+//        QueryBuilders.termQuery("title", "开发开放");
+//        QueryBuilders.termsQuery("fieldName", "fieldlValue1","fieldlValue2...");
+//
+//        QueryBuilders.matchQuery("title", "开发开放");
+//        QueryBuilders.multiMatchQuery("fieldlValue", "fieldName1", "fieldName2", "fieldName3");
+//
+//
+//
+
+        //正常使用match query 进行简单模糊就可以，query_string 功能复杂。
+
+        //多个字段or
         NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
                 //查询条件:es支持分词查询，最小是一个词，要精确匹配分词
-                .withQuery(QueryBuilders.queryStringQuery("china fancky").defaultField("product_name"))
-                .withQuery(QueryBuilders.rangeQuery("id").from("10").to("15"))//多个条件and 的关系
+                //两个字段中or
+//                .withQuery(QueryBuilders.boolQuery()
+//                        .must(QueryBuilders.queryStringQuery("中国徐家汇").defaultField("product_name"))
+//                        .must(QueryBuilders.queryStringQuery("上海中国").defaultField("produce_address"))
+//                        .must(QueryBuilders.rangeQuery("price").from("5").to("9"))
+//                )
+
+                //在指定字段中查找值
+//                .withQuery(QueryBuilders.queryStringQuery("合肥").field("product_name").field("produce_address"))
+                .withQuery(QueryBuilders.multiMatchQuery("安徽合肥","product_name","produce_address"))
+
+
+
+//                .withQuery(QueryBuilders.rangeQuery("price").from("5").to("9"))//多个条件and 的关系
                 //分页
                 .withPageable(PageRequest.of(0, 5))
                 //排序
@@ -151,10 +194,7 @@ public class ESDemoProductService {
 //                .withHighlightFields(new HighlightBuilder.Field("product_name"))
                 .build();
         SearchHits<DemoProduct> search = elasticsearchRestTemplate.search(nativeSearchQuery, DemoProduct.class);
-        List<DemoProduct> products1=search.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
-
-
-
+        List<DemoProduct> products1 = search.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
 
 
         return null;

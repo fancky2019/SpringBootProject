@@ -14,6 +14,9 @@ userName 和password都是  root
 
 使用：一、Global Setting添加注册中心填写ZK信息，保存之后连接.
      二、Job Operation进行job自定义操作。
+
+
+ElasticJob依赖zookeeper,项目启动要启动ZK，redisson依赖redis要启动redis
  */
 @RestController
 @RequestMapping("/elasticJob")
