@@ -1,6 +1,5 @@
-package com.example.demo.configuration;
+package com.example.demo.config;
 
-import com.example.demo.controller.UtilityController;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
