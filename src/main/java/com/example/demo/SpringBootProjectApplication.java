@@ -49,8 +49,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 //@MapperScan("com.example.demo.dao")
 //类不在主目录下需要指定扫描类完全限定名同时要加主类路径
-@ComponentScan(basePackages = {"com.example.fanckyspringbootstarter",
-                               "com.example.demo"})
+//@ComponentScan(basePackages = {"com.example.fanckyspringbootstarter",
+//                               "com.example.demo"})
 
 @EnableCaching   //redis
 @EnableScheduling //quartz
