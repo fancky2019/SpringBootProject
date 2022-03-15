@@ -1,4 +1,4 @@
-package com.example.demo.configuration;
+package com.example.demo.config;
 
 import com.example.demo.model.viewModel.Person;
 import lombok.Data;
@@ -43,6 +43,13 @@ public @interface ConditionalOnProperty {
     boolean matchIfMissing() default false;
 }
 */
+
+/*
+#配置文件不要用駝峰写法 单词全小写或者用短横线连接 如：config.configmodel 或config.config-model
+#在竖线位置粘贴
+ */
+
+
 
 
 @Data

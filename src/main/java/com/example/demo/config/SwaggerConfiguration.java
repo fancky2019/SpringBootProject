@@ -1,4 +1,4 @@
-package com.example.demo.configuration;
+package com.example.demo.config;
 
 import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

@@ -1,4 +1,4 @@
-package com.example.demo.configuration;
+package com.example.demo.config;
 
 import com.example.demo.Interceptor.AuthenticationInterceptor;
 import org.springframework.context.annotation.Bean;

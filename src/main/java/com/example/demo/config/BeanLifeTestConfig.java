@@ -1,6 +1,5 @@
-package com.example.demo.configuration;
+package com.example.demo.config;
 
-import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.pojo.BeanLife;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
