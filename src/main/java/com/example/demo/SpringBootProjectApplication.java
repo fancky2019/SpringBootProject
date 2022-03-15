@@ -11,9 +11,35 @@ import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboard;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+
+
+/*
+ springboot springcloud 版本对应 https://spring.io/projects/spring-cloud#overview
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //默认扫描的是启动类所在的包及其子包
 //由于采用多数据源，禁用springboot默认的数据源配置，多数据源不适合微服务设计理念废弃。采用分布式事务。
@@ -22,9 +48,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 //@SpringBootApplication
 
 //@MapperScan("com.example.demo.dao")
-//类不在主目录下需要指定扫描类完全限定名
-//@ComponentScan(basePackages = {"com.example.demo.service"})
-
+//类不在主目录下需要指定扫描类完全限定名同时要加主类路径
+@ComponentScan(basePackages = {"com.example.fanckyspringbootstarter",
+                               "com.example.demo"})
 
 @EnableCaching   //redis
 @EnableScheduling //quartz

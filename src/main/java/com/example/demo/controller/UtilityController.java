@@ -9,6 +9,8 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.PersonService;
+//import com.example.fanckyspringbootstarter.config.FanckyTest;
+import com.example.fanckyspringbootstarter.config.FanckyTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -77,6 +79,9 @@ public class UtilityController {
 
     @Autowired
     private PersonService personService;
+
+    @Autowired
+    private FanckyTest fanckyTest;
 
 //    @Autowired
 //    private BeanLife beanLife;
@@ -516,5 +521,13 @@ public class UtilityController {
     }
     //endregion
 
+
+    //region Jackson
+
+    @GetMapping(value = "/starterTest")
+    public String starterTest() {
+        return this.fanckyTest.getHost()+":"+this.fanckyTest.getPort();
+    }
+    //endregion
 
 }

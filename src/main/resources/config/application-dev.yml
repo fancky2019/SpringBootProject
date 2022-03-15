@@ -239,6 +239,9 @@ spring:
       #手动提交模式
       #ack-mode: manual
 
+  fanckytest:
+    host: 127.0.0.1
+    port: 8082
 
 
 
