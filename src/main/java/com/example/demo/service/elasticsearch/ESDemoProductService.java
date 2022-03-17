@@ -19,7 +19,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.data.elasticsearch.repository.support.SimpleElasticsearchRepository;
 import org.springframework.stereotype.Service;
 
-import javax.xml.ws.ServiceMode;
+//import javax.xml.ws.ServiceMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
