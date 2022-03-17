@@ -16,8 +16,19 @@ import java.util.List;
 @RequestMapping("/Elasticsearch")
 public class ElasticsearchController {
 
-    @Autowired
-    private ESDemoProductService esDemoProductService;
+//    @Autowired
+//    private ESDemoProductService esDemoProductService;
+
+
+    private final ESDemoProductService esDemoProductService;
+
+
+    //构造函数注入
+    public ElasticsearchController(ESDemoProductService esDemoProductService) {
+        this.esDemoProductService = esDemoProductService;
+    }
+
+
 
     @RequestMapping("/getByProductName")
     public MessageResult<List<DemoProduct>> getByProductName() {

@@ -9,7 +9,7 @@ import org.apache.shardingsphere.elasticjob.reg.zookeeper.ZookeeperConfiguration
 import org.apache.shardingsphere.elasticjob.reg.zookeeper.ZookeeperRegistryCenter;
 import org.apache.shardingsphere.elasticjob.simple.job.SimpleJob;
 import org.springframework.stereotype.Component;
-import sun.reflect.generics.tree.VoidDescriptor;
+//import sun.reflect.generics.tree.VoidDescriptor;
 
 import javax.annotation.Resource;
 import java.util.TimeZone;
