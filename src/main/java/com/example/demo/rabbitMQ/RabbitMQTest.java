@@ -38,7 +38,7 @@ public class RabbitMQTest {
 
         try {
 
-
+//            directExchangeProducer.produceDelayedMessage();
             directExchangeProducer.producer();
 //        fanoutExchangeProducer.producer();
 //        topicExchangeProducer.producer();
