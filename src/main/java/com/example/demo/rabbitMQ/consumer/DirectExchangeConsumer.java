@@ -13,6 +13,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
@@ -39,7 +41,8 @@ public class DirectExchangeConsumer {
             Person person = JSON.parseObject(receivedMessage, Person.class);
             System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
 
-            Integer m = Integer.parseInt("m");
+            //设置异常进入死信队列
+//            Integer m = Integer.parseInt("m");
             //手动Ack listener.simple.acknowledge-mode: manual
 //            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
@@ -61,17 +64,16 @@ public class DirectExchangeConsumer {
     }
 
 
-
     @RabbitHandler
-    @RabbitListener(queues = {DIRECT_QUEUE_NAME},containerFactory = "customContainerFactory")
+    @RabbitListener(queues = {DIRECT_QUEUE_NAME}, containerFactory = "customContainerFactory")
     public void consumerByMultiThread(String receivedMessage, Channel channel, Message message) throws Exception {
         try {
             //  System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
 
             Person person = JSON.parseObject(receivedMessage, Person.class);
             System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
-
-            Integer m = Integer.parseInt("m");
+            //设置异常进入死信队列
+//            Integer m = Integer.parseInt("m");
             //手动Ack listener.simple.acknowledge-mode: manual
 //            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
@@ -92,4 +94,43 @@ public class DirectExchangeConsumer {
 
     }
 
+
+    //region  rabbitmq_delayed_message_exchange
+    public static final String DELAYED_MESSAGE_EXCHANGE = "DelayedMessageSpringBoot";
+    // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
+    public static final String DELAYED_MESSAGE_KEY = "DelayedMessageRoutingKeySpringBoot";
+    public static final String DELAYED_MESSAGE_QUEUE = "DelayedMessageQueueSpringBoot";
+
+    //endregion
+    @RabbitHandler
+    @RabbitListener(queues = DELAYED_MESSAGE_QUEUE)//参数为队列名称
+    public void receivedDelayedMsg(String receivedMessage, Channel channel, Message message) throws Exception {
+        try {
+            //  System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
+            DateTimeFormatter dateTimeFormatter=DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss SSS");
+            String dateStr=dateTimeFormatter.format(LocalDateTime.now());
+            Person person = JSON.parseObject(receivedMessage, Person.class);
+            System.out.println(dateStr+":"+"DirectExchange Queue:" + DELAYED_MESSAGE_QUEUE + " receivedMsg: " + receivedMessage);
+            //设置异常进入死信队列
+//            Integer m = Integer.parseInt("m");
+            //手动Ack listener.simple.acknowledge-mode: manual
+//            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        } catch (Exception e) {
+
+
+            //死信
+            // channel.basicNack(message.getMessageProperties().getDeliveryTag(), false,false);
+
+            //  设置死信队列设置自动Ack. 否则不能进入死信队列。
+            //将异常抛出，不能吞了，否则不能重试。和mybatis的事务回滚有点像，否则mybatis不能回滚。
+            //  throw new AmqpRejectAndDontRequeueException(e.getMessage()) ;
+            throw e;
+            // e.printStackTrace();
+//            logger.error(e.getMessage());
+            //丢弃这条消息
+            //channel.basicNack(message.getMessageProperties().getDeliveryTag(), false,false);
+        }
+
+
+    }
 }

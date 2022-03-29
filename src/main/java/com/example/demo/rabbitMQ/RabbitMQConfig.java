@@ -3,6 +3,7 @@ package com.example.demo.rabbitMQ;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -75,6 +76,15 @@ public class RabbitMQConfig {
     public static final String FANOUT_QUEUE_NAME1 = "FanoutExchangeQueueSpringBoot1";
     //endregion
 
+
+    //region  rabbitmq_delayed_message_exchange
+    public static final String DELAYED_MESSAGE_EXCHANGE = "DelayedMessageSpringBoot";
+    // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
+    public static final String DELAYED_MESSAGE_KEY = "DelayedMessageRoutingKeySpringBoot";
+    public static final String DELAYED_MESSAGE_QUEUE= "DelayedMessageQueueSpringBoot";
+    //endregion
+
+
     //endregion
 
 //    @Autowired
@@ -85,11 +95,24 @@ public class RabbitMQConfig {
     public RabbitTemplate RabbitTemplate(ConnectionFactory connectionFactory) {
         //公平分发模式在Spring-amqp中是默认的
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-
+        rabbitTemplate.setMandatory(true);//新版加此句
         // 消息返回, yml需要配置 publisher-returns: true
+        // 新版 #发布确认 publisher-confirms已经修改为publisher-confirm-type，
         rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
-            System.out.println("消息失败返回成功 ");
+            System.out.println("消息生产失败返回成功 ");
         });
+
+//        CachingConnectionFactory.ConfirmType
+
+
+//        NONE ，禁用发布确认模式，是默认值。
+//
+//        CORRELATED，发布消息时会携带一个CorrelationData，被ack/nack时CorrelationData会被返回进行对照处理，CorrelationData可以包含比较丰富的元信息进行回调逻辑的处理。
+//
+//        SIMPLE，当被ack/nack后会等待所有消息被发布，如果超时会触发异常，甚至关闭连接通道。
+
+     //当消息路由失败时候先执行  setConfirmCallsetReturnCallback后执行
+
         // 消息确认, yml需要配置 publisher-confirms: true
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
             if (ack) {
@@ -180,12 +203,32 @@ public class RabbitMQConfig {
     //    @Bean("deadLetterExchange")
     @Bean("deadDirectExchange")
     public DirectExchange deadDirectExchange() {
+//        autoDelete属性
+//            @Queue: 当所有消费客户端连接断开后，是否自动删除队列 true：删除false：不删除
+//
+//            @Exchange：当所有绑定队列都不在使用时，是否自动删除交换器 true：删除false：不删除
+
+        /*
+          默认持久化交换机： (String name, boolean durable, boolean autoDelete)
+                          this(name, true, false);
+         */
         DirectExchange directExchange = new DirectExchange(DEAD_DIRECT_EXCHANGE_NAME);
         return directExchange;
     }
 
     @Bean("deadDirectQueue")
     public Queue deadDirectQueue() {
+
+
+        /*
+        exclusive
+        只对首次声明它的连接（Connection）可见
+        会在其连接断开的时候自动删除。
+         */
+        /*
+        (String name, boolean durable, boolean exclusive, boolean autoDelete)
+           this(name, true, false, false);
+         */
         Queue queue = new Queue(DEAD_DIRECT_QUEUE_NAME);
         return queue;
     }
@@ -231,7 +274,6 @@ public class RabbitMQConfig {
         return binding;
     }
     //endregion
-
 
     //region Topic
     @Bean
@@ -308,6 +350,34 @@ public class RabbitMQConfig {
         return binding;
     }
     //endregion
+
+
+    //region DelayedMessage
+    @Bean
+    public DirectExchange directDelayedMessageExchange() {
+        DirectExchange directExchange = new DirectExchange(DELAYED_MESSAGE_EXCHANGE);
+        directExchange.setDelayed(true);
+        return directExchange;
+    }
+
+    @Bean
+    public Queue directDelayedMessageQueue() {
+
+//        QueueBuilder.durable(DIRECT_QUEUE_NAME).withArguments(args).build();
+        return new Queue(DELAYED_MESSAGE_QUEUE);
+    }
+
+    /**
+     * 绑定队列、交换机、路由Key
+     */
+    @Bean
+    public Binding bindingDirectDelayedMessage() {
+        Binding binding = BindingBuilder.bind(directDelayedMessageQueue()).to(directDelayedMessageExchange()).with(DELAYED_MESSAGE_KEY);
+        return binding;
+    }
+    //endregion
+
+
 
     //endregion
 }
