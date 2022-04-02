@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /*
 在service类上加注解@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -527,6 +528,82 @@ public class UtilityController {
 //        return this.fanckyTest.getHost()+":"+this.fanckyTest.getPort();
         return  null;
     }
+    //endregion
+
+
+    //region threadExceptionTest
+
+    @GetMapping(value = "/threadExceptionTest")
+    public String threadExceptionTest() {
+//        return this.fanckyTest.getHost()+":"+this.fanckyTest.getPort();
+        threadPoolExceptionTest();
+//        threadExceptionTestFun();
+        return  null;
+    }
+
+    private void threadPoolExceptionTest() {
+
+        try {
+            CompletableFuture<Integer> completableFuture = CompletableFuture.supplyAsync(() ->
+            {
+                //必须在线程内部进行异常处理，无法抛出到外边的另外一个线程。和C#一样
+//                Integer m = Integer.parseInt("m");
+                try {
+                    Integer m = Integer.parseInt("m");
+                    int ii=0;
+                } catch (Exception e) {
+                    System.out.println("Thead 内部:"+e.getMessage());
+                    throw e;
+                }
+                return 1;
+            });
+
+            // get 内部还是通过 LockSupport.unpark()、 LockSupport.park() block 当前线程。知道线程完成
+            completableFuture.get();
+            int n=0;
+        } catch (Exception e) {
+            //外层捕获，没有进入catch
+            System.out.println("Thead 外部:" + e.getMessage());
+            int m = 0;
+        }
+
+
+        System.out.println("threadPoolExceptionTest Completed");
+    }
+
+
+    /*
+    异常不会抛出到主线程，主线程代码已经执行完
+     */
+    private void threadExceptionTestFun() {
+
+        try {
+            Thread thread = new Thread(() ->
+            {
+                //必须在线程内部进行异常处理，无法抛出到外边的另外一个线程。和C#一样
+                Integer m = Integer.parseInt("m");
+//                try {
+//                    Integer m = Integer.parseInt("m");
+//                } catch (Exception e) {
+//                    System.out.println("Thead 内部:"+e.getMessage());
+//                    throw e;
+//                }
+
+            });
+
+            //外部主线程已经执行完，如果内部线程抛异常将不会进入外部线程
+            thread.start();
+        } catch (Exception e) {
+            //外层捕获，没有进入catch
+            System.out.println("Thead 外部:" + e.getMessage());
+            int m = 0;
+        }
+
+
+        System.out.println("threadExceptionTestFun Completed");
+    }
+
+
     //endregion
 
 }
