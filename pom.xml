@@ -189,16 +189,16 @@
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>2.1.4</version>
+            <version>2.2.0</version>
         </dependency>
 
-        <!-- mybatis pagehelper 分页 -->
-        <!-- https://mvnrepository.com/artifact/com.github.pagehelper/pagehelper-spring-boot-starter -->
-        <dependency>
-            <groupId>com.github.pagehelper</groupId>
-            <artifactId>pagehelper-spring-boot-starter</artifactId>
-            <version>1.4.1</version>
-        </dependency>
+<!--        &lt;!&ndash; mybatis pagehelper 分页 &ndash;&gt;-->
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.github.pagehelper/pagehelper-spring-boot-starter &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.pagehelper</groupId>-->
+<!--            <artifactId>pagehelper-spring-boot-starter</artifactId>-->
+<!--            <version>1.4.1</version>-->
+<!--        </dependency>-->
 
 
         <!--Redis依赖-->

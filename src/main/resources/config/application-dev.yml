@@ -16,18 +16,20 @@ eureka:
 #mapper路径和实体对象路径
 #要配置mybatis不然mybatis有可能无法Invalid bound statement问题
 mybatis:
+#  mybatis全局配置文件
+  config-location: classpath:mybatis-config.xml
   #  Mapper文件存放的位置
-  mapperLocations: classpath:mapper/**/*.xml
+  mapper-locations: classpath:mapper/**/*.xml
   #  实体类所在的包
-  typeAliasesPackage: com.example.demo.model.entity
+  type-aliases-package: com.example.demo.model.entity
 
-#mybatis 分页
-pagehelper:
-  ##  mysql、sqlserver2012，没找到sqlserver2008版本的
-  helperDialect: sqlserver2012
-  reasonable: true
-  supportMethodsArguments: true
-  params: count=countSql
+##mybatis 分页 pageHelper插件4.0.0以后的版本支持自动识别使用的数据库
+#pagehelper:
+#  ##  mysql、sqlserver2012，没找到sqlserver2008版本的
+#  helperDialect: sqlserver2012
+#  reasonable: true
+#  supportMethodsArguments: true
+#  params: count=countSql
 
 
 

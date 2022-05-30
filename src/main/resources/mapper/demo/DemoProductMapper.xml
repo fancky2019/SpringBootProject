@@ -59,8 +59,15 @@ useCache="true"
     id, guid, product_name, product_style, image_path, create_time, modify_time, `status`, 
     description, `timestamp`
   </sql>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select 
+<!--  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">-->
+<!--    select -->
+<!--    <include refid="Base_Column_List" />-->
+<!--    from demo_product-->
+<!--    where id = #{id,jdbcType=INTEGER}-->
+<!--  </select>-->
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.demo.DemoProduct">
+    select
     <include refid="Base_Column_List" />
     from demo_product
     where id = #{id,jdbcType=INTEGER}
