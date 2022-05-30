@@ -4,6 +4,7 @@ import com.example.demo.dao.demo.DemoProductMapper;
 import com.example.demo.dao.rabc.AuthoritiesMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.service.rabc.AuthoritiesService;
+import kotlin.UByte;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class DemoProductService {
         return 0;
     }
 
-    @Transactional(rollbackFor = Exception.class,propagation = Propagation.NOT_SUPPORTED)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.NOT_SUPPORTED)
     public int insert() {
         List<DemoProduct> list = new ArrayList<>();
         for (int i = 0; i < 1; i++) {
@@ -77,5 +78,10 @@ public class DemoProductService {
         int m = Integer.parseInt("m");
         return 0;
     }
+
+    public DemoProduct selectByPrimaryKey(Integer id) {
+        return this.demoProductMapper.selectByPrimaryKey(id);
+    }
+
 
 }
