@@ -81,7 +81,7 @@ public class RabbitMQConfig {
     public static final String DELAYED_MESSAGE_EXCHANGE = "DelayedMessageSpringBoot";
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
     public static final String DELAYED_MESSAGE_KEY = "DelayedMessageRoutingKeySpringBoot";
-    public static final String DELAYED_MESSAGE_QUEUE= "DelayedMessageQueueSpringBoot";
+    public static final String DELAYED_MESSAGE_QUEUE = "DelayedMessageQueueSpringBoot";
     //endregion
 
 
@@ -102,6 +102,14 @@ public class RabbitMQConfig {
             System.out.println("消息生产失败返回成功 ");
         });
 
+        //比上面的方法多一个s是Returns不是Return
+        //ReturnedMessage  待确认
+        rabbitTemplate.setReturnsCallback(returnedMessage ->
+        {
+            String failedMessage = new String(returnedMessage.getMessage().getBody());
+            System.out.println("消息生产失败返回成功 - " + failedMessage);
+        });
+
 //        CachingConnectionFactory.ConfirmType
 
 
@@ -111,7 +119,7 @@ public class RabbitMQConfig {
 //
 //        SIMPLE，当被ack/nack后会等待所有消息被发布，如果超时会触发异常，甚至关闭连接通道。
 
-     //当消息路由失败时候先执行  setConfirmCallsetReturnCallback后执行
+        //当消息路由失败时候先执行  setConfirmCallsetReturnCallback后执行
 
         // 消息确认, yml需要配置 publisher-confirms: true
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
@@ -136,11 +144,6 @@ public class RabbitMQConfig {
         configurer.configure(factory, connectionFactory);
         return factory;
     }
-
-
-
-
-
 
 
 //    @Bean
@@ -257,7 +260,7 @@ public class RabbitMQConfig {
         // Queue(String name, boolean durable, boolean exclusive, boolean autoDelete, Map<String, Object> arguments)
         HashMap<String, Object> args = new HashMap<>();
 //        args.put("x-message-ttl", 30000);
-        // 设置该Queue的死信的信箱
+        // 设置该Queue的死信的队列
         args.put("x-dead-letter-exchange", DEAD_DIRECT_EXCHANGE_NAME);
         // 设置死信routingKey
         args.put("x-dead-letter-routing-key", DEAD_DIRECT_ROUTING_KEY);
@@ -376,7 +379,6 @@ public class RabbitMQConfig {
         return binding;
     }
     //endregion
-
 
 
     //endregion
