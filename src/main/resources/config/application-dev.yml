@@ -32,9 +32,7 @@ mybatis:
 #  params: count=countSql
 
 
-
 #开发配
-
 spring:
   application:
     name: SpringBootProject
@@ -116,20 +114,39 @@ spring:
       max-lifetime: 1800000
       connection-timeout: 60000
       #connection-test-query: SELECT 1
+
   redis:
     ##单机
     #  数据库索引
     database: 0
+
+#    单机
     # 远程服务器地址
     host: 127.0.0.1
     # 远程服务器端口
     port: 6379
+
+
+#    #配置集群，自动写入集群
+#    ##集群 注意：密码用上面密码配置 127.0.0.1:7001,127.0.0.1:7002,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005,127.0.0.1:7006 #集群节点
+#    cluster:
+#      nodes:
+#        - 127.0.0.1:7000
+#        - 127.0.0.1:7001
+#        - 127.0.0.1:7002
+#        - 127.0.0.1:7003
+#        - 127.0.0.1:7004
+#        - 127.0.0.1:7005
+#      max-redirects: 3
+
+
     # 集群配置也用此处写正确的密码
     password: fancky123456
     # 链接超时时间（毫秒）
     timeout: 30000
 
     #redis连接池 lettuce、jedis。连接池 单机配置。默认集成lettuce
+#    jedis:
     lettuce:
       pool:
         # 最大空闲连接
@@ -141,11 +158,6 @@ spring:
         # 最大阻塞等待时间（负数表示没有限制）
         max-wait: 0
 
-
-    redisson:
-      # 配置单点模式
-      file: classpath:redisson.yml
-  #
 
   #    ##集群 注意：密码用上面密码配置
   #    cluster:
@@ -164,6 +176,13 @@ spring:
   #        - 127.0.0.1:60001
   #        - 127.0.0.1:60002
   #        - 127.0.0.1:60003
+
+
+    #springboot 配置未成功，参见代码的配置
+    redisson:
+      file: classpath:redisson-config.yml
+
+
 
   rabbitmq:
     host: 127.0.0.1

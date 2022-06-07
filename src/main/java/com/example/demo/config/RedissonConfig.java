@@ -2,11 +2,13 @@ package com.example.demo.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
 import org.redisson.config.SingleServerConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.File;
 import java.io.IOException;
 
 /*
@@ -28,15 +30,33 @@ public class RedissonConfig {
 //                .setPassword("fancky123456");
 //        return Redisson.create(config);
 
-        //默认数据库index:0
-        //redisson-->connectionManager-->config-->database
-        Config config = new Config();
-        ((SingleServerConfig) config.useSingleServer().setTimeout(1000000))
-                .setAddress("redis://127.0.0.1:6379")
-                .setPassword("fancky123456");
+
+//        //单机
+//        //默认数据库index:0
+//        //redisson-->connectionManager-->config-->database
+//        Config config = new Config();
+//        ((SingleServerConfig) config.useSingleServer().setTimeout(1000000))
+//                .setAddress("redis://127.0.0.1:6379")
+//                .setPassword("fancky123456");
 
 
 //        // connects to 127.0.0.1:6379 by default
+//        return Redisson.create(config);
+
+
+//        //集群
+//        Config config = new Config();
+//        config.useClusterServers()
+//                .setScanInterval(2000) // 集群状态扫描间隔时间，单位是毫秒
+//                //可以用"rediss://"来启用SSL连接
+//                .addNodeAddress("redis://127.0.0.1:7000", "redis://127.0.0.1:7001")
+//                .addNodeAddress("redis://127.0.0.1:7002");
+//
+//        RedissonClient redisson = Redisson.create(config);
+
+
+//        Config  config = Config.fromYAML(new File("redisson-config.yml"));
+        Config  config = Config.fromYAML(RedissonConfig.class.getClassLoader().getResource("redisson-config.yml"));
         return Redisson.create(config);
     }
 }
