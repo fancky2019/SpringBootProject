@@ -78,7 +78,7 @@ public class SpringBootProjectApplication {
      */
 
 
-
+    //    RedisAutoConfiguration re=new RedisAutoConfiguration();
     public static void main(String[] args) {
         SpringApplication.run(SpringBootProjectApplication.class, args);
     }
