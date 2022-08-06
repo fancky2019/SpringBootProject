@@ -187,8 +187,8 @@ spring:
   rabbitmq:
     host: 127.0.0.1
     port: 5672
-    username: fancky
-    password: 123456
+    username: guest
+    password: guest
     #发布确认 publisher-confirms已经修改为publisher-confirm-type，
     publisher-confirm-type: CORRELATED
     # 开启发送失败退回
@@ -315,7 +315,7 @@ cron: '0/8 * * * * ?'
 
 sbp:
   ordermigratedbtoolurl: http://localhost:8101
-  ESCertPath: D:\work\software\es\elasticsearch-8.0.0\config\certs\http_ca.crt
+  ESCertPath: D:\Work\DeveloperSoftware\ES\elasticsearch-8.3.3\config\certs\http_ca.crt
 
 elasticjob:
   tracing:

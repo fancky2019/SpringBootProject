@@ -93,9 +93,9 @@ public class ElasticsearchRestClientConfig extends AbstractElasticsearchConfigur
         }
 
         final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
-                .connectedTo("192.168.125.166:9200")
+                .connectedTo("192.168.0.106:9200")
                 .usingSsl(this.getSSLContext(certificateBase64))
-                .withBasicAuth("elastic", "2yaE2Ye9*abw=WfUoTHx")
+                .withBasicAuth("elastic", "XjOhFgxdt120jjo1MMaN")
                 .build();
 
         return RestClients.create(clientConfiguration).rest();

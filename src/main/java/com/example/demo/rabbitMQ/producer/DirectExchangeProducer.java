@@ -131,6 +131,11 @@ public class DirectExchangeProducer {
 
 
     /*
+
+  doc -->Community Plugins 下载  rabbitmq_delayed_message_exchange 放到 C:\Program Files\RabbitMQ Server\rabbitmq_server-3.10.5\plugins
+
+  C:\Program Files\RabbitMQ Server\rabbitmq_server-3.10.5\sbin 目录执行命令 rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+
     延迟队列：只是在交换器上暂存，等过期时间到了 才会发往队列。
     通过 x-delayed-message 声明的交换机（具体代码请看下面config下的配置类交换机定义参数），它的消息在发布之后不会立即进入队列，先将消息保存至 Mnesia（一个分布式数据库管理系统，适合于电信和其它需要持续运行和具备软实时特性的 Erlang 应用。目前资料介绍的不是很多）
      */

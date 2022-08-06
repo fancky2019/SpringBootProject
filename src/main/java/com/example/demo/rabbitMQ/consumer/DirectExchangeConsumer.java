@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
-//@RabbitListener(queues = "DirectExchangeQueueSpringBoot")//参数为队列名称
+@RabbitListener(queues = "DirectExchangeQueueSpringBoot")//参数为队列名称
 public class DirectExchangeConsumer {
 
     private static Logger logger = LogManager.getLogger(DirectExchangeConsumer.class);
