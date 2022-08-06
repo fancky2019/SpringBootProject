@@ -7,7 +7,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 @Component
-@RabbitListener
+//@RabbitListener
 public class FanoutExchangeConsumer {
     public static final String FANOUT_QUEUE_NAME = "FanoutExchangeQueueSpringBoot";
     public static final String FANOUT_QUEUE_NAME1 = "FanoutExchangeQueueSpringBoot1";

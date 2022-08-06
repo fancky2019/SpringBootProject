@@ -98,12 +98,12 @@ public class RabbitMQConfig {
         rabbitTemplate.setMandatory(true);//新版加此句
         // 消息返回, yml需要配置 publisher-returns: true
         // 新版 #发布确认 publisher-confirms已经修改为publisher-confirm-type，
-        rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
-            System.out.println("消息生产失败返回成功 ");
-        });
+//        rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
+//            System.out.println("消息生产失败返回成功 ");
+//        });
 
-        //比上面的方法多一个s是Returns不是Return
-        //ReturnedMessage  待确认
+//        //比上面的方法多一个s是Returns不是Return
+//        //ReturnedMessage  待确认
         rabbitTemplate.setReturnsCallback(returnedMessage ->
         {
             String failedMessage = new String(returnedMessage.getMessage().getBody());
@@ -266,6 +266,9 @@ public class RabbitMQConfig {
         args.put("x-dead-letter-routing-key", DEAD_DIRECT_ROUTING_KEY);
 //        QueueBuilder.durable(DIRECT_QUEUE_NAME).withArguments(args).build();
         return new Queue(DIRECT_QUEUE_NAME, true, false, false, args);
+//
+//        return new Queue(DIRECT_QUEUE_NAME);
+
     }
 
     /**

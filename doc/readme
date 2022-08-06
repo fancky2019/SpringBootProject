@@ -1,3 +1,16 @@
 项目依赖启动依赖：1、zookeeper   zkServer.cmd
                2、redis
-               3、es ---elasticsearch.bat
+               3、es ---elasticsearch.bat   kibana 初始化索引
+               POST demo_product/_doc/1
+               {
+                 "id":1,
+                 "product_name":"productname",
+                 "product_style":"fancky",
+                 "create_time":"2022-03-07 20:51:57.000",
+                 "modify_time":"2022-03-07 20:51:57.000",
+                 "description": "上海",
+                 "price":1232,
+                 "count":12,
+                 "produce_address":"上海市青浦区"
+               }
+               4、rabbitMQ  安装rabbitmq_delayed_message_exchange-3.10.2 插件并启用
