@@ -23,10 +23,12 @@ import com.example.demo.model.pojo.Student;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -607,4 +609,43 @@ public class UtilityController {
 
     //endregion
 
+    //
+
+//    @PostMapping(value = "/temp")
+//    @ResponseBody
+//    public ResultResponse tempSave(@RequestPart(value = "file", required = false) MultipartFile file, @RequestPart("tBCodeRequest") TBCodeRequest tBCodeRequest) {
+//        ResultResponse response = new ResultResponse();
+//
+//        try {
+//            String s=tBCodeRequest.getTaskId();
+//            LocalDateTime localDateTime = LocalDateTime.now();
+//            String dateStr = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+////
+////            String rootPath =   ResourceUtils.getURL("classpath:").getPath();
+//            String directory = "\\uploadfiles" + "\\" + dateStr + "\\";
+//            File destFile = new File(directory);
+//            //判断路径是否存在,和C#不一样。她判断路径和文件是否存在
+//            if (!destFile.exists()) {
+//                destFile.mkdirs();
+//            }
+//
+//            //获取body中的参数
+////            String value = (String)request.getAttribute("paramName");
+//            //获取文件名称
+//            String sourceFileName = file.getOriginalFilename();
+//            //写入目的文件
+//            String fileFullName = directory + sourceFileName;
+//            File existFile = new File(fileFullName);
+//            if (existFile.exists()) {
+//                existFile.delete();
+//            }
+//            file.transferTo(existFile);
+//        } catch (IOException e) {
+//            response.setSuccess(false);
+//            response.setCode(500);
+//            logger.error("",e);
+//        }
+//
+//        return response;
+//    }
 }
