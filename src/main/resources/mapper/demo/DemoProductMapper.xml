@@ -2,6 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.dao.demo.DemoProductMapper">
 
+
+
     <!--开启本mapper的namespace下的二级缓存.或者在mybatis全局配置文件（mybatis-config）开启二级缓存-->
   <!--
       eviction:代表的是缓存回收策略，目前MyBatis提供以下策略。
