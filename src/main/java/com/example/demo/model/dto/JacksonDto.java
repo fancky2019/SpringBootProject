@@ -2,6 +2,7 @@ package com.example.demo.model.dto;
 
 import com.example.demo.model.entity.demo.Person;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -11,6 +12,9 @@ import java.util.List;
 
 @Data
 public class JacksonDto {
+
+    //字段名称映射
+//    @JsonProperty(value = "aName", required = true)
     private Integer id;
 
     private String cityName;
