@@ -1,31 +1,44 @@
 package com.example.demo.controller;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.read.listener.ReadListener;
+import com.alibaba.excel.util.ListUtils;
 import com.example.demo.model.dto.JacksonDto;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.pojo.EnumParamPojo;
+import com.example.demo.model.pojo.ReturnResult;
 import com.example.demo.model.pojo.UnitEnum;
+import com.example.demo.model.request.TestRequest;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
+import com.example.demo.model.vo.DownloadData;
+import com.example.demo.model.vo.UploadData;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.PersonService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.example.demo.model.pojo.Student;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -513,7 +526,7 @@ public class UtilityController {
         try {
             String json = mapper.writeValueAsString(jacksonDto);
             JacksonDto dto = mapper.readValue(json, JacksonDto.class);
-            int m=0;
+            int m = 0;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -529,7 +542,7 @@ public class UtilityController {
     @GetMapping(value = "/starterTest")
     public String starterTest() {
 //        return this.fanckyTest.getHost()+":"+this.fanckyTest.getPort();
-        return  null;
+        return null;
     }
     //endregion
 
@@ -541,7 +554,7 @@ public class UtilityController {
 //        return this.fanckyTest.getHost()+":"+this.fanckyTest.getPort();
         threadPoolExceptionTest();
 //        threadExceptionTestFun();
-        return  null;
+        return null;
     }
 
     private void threadPoolExceptionTest() {
@@ -553,9 +566,9 @@ public class UtilityController {
 //                Integer m = Integer.parseInt("m");
                 try {
                     Integer m = Integer.parseInt("m");
-                    int ii=0;
+                    int ii = 0;
                 } catch (Exception e) {
-                    System.out.println("Thead 内部:"+e.getMessage());
+                    System.out.println("Thead 内部:" + e.getMessage());
                     throw e;
                 }
                 return 1;
@@ -563,7 +576,7 @@ public class UtilityController {
 
             // get 内部还是通过 LockSupport.unpark()、 LockSupport.park() block 当前线程。知道线程完成
             completableFuture.get();
-            int n=0;
+            int n = 0;
         } catch (Exception e) {
             //外层捕获，没有进入catch
             System.out.println("Thead 外部:" + e.getMessage());
@@ -609,43 +622,157 @@ public class UtilityController {
 
     //endregion
 
-    //
 
-//    @PostMapping(value = "/temp")
-//    @ResponseBody
-//    public ResultResponse tempSave(@RequestPart(value = "file", required = false) MultipartFile file, @RequestPart("tBCodeRequest") TBCodeRequest tBCodeRequest) {
-//        ResultResponse response = new ResultResponse();
-//
-//        try {
-//            String s=tBCodeRequest.getTaskId();
-//            LocalDateTime localDateTime = LocalDateTime.now();
-//            String dateStr = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-////
-////            String rootPath =   ResourceUtils.getURL("classpath:").getPath();
-//            String directory = "\\uploadfiles" + "\\" + dateStr + "\\";
-//            File destFile = new File(directory);
-//            //判断路径是否存在,和C#不一样。她判断路径和文件是否存在
-//            if (!destFile.exists()) {
-//                destFile.mkdirs();
-//            }
-//
-//            //获取body中的参数
-////            String value = (String)request.getAttribute("paramName");
-//            //获取文件名称
-//            String sourceFileName = file.getOriginalFilename();
-//            //写入目的文件
-//            String fileFullName = directory + sourceFileName;
-//            File existFile = new File(fileFullName);
-//            if (existFile.exists()) {
-//                existFile.delete();
-//            }
-//            file.transferTo(existFile);
-//        } catch (IOException e) {
-//            response.setSuccess(false);
-//            response.setCode(500);
-//            logger.error("",e);
-//        }
-//
-//        return response;
-//    }
+    //region form-data 文件和数据 @RequestPart
+    //不指定盘符要加入 commons-io 依赖
+
+
+    //文件：单个文件用 MultipartFile file 接收，多个用MultipartFile[] files.注意别名设置
+    //     前台postman 设置 点击 description 右侧... 选中 content-type .在contentType设置multipart/form-data
+    //表单数据：前台postman 设置json 字符串提交
+    //     前台postman 设置 点击 description 右侧... 选中 content-type .在contentType设置   application/json
+
+    @PostMapping(value = "/saveFormDta")
+    public ReturnResult saveFormDta(@RequestPart(value = "files", required = false) MultipartFile[] files, @RequestPart("testRequest") TestRequest testRequest) {
+        ReturnResult<Void> response = new ReturnResult();
+
+        try {
+
+            List<String> fileNames = saveFiles(files);
+            //获取body中的参数
+//            String value = (String)request.getAttribute("paramName");
+            String name = testRequest.getName();
+        } catch (IOException e) {
+            response.setSuccess(false);
+            response.setCode(500);
+            LOGGER.error("", e);
+        }
+
+        return response;
+    }
+
+    //    @Async
+    public List<String> saveFiles(MultipartFile[] files) throws IOException {
+        List<String> tempFiles = new ArrayList<String>();
+        if (files != null && files.length > 0) {
+            //遍历文件
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    LocalDateTime localDateTime = LocalDateTime.now();
+                    String dateStr = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    String rootPath = System.getProperty("user.dir");
+                    String directory = rootPath + "\\uploadfiles" + "\\" + dateStr + "\\";
+//                    String directory = "\\uploadfiles" + "\\" + dateStr + "\\";
+                    File destFile = new File(directory);
+                    //判断路径是否存在,和C#不一样。她判断路径和文件是否存在
+                    if (!destFile.exists()) {
+                        destFile.mkdirs();
+                    }
+
+                    //获取文件名称
+                    String sourceFileName = file.getOriginalFilename();
+                    //写入目的文件
+                    String fileFullName = directory + sourceFileName;
+                    File existFile = new File(fileFullName);
+                    if (existFile.exists()) {
+                        existFile.delete();
+                    }
+                    //用 file.transferTo 要指定盘符，不然报错找不到文件路径
+                    //引入commons-io 依赖，用下面方法不用指定盘符
+                    file.transferTo(existFile);
+//                    FileUtils.copyInputStreamToFile(file.getInputStream(), existFile);
+                    tempFiles.add(fileFullName);
+                }
+            }
+        }
+        return tempFiles;
+    }
+
+    //endregion
+
+    //region EasyExcel
+    //注意：easyExcel 和easyPoi 不兼容，两个不能同时引用，否则easyExcel 下载的excel 打不开
+    //     easyexcel 的性能不easypoi性能好点。
+
+
+    //postman  send and download
+
+    /**
+     * 文件下载（失败了会返回一个有部分数据的Excel）
+     * <p>
+     * 1. 创建excel对应的实体对象 参照{@link DownloadData}
+     * <p>
+     * 2. 设置返回的 参数
+     * <p>
+     * 3. 直接写，这里注意，finish的时候会自动关闭OutputStream,当然你外面再关闭流问题不大
+     */
+    @GetMapping("excelDownload")
+    public void download(HttpServletResponse response, DownloadData query) throws IOException {
+
+        try {
+            // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setCharacterEncoding("utf-8");
+            // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+            String fileName = URLEncoder.encode("测试", "UTF-8").replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+            EasyExcel.write(response.getOutputStream(), DownloadData.class).sheet("表名称").doWrite(data());
+            int mm = 0;
+        } catch (Exception ex) {
+            String msg = ex.getMessage();
+            int m = 0;
+        }
+    }
+
+    private List<DownloadData> data() {
+        List<DownloadData> list = ListUtils.newArrayList();
+        for (int i = 0; i < 10; i++) {
+            DownloadData data = new DownloadData();
+            data.setString("字符串" + i);
+            data.setDate(new Date());
+            data.setDoubleData(0.56);
+            list.add(data);
+        }
+        return list;
+    }
+
+    /**
+     * 文件上传
+     * <p>1. 创建excel对应的实体对象 参照{@link UploadData}
+     * <p>2. 由于默认一行行的读取excel，所以需要创建excel一行一行的回调监听器
+     * <p>3. 直接读即可
+     */
+    @PostMapping("excelUpload")
+    @ResponseBody
+    public String upload(MultipartFile file) throws IOException {
+        List<UploadData> list = new ArrayList<UploadData>();
+        EasyExcel.read(file.getInputStream(), UploadData.class, new ReadListener<UploadData>() {
+
+                    /**
+                     * 这个每一条数据解析都会来调用
+                     * @param o
+                     * @param analysisContext
+                     */
+                    @Override
+                    public void invoke(UploadData o, AnalysisContext analysisContext) {
+
+                        list.add(o);
+
+                    }
+
+                    /**
+                     *所有的都读取完 回调 ，
+                     * @param analysisContext
+                     */
+                    @Override
+                    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
+
+                    }
+                }
+        ).sheet().doRead();
+
+        int size = list.size();
+        return "success";
+    }
+    //endregion
 }
