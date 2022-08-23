@@ -42,11 +42,6 @@ public class ESDemoProductService {
 
 
 
-
-
-
-
-
     /*
      区间查询：
      //闭区间查询
