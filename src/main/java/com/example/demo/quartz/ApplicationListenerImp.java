@@ -13,8 +13,12 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.annotation.Order;
 
+
+//@Order控制配置类的加载顺序，通过@Order指定执行顺序，值越小，越先执行
 @Configuration
+@Order(2)
 public class ApplicationListenerImp implements ApplicationListener<ApplicationReadyEvent> {
     @Autowired
     private QuartzJobComponent quartzJobComponent;
