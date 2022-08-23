@@ -4,6 +4,7 @@
 ### STS ###
 .apt_generated
 .classpath
+uploadfiles/
 log/
 logs/
 *.log
