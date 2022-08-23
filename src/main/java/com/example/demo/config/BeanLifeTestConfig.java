@@ -15,6 +15,7 @@ public class BeanLifeTestConfig {
      */
 //    @Bean(initMethod = "init", destroyMethod = "destroy")
     @Bean
+//    @Bean(name="beanLife") //默认方法名称
     public BeanLife beanLife() {
         return new BeanLife();
     }

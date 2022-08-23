@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.entity.rabc.Users;
+import com.example.demo.model.pojo.BeanLife;
 import com.example.demo.model.viewModel.Person;
 import com.example.demo.service.UserService;
 import com.example.demo.service.interfaceAndImp.InterfaceTest;
@@ -54,6 +55,7 @@ public class UserController {
     @Qualifier("typeAlia")
     @Resource
     private UserService userService;
+
 
     /*
     @Resource:默认按照ByName自动注入，由J2EE提供，需要导入包javax.annotation.Resource。@Resource有两个重要的属性：name和type，

@@ -7,9 +7,7 @@ import com.alibaba.excel.util.ListUtils;
 import com.example.demo.model.dto.JacksonDto;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.rabc.Users;
-import com.example.demo.model.pojo.EnumParamPojo;
-import com.example.demo.model.pojo.ReturnResult;
-import com.example.demo.model.pojo.UnitEnum;
+import com.example.demo.model.pojo.*;
 import com.example.demo.model.request.TestRequest;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
@@ -23,14 +21,15 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.example.demo.model.pojo.Student;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -97,8 +96,19 @@ public class UtilityController {
 //    @Autowired
 //    private FanckyTest fanckyTest;
 
-//    @Autowired
-//    private BeanLife beanLife;
+    @Autowired
+    private BeanLife beanLife;
+
+
+    // @Resource 指定bean 名称,@Autowired 通过 @Qualifier指定具体别名
+    @Resource(name = "studentF")
+    private Student studentF;
+
+    //指定bean 名称
+    @Qualifier("studentD")
+    @Autowired
+    private Student studentD;
+
 
     //region  切面
     /*
@@ -775,4 +785,11 @@ public class UtilityController {
         return "success";
     }
     //endregion
+
+    @GetMapping("beanTest")
+    public void BeanTest() {
+        String na1 = studentD.getName();
+        String na2 = studentF.getName();
+        int m = 0;
+    }
 }
