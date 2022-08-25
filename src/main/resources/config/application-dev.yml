@@ -38,7 +38,7 @@ mybatis:
 #开发配
 spring:
   application:
-    name: SpringBootProject
+    name: springBootProject
 #  jackson: # 无法处理LocalDateTime格式化问题，使用代码配置类
 #    date-format: yyyy-MM-dd HH:mm:ss
 #    time-zone: GMT+8
@@ -370,3 +370,17 @@ config:
       - name: fancky3
         age: 29
     conditional-on-property: false
+
+
+xxl:
+  job:
+    accessToken: default_token
+    admin:
+      addresses: http://127.0.0.1:8181/xxl-job-admin
+    executor:
+      address:
+      appname: springBootProject
+      ip:
+      logpath: /data/applogs/xxl-job/jobhandler
+      logretentiondays: 30
+      port: 9999

@@ -3,6 +3,7 @@ package com.example.demo.service.demo;
 import com.example.demo.dao.demo.DemoProductMapper;
 import com.example.demo.dao.rabc.AuthoritiesMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
+import com.example.demo.model.entity.demo.Person;
 import com.example.demo.service.rabc.AuthoritiesService;
 import kotlin.UByte;
 import org.apache.logging.log4j.LogManager;
@@ -25,9 +26,12 @@ public class DemoProductService {
     @Autowired
     DemoProductMapper demoProductMapper;
 
+    @Autowired
+    private PersonService personService;
+
     /*
-      数据量过大，分批量插入：5K每次；1W条耗时1.3s左右
-     */
+   数据量过大，分批量插入：5K每次；1W条耗时1.3s左右
+  */
     public int batchInsert() {
         List<DemoProduct> list = new ArrayList<>();
         for (int i = 0; i < 100000; i++) {
@@ -56,7 +60,7 @@ public class DemoProductService {
         return 0;
     }
 
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.NOT_SUPPORTED)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public int insert() {
         List<DemoProduct> list = new ArrayList<>();
         for (int i = 0; i < 1; i++) {
@@ -74,8 +78,10 @@ public class DemoProductService {
         }
 
         int i = demoProductMapper.batchInsert(list);
-
         int m = Integer.parseInt("m");
+
+
+
         return 0;
     }
 

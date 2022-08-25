@@ -480,13 +480,25 @@ public class UtilityController {
     //region 事务传播
 
     /*
+     @Transactional：
+    Propagation propagation() default Propagation.REQUIRED;
+
+    Isolation isolation() default Isolation.DEFAULT;
+     ESTED：嵌套事务回滚到回滚点。
+    NESTED是为被嵌套的方法开启了一个子事务，这个事务与父类使用的是同一个连接。
+    REQUIRES_NEW是使用一个全新的事务，这个事务属于另外一条全新的连接。
+    两者最重要的体现，就是在多数据源中，REQUIRES_NEW会再次触发一下数据源的获取，而NESTED则不会
+
+
+
+
     REQUIRED： 没有事务就开启，有事务就加入，不指定的话默认为该类型
     SUPPORTS： 有事务就加入，没有就无事务运行
     MANDATORY： 加入当前事务，如果不存在则抛出异常
-    REQUIRES_NEW： 没有就开启，有了挂起原来的，开启新的
+    REQUIRES_NEW： 没有就开启，有了挂起原来的，开启新的事务：调用者在老事务，新事物不影响外层食物，外层事务回滚整个事务。
     NOT_SUPPORTED： 有了挂起，没有就无事务运行
     NEVER： 以非事务方式执行，如果存在事务则抛出异常
-    NESTED： 如果当前事务存在，则在嵌套事务中执行，否则行为类似于REQUIRED
+    Propagation.NESTED: 调用者事务存在调用者事务和被调用者事务分别在两个事务中执行，嵌套事务回滚到回滚点。外层事务回滚整个事务。
      */
     @GetMapping(value = "/propagation")
     public void propagation() {
@@ -709,11 +721,11 @@ public class UtilityController {
 
     /**
      * 文件下载（失败了会返回一个有部分数据的Excel）
-     * <p>
+     *
      * 1. 创建excel对应的实体对象 参照{@link DownloadData}
-     * <p>
+     *
      * 2. 设置返回的 参数
-     * <p>
+     *
      * 3. 直接写，这里注意，finish的时候会自动关闭OutputStream,当然你外面再关闭流问题不大
      */
     @GetMapping("excelDownload")
@@ -748,9 +760,9 @@ public class UtilityController {
 
     /**
      * 文件上传
-     * <p>1. 创建excel对应的实体对象
-     * <p>2. 由于默认一行行的读取excel，所以需要创建excel一行一行的回调监听器
-     * <p>3. 直接读即可
+     * 1. 创建excel对应的实体对象
+     * 2. 由于默认一行行的读取excel，所以需要创建excel一行一行的回调监听器
+     * 3. 直接读即可
      */
     @PostMapping("excelUpload")
     @ResponseBody
