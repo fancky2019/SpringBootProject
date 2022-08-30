@@ -18,14 +18,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * https://square.github.io/okhttp/recipes/
- *
+ * <p>
  * 测试项目在：AL.WorkSpace.ordermigratedbtool
  */
 @RestController
 @RequestMapping("/okHttp")
 public class OkHttpController {
 
-    //    @Autowired
+
     private OkHttpClient okHttpClient;
 
     @Autowired
@@ -53,18 +53,37 @@ public class OkHttpController {
 //                .addHeader("Accept", "application/vnd.github.v3+json")
                 .build();
 
-        try (Response response = okHttpClient.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+        //同步调用
+//        try (Response response = okHttpClient.newCall(request).execute()) {
+//            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+//
+////            Headers responseHeaders = response.headers();
+////            for (int i = 0; i < responseHeaders.size(); i++) {
+////                System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+////            }
+//            ResponseBody responseBody = Objects.requireNonNull(response.body());
+//            String result = Objects.requireNonNull(response.body()).string();
+//
+//            return result;
+//        }
 
-//            Headers responseHeaders = response.headers();
-//            for (int i = 0; i < responseHeaders.size(); i++) {
-//                System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
-//            }
-            ResponseBody responseBody = Objects.requireNonNull(response.body());
-            String result = Objects.requireNonNull(response.body()).string();
 
-            return result;
-        }
+        //异步调用
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+//                Log.e("测试", e+"");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                String str = response.body().string();
+
+            }
+
+        });
+        return "";
     }
 
     @PostMapping("/post")
