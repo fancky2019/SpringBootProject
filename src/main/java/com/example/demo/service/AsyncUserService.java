@@ -12,12 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.IntStream;
 
 
 //@Service("UserService")
 @Service
-public class UserService {
+public class AsyncUserService {
 
     @Autowired
     UsersMapper usersMapper;

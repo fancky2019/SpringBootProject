@@ -4,13 +4,10 @@ import com.example.demo.controller.UserController;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.PageData;
-import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.model.viewModel.rabc.UsersVM;
-import com.example.demo.service.UserService;
 import com.example.demo.service.rabc.UserManagerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

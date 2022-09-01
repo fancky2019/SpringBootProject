@@ -1,9 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.entity.rabc.Users;
-import com.example.demo.model.pojo.BeanLife;
 import com.example.demo.model.viewModel.Person;
-import com.example.demo.service.UserService;
+import com.example.demo.service.AsyncUserService;
 import com.example.demo.service.interfaceAndImp.InterfaceTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,7 +53,7 @@ public class UserController {
 //    @Resource("UserService")
     @Qualifier("typeAlia")
     @Resource
-    private UserService userService;
+    private AsyncUserService asyncUserService;
 
 
     /*
@@ -123,7 +122,7 @@ public class UserController {
 
         logger.info("dssdsdsd");
         logger.error("dssdsdsd");
-        Users re = userService.selectByPrimaryKey(user.getId());
+        Users re = asyncUserService.selectByPrimaryKey(user.getId());
         return re;
     }
 

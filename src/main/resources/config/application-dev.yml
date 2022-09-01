@@ -37,6 +37,8 @@ mybatis:
 
 #开发配
 spring:
+#  main:
+#    allow-bean-definition-overriding: true #当遇到相同名字的时候，是否允许覆盖注册 bean
   application:
     name: springBootProject
 #  jackson: # 无法处理LocalDateTime格式化问题，使用代码配置类

@@ -1,14 +1,11 @@
 package com.example.demo.controller;
 
-import com.example.demo.service.UserService;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import com.example.demo.service.AsyncUserService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /*
@@ -38,14 +35,14 @@ public class AsyncController {
 
 
     @Resource
-    private UserService userService;
+    private AsyncUserService asyncUserService;
 
     @GetMapping("/asyncFun")
     public void asyncFun() {
       //  spring boot 测试发现默认最大线程池数量8
         for(int i=0;i<50;i++)
         {
-            userService.asyncFun();
+            asyncUserService.asyncFun();
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -57,11 +54,11 @@ public class AsyncController {
 
     @GetMapping("/asyncFunReturn")
     public String asyncFunReturn() throws InterruptedException, ExecutionException {
-        return userService.asyncFunReturn().get();
+        return asyncUserService.asyncFunReturn().get();
     }
 
     @GetMapping("/syncFun")
     public String syncFun() {
-        return userService.syncFun();
+        return asyncUserService.syncFun();
     }
 }

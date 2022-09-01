@@ -4,17 +4,17 @@ import com.example.demo.controller.UserController;
 import com.example.demo.model.viewModel.MessageResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -91,5 +91,22 @@ public class GlobalExceptionHandler {
 ////        resultInfo.setMessage(e.getBindingResult().getFieldError().getDefaultMessage());
 ////        return resultInfo;
 ////    }
+//
+//    @ExceptionHandler({UnauthorizedException.class})
+//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+//    public MessageResult<Void> processUnauthenticatedException(NativeWebRequest request, UnauthorizedException e) {
+//        MessageResult<Void> messageResult = new MessageResult<>();
+//        messageResult.setCode(500);
+//        messageResult.setMessage(e.getMessage());
+//        messageResult.setSuccess(false);
+////        Void.class
+//        //     MDC.put("traceId", traceId);//traceId在过滤器的destroy()中清除
+//        //   messageResult.setTraceId(MDC.get("traceId"));
+////        return ResponseEntity.ok(messageResult);
+////        logger.error(ex.toString());// 不会打出异常的堆栈信息
+//        logger.error("",e);//用此重载，打印异常的所有信息
+//        return messageResult;
+//    }
+
 
 }
