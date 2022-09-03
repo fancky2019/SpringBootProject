@@ -26,8 +26,8 @@ public class DemoProductService {
     @Autowired
     DemoProductMapper demoProductMapper;
 
-    @Autowired
-    private PersonService personService;
+//    @Autowired
+//    private PersonService personService;
 
     /*
    数据量过大，分批量插入：5K每次；1W条耗时1.3s左右

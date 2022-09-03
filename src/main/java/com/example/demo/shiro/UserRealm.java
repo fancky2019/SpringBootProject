@@ -1,63 +1,84 @@
-//package com.example.demo.shiro;
-//
-//import org.apache.shiro.authc.AuthenticationToken;
-//import org.apache.shiro.authc.SimpleAuthenticationInfo;
-//import org.apache.shiro.authc.UnknownAccountException;
-//import org.apache.shiro.authz.AuthorizationInfo;
-//import org.apache.shiro.realm.AuthorizingRealm;
-//import org.apache.shiro.subject.PrincipalCollection;
-//import org.apache.shiro.util.ByteSource;
-//import org.apache.shiro.authc.*;
-//
-//
-//import javax.annotation.Resource;
-//import java.util.ArrayList;
-//import java.util.HashMap;
-//import java.util.Map;
-//
-//public class UserRealm extends AuthorizingRealm {
-//
-////    @Resource
-////    private UserMapper userMapper;
-//
-//    /**
-//     * 授权
-//     * 这里不需要将用户的权限和角色放入到SimpleAuthorizationInfo中
-//     * 就算写了，也没用，因为动态代理是需要从数据库去查询的
-//     * 而这里仅仅只会在用户登录的时候执行一次，即在用户登录的时候就把权限和角色定死了
-//     * 即使在数据库修改了用户的权限和角色，只要用户没有退出登录，那么用户就还保有角色和权限
-//     * 直到用户重新登陆的时候才会从数据库拿到被修改后的角色和权限
-//     */
-//
-//    @Override
-//    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-//        return null;
-//    }
-//
-//    //认证
-//    @Override
-//    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-//        //在token中获取用户名
-//        String name = (String)authenticationToken.getPrincipal();
-//        //从数据库查询用户信息
-//        Map<String, Object> userMap = new HashMap<>();
-//        userMap.put("name", name);
-////        List<User> users =new ArrayList<>();// userMapper.selectByMap(userMap);
-////
-////        if (users.size() == 0) {
-////            throw new UnknownAccountException("没有此账号");
-////        }else{
-////            User user = users.get(0);
-////            return new SimpleAuthenticationInfo(name,       //用户名
-////                    user.getPassword(),                     //加密后的密码
-////                    ByteSource.Util.bytes(user.getSalt()),  //随机盐
-////                    getName());                             //当前realm的名称
-////        }
-//        return new SimpleAuthenticationInfo(name,       //用户名
-//                    "user password",                  //加密后的密码
-//                    ByteSource.Util.bytes("sddsdssdsd"),  //随机盐
-//                    getName());
-//
-//    }
-//}
-//
+package com.example.demo.shiro;
+
+import com.example.demo.dao.shiro.UserMapper;
+import com.example.demo.model.entity.shiro.User;
+import com.example.demo.service.shiro.UserService;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.crypto.hash.Md5Hash;
+import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.util.ByteSource;
+import org.apache.shiro.authc.*;
+import org.springframework.beans.factory.annotation.Autowired;
+
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+public class UserRealm extends AuthorizingRealm {
+
+    @Autowired
+    private UserService userService;
+
+    /**
+     * 授权
+     * 这里不需要将用户的权限和角色放入到SimpleAuthorizationInfo中
+     * 就算写了，也没用，因为动态代理是需要从数据库去查询的
+     * 而这里仅仅只会在用户登录的时候执行一次，即在用户登录的时候就把权限和角色定死了
+     * 即使在数据库修改了用户的权限和角色，只要用户没有退出登录，那么用户就还保有角色和权限
+     * 直到用户重新登陆的时候才会从数据库拿到被修改后的角色和权限
+     */
+
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+        return null;
+    }
+
+    //认证
+    @Override
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+        //在token中获取用户名
+        String username = (String) authenticationToken.getPrincipal();
+        //从数据库中查数据
+        User user = userService.selectByUserName(username);
+        if (user == null) {
+            throw new UnknownAccountException();
+        }
+//        User user = new User();
+//        //从数据库中查数据
+
+//        user.setUsername(username);
+//        user.setPassword("123456");
+//        //生成随机的字符串，即我们要用到的盐值
+//        String salt = "salt";
+//        //使用MD5加密
+//        Md5Hash password = new Md5Hash(user.getPassword(), salt, 1024);
+//        String saltPassword = String.valueOf(password);
+//        //将加密后的密码和盐值放入到实体类中
+//        user.setPassword(saltPassword);
+//        user.setSalt(salt);
+
+
+        SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(user.getUsername(), //用户名      //用户名
+                user.getPassword(),                  //加密后的密码
+                ByteSource.Util.bytes(user.getSalt()),  //随机盐
+                getName()); //当前realm的名称
+        /**
+         * 写入session，但是移除password信息
+         */
+        user.setPassword("");
+        user.setSalt("");
+        SecurityUtils.getSubject().getSession().setAttribute("UserInfo", user);
+        User sessionUser = (User) SecurityUtils.getSubject().getSession().getAttribute("UserInfo");
+        return info;
+
+
+    }
+}
+

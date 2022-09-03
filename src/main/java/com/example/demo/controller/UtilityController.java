@@ -455,10 +455,6 @@ public class UtilityController {
     //region MD5
     @GetMapping(value = "/batchInsert")
     public void batchInsert() {
-        //md5(Password+UserName)，即将用户名和密码字符串相加再MD5，这样的MD5摘要基本上不可反查。字母+数字，10位以上
-        //MD5加密不可逆  比较密码  和MD5加密后的字符串比较
-        //对密码进行 md5 加密
-
         this.demoProductService.batchInsert();
     }
     //endregion

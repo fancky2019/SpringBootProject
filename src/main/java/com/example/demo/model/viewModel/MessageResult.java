@@ -14,8 +14,12 @@ public class MessageResult<T> implements Serializable {
     private Boolean success;
     private String message;
     //  MDC.put("traceId", traceId);//traceId在过滤器的destroy()中生成、清除
-    private String traceId= MDC.get("traceId");
+    private String traceId = MDC.get("traceId");
     private T data;
+
+    public MessageResult() {
+        this.success = true;
+    }
 
     public Boolean getSuccess() {
         return success;
@@ -40,6 +44,7 @@ public class MessageResult<T> implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
+
     public Integer getCode() {
         return code;
     }
