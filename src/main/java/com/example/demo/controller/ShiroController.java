@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.entity.shiro.User;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.shiro.UserService;
+import lombok.Getter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,10 +13,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
@@ -97,6 +95,8 @@ public class ShiroController {
         Md5Hash password = new Md5Hash(user.getPassword(), salt, 1024);
         String saltPassword = String.valueOf(password);
 
+        //数据库保存加盐后的密码
+        user.setPassword(saltPassword);
         user.setUserId("13956914410");
         user.setSalt(salt);
         //入库 user
@@ -107,6 +107,14 @@ public class ShiroController {
         user.setSex(1);
         user.setStatus(1);
         userService.insert(user);
+        return messageResult;
+    }
+
+    @GetMapping("list")
+    public MessageResult<Void> getList() {
+        MessageResult<Void> messageResult = new MessageResult<>();
+
+
         return messageResult;
     }
 

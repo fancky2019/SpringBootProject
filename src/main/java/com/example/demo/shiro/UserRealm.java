@@ -8,6 +8,7 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
@@ -37,6 +38,25 @@ public class UserRealm extends AuthorizingRealm {
 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+        SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
+        //如果身份认证的时候没有传入User对象，这里只能取到userName
+        //也就是SimpleAuthenticationInfo构造的时候第一个参数传递需要User对象
+        User user = (User) principalCollection.getPrimaryPrincipal();
+
+
+
+//        // 查询用户角色，一个用户可能有多个角色
+//        List<Role> roles = iRoleService.getUserRoles(user.getUserId());
+//
+//        for (Role role : roles) {
+//            authorizationInfo.addRole(role.getRole());
+//            // 根据角色查询权限
+//            List<Permission> permissions = iPermissionService.getRolePermissions(role.getRoleId());
+//            for (Permission p : permissions) {
+//                authorizationInfo.addStringPermission(p.getPermission());
+//            }
+//        }
+//        return authorizationInfo;
         return null;
     }
 
@@ -69,13 +89,17 @@ public class UserRealm extends AuthorizingRealm {
                 user.getPassword(),                  //加密后的密码
                 ByteSource.Util.bytes(user.getSalt()),  //随机盐
                 getName()); //当前realm的名称
-        /**
-         * 写入session，但是移除password信息
-         */
-        user.setPassword("");
-        user.setSalt("");
-        SecurityUtils.getSubject().getSession().setAttribute("UserInfo", user);
-        User sessionUser = (User) SecurityUtils.getSubject().getSession().getAttribute("UserInfo");
+
+
+        //  写入session，但是移除password信息
+//        user.setPassword("");
+//        user.setSalt("");
+//        //Session适用redis做缓存就不会保存内存
+//        SecurityUtils.getSubject().getSession().setAttribute("UserInfo", user);
+//        User sessionUser = (User) SecurityUtils.getSubject().getSession().getAttribute("UserInfo");
+//
+
+
         return info;
 
 
