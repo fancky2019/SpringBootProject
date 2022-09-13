@@ -35,8 +35,13 @@ public class URLPathMatchingFilter extends PathMatchingFilter {
         Subject subject = SecurityUtils.getSubject();
         boolean hasPermission = false;
         if (!subject.isAuthenticated()){
+
+
             // 如果没有登录, 直接返回true 进入登录流程
-            hasPermission=  false;
+//            hasPermission=  false;
+
+            //调试代码放行
+            return true;
         }
         else {
 

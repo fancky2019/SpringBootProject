@@ -11,6 +11,8 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -18,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
-@RabbitListener(queues = "DirectExchangeQueueSpringBoot")//参数为队列名称
+//@RabbitListener(queues = "DirectExchangeQueueSpringBoot")//参数为队列名称
 public class DirectExchangeConsumer {
 
     private static Logger logger = LogManager.getLogger(DirectExchangeConsumer.class);
@@ -104,8 +106,11 @@ public class DirectExchangeConsumer {
     //endregion
     @RabbitHandler
     @RabbitListener(queues = DELAYED_MESSAGE_QUEUE)//参数为队列名称
+//    public void receivedDelayedMsg(String receivedMessage, Channel channel, Message message, @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws Exception {
     public void receivedDelayedMsg(String receivedMessage, Channel channel, Message message) throws Exception {
         try {
+//            receivedMessage =msg
+           String msg= new String(message.getBody());
             //  System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
             DateTimeFormatter dateTimeFormatter=DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss SSS");
             String dateStr=dateTimeFormatter.format(LocalDateTime.now());

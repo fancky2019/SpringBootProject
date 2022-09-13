@@ -67,6 +67,9 @@ public class RedisTestController {
 
         try {
 
+            //key 存在
+            redisTemplate.hasKey("ds");
+            redisTemplate.expire("ds", 60, TimeUnit.SECONDS);
             //region String
             ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
             valueOperations.set("stringKey1", "stringKeyValue1");

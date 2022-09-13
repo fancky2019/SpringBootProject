@@ -76,5 +76,8 @@ public class JWTUtility {
         return jwtVerifier.verify(token);
     }
 
+    //过期作废（改密码、登出）：黑名单：如果登出或者修改密码把用户加入黑名单redis中 uid
+    //续期：
+
 
 }

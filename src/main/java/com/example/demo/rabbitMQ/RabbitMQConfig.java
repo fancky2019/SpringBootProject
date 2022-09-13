@@ -29,6 +29,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
+ * rabbitMQ安装目录C:\Program Files\RabbitMQ Server\rabbitmq_server-3.10.5\sbin 下控制台执行命令
+ * # 查看所有队列
+ * rabbitmqctl list_queues
+ *
+ * # 根据 queue_name 参数，删除对应的队列
+ * rabbitmqctl delete_queue queue_name
+ *
+ *
  * 声明RabbitMQ的交换机、队列、并将相应的队列、交换机、RoutingKey绑定。
  */
 @Configuration
@@ -92,7 +100,7 @@ public class RabbitMQConfig {
 
     //@Bean注解的方法的参数可以任意加，反射会自动添加对应参数
     @Bean
-    public RabbitTemplate RabbitTemplate(ConnectionFactory connectionFactory) {
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         //公平分发模式在Spring-amqp中是默认的
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMandatory(true);//新版加此句
@@ -139,8 +147,8 @@ public class RabbitMQConfig {
     @Bean("customContainerFactory")
     public SimpleRabbitListenerContainerFactory containerFactory(SimpleRabbitListenerContainerFactoryConfigurer configurer, ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConcurrentConsumers(10);  //设置线程数
-        factory.setMaxConcurrentConsumers(10); //最大线程数
+        factory.setConcurrentConsumers(1);  //设置线程数
+        factory.setMaxConcurrentConsumers(1); //最大线程数
         configurer.configure(factory, connectionFactory);
         return factory;
     }

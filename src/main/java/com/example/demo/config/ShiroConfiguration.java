@@ -98,7 +98,7 @@ public class ShiroConfiguration {
 
         /*加入自定义过滤器*/
 //        filterChainDefinitionMap.put("/**", "kickout");
-
+        filterChainDefinitionMap.put("/sbp/utility/*", "anon");
         //不需要授权的写在前面
         //所有的路径都通过过滤器
         filterChainDefinitionMap.put("/**", "requestURL");

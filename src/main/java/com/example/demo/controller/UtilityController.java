@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import cn.hutool.crypto.symmetric.AES;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
@@ -15,6 +16,7 @@ import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.PersonService;
+import com.example.demo.utility.RSAUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
@@ -439,20 +441,75 @@ public class UtilityController {
     }
     //endregion
 
+    //region MD5 消息摘要算法
 
-    //region MD5
+    /*
+    BASE64 严格地说，属于编码格式，而非加密算法
+ 主要就是BASE64Encoder、BASE64Decoder两个类，我们只需要知道使用对应的方法即可。
+ 另，BASE加密后产生的字节位数是8的倍数，如果不够位数以=符号填充。
+
+
+
+ Base64就是一种基于64个可打印字符来表示二进制数据的方法
+ Base64编码是从二进制到字符的过程
+     */
+    @GetMapping(value = "/base64")
+    public String base64(String src) {
+        //        Base64.Encoder  encoder=new Base64.Encoder();
+//        encoder.encodeToString()
+        //
+        String encodeStr = Base64Utils.encodeToString(src.getBytes());
+        byte[] de = Base64Utils.decodeFromString(encodeStr);
+        return encodeStr;
+    }
+
+    //endregion
+
+    //region aes
+    @GetMapping(value = "/aes")
+    public String aes(String src) {
+        //        Base64.Encoder  encoder=new Base64.Encoder();
+//        encoder.encodeToString()
+        //
+
+        return "";
+    }
+    //endregion
+
+
+    //region MD5 消息摘要算法
+
+
+    /**
+     * password：对明文长度没有要求
+     *
+     * @param password
+     * @return
+     */
     @GetMapping(value = "/md5")
     public String md5(String password) {
+        /*
+        MD5散列函数长度是128比特（16字节或32个16进制数字符）
+        MD5 加密后的位数有两种：16 位与 32 位。默认使用32位。
+         （16 位实际上是从 32 位字符串中取中间的第 9 位到第 24 位的部分）str.substring(8, 24);为提高安全性。
+
+
+         最好把密码加盐（随机字符串） password+salt,密码和盐 可以按一定规则混合，最简单直接拼接
+         */
+
+
         //默认32小写
         //md5(Password+UserName)，即将用户名和密码字符串相加再MD5，这样的MD5摘要基本上不可反查。字母+数字，10位以上
         //MD5加密不可逆  比较密码  和MD5加密后的字符串比较
         //对密码进行 md5 加密
         String md5Password = DigestUtils.md5DigestAsHex(password.getBytes());
+        String upperStr = md5Password.toUpperCase();
+        String str16 = md5Password.substring(8, 24);
         return md5Password;
     }
     //endregion
 
-    //region MD5
+    //region batchInsert
     @GetMapping(value = "/batchInsert")
     public void batchInsert() {
         this.demoProductService.batchInsert();
@@ -717,11 +774,11 @@ public class UtilityController {
 
     /**
      * 文件下载（失败了会返回一个有部分数据的Excel）
-     *
+     * <p>
      * 1. 创建excel对应的实体对象 参照{@link DownloadData}
-     *
+     * <p>
      * 2. 设置返回的 参数
-     *
+     * <p>
      * 3. 直接写，这里注意，finish的时候会自动关闭OutputStream,当然你外面再关闭流问题不大
      */
     @GetMapping("excelDownload")
@@ -800,4 +857,27 @@ public class UtilityController {
         String na2 = studentF.getName();
         int m = 0;
     }
+
+    @GetMapping("rsaTest")
+    public void RSAUtilTest() {
+        try {
+
+
+            String data = "ddddddddddddddddddddddddddddd54454554dddddddddddddd" +
+                    "ddddddddddddddddddddddddddddd544554ddddddddddddddd" +
+                    "ddddddddddddddddddddddddddd5454ddddddddddddddd" +
+                    "ddddddddddddddddddddd454554dddddddddddddddddddddd" +
+                    "dsrgregergredssssssssssssss333333333333333535355" +
+                    "dssssssssss44444444444444444444";
+            byte[] encryptData = RSAUtil.encrypt(data.getBytes());
+            String decryptData = new String(RSAUtil.decrypt(encryptData));
+
+            String signData = RSAUtil.sign(data.getBytes(), RSAUtil.getPrivateKey());
+            boolean re = RSAUtil.verify(data.getBytes(), signData, RSAUtil.getPublicKey());
+            int m = 0;
+        } catch (Exception e) {
+            int m = 0;
+        }
+    }
+
 }

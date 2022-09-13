@@ -128,8 +128,8 @@ public class LogAspect {
      *
      * @return
      */
-   @Around(value = "execution(* com.example.demo.controller.*.*(..))")
-    public Object aroundMethod(ProceedingJoinPoint jp) {
+    @Around(value = "execution(* com.example.demo.controller.*.*(..))")
+    public Object aroundMethod(ProceedingJoinPoint jp) throws Throwable {
         String methodName = jp.getSignature().getName();
         Object result = null;
         try {
@@ -140,6 +140,8 @@ public class LogAspect {
         } catch (Throwable e) {
             result = "error";
             log.info("【环绕增强中的--->异常增强】：the method 【" + methodName + "】 occurs exception " + e);
+           //要把异常扔出来，不然全局异常处理捕捉不到
+            throw e;
         }
         log.info("【环绕增强中的--->后置增强】：-----------------end.----------------------");
         return result;
@@ -148,7 +150,7 @@ public class LogAspect {
 
     @AfterThrowing(pointcut = "execution(* com.example.demo.controller.*.*(..))", throwing = "ex")
     public void onExceptionThrow(Exception ex) {
-        log.info("",ex);
+        log.info("", ex);
     }
 
 }
