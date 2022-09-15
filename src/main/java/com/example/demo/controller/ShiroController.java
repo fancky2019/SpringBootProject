@@ -11,10 +11,13 @@ import org.apache.logging.log4j.Logger;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.crypto.hash.Md5Hash;
+import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 
 @RestController
@@ -25,6 +28,9 @@ public class ShiroController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    private HttpServletRequest httpServletRequest;
 
     //    没有默认值，如果不配置method，
 //
@@ -53,16 +59,31 @@ public class ShiroController {
             UsernamePasswordToken token = new UsernamePasswordToken(userName, password);
             // 传到 MyShiroRealm 类中的方法进行认证
             currentUser.login(token);
+
+
+            //登录成功之后 把用户信息加入session
+            User user = userService.selectByUserName(userName);
+            SecurityUtils.getSubject().getSession().setAttribute("user", user);
+
+
 //            CacheUser cacheUser;
             String salt = RandomStringUtils.randomAlphanumeric(10);
-            ;
+
+
+//            User principal = (User) currentUser.getPrincipal();
+//            System.out.println("userService中通过subject获取的principal="+principal);
+//            Session session = currentUser.getSession();
+//            session.setAttribute("user",principal);
+
+
             // 构建缓存用户信息返回给前端
             String userName1 = (String) currentUser.getPrincipals().getPrimaryPrincipal();
 //            cacheUser = CacheUser.builder()
 //                    .token(currentUser.getSession().getId().toString())
 //                    .build();
 
-            User sessionUser = (User) SecurityUtils.getSubject().getSession().getAttribute("UserInfo");
+            User sessionUser = (User) SecurityUtils.getSubject().getSession().getAttribute("user");
+
 
         } catch (Exception e) {
             messageResult.setCode(500);
@@ -92,7 +113,7 @@ public class ShiroController {
         String salt = RandomStringUtils.randomAlphanumeric(10);
 
         //使用MD5加密
-        Md5Hash password = new Md5Hash(user.getPassword(), salt, 1024);
+        Md5Hash password = new Md5Hash(user.getPassword(), salt);
         String saltPassword = String.valueOf(password);
 
         //数据库保存加盐后的密码
@@ -114,7 +135,8 @@ public class ShiroController {
     public MessageResult<Void> getList() {
         MessageResult<Void> messageResult = new MessageResult<>();
 
-
+        HttpSession session = httpServletRequest.getSession();
+        int m = 0;
         return messageResult;
     }
 

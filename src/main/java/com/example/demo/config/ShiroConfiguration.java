@@ -158,7 +158,7 @@ public class ShiroConfiguration {
         //适用盐，加盐（加密）次数
         //默认就是1
         //如果使用散列（加密次数），则需要设置散列的次数：1024次，与注册时的加密次数是一致的
-        hashedCredentialsMatcher.setHashIterations(1024);
+//        hashedCredentialsMatcher.setHashIterations(1);
         // 默认 true 密码加密用hex编码; false 用base64编码
 //        hashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
         return hashedCredentialsMatcher;

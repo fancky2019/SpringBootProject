@@ -1,4 +1,4 @@
-package com.example.demo.dynamicDataSource;
+package com.example.demo.dao.dynamicDataSource;
 
 public class DataSourceContextHolder {
     /**

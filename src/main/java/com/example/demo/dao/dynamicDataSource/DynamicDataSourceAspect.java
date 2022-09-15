@@ -1,16 +1,9 @@
-package com.example.demo.dynamicDataSource;
+package com.example.demo.dao.dynamicDataSource;
 
-import com.example.demo.dynamicDataSource.DataSourceAnnotation;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.DispatcherServlet;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 
 /*

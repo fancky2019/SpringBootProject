@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -110,6 +112,29 @@ public class UtilityController {
     @Qualifier("studentD")
     @Autowired
     private Student studentD;
+
+    //初始化操作：1、实现 InitializingBean 接口
+//    public class UserController implements InitializingBean {
+//        // 初始化方法
+//        @Override
+//        public void afterPropertiesSet() throws Exception {
+//           //类初始化操作
+//        }
+//    }
+
+//二   @PostConstruct
+        // 类初始化调用顺序：
+        //（1）构造方法Constructor
+        //（2）@Autowired
+        //（3）@PostConstruct
+    @PostConstruct
+    public void init()
+    {
+
+    }
+
+
+
 
 
     //region  切面
@@ -460,6 +485,9 @@ public class UtilityController {
         //
         String encodeStr = Base64Utils.encodeToString(src.getBytes());
         byte[] de = Base64Utils.decodeFromString(encodeStr);
+
+//        Base64Utils.decodeFromUrlSafeString()
+//        Base64Utils.encodeToUrlSafeString()
         return encodeStr;
     }
 

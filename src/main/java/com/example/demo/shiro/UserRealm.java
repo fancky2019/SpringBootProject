@@ -12,6 +12,7 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 import org.apache.shiro.authc.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class UserRealm extends AuthorizingRealm {
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
         //如果身份认证的时候没有传入User对象，这里只能取到userName
         //也就是SimpleAuthenticationInfo构造的时候第一个参数传递需要User对象
-        User user = (User) principalCollection.getPrimaryPrincipal();
+        String userName = (String) principalCollection.getPrimaryPrincipal();
 
 
 
@@ -89,6 +90,9 @@ public class UserRealm extends AuthorizingRealm {
                 user.getPassword(),                  //加密后的密码
                 ByteSource.Util.bytes(user.getSalt()),  //随机盐
                 getName()); //当前realm的名称
+
+
+
 
 
         //  写入session，但是移除password信息
