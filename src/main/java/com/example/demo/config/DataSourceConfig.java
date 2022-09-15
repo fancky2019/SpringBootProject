@@ -1,6 +1,6 @@
 package com.example.demo.config;
 
-import com.example.demo.dao.dynamicDataSource.DynamicDataSource;
+import com.example.demo.dynamicDataSource.DynamicDataSource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;

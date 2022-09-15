@@ -1,4 +1,4 @@
-package com.example.demo.dao.dynamicDataSource;
+package com.example.demo.dynamicDataSource;
 
 public class DataSourceStrings {
     public static final String WRITER = "dataSourceWriter";

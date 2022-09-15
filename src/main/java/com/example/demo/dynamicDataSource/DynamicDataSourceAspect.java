@@ -1,4 +1,4 @@
-package com.example.demo.dao.dynamicDataSource;
+package com.example.demo.dynamicDataSource;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;
