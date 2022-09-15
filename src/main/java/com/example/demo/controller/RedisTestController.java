@@ -18,32 +18,32 @@ import java.util.concurrent.TimeUnit;
 /**
  * 数据类型的首字母找对应的数据类型的操作
  * 操作命令中文文档：http://www.redis.cn/commands/lpushx.html
- *https://redis.io/commands/
- *
+ * https://redis.io/commands/
+ * <p>
  * 密码配置： SECURITY配置节点 ，requirepass fancky123456
- *
+ * <p>
  * redis集群最少三台主三从。
- *
+ * <p>
  * RedLock；集群配置最少三台机器，最好为奇数。(N/2 + 1)中成功获取锁，则获取锁成功。
- *         redisson在加锁的时候，key=lockName, value=uuid + threadID, 采用set结构存储，
- *         并包含了上锁的次数 （支持可重入）；
- *         解锁的时候通过hexists判断key和value是否存在，存在则解锁；这里不会出现误解锁
- *
+ * redisson在加锁的时候，key=lockName, value=uuid + threadID, 采用set结构存储，
+ * 并包含了上锁的次数 （支持可重入）；
+ * 解锁的时候通过hexists判断key和value是否存在，存在则解锁；这里不会出现误解锁
+ * <p>
  * 持久化：rdb,aof。默认RDB,如果不丢就用aof方式。
- *
- *
+ * <p>
+ * <p>
  * 主从同步：主从同步刚连接的时候进行全量同步；全量同步结束后开始增量同步。如果有需要，slave在任何时候都可以发起全量同步，
  * 其主要策略就是无论如何首先会尝试进行增量同步，如果步成功，则会要求slave进行全量同步，之后再进行增量同步。
  * 只要slave启动，就会和master建立连接发送SYNC请求和主机全量同步。
- *
- *
+ * <p>
+ * <p>
  * redis 高可用：redis 主从、redis sentinel、 redis cluster 。
- *
+ * <p>
  * redis cluster :解决sentinel扩容问题。集群分片存储。每个节点都有自己的至少一个从节点，
  * 若有一个节点的主从都宕机，集群就不可用。每个节点保存其他节点的主从信息，主节点不可用就切换从节点。
- *
- *
- *
+ * <p>
+ * <p>
+ * <p>
  * redis key 过期订阅：
  */
 /*
@@ -83,6 +83,8 @@ public class RedisTestController {
             Boolean delByStringKey = redisTemplate.delete("stringKey1");
             Boolean del = redisTemplate.delete(strVal3);
             Boolean exists = redisTemplate.hasKey(strVal3);
+
+            redisTemplate.expire("stringKey1", 1000, TimeUnit.SECONDS);
             //endregion
 
             //region List
@@ -372,9 +374,9 @@ public class RedisTestController {
 
             redisTemplate.opsForValue().set("stringKey", "value");
 
-            int id1=1,id2=2;
-            redisTemplate.opsForValue().setBit("bitMapKey1",id1,true);
-            redisTemplate.opsForValue().setBit("bitMapKey2",id2,false);
+            int id1 = 1, id2 = 2;
+            redisTemplate.opsForValue().setBit("bitMapKey1", id1, true);
+            redisTemplate.opsForValue().setBit("bitMapKey2", id2, false);
 
         } catch (Exception ex) {
             String msg = ex.toString();
@@ -399,7 +401,7 @@ public class RedisTestController {
         RLock lock = redissonClient.getLock("redisKey_testRedisson");
 
         //使用默认看门狗延期机制    this.lockWatchdogTimeout = 30000L;
-       // lock.lock();
+        // lock.lock();
         //加锁（阻塞等待），默认过期时间是30秒。   this.lockWatchdogTimeout = 30000L;
 //        lock.lock();
         try {

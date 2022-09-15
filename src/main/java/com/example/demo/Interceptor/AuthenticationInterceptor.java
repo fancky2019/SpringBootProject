@@ -29,6 +29,10 @@ Aspect:springboot 默认采用动态代理实现，获取不到request请求的�
 preHandle-->postHandle-->afterCompletion
 preHandle return false 就不进入postHandle
 可以多个Interceptor
+
+
+
+ 拦截器：拦截不执行，返回false,在response中写入信息，如果有的要执行请用Aspect
  */
 public class AuthenticationInterceptor implements HandlerInterceptor {
 

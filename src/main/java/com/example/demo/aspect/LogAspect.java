@@ -2,18 +2,35 @@ package com.example.demo.aspect;
 
 import com.alibaba.fastjson.JSON;
 import com.example.demo.model.entity.rabc.Users;
+import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.utility.RepeatPermission;
 import lombok.extern.log4j.Log4j2;
+import org.apache.poi.ss.formula.functions.T;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 import com.example.demo.model.pojo.Student;
 
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /*
 切点表达式:参考https://www.cnblogs.com/zhangxufeng/p/9160869.html
@@ -42,6 +59,16 @@ execution(public * com.spring.service.BusinessObject.businessService(java.lang.S
 //@Slf4j
 @Log4j2
 public class LogAspect {
+
+
+    @Autowired
+    private HttpServletRequest httpServletRequest;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     /*
     注解@Slf4j的使用
@@ -131,21 +158,90 @@ public class LogAspect {
     @Around(value = "execution(* com.example.demo.controller.*.*(..))")
     public Object aroundMethod(ProceedingJoinPoint jp) throws Throwable {
         String methodName = jp.getSignature().getName();
-        Object result = null;
-        try {
-            log.info("【环绕增强中的--->前置增强】：the method 【" + methodName + "】 begins with " + Arrays.asList(jp.getArgs()));
-            //执行目标方法
-            result = jp.proceed();
-            log.info("【环绕增强中的--->返回增强】：the method 【" + methodName + "】 ends with " + result);
-        } catch (Throwable e) {
-            result = "error";
-            log.info("【环绕增强中的--->异常增强】：the method 【" + methodName + "】 occurs exception " + e);
-           //要把异常扔出来，不然全局异常处理捕捉不到
-            throw e;
+        //获取方法
+        Signature signature = jp.getSignature();
+        MethodSignature methodSignature = (MethodSignature) signature;
+        Method method = methodSignature.getMethod();
+        //方法参数
+        Object[] args = jp.getArgs();
+
+
+        MessageResult<Object> returnResult = null;
+        Supplier<MessageResult<Object>> supplier = () ->
+        {
+            MessageResult<Object> messageResult = new MessageResult<>();
+            try {
+                log.info("【环绕增强中的--->前置增强】：the method 【" + methodName + "】 begins with " + Arrays.asList(jp.getArgs()));
+                //执行目标方法
+                Object result = jp.proceed();
+                messageResult.setData(result);
+                messageResult.setSuccess(true);
+                log.info("【环绕增强中的--->返回增强】：the method 【" + methodName + "】 ends with " + result);
+            } catch (Throwable e) {
+                messageResult.setSuccess(false);
+                messageResult.setMessage(e.getMessage());
+                log.info("【环绕增强中的--->异常增强】：the method 【" + methodName + "】 occurs exception " + e);
+
+            }
+            log.info("【环绕增强中的--->后置增强】：-----------------end.----------------------");
+            return messageResult;
+        };
+
+//        supplier.get();
+
+
+        RepeatPermission repeatPermission = method.getDeclaredAnnotation(RepeatPermission.class);
+        MessageResult<Object> messageResult = new MessageResult<>();
+        if (repeatPermission != null) {
+
+
+            //重复提交：redis 中设置带有过期的key,判断是否存在。  过期防止程序异常，不释放锁
+            //在redis中判断 userid + path 是否存在
+
+            //redis 中设置key
+
+            BigInteger userId = new BigInteger("1");
+            String uri = httpServletRequest.getRequestURI();
+            String key ="repeat:"+ uri + "_" + userId.toString();
+
+            RLock lock = redissonClient.getLock(key);
+            try {
+                boolean isLocked = lock.isLocked();
+                if (isLocked) {
+                    //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
+                    messageResult.setSuccess(false);
+                    messageResult.setMessage("重复提交：服务器繁忙");
+                    return messageResult;
+                }
+                boolean lockSuccessfully = lock.tryLock(1, 30, TimeUnit.SECONDS);
+                isLocked = lock.isLocked();
+                if (isLocked) {
+                    return supplier.get();
+                } else {
+                    //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
+                    messageResult.setSuccess(false);
+                    messageResult.setMessage("重复提交:获取锁失败");
+                    return messageResult;
+                }
+            } catch (InterruptedException e) {
+                messageResult.setSuccess(false);
+                messageResult.setMessage(e.getMessage());
+            } finally {
+                //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
+                //unlock 删除key
+                lock.unlock();
+
+            }
+
+            return messageResult;
+        } else {
+            return supplier.get();
         }
-        log.info("【环绕增强中的--->后置增强】：-----------------end.----------------------");
-        return result;
+
+
     }
+
+
 
 
     @AfterThrowing(pointcut = "execution(* com.example.demo.controller.*.*(..))", throwing = "ex")

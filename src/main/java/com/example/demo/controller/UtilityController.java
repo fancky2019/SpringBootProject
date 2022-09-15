@@ -17,6 +17,7 @@ import com.example.demo.model.vo.UploadData;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.PersonService;
 import com.example.demo.utility.RSAUtil;
+import com.example.demo.utility.RepeatPermission;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
@@ -113,6 +114,18 @@ public class UtilityController {
     @Autowired
     private Student studentD;
 
+
+    @Autowired
+    private HttpServletRequest httpServletRequest;
+
+
+
+
+
+
+
+
+
     //初始化操作：1、实现 InitializingBean 接口
 //    public class UserController implements InitializingBean {
 //        // 初始化方法
@@ -122,19 +135,15 @@ public class UtilityController {
 //        }
 //    }
 
-//二   @PostConstruct
-        // 类初始化调用顺序：
-        //（1）构造方法Constructor
-        //（2）@Autowired
-        //（3）@PostConstruct
+    //二   @PostConstruct
+    // 类初始化调用顺序：
+    //（1）构造方法Constructor
+    //（2）@Autowired
+    //（3）@PostConstruct
     @PostConstruct
-    public void init()
-    {
+    public void init() {
 
     }
-
-
-
 
 
     //region  切面
@@ -887,7 +896,7 @@ public class UtilityController {
     }
 
     @GetMapping("rsaTest")
-    public void RSAUtilTest() {
+    public MessageResult<Void> RSAUtilTest() {
         try {
 
 
@@ -906,6 +915,17 @@ public class UtilityController {
         } catch (Exception e) {
             int m = 0;
         }
+
+        return new MessageResult<>();
+    }
+
+    @RepeatPermission
+    @GetMapping("repeat")
+    public MessageResult<Void> repeat() {
+
+        MessageResult<Void> messageResult=new MessageResult<>();
+        messageResult.setSuccess(true);
+        return messageResult;
     }
 
 }
