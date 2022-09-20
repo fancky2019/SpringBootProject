@@ -27,6 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
@@ -82,6 +83,10 @@ global session作用域类似于标准的HTTP Session作用域，不过它仅仅
 @RequestMapping("/utility")
 //@Scope("prototype")
 public class UtilityController {
+
+
+    @Resource
+    ApplicationContext applicationContext;
 
     //Lombox 的注解 @Slf4j 相当于下面语句
     private static final Logger LOGGER = LogManager.getLogger(UtilityController.class);
@@ -896,7 +901,7 @@ public class UtilityController {
     }
 
     @GetMapping("rsaTest")
-    public MessageResult<Void> RSAUtilTest() {
+    public MessageResult<Void> rSAUtilTest() throws Exception {
         try {
 
 
@@ -913,7 +918,9 @@ public class UtilityController {
             boolean re = RSAUtil.verify(data.getBytes(), signData, RSAUtil.getPublicKey());
             int m = 0;
         } catch (Exception e) {
+
             int m = 0;
+            throw e;
         }
 
         return new MessageResult<>();

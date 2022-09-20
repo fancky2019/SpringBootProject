@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.utility.RepeatPermission;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.formula.functions.T;
 import org.aspectj.lang.JoinPoint;
@@ -69,6 +71,10 @@ public class LogAspect {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     /*
     注解@Slf4j的使用
@@ -150,6 +156,10 @@ public class LogAspect {
 //        log.error("【异常增强】the method 【" + methodName + "】 occurs exception: ", e);
 //    }
 
+//配置过个路径
+//    @Around(value = "execution(* com.fnd.businessvehicleintelligent.*.controller.*.*(..))" +
+//            "||execution(* com.fnd.mq.controller.*.*(..))")
+
     /**
      * 环绕增强：目标方法执行前后分别执行一些代码，发生异常的时候执行另外一些代码
      *
@@ -166,28 +176,15 @@ public class LogAspect {
         Object[] args = jp.getArgs();
 
 
-        MessageResult<Object> returnResult = null;
-        Supplier<MessageResult<Object>> supplier = () ->
-        {
-            MessageResult<Object> messageResult = new MessageResult<>();
-            try {
-                log.info("【环绕增强中的--->前置增强】：the method 【" + methodName + "】 begins with " + Arrays.asList(jp.getArgs()));
-                //执行目标方法
-                Object result = jp.proceed();
-                messageResult.setData(result);
-                messageResult.setSuccess(true);
-                log.info("【环绕增强中的--->返回增强】：the method 【" + methodName + "】 ends with " + result);
-            } catch (Throwable e) {
-                messageResult.setSuccess(false);
-                messageResult.setMessage(e.getMessage());
-                log.info("【环绕增强中的--->异常增强】：the method 【" + methodName + "】 occurs exception " + e);
-
-            }
-            log.info("【环绕增强中的--->后置增强】：-----------------end.----------------------");
-            return messageResult;
-        };
-
-//        supplier.get();
+//        String className = jp.getTarget().getClass().toString();
+//        String methodName = jp.getSignature().getName();
+//        Object[] args = jp.getArgs();
+//
+//
+//        log.info("{} - {} 开始处理,参数列表 - {}", className, methodName,objectMapper.writeValueAsString(args));
+//        Object result = jp.proceed();
+//        log.info("{} - {} 处理完成,返回结果 - {}", className, methodName,objectMapper.writeValueAsString(result));
+//
 
 
         RepeatPermission repeatPermission = method.getDeclaredAnnotation(RepeatPermission.class);
@@ -202,7 +199,7 @@ public class LogAspect {
 
             BigInteger userId = new BigInteger("1");
             String uri = httpServletRequest.getRequestURI();
-            String key ="repeat:"+ uri + "_" + userId.toString();
+            String key = "repeat:" + uri + "_" + userId.toString();
 
             RLock lock = redissonClient.getLock(key);
             try {
@@ -216,7 +213,7 @@ public class LogAspect {
                 boolean lockSuccessfully = lock.tryLock(1, 30, TimeUnit.SECONDS);
                 isLocked = lock.isLocked();
                 if (isLocked) {
-                    return supplier.get();
+                    return jp.proceed();
                 } else {
                     //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
                     messageResult.setSuccess(false);
@@ -235,18 +232,17 @@ public class LogAspect {
 
             return messageResult;
         } else {
-            return supplier.get();
+            return jp.proceed();
+
         }
 
 
     }
 
 
-
-
     @AfterThrowing(pointcut = "execution(* com.example.demo.controller.*.*(..))", throwing = "ex")
     public void onExceptionThrow(Exception ex) {
-        log.info("", ex);
+        log.error("", ex);
     }
 
 }

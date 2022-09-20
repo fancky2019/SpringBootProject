@@ -4,7 +4,6 @@ import org.apache.tomcat.util.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 
-
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
 import java.security.*;
@@ -16,28 +15,20 @@ import java.util.HashMap;
 public class RSAUtil {
 
     /**
-     * 非对称加密密钥算法
+     * 非对称加密密钥算法 RSA_PKCS1_PADDING
      */
     private static final String KEY_ALGORITHM_RSA = "RSA";
     //不能指定RSA否则解密乱码+明文
     private static final String CIPHER = "RSA/ECB/PKCS1Padding";
     /**
-     *
      * MD5withRSA  SHA256withRSA
-     *  * 数字签名
-     *  * 1：MD5withRSA，：将正文通过MD5数字摘要后，将密文 再次通过生成的RSA密钥加密，生成数字签名，
-     *  * 将明文与密文以及公钥发送给对方，对方拿到私钥/公钥对数字签名进行解密，然后解密后的，与明文经过MD5加密进行比较
-     *  * 如果一致则通过
-     *
-     *
-     *
-     *
-     *
-     *
-     *
-     *
-     *  hmac数字签名 =  rsa_encrypt(hmac(信息) + RSA私钥)
-     *  SHA256withRSA数字签名 =  SHA256withRSA_encrypt(信息 + RSA私钥)
+     * * 数字签名
+     * * 1：MD5withRSA，：将正文通过MD5数字摘要后，将密文 再次通过生成的RSA密钥加密，生成数字签名，
+     * * 将明文与密文以及公钥发送给对方，对方拿到私钥/公钥对数字签名进行解密，然后解密后的，与明文经过MD5加密进行比较
+     * * 如果一致则通过
+
+     * hmac数字签名 =  rsa_encrypt(hmac(信息) + RSA私钥)
+     * SHA256withRSA数字签名 =  SHA256withRSA_encrypt(信息 + RSA私钥)
      */
     private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 
@@ -68,12 +59,12 @@ public class RSAUtil {
             KeyPair keyPair = keyPairGen.generateKeyPair();
             PUBLIC_KEY = keyPair.getPublic();
             PRIVATE_KEY = keyPair.getPrivate();
-//            PUBLIC_KEY_STR = Base64.toBase64String(PUBLIC_KEY.getEncoded());
-//            PRIVATE_KEY_STR = Base64.toBase64String(PRIVATE_KEY.getEncoded());
+            PUBLIC_KEY_STR = Base64.encodeBase64String(PUBLIC_KEY.getEncoded());
+            PRIVATE_KEY_STR = Base64.encodeBase64String(PRIVATE_KEY.getEncoded());
 
-            PRIVATE_KEY_STR="MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAJ/OZFB803CogXzkssdQKrlRVncx6xtLGr+vrQeJoO5LfKL9FbkSNdHimbJzY7KXBI+fHz/F6GdlO24r6qEZwMXrDO7dQMwYFPY43Sfa1A90vazjQJm8/66nZM2JNW70WtYJZpSHx5SRqhBO1w0tAd+Lyc/wD/sZf1RF4xxYztzjAgMBAAECgYAYPnEUjuNq/31pi66ds0lQBQl3mtCeuuWreATplFUgYb5eYcPmaF9W4KhNnNjesq+D9HGCtM0dxoteGvaFC0ml35YLbPQkgVJ2n0/A7pTo41NJF9WuEXlNmp96P8K2ndBDMQQ+Fiqf1+AC2JbNM7zzL2g3mJyrwGkbGpuE9IQI0QJBANdDxuTS/CRwL/LGoh3msnOhBDsNKI86dJCdluILJU2DHI5abYbExZPYm1y7R1/ajfidfF30cAfLIis00z1mmJECQQC+C/9uHx1Mvt8gXsp6BmQktEP0DDRe7UAQflmMYBQbo5Jct8yQ9oAwiGDO5Ov8Fp99/3Xb0UAxFOEYaWu5cvgzAkA+OIIB3BYzdhX154IugGMuVulBJFGH7M6KinJ1TeFvYSlc4DhuTuwJCwAFMsCzrRmCNgsfoSrMpeNvd6pjQgdxAkAQm33Lwr5NuZRIAOCSv0I7DuGtTu+4p+TkTBZJNRAsxiOBJLKkrFXRZ+mFyu1wTw3K9er3tZZ1c4ykFHpMb2aPAkBlpa5wuscsItRuysZk8WtPXxmrqdkW+JamHS2zLuKSe3a9hMh6oNsU47jXqEWcyF5iFZONal9+t0I++K5m7Q3A";
-            PUBLIC_KEY_STR="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCfzmRQfNNwqIF85LLHUCq5UVZ3MesbSxq/r60HiaDuS3yi/RW5EjXR4pmyc2OylwSPnx8/xehnZTtuK+qhGcDF6wzu3UDMGBT2ON0n2tQPdL2s40CZvP+up2TNiTVu9FrWCWaUh8eUkaoQTtcNLQHfi8nP8A/7GX9UReMcWM7c4wIDAQAB";
-
+//            PRIVATE_KEY_STR="MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAJ/OZFB803CogXzkssdQKrlRVncx6xtLGr+vrQeJoO5LfKL9FbkSNdHimbJzY7KXBI+fHz/F6GdlO24r6qEZwMXrDO7dQMwYFPY43Sfa1A90vazjQJm8/66nZM2JNW70WtYJZpSHx5SRqhBO1w0tAd+Lyc/wD/sZf1RF4xxYztzjAgMBAAECgYAYPnEUjuNq/31pi66ds0lQBQl3mtCeuuWreATplFUgYb5eYcPmaF9W4KhNnNjesq+D9HGCtM0dxoteGvaFC0ml35YLbPQkgVJ2n0/A7pTo41NJF9WuEXlNmp96P8K2ndBDMQQ+Fiqf1+AC2JbNM7zzL2g3mJyrwGkbGpuE9IQI0QJBANdDxuTS/CRwL/LGoh3msnOhBDsNKI86dJCdluILJU2DHI5abYbExZPYm1y7R1/ajfidfF30cAfLIis00z1mmJECQQC+C/9uHx1Mvt8gXsp6BmQktEP0DDRe7UAQflmMYBQbo5Jct8yQ9oAwiGDO5Ov8Fp99/3Xb0UAxFOEYaWu5cvgzAkA+OIIB3BYzdhX154IugGMuVulBJFGH7M6KinJ1TeFvYSlc4DhuTuwJCwAFMsCzrRmCNgsfoSrMpeNvd6pjQgdxAkAQm33Lwr5NuZRIAOCSv0I7DuGtTu+4p+TkTBZJNRAsxiOBJLKkrFXRZ+mFyu1wTw3K9er3tZZ1c4ykFHpMb2aPAkBlpa5wuscsItRuysZk8WtPXxmrqdkW+JamHS2zLuKSe3a9hMh6oNsU47jXqEWcyF5iFZONal9+t0I++K5m7Q3A";
+//            PUBLIC_KEY_STR="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCfzmRQfNNwqIF85LLHUCq5UVZ3MesbSxq/r60HiaDuS3yi/RW5EjXR4pmyc2OylwSPnx8/xehnZTtuK+qhGcDF6wzu3UDMGBT2ON0n2tQPdL2s40CZvP+up2TNiTVu9FrWCWaUh8eUkaoQTtcNLQHfi8nP8A/7GX9UReMcWM7c4wIDAQAB";
+            int m = 0;
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -125,7 +116,6 @@ public class RSAUtil {
     }
 
 
-
     public static byte[] decrypt(byte[] data) throws Exception {
         return decrypt(data, PRIVATE_KEY_STR);
     }
@@ -163,9 +153,6 @@ public class RSAUtil {
     }
 
 
-
-
-
 //endregion
 
 
@@ -175,8 +162,8 @@ public class RSAUtil {
     /**
      * 验签：公钥解密
      *
-     * @param data 待解密数据
-     * @param publicKeyStr  公钥
+     * @param data         待解密数据
+     * @param publicKeyStr 公钥
      * @return byte[] 解密数据
      * @throws Exception
      */

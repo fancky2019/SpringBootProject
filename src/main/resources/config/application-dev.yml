@@ -396,3 +396,10 @@ xxl:
 ##mybatis:
 ##  configuration:
 ##    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+gx:
+  jwt:
+    JWTSecretKey: GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk
+  encrypt:
+    allowlist: /login;/logout
+

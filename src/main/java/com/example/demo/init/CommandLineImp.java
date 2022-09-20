@@ -2,9 +2,13 @@ package com.example.demo.init;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 
 //容器初始化完成执行：ApplicationRunner-->CommandLineRunner-->ApplicationReadyEvent
@@ -17,11 +21,14 @@ public class CommandLineImp implements org.springframework.boot.CommandLineRunne
     private String fistName;
     private static Logger LOGGER = LogManager.getLogger(CommandLineImp.class);
 
+    @Autowired
+//    @Resource
+    ApplicationContext applicationContext;
 
     @Override
     public void run(String... args) throws Exception {
-        String name=fistName;
+        String name = fistName;
         LOGGER.info("CommandLineImp");
-        int m=0;
+        int m = 0;
     }
 }
