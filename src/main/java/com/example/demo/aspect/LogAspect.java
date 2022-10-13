@@ -176,12 +176,12 @@ public class LogAspect {
         Object[] args = jp.getArgs();
 
 
-//        String className = jp.getTarget().getClass().toString();
+        String className = jp.getTarget().getClass().toString();
 //        String methodName = jp.getSignature().getName();
 //        Object[] args = jp.getArgs();
 //
 //
-//        log.info("{} - {} 开始处理,参数列表 - {}", className, methodName,objectMapper.writeValueAsString(args));
+        log.info("{} - {} 开始处理,参数列表 - {}", className, methodName,Arrays.toString(args));
 //        Object result = jp.proceed();
 //        log.info("{} - {} 处理完成,返回结果 - {}", className, methodName,objectMapper.writeValueAsString(result));
 //
@@ -229,7 +229,8 @@ public class LogAspect {
                 lock.unlock();
 
             }
-
+        log.info("{} - {} 处理完成,返回结果 - {}", className, methodName,objectMapper.writeValueAsString(messageResult));
+//
             return messageResult;
         } else {
             return jp.proceed();

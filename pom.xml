@@ -529,6 +529,17 @@
             <scope>test</scope>
         </dependency>
 
+
+        <dependency>
+            <groupId>com.fancky</groupId>
+            <artifactId>model</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+
+            <!--            添加本地jar依赖-->
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/model-0.0.1-SNAPSHOT.jar</systemPath>
+        </dependency>
+
     </dependencies>
 
 
@@ -587,9 +598,16 @@
                 <version>2.5.4</version>
                 <!--热部署：该配置必须-->
                 <configuration>
+                    <!--热部署：该配置必须-->
                     <fork>true</fork>
-                </configuration>
+                    <!-- maven打包时会将外部引入的第三方jar包,打包到项目jar保重BOOT-INF文件夹lib文件夹下，-->
+                    <includeSystemScope>true</includeSystemScope>
 
+
+<!-- 打第三方jar 去掉打包的jar目录有BOOT-INF文件夹，项目引入jar后，找不到程序包，找不到指定bean-->
+<!--                    <skip>true</skip>-->
+
+                </configuration>
             </plugin>
 
             <!-- mybatis逆向工程 -->

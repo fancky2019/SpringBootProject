@@ -124,13 +124,6 @@ public class UtilityController {
     private HttpServletRequest httpServletRequest;
 
 
-
-
-
-
-
-
-
     //初始化操作：1、实现 InitializingBean 接口
 //    public class UserController implements InitializingBean {
 //        // 初始化方法
@@ -815,6 +808,7 @@ public class UtilityController {
     //postman  send and download
 
     /**
+     * https://easyexcel.opensource.alibaba.com/docs/current/quickstart/write
      * 文件下载（失败了会返回一个有部分数据的Excel）
      * <p>
      * 1. 创建excel对应的实体对象 参照{@link DownloadData}
@@ -834,6 +828,7 @@ public class UtilityController {
             String fileName = URLEncoder.encode("测试", "UTF-8").replaceAll("\\+", "%20");
             response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
             EasyExcel.write(response.getOutputStream(), DownloadData.class).sheet("表名称").doWrite(data());
+
             int mm = 0;
         } catch (Exception ex) {
             String msg = ex.getMessage();
@@ -930,9 +925,20 @@ public class UtilityController {
     @GetMapping("repeat")
     public MessageResult<Void> repeat() {
 
-        MessageResult<Void> messageResult=new MessageResult<>();
+        MessageResult<Void> messageResult = new MessageResult<>();
         messageResult.setSuccess(true);
         return messageResult;
+    }
+
+    private void localJar() {
+        /*
+       打第三方jar, maven 插件配置中添加 <skip>true</skip>-->
+        <!-- 打第三方jar 去掉打包的jar目录有BOOT-INF文件夹，项目引入jar后，找不到程序包，找不到指定bean-->
+<!--                    <skip>true</skip>-->
+         */
+        com.fancky.model.entity.ModelTest model = new com.fancky.model.entity.ModelTest();
+
+
     }
 
 }

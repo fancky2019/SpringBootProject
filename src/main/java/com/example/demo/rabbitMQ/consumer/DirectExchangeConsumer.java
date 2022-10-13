@@ -105,7 +105,9 @@ public class DirectExchangeConsumer {
 
     //endregion
     @RabbitHandler
-    @RabbitListener(queues = DELAYED_MESSAGE_QUEUE)//参数为队列名称
+    @RabbitListener(queues = DELAYED_MESSAGE_QUEUE)
+    //使用 @Payload 和 @Headers注解可以消息中的 body 与 headers 信息
+    //参数为队列名称  , @Headers Map<String, Object> header
 //    public void receivedDelayedMsg(String receivedMessage, Channel channel, Message message, @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws Exception {
     public void receivedDelayedMsg(String receivedMessage, Channel channel, Message message) throws Exception {
         try {

@@ -15,6 +15,20 @@ import java.time.LocalDate;
 import java.util.Date;
 
 /*
+
+先签名后加密
+
+
+token 续签：一、长短令牌access_token、refresh_token。短令牌可保证安全性，防止泄露。
+           二、服务端判断token快过期自动续签返回前段。
+
+
+
+
+
+
+
+
 在公钥加密中。加密（encryption）是用对方的公钥加密（encrypt）数据，对方用私钥解密。签名是用自己的私钥加密（encrypt）数据，对方用你的公钥解密。
 签名的本质就是“加密”
 
