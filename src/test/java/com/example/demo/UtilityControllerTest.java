@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.model.pojo.BeanLife;
+import com.example.demo.model.pojo.SpringLifeCycleBean;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -18,6 +19,10 @@ public class UtilityControllerTest {
             AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(BeanLife.class);
             System.out.println("容器初始化");
             context.close();
+
+            AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext(SpringLifeCycleBean.class);
+            System.out.println("容器初始化");
+            context1.close();
         } catch (Exception ex) {
         }
     }

@@ -6,9 +6,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 /**
+ * SpringLifeCycleBean
  * 测试方法在UtilityControllerTest
  */
 
@@ -39,6 +44,18 @@ public class BeanLife implements InitializingBean, DisposableBean {
         logger.info("BeanLife init");
     }
 
+
+    @PostConstruct
+    public void initPostConstruct(){
+        System.out.println("PostConstruct method invoked");
+    }
+
+
+    @PreDestroy
+    public void preDestroy(){
+        System.out.println("PreDestroy method invoked");
+    }
+    @Override
     public void destroy() {
         logger.info("BeanLife destroy");
     }

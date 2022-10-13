@@ -16,6 +16,11 @@ import java.util.Date;
 
 /*
 
+jwt 用来身份认证，无状态。
+
+JWTString=Base64(Header).Base64(Payload).HMACSHA256(base64UrlEncode(header)+"."+base64UrlEncode(payload),secret)
+
+
 先签名后加密
 
 
@@ -24,7 +29,7 @@ token 续签：一、长短令牌access_token、refresh_token。短令牌可保�
 
 
 
-token 注销：redis 违背无状态设计初衷
+token 注销：redis token 黑名单，每次请求查询校验，违背无状态设计初衷
 设置令牌的合理过期时间
 注销时从客户端删除存储的Token
 拥有不再活动Token的数据库，这些Token仍有一些生存时间

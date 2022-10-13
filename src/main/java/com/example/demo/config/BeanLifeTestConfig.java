@@ -1,6 +1,7 @@
 package com.example.demo.config;
 
 import com.example.demo.model.pojo.BeanLife;
+import com.example.demo.model.pojo.SpringLifeCycleBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,4 +20,12 @@ public class BeanLifeTestConfig {
     public BeanLife beanLife() {
         return new BeanLife();
     }
+
+
+    @Bean(destroyMethod = "customDestroy", initMethod = "customInit")
+    public SpringLifeCycleBean lifeCycleBean(){
+        SpringLifeCycleBean lifeCycleBean = new SpringLifeCycleBean();
+        return lifeCycleBean;
+    }
+
 }

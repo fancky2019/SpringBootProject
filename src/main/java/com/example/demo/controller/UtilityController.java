@@ -32,11 +32,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.ServletInputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -124,6 +127,7 @@ public class UtilityController {
     private HttpServletRequest httpServletRequest;
 
 
+    //bean  生命周期 参见 model--pojo--BeanLife SpringLifeCycleBean
     //初始化操作：1、实现 InitializingBean 接口
 //    public class UserController implements InitializingBean {
 //        // 初始化方法
@@ -939,6 +943,39 @@ public class UtilityController {
         com.fancky.model.entity.ModelTest model = new com.fancky.model.entity.ModelTest();
 
 
+    }
+
+    @RequestMapping(value = "/getCookies", method = RequestMethod.GET)
+    public String getCookies(HttpServletResponse response) {
+        //HttpServletRequest  装请求信息的类
+        //HttpServletResponse  装相应信息的类
+        Cookie cookie = new Cookie("sessionId", "10001");
+        response.addCookie(cookie);
+        return "恭喜获得cookies信息成功";
+    }
+
+    //SpringMVC可以通过入参的方式绑定HttpServletRequest和HttpServletResponse
+    // (SpringMVC在调用处理器时会自动创建对应的HttpServletRequest和HttpServletReponse对象并传入适配的控制器方法中)
+    @RequestMapping(path = "/httpServletRequestResponse")
+    public String httpServletRequestResponse(HttpServletRequest request, HttpServletResponse response) {
+
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("sessionId")) {
+                String sessionId = cookie.getValue();
+            }
+        }
+        System.out.println(request.toString() + response.toString());
+
+
+        //通用获取HttpServletRequest、HttpServletResponse
+        //获取response对象
+        HttpServletResponse response1 = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+        //获取request对象
+        HttpServletRequest request1 = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
+
+        return "helloWorld";
     }
 
 }
