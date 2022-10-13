@@ -24,7 +24,11 @@ token 续签：一、长短令牌access_token、refresh_token。短令牌可保�
 
 
 
-
+token 注销：redis 违背无状态设计初衷
+设置令牌的合理过期时间
+注销时从客户端删除存储的Token
+拥有不再活动Token的数据库，这些Token仍有一些生存时间
+针对每个请求根据黑名单查询授权情况
 
 
 
