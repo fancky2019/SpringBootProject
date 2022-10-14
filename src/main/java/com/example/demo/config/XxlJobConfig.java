@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 /*
 后台管理：http://localhost:8181/xxl-job-admin/joblog
+admin,123456
  */
 @Configuration
 public class XxlJobConfig {

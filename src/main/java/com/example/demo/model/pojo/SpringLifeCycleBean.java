@@ -43,25 +43,25 @@ public class SpringLifeCycleBean implements BeanNameAware, BeanFactoryAware, App
 
     @Override
     public void setBeanName(String s) {
-        System.out.println("BeanNameAware setBeanName method inovked, name: " + s);
+        System.out.println("BeanNameAware setBeanName method invoked, name: " + s);
     }
 
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        System.out.println("BeanFactoryAware setBeanFactory method inovked, beanFactory: " + beanFactory.getClass().getName());
+        System.out.println("BeanFactoryAware setBeanFactory method invoked, beanFactory: " + beanFactory.getClass().getName());
     }
 
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        System.out.println("ApplicationContextAware setApplicationContext method inovked, applicationContext: " + applicationContext.getClass().getName());
+        System.out.println("ApplicationContextAware setApplicationContext method invoked, applicationContext: " + applicationContext.getClass().getName());
     }
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (beanName.equals("lifeCycleBean")) {
-            System.out.println("BeanPostProcessor postProcessBeforeInitialization method inovked, beanName: " + beanName);
+            System.out.println("BeanPostProcessor postProcessBeforeInitialization method invoked, beanName: " + beanName);
         }
         return bean;
     }
@@ -69,7 +69,7 @@ public class SpringLifeCycleBean implements BeanNameAware, BeanFactoryAware, App
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (beanName.equals("lifeCycleBean")) {
-            System.out.println("BeanPostProcessor postProcessAfterInitialization method inovked, beanName: " + beanName);
+            System.out.println("BeanPostProcessor postProcessAfterInitialization method invoked, beanName: " + beanName);
         }
 
       return bean;
@@ -77,25 +77,29 @@ public class SpringLifeCycleBean implements BeanNameAware, BeanFactoryAware, App
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        System.out.println("InitializingBean afterPropertiesSet method inovked");
+        System.out.println("InitializingBean afterPropertiesSet method invoked");
 
     }
-
+    //region 类中声明注解    @PreDestroy
     @PostConstruct
     public void init() {
         System.out.println("PostConstruct method invoked");
     }
 
+
     @PreDestroy
     public void preDestroy() {
         System.out.println("PreDestroy method invoked");
     }
+    //endregion
 
     @Override
     public void destroy() throws Exception {
         System.out.println("DisposableBean destroy method invoked");
     }
 
+
+    //region 声明bean 配置时候使用
     public void customInit() {
         System.out.println("customInit method invoked");
     }
@@ -103,7 +107,7 @@ public class SpringLifeCycleBean implements BeanNameAware, BeanFactoryAware, App
     public void customDestroy() {
         System.out.println("customDestroy method invoked");
     }
-
+ //endregion
 
 }
 

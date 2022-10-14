@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 /*
 此种要到 XxlJobConfig
 注册： XxlJobSpringExecutor.registJobHandler("beanClassJobHandler", new BeanClassJobHandler());
-
+admin,123456
 建议采用方法注册
  */
 @Component
