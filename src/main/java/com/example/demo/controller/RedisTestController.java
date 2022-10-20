@@ -55,8 +55,17 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/redisTest")
 public class RedisTestController {
     private static final Logger logger = LogManager.getLogger(RedisTestController.class);
+
+    //如果定义了泛型，实例化时没有指明类的泛型，则认为此泛型类型为Object
+    //相当于 RedisTemplate<Object,Object>
     @Autowired
     private RedisTemplate redisTemplate;
+
+    @Autowired
+    private RedisTemplate<String,Object> redisTemplateObj;
+
+    @Autowired
+    private RedisTemplate<String,Integer> redisTemplateInt;
 
     @Autowired
     private RedissonClient redissonClient;

@@ -1,4 +1,4 @@
-package com.example.demo.Interceptor;
+package com.example.demo.aop.Interceptor;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;

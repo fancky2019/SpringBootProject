@@ -1,4 +1,4 @@
-package com.example.demo.handler;
+package com.example.demo.aop.advice;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

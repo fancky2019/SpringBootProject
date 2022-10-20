@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -61,5 +63,39 @@ public class SwaggerConfiguration {
                 .build();
     }
 
+    /*
+    http://localhost:8081/v2/api-docs  看是否通
+        加入    registry.addResourceHandler("/swagger-ui.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+    */
+
+
+//    public class WebMvcConfig extends WebMvcConfigurationSupport
+//    /**
+//     * 功能描述: 开放静态资源
+//     */
+//    @Override
+//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+////        "classpath:/META-INF/resources/", "classpath:/resources/", "classpath:/static/", "classpath:/public/"
+//        //重写这个方法，映射静态资源文件
+//        registry.addResourceHandler("/**")
+//                .addResourceLocations("classpath:/resources/")
+//                .addResourceLocations("classpath:/static/")
+//                .addResourceLocations("classpath:/pages/")
+//        ;
+//        registry.addResourceHandler("/swagger-ui.html")
+//                .addResourceLocations("classpath:/META-INF/resources/");
+//        registry.addResourceHandler("/webjars/**")
+//                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+//        super.addResourceHandlers(registry);
+//    }
+//
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins("*")
+//                .allowedMethods("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH")
+//                .allowCredentials(true).maxAge(3600);
+//    }
 
 }
