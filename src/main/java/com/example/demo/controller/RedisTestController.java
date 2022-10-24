@@ -61,11 +61,16 @@ public class RedisTestController {
     @Autowired
     private RedisTemplate redisTemplate;
 
+
+    /**
+     * 要配置redis 此种类型的bean.
+     *
+     */
     @Autowired
     private RedisTemplate<String,Object> redisTemplateObj;
 
-    @Autowired
-    private RedisTemplate<String,Integer> redisTemplateInt;
+//    @Autowired
+//    private RedisTemplate<String,Integer> redisTemplateInt;
 
     @Autowired
     private RedissonClient redissonClient;
@@ -80,6 +85,9 @@ public class RedisTestController {
             redisTemplate.hasKey("ds");
             redisTemplate.expire("ds", 60, TimeUnit.SECONDS);
             //region String
+            //待测试
+            ValueOperations<Integer, Integer> valueOperations1 = redisTemplate.opsForValue();
+
             ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
             valueOperations.set("stringKey1", "stringKeyValue1");
             valueOperations.set("stringKey2", "stringKeyValue2");

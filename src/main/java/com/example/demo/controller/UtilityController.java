@@ -21,6 +21,7 @@ import com.example.demo.utility.RepeatPermission;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
@@ -42,11 +44,10 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -976,6 +977,59 @@ public class UtilityController {
 
 
         return "helloWorld";
+    }
+
+
+    @GetMapping("fileTest")
+    public List<String> fileTest() {
+        //D:\\work\\project\\git\\java\\SpringBootProject
+        String rootPath = System.getProperty("user.dir");
+
+        String filePath = "/configfile/name.txt";
+
+
+        String content = "";
+        List<String> strList = new ArrayList<>();
+        try {
+            //idea 中可以正常运行，达成jar报错：找不到文件
+//            ClassPathResource resource = new ClassPathResource(filePath);
+//            File file = resource.getFile();
+//            content = FileUtils.readFileToString(file, "UTF-8");
+
+
+//            content = IOUtils.resourceToString(filePath, Charset.forName("UTF-8"));
+
+            InputStream inputStream = this.getClass().getResourceAsStream(filePath);
+            strList = IOUtils.readLines(inputStream, Charset.forName("UTF-8"));
+
+
+            int m = 0;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+        try {
+//            //append 没有换行符
+//            StringBuilder fileContent = new StringBuilder();
+//            InputStream is = this.getClass().getResourceAsStream(filePath);
+//            InputStreamReader isr = new InputStreamReader(is);
+//            BufferedReader br = new BufferedReader(isr);
+//            String data = null;
+//            while ((data = br.readLine()) != null) {
+//                fileContent.append(data + System.getProperty("line.separator"));
+//            }
+//            br.close();
+//            isr.close();
+//            is.close();
+
+            int m = 0;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+        return strList;
     }
 
 }
