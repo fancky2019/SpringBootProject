@@ -30,8 +30,4 @@ public class BeanLifeTestConfig {
         return lifeCycleBean;
     }
 
-    @Bean
-    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
-        return new LifecycleBeanPostProcessor();
-    }
 }

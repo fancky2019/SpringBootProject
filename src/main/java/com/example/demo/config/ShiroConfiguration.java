@@ -83,7 +83,12 @@ public class ShiroConfiguration {
 
 
 
-
+//    //LifecycleBeanPostProcessor 会造成autowire bean  无法注入，不知道原因
+//    //从shiroConfiguration 中分离
+//    @Bean
+//    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
+//        return new LifecycleBeanPostProcessor();
+//    }
 
 
     /**
