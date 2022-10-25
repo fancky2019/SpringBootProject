@@ -2,6 +2,8 @@ package com.example.demo.config;
 
 import com.example.demo.model.pojo.BeanLife;
 import com.example.demo.model.pojo.SpringLifeCycleBean;
+import com.example.demo.shiro.ShiroRedisProperties;
+import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,4 +30,8 @@ public class BeanLifeTestConfig {
         return lifeCycleBean;
     }
 
+    @Bean
+    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
+        return new LifecycleBeanPostProcessor();
+    }
 }

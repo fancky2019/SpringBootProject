@@ -16,6 +16,7 @@ import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.PersonService;
+import com.example.demo.shiro.ShiroRedisProperties;
 import com.example.demo.utility.RSAUtil;
 import com.example.demo.utility.RepeatPermission;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -97,6 +98,11 @@ public class UtilityController {
 
     @Value("${demo.multiEnvironment}")
     private String multiEnvironment;
+
+
+    @Autowired
+    private ShiroRedisProperties shiroProperties;
+
 
     @Autowired
     private ObjectMapper mapper;
@@ -1031,5 +1037,11 @@ public class UtilityController {
 
         return strList;
     }
+
+    @GetMapping("enableConfigurationProperties")
+    public String enableConfigurationProperties() {
+        return shiroProperties.getHost();
+    }
+
 
 }

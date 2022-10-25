@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.example.demo.shiro.ShiroRedisProperties;
 import com.example.demo.shiro.URLPathMatchingFilter;
 import com.example.demo.shiro.UserRealm;
 import lombok.Data;
@@ -18,35 +19,71 @@ import org.crazycake.shiro.RedisCacheManager;
 import org.crazycake.shiro.RedisManager;
 import org.crazycake.shiro.RedisSessionDAO;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import javax.servlet.Filter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+
+/*
+1. Bean 用在方法上，Component用在类上， 用了这2个注解 就放入ioc了。注意：有@Bean的方法的类，必须加上@Configuration，表明这个是个配置类，相当于xml文件的作用。不然，你加上@Bean没有用啊！！
+
+2.ConfigurationProperties 作用是绑定配置文件中的值和类的成员变量，使得new出的对象是有初始值的。但是，用了这个注解后，类并没有到容器中。必须要加@Component，放入容器。
+
+3.如果不用Component，那么需要注入上面这个对象的类 必须加上@EnableConfigurationProperties。这样，使用了@EnableConfigurationProperties这个注解后，IOC容器中也会有了。那么你就可以在这个类中使用@AutoWired 等注解来注入上述组件。
+ *
+
+
+
+
+@ConfigurationProperties
+@Component
+
+
+
+@Configuration
+@EnableConfigurationProperties(HelloServiceProperties.class)
+@ConditionalOnClass(HelloService.class)
+@ConditionalOnProperty(prefix = "hello", value = "enable", matchIfMissing = true)
+ */
+@EnableConfigurationProperties({ShiroRedisProperties.class})
 @Configuration
 public class ShiroConfiguration {
 
-    @Value("${spring.redis.host}")
-    private String host = "127.0.0.1";
+//    @Value("${spring.redis.host}")
+//    private String host = "127.0.0.1";
+//
+//    @Value("${spring.redis.port}")
+//
+//    private int port = 6379;
+//    @Value("${spring.redis.timeout}")
+//    private int timeout;
+//
+//    @Value("${spring.redis.password}")
+//    private String password = "fancky123456";
 
-    @Value("${spring.redis.port}")
+    /*
+      如果bean    @Autowired 无法注入，就采用在方法参数中注入
 
-    private int port = 6379;
-    @Value("${spring.redis.timeout}")
-    private int timeout;
+        @Bean
+      public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager) {
 
-    @Value("${spring.redis.password}")
-    private String password = "fancky123456";
+       */
+    //
+    @Autowired
+    private  ShiroRedisProperties shiroProperties;
 
-    @Bean
-    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
-        return new LifecycleBeanPostProcessor();
-    }
+
+
+
 
 
     /**
@@ -237,12 +274,16 @@ public class ShiroConfiguration {
      */
     @Bean
     public RedisManager redisManager() {
+
         RedisManager redisManager = new RedisManager();
-        redisManager.setHost(host + ":" + port);
+        redisManager.setHost(shiroProperties.getHost() + ":" + shiroProperties.getPort());
 //        redisManager.setPort(port);
 //        redisManager.setExpire(1800);// 配置缓存过期时间
 //        redisManager.setTimeout(timeout);
-        redisManager.setPassword(password);
+        redisManager.setPassword(shiroProperties.getPassword());
+
+
+
         return redisManager;
     }
 
