@@ -36,8 +36,8 @@ import java.util.concurrent.TimeUnit;
  *
  * 调度中心（xxl-job-admin）与执行器 xxl-job-executor
  */
-@Component
-@Order(10)
+//@Component
+//@Order(10)
 public class XXLJobApplicationRunnerImp implements ApplicationRunner {
     private static Logger LOGGER = LogManager.getLogger(ApplicationRunnerImp.class);
 

@@ -7,6 +7,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Component
 public class BeanMethodJobHandler {
 
@@ -14,9 +17,11 @@ public class BeanMethodJobHandler {
 
     @XxlJob("beanMethodJobHandler")
     public void beanMethodJobHandler(String param) throws Exception {
-       // XxlJobLogger.log("bean method jobhandler running...");
+        // XxlJobLogger.log("bean method jobhandler running...");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String timeStr = formatter.format(LocalDateTime.now());
         XxlJobHelper.log("BeanMethodJobHandler");
-        LOGGER.info("BeanMethodJobHandler");
+        LOGGER.info("xxljob - BeanMethodJobHandler  {} ",timeStr);
 
     }
 
