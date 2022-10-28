@@ -29,6 +29,11 @@ public class URLPathMatchingFilter extends PathMatchingFilter {
 //        }
 
 
+        /**
+         *
+         */
+
+
 //        //请求的url
         String requestURL = getPathWithinApplication(request);
         System.out.println("请求的url :"+requestURL);
@@ -44,7 +49,6 @@ public class URLPathMatchingFilter extends PathMatchingFilter {
             return true;
         }
         else {
-
             hasPermission=true;
         }
 

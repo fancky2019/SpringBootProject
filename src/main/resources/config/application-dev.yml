@@ -378,8 +378,8 @@ xxl:
   job:
     accessToken: default_token
     admin:
-      addresses: http://xxljob.com:8181/xxl-job-admin
-#      addresses: http://127.0.0.1:8182/xxl-job-admin
+#      addresses: http://xxljob.com:8182/xxl-job-admin
+      addresses: http://127.0.0.1:8182/xxl-job-admin
     executor:
       address:
       appname: springBootProject

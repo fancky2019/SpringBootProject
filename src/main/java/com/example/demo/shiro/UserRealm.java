@@ -11,15 +11,21 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.util.ByteSource;
 import org.apache.shiro.authc.*;
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
 import javax.annotation.Resource;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,7 +97,8 @@ public class UserRealm extends AuthorizingRealm {
                 ByteSource.Util.bytes(user.getSalt()),  //随机盐
                 getName()); //当前realm的名称
 
-
+        // 认证缓存信息
+//        SimpleAuthenticationInfo info =  new SimpleAuthenticationInfo(user, user.getPassword(), user.getUsername());
 
 
 
@@ -104,9 +111,35 @@ public class UserRealm extends AuthorizingRealm {
 //
 
 
+
+
+
         return info;
 
 
+    }
+
+    private void singleLogin(String username) {
+
+        Serializable id = SecurityUtils.getSubject().getSession().getId();
+
+        DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager)SecurityUtils.getSecurityManager();
+        DefaultWebSessionManager sessionManager = (DefaultWebSessionManager)securityManager.getSessionManager();
+        Collection<Session> activeSessions = sessionManager.getSessionDAO().getActiveSessions();
+
+        for (Session activeSession : activeSessions) {
+            if(id.equals(activeSession.getId())) {
+                continue;
+            }
+            SimplePrincipalCollection simplePrincipalCollection = (SimplePrincipalCollection)activeSession.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
+            if(simplePrincipalCollection != null) {
+                //username 相同的删除
+//                AuthUserVo authUserVo = (AuthUserVo)simplePrincipalCollection.getPrimaryPrincipal();
+//                if(username != null && authUserVo != null && username.equals(authUserVo.getUserId())) {
+//                    sessionManager.getSessionDAO().delete(activeSession);
+//                }
+            }
+        }
     }
 }
 

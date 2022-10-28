@@ -1,8 +1,10 @@
-package com.example.demo.config;
+package com.example.demo.shiro;
 
+import cn.hutool.core.util.URLUtil;
 import com.example.demo.shiro.ShiroRedisProperties;
 import com.example.demo.shiro.URLPathMatchingFilter;
 import com.example.demo.shiro.UserRealm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.mgt.SecurityManager;
@@ -79,9 +81,11 @@ public class ShiroConfiguration {
        */
     //
     @Autowired
-    private  ShiroRedisProperties shiroProperties;
+    private ShiroRedisProperties shiroProperties;
 
 
+    @Autowired
+    private ObjectMapper objectMapper;
 
 //    //LifecycleBeanPostProcessor 会造成autowire bean  无法注入，不知道原因
 //    //从shiroConfiguration 中分离
@@ -123,7 +127,7 @@ public class ShiroConfiguration {
 //        filtersMap.put("kickout", kickoutSessionControlFilter());
         //访问权限配置
         filtersMap.put("requestURL", getURLPathMatchingFilter());
-
+//        filtersMap.put("shiroAuthFilter", new ShiroAuthFilter(objectMapper));
         shiroFilterFactoryBean.setFilters(filtersMap);
 
         //拦截器.
@@ -144,7 +148,7 @@ public class ShiroConfiguration {
         //不需要授权的写在前面
         //所有的路径都通过过滤器
         filterChainDefinitionMap.put("/**", "requestURL");
-
+//        filterChainDefinitionMap.put("/**", "shiroAuthFilter");
 
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
@@ -173,7 +177,7 @@ public class ShiroConfiguration {
 
         // 自定义缓存实现 使用redis
 //        securityManager.setCacheManager(cacheManager());
-//        securityManager.setSessionManager(sessionManager());
+        securityManager.setSessionManager(sessionManager());
 //        注入记住我管理器;
 //        securityManager.setRememberMeManager(rememberMeManager());
         return securityManager;
@@ -255,6 +259,17 @@ public class ShiroConfiguration {
     @Bean(name = "sessionManager")
     public DefaultWebSessionManager sessionManager() {
         DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
+
+        //会话超时 subject.isAuthenticated() false
+        sessionManager.setGlobalSessionTimeout(1 * 60 * 1000);
+
+
+        sessionManager.setSessionIdCookie(sessionIdCookie());
+        sessionManager.setSessionIdCookieEnabled(true);
+        sessionManager.setSessionIdUrlRewritingEnabled(false);
+//        log.info("DefaultWebSessionManager cookie Name = "+ sessionManager.getSessionIdCookie().getName());
+
+        String cookieName = sessionManager.getSessionIdCookie().getName();
         sessionManager.setSessionDAO(redisSessionDAO());
         return sessionManager;
     }
@@ -286,7 +301,6 @@ public class ShiroConfiguration {
 //        redisManager.setExpire(1800);// 配置缓存过期时间
 //        redisManager.setTimeout(timeout);
         redisManager.setPassword(shiroProperties.getPassword());
-
 
 
         return redisManager;
@@ -343,5 +357,20 @@ public class ShiroConfiguration {
 //        kickoutSessionControlFilter.setKickoutUrl("kickout");
 //        return kickoutSessionControlFilter;
 //    }
+
+    @Bean
+    public SimpleCookie sessionIdCookie() {
+        //DefaultSecurityManager
+        SimpleCookie simpleCookie = new SimpleCookie();
+        //sessionManager.setCacheManager(ehCacheManager());
+        //如果在Cookie中设置了"HttpOnly"属性，那么通过程序(JS脚本、Applet等)将无法读取到Cookie信息，这样能有效的防止XSS攻击。
+        simpleCookie.setHttpOnly(true);
+//		simpleCookie.setName("SHRIOSESSIONID");
+        simpleCookie.setName("shiro.sesssion");
+        //单位秒
+        simpleCookie.setMaxAge(86400);
+        return simpleCookie;
+
+    }
 
 }
