@@ -16,18 +16,24 @@ public class BeanMethodJobHandler {
     private static final Logger LOGGER = LogManager.getLogger(BeanMethodJobHandler.class);
 
     @XxlJob("beanMethodJobHandler")
-    public void beanMethodJobHandler(String param) throws Exception {
+    public void beanMethodJobHandler() throws Exception {
+        //param xxl admin 填写的任务参数
+        String param = XxlJobHelper.getJobParam();
         // XxlJobLogger.log("bean method jobhandler running...");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String timeStr = formatter.format(LocalDateTime.now());
         XxlJobHelper.log("BeanMethodJobHandler");
-        LOGGER.info("xxljob - BeanMethodJobHandler  {} ",timeStr);
+        LOGGER.info("xxljob - BeanMethodJobHandler  {} ", timeStr);
 
     }
 
     @XxlJob("dynamicJob")
-    public void dynamicJob(String param) throws Exception {
+    public void dynamicJob() throws Exception {
         // XxlJobLogger.log("bean method jobhandler running...");
+
+        //param xxl admin 填写的任务参数
+        String param =   XxlJobHelper.getJobParam();
+        System.out.println("dynamicJob - "+param );
         XxlJobHelper.log("dynamicJob");
         LOGGER.info("dynamicJob");
 

@@ -1005,6 +1005,11 @@ public class UtilityController {
 
 //            content = IOUtils.resourceToString(filePath, Charset.forName("UTF-8"));
 
+
+
+            //注入applicationContext
+//    Map<String, Object> enums =this.applicationContext.getBeansWithAnnotation(QLExpressionEnumDescription.class);
+
             InputStream inputStream = this.getClass().getResourceAsStream(filePath);
             strList = IOUtils.readLines(inputStream, Charset.forName("UTF-8"));
 

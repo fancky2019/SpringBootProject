@@ -44,7 +44,7 @@ token 注销：redis token 黑名单，每次请求查询校验，违背无状�
 
 
 
-另一个开源框架：io.jsonwebtoken
+另一个开源框架：io.jsonwebtoken 不更新了
  */
 @Component
 public class JWTUtility {

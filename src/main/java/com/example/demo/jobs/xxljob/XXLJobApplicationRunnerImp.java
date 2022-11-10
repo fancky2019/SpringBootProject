@@ -36,8 +36,8 @@ import java.util.concurrent.TimeUnit;
  *
  * 调度中心（xxl-job-admin）与执行器 xxl-job-executor
  */
-//@Component
-//@Order(10)
+@Component
+@Order(10)
 public class XXLJobApplicationRunnerImp implements ApplicationRunner {
     private static Logger LOGGER = LogManager.getLogger(ApplicationRunnerImp.class);
 
@@ -94,10 +94,12 @@ public class XXLJobApplicationRunnerImp implements ApplicationRunner {
 
 //        addXxlJob();
 
-        okHttpClient();
-        loginAdmin();
-        int jobId = addJob();
-        startJob(jobId);
+
+        //注释功能
+//        okHttpClient();
+//        loginAdmin();
+//        int jobId = addJob();
+//        startJob(jobId);
     }
 
     public void loginAdmin() {
@@ -194,7 +196,7 @@ public class XXLJobApplicationRunnerImp implements ApplicationRunner {
 
 
             RequestBody requestBody = new FormBody.Builder()
-                    .add("jobGroup", "2")
+                    .add("jobGroup", "4")//注意数据库xxl_job_group存在值
                     .add("jobDesc", "代码启动任务")
                     .add("author", "fancky")
                     .add("glueType", "BEAN")
