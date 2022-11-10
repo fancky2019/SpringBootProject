@@ -555,11 +555,48 @@ public class UtilityController {
     }
     //endregion
 
+    //region mybatis batch operation
+
     //region batchInsert
+
+    /*
+    batchInsertSession 的性能比 batchInsert好
+    batchInsertSession： 在session 内一条一条插入最后提交
+    batchInsert：一次插入提交多条
+     */
+
     @GetMapping(value = "/batchInsert")
     public void batchInsert() {
         this.demoProductService.batchInsert();
     }
+
+    /**
+     * 连接字符串添加 &rewriteBatchedStatements=true
+     */
+    @GetMapping(value = "/batchInsertSession")
+    public void batchInsertSession() {
+        this.demoProductService.batchInsertSession();
+    }
+
+    //endregion
+
+    //region batchUpdate
+    /*
+   连接字符串添加 &allowMultiQueries=true
+     */
+    @GetMapping(value = "/batchUpdate")
+    public void batchUpdate() {
+        this.demoProductService.batchUpdate();
+    }
+    //endregion
+
+    //region batchDelete
+    @GetMapping(value = "/batchDelete")
+    public void batchDelete() {
+        this.demoProductService.batchDelete();
+    }
+    //endregion
+
     //endregion
 
 

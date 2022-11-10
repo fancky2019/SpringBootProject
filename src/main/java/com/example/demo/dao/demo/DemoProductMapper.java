@@ -21,4 +21,8 @@ public interface DemoProductMapper {
 
     int batchInsert(List<DemoProduct> list);
 
+    int batchUpdate(List<DemoProduct> list);
+
+    int batchDelete(List<Integer> list);
+
 }

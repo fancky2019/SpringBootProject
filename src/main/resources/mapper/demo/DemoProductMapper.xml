@@ -210,8 +210,32 @@ useCache="true"
       #{item.status,jdbcType=TINYINT}, #{item.description,jdbcType=VARCHAR}, #{item.timestamp,jdbcType=TIMESTAMP}
        )
         </foreach>
-
-
-
     </insert>
+
+
+  <update id="batchUpdate" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+      update demo_product
+      <set>
+        <if test="item.productName != null and item.productName != ''">
+          product_name = #{item.productName,jdbcType=VARCHAR},
+        </if>
+        <if test="item.productStyle != null and item.productStyle != ''">
+          product_style = #{item.productStyle,jdbcType=VARCHAR},
+        </if>
+      </set>
+      where id = #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+
+  <delete id="batchDelete">
+    delete from demo_product where id in
+    <foreach collection="list" item="id" separator="," open="(" close=")">
+      #{id}
+    </foreach>
+  </delete>
+
+
+
+
 </mapper>
