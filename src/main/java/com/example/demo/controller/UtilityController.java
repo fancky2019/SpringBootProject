@@ -6,9 +6,11 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.util.ListUtils;
 import com.example.demo.model.dto.JacksonDto;
+import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.pojo.*;
+import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.request.TestRequest;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
@@ -1023,7 +1025,7 @@ public class UtilityController {
     }
 
 
-    @GetMapping("fileTest")
+    @GetMapping("/fileTest")
     public List<String> fileTest() {
         //D:\\work\\project\\git\\java\\SpringBootProject
         String rootPath = System.getProperty("user.dir");
@@ -1080,10 +1082,20 @@ public class UtilityController {
         return strList;
     }
 
-    @GetMapping("enableConfigurationProperties")
+    @GetMapping("/enableConfigurationProperties")
     public String enableConfigurationProperties() {
         return shiroProperties.getHost();
     }
 
 
+    @GetMapping("/pageHelper")
+    public PageData<DemoProduct> pageHelper(DemoProductRequest request) {
+        return demoProductService.pageHelper(request);
+
+    }
+    @GetMapping("/getPageData")
+    public PageData<DemoProduct> getPageData(DemoProductRequest request) {
+        return demoProductService.pageHelper(request);
+
+    }
 }

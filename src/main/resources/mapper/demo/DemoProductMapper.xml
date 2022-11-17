@@ -68,12 +68,35 @@ useCache="true"
 <!--    where id = #{id,jdbcType=INTEGER}-->
 <!--  </select>-->
 
+  <!--    useCache="true" 使用二级缓存-->
+  <!--分页查询-->
+  <select id="getPageData" useCache="true" parameterType="com.example.demo.model.request.DemoProductRequest"
+          resultType="com.example.demo.model.entity.demo.DemoProduct">
+    select * from demo_product
+    where 1=1
+    <if test="productName != null and productName != ''">
+      and product_name LIKE CONCAT('%',#{productName,jdbcType=VARCHAR},'%')
+    </if>
+    limit #{pageSize,jdbcType=INTEGER}*(#{pageIndex,jdbcType=INTEGER}-1) ,#{pageSize,jdbcType=INTEGER}
+  </select>
+
+  <select id="query" useCache="true" parameterType="com.example.demo.model.request.DemoProductRequest"
+          resultType="com.example.demo.model.entity.demo.DemoProduct">
+    select * from demo_product
+    where 1=1
+    <if test="productName != null and productName != ''">
+      and product_name LIKE CONCAT('%',#{productName,jdbcType=VARCHAR},'%')
+    </if>
+
+  </select>
+
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.demo.DemoProduct">
     select
     <include refid="Base_Column_List" />
     from demo_product
     where id = #{id,jdbcType=INTEGER}
   </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from demo_product
     where id = #{id,jdbcType=INTEGER}

@@ -28,17 +28,17 @@ Mapper加@Repository注解Service层依赖注入ProductMapper就不会报错红�
 //@Repository  //@MapperScan("com.example.demo.dao")
 @Mapper
 public interface ProductMapper {
-    int deleteByPrimaryKey(Integer id);
-
-    int insert(Product record);
-
-    int insertSelective(Product record);
-
-    Product selectByPrimaryKey(Integer id);
-
-    int updateByPrimaryKeySelective(Product record);
-
-    int updateByPrimaryKeyWithBLOBs(Product record);
+//    int deleteByPrimaryKey(Integer id);
+//
+//    int insert(Product record);
+//
+//    int insertSelective(Product record);
+//
+//    Product selectByPrimaryKey(Integer id);
+//
+//    int updateByPrimaryKeySelective(Product record);
+//
+//    int updateByPrimaryKeyWithBLOBs(Product record);
 
     int updateByPrimaryKey(Product record);
 

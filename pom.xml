@@ -192,13 +192,13 @@
             <version>2.2.0</version>
         </dependency>
 
-        <!--        &lt;!&ndash; mybatis pagehelper 分页 &ndash;&gt;-->
-        <!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.github.pagehelper/pagehelper-spring-boot-starter &ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.github.pagehelper</groupId>-->
-        <!--            <artifactId>pagehelper-spring-boot-starter</artifactId>-->
-        <!--            <version>1.4.1</version>-->
-        <!--        </dependency>-->
+        <!-- mybatis pagehelper 分页 -->
+        <!-- https://mvnrepository.com/artifact/com.github.pagehelper/pagehelper-spring-boot-starter -->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.4.5</version>
+        </dependency>
 
 
         <!--Redis依赖-->
@@ -485,12 +485,12 @@
         </dependency>
 
 
-        <!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter &ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.baomidou</groupId>-->
-        <!--            <artifactId>mybatis-plus-boot-starter</artifactId>-->
-        <!--            <version>3.5.2</version>-->
-        <!--        </dependency>-->
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.baomidou</groupId>-->
+<!--            <artifactId>mybatis-plus-boot-starter</artifactId>-->
+<!--            <version>3.5.2</version>-->
+<!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/cn.hutool/hutool-all -->
         <dependency>
@@ -604,8 +604,8 @@
                     <includeSystemScope>true</includeSystemScope>
 
 
-<!-- 打第三方jar 去掉打包的jar目录有BOOT-INF文件夹，项目引入jar后，找不到程序包，找不到指定bean-->
-<!--                    <skip>true</skip>-->
+                    <!-- 打第三方jar 去掉打包的jar目录有BOOT-INF文件夹，项目引入jar后，找不到程序包，找不到指定bean-->
+                    <!--                    <skip>true</skip>-->
 
                 </configuration>
             </plugin>
@@ -627,13 +627,13 @@
 
         </plugins>
 
-<!--        <resources>-->
-<!--            <resource>-->
-<!--                <directory>src/main/resources</directory>-->
-<!--                <includes>-->
-<!--                    <include>**/*.txt</include>-->
-<!--                </includes>-->
-<!--            </resource>-->
-<!--        </resources>-->
+        <!--        <resources>-->
+        <!--            <resource>-->
+        <!--                <directory>src/main/resources</directory>-->
+        <!--                <includes>-->
+        <!--                    <include>**/*.txt</include>-->
+        <!--                </includes>-->
+        <!--            </resource>-->
+        <!--        </resources>-->
     </build>
 </project>

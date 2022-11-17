@@ -4,7 +4,12 @@ import com.example.demo.dao.demo.DemoProductMapper;
 import com.example.demo.dao.rabc.AuthoritiesMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.Person;
+import com.example.demo.model.pojo.Page;
+import com.example.demo.model.pojo.PageData;
+import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.service.rabc.AuthoritiesService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import kotlin.UByte;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
@@ -88,9 +93,7 @@ public class DemoProductService {
         SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);
         //不能用spring 注入的mapper,必须从session 里取，否则是一条一条插入
         DemoProductMapper mapper = sqlSession.getMapper(DemoProductMapper.class);
-        list.stream().forEach(e -> {
-            mapper.insert(e);
-        });
+        list.forEach(mapper::insert);
 //        sqlSession.clearCache();
         sqlSession.commit();
 
@@ -181,4 +184,26 @@ public class DemoProductService {
     }
 
 
+    public PageData<DemoProduct> getPageData(DemoProductRequest request)
+    {
+        PageData<DemoProduct> pageData = new PageData<>();
+        List<DemoProduct> list = demoProductMapper.getPageData(request);
+        pageData.setRows(list);
+        pageData.setCount(1);
+        return pageData;
+    }
+    public PageData<DemoProduct> pageHelper(DemoProductRequest request) {
+        PageData<DemoProduct> pageData = new PageData<>();
+        PageHelper.startPage(request.getPageIndex(), request.getPageSize());
+        try {
+            List<DemoProduct> list = demoProductMapper.query(request);
+            //调用分页查询的方法
+            PageInfo<DemoProduct> pageInfo = new PageInfo<>(list);
+            pageData.setRows(pageInfo.getList());
+            pageData.setCount(pageInfo.getSize());
+        } finally {
+            PageHelper.clearPage(); //清理 ThreadLocal 存储的分页参数,保证线程安全
+        }
+        return pageData;
+    }
 }

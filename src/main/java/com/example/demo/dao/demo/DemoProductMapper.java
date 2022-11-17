@@ -1,12 +1,18 @@
 package com.example.demo.dao.demo;
 
 import com.example.demo.model.entity.demo.DemoProduct;
+import com.example.demo.model.request.DemoProductRequest;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
 @Mapper
 public interface DemoProductMapper {
+
+    List<DemoProduct> getPageData(DemoProductRequest request);
+
+    List<DemoProduct> query(DemoProductRequest request);
+
     int deleteByPrimaryKey(Integer id);
 
     int insert(DemoProduct record);
