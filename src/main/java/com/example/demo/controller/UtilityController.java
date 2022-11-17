@@ -17,6 +17,7 @@ import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
 import com.example.demo.service.demo.DemoProductService;
+import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.service.demo.PersonService;
 import com.example.demo.shiro.ShiroRedisProperties;
 import com.example.demo.utility.RSAUtil;
@@ -121,6 +122,8 @@ public class UtilityController {
     @Autowired
     private BeanLife beanLife;
 
+    @Autowired
+    private IProductTestService productTestService;
 
     // @Resource 指定bean 名称,@Autowired 通过 @Qualifier指定具体别名
     @Resource(name = "studentF")
@@ -1096,6 +1099,13 @@ public class UtilityController {
     @GetMapping("/getPageData")
     public PageData<DemoProduct> getPageData(DemoProductRequest request) {
         return demoProductService.pageHelper(request);
+
+    }
+
+    @GetMapping("/mybatisPlusTest")
+    public String mybatisPlusTest(DemoProductRequest request) {
+        productTestService.mybatisPlusTest();
+        return "completed";
 
     }
 }
