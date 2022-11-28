@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.Student;
 import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.service.demo.IProductTestService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -61,13 +63,13 @@ public class RedisTestController {
     @Autowired
     private RedisTemplate redisTemplate;
 
-
+    @Autowired
+    private IProductTestService productTestService;
     /**
      * 要配置redis 此种类型的bean.
-     *
      */
     @Autowired
-    private RedisTemplate<String,Object> redisTemplateObj;
+    private RedisTemplate<String, Object> redisTemplateObj;
 
 //    @Autowired
 //    private RedisTemplate<String,Integer> redisTemplateInt;
@@ -192,6 +194,10 @@ public class RedisTestController {
 
         try {
 
+
+            ValueOperations<String, ProductTest> productTestValueOperations = redisTemplate.opsForValue();
+            ProductTest productTest = productTestService.getById(100003);
+            productTestValueOperations.set("productTest:" + productTest.getId(), productTest);
             Student student1 = new Student();
             student1.setName("fancky");
             student1.setAge(25);

@@ -14,6 +14,8 @@ import java.util.Date;
 @Setter
 @EqualsAndHashCode
 public class DownloadData {
+
+    //@ExcelIgnore 不导出列
     @ExcelProperty("字符串标题")
     private String string;
     @ExcelProperty("日期标题")

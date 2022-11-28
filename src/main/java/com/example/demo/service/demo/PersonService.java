@@ -23,11 +23,27 @@ public class PersonService {
 
     private static Logger logger = LogManager.getLogger(PersonService.class);
 
-    @Autowired
     PersonMapper personMapper;
 
-    @Autowired
     DemoProductService demoProductService;
+
+    List<String> list = null;
+
+    @Autowired
+    public PersonService(PersonMapper personMapper,
+                         DemoProductService demoProductService) {
+
+        this.personMapper=personMapper;
+        this.demoProductService=demoProductService;
+        list=new ArrayList<>();
+        list.add("test1");
+        list.add("test2");
+        list.add("test3");
+    }
+
+    public void test() {
+        int size = list.size();
+    }
 
     @Transactional(rollbackFor = Exception.class)
     public int insert(Person person) {

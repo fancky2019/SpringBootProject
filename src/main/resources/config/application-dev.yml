@@ -29,6 +29,10 @@ mybatis-plus:
   mapper-locations: classpath:mapper/**/*.xml
   #  实体类所在的包
   type-aliases-package: com.example.demo.model.entity
+#配置日志  打印sql语句
+#mybatis-plus:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 ##mybatis 分页 pageHelper插件4.0.0以后的版本支持自动识别使用的数据库
 #pagehelper:
@@ -59,6 +63,10 @@ spring:
   #  resources:
   #    static-locations: classpath:/
 
+  #默认redis 缓存，ehcache本地缓存
+#  cache:
+#    redis:
+#      cache-null-values: true  #默认缓存null值解决缓存穿透
   datasource:
     #    # sqlserver
     #    url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS

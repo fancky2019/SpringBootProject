@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ *
+ * lombok 默认会生成equal and hashCode 可以在生成的class 文件中查看
  * @Auther fancky
  * @Date 2020-10-26 9:48
  * @Description

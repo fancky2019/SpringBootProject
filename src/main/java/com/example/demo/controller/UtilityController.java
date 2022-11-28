@@ -1,6 +1,5 @@
 package com.example.demo.controller;
 
-import cn.hutool.crypto.symmetric.AES;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
@@ -8,6 +7,7 @@ import com.alibaba.excel.util.ListUtils;
 import com.example.demo.model.dto.JacksonDto;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.Person;
+import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.pojo.*;
 import com.example.demo.model.request.DemoProductRequest;
@@ -16,6 +16,7 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
+import com.example.demo.service.demo.CacheService;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.service.demo.PersonService;
@@ -24,17 +25,13 @@ import com.example.demo.utility.RSAUtil;
 import com.example.demo.utility.RepeatPermission;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +45,10 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -124,6 +124,10 @@ public class UtilityController {
 
     @Autowired
     private IProductTestService productTestService;
+
+    @Autowired
+    private CacheService cacheService;
+
 
     // @Resource 指定bean 名称,@Autowired 通过 @Qualifier指定具体别名
     @Resource(name = "studentF")
@@ -1048,7 +1052,6 @@ public class UtilityController {
 //            content = IOUtils.resourceToString(filePath, Charset.forName("UTF-8"));
 
 
-
             //注入applicationContext
 //    Map<String, Object> enums =this.applicationContext.getBeansWithAnnotation(QLExpressionEnumDescription.class);
 
@@ -1096,6 +1099,7 @@ public class UtilityController {
         return demoProductService.pageHelper(request);
 
     }
+
     @GetMapping("/getPageData")
     public PageData<DemoProduct> getPageData(DemoProductRequest request) {
         return demoProductService.pageHelper(request);
@@ -1108,4 +1112,57 @@ public class UtilityController {
         return "completed";
 
     }
+
+    @GetMapping("/beanConstructor")
+    public String beanConstructor() {
+        personService.test();
+        return "completed";
+
+    }
+
+    @GetMapping("/stopWatch")
+    public MessageResult<String> stopWatch() throws Exception {
+        StopWatch stopWatch = new StopWatch("stopWatch1");
+        stopWatch.start("work1");
+        Thread.sleep(1000);
+        stopWatch.stop();
+        System.out.println(stopWatch.prettyPrint());
+
+        //第二次检测不会重置之前的时间，重新new  重置时间
+        stopWatch = new StopWatch("stopWatch2");
+        stopWatch.start("work2");
+        Thread.sleep(3000);
+        stopWatch.stop();
+
+
+        System.out.println(stopWatch.prettyPrint());
+
+        MessageResult<String> messageResult = new MessageResult<>();
+        messageResult.setMessage("completed");
+        messageResult.setData(null);
+        return messageResult;
+
+    }
+
+    @GetMapping("/cacheServiceGet")
+    public MessageResult<ProductTest> cacheServiceGet(int id) {
+        MessageResult<ProductTest> messageResult = new MessageResult<>();
+        messageResult.setMessage("completed");
+        ProductTest productTest = this.cacheService.getProductTest(id);
+        messageResult.setData(productTest);
+        return messageResult;
+    }
+
+    @PostMapping("/cacheServicePut")
+    public String cacheServicePut(@RequestBody ProductTest request) {
+        this.cacheService.cacheServicePut(request);
+        return "completed";
+    }
+
+    @PostMapping("/cacheServiceEvict")
+    public String cacheServiceEvict(@RequestBody ProductTest request) {
+        this.cacheService.cacheServiceEvict(request.getId());
+        return "completed";
+    }
+
 }
