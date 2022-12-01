@@ -1,6 +1,11 @@
 package com.example.demo.rabbitMQ;
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -25,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -32,18 +38,18 @@ import java.util.concurrent.ThreadPoolExecutor;
  * rabbitMQ安装目录C:\Program Files\RabbitMQ Server\rabbitmq_server-3.10.5\sbin 下控制台执行命令
  * # 查看所有队列
  * rabbitmqctl list_queues
- *
+ * <p>
  * # 根据 queue_name 参数，删除对应的队列
  * rabbitmqctl delete_queue queue_name
- *
- *
+ * <p>
+ * <p>
  * 声明RabbitMQ的交换机、队列、并将相应的队列、交换机、RoutingKey绑定。
  */
 @Configuration
 public class RabbitMQConfig {
 
     //region 常量参数
-
+    public static final int RETRY_INTERVAL=10000;
     //region batch
     public static final String BATCH_DIRECT_EXCHANGE_NAME = "BatchSpringBoot";
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
@@ -57,6 +63,9 @@ public class RabbitMQConfig {
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
     public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot";
     public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
+
+    public static final String DIRECT_ROUTING_KEY_DLX = "DirectExchangeRoutingKeySpringBoot";
+    public static final String DIRECT_QUEUE_NAME_DLX = "DirectExchangeQueueSpringBoot";
     //endregion
 
     //region DIRECT
@@ -95,6 +104,19 @@ public class RabbitMQConfig {
 
     //endregion
 
+
+//    //发送消息时如不配置序列化方法则按照java默认序列化机制，则会造成发送编码不符合
+//    @Bean
+//    public MessageConverter messageConverter(){
+//        ObjectMapper om = new ObjectMapper();
+//        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+//        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+//        om.registerModule(new JavaTimeModule());
+//        return new Jackson2JsonMessageConverter(om);
+//
+//    }
+
+
 //    @Autowired
 //    private ConnectionFactory connectionFactory;
 
@@ -104,19 +126,19 @@ public class RabbitMQConfig {
         //公平分发模式在Spring-amqp中是默认的
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMandatory(true);//新版加此句
-        // 消息返回, yml需要配置 publisher-returns: true
+        // 消息生产到交换机没有路由到队列 消息返回, yml需要配置 publisher-returns: true
         // 新版 #发布确认 publisher-confirms已经修改为publisher-confirm-type，
-//        rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
-//            System.out.println("消息生产失败返回成功 ");
-//        });
-
-//        //比上面的方法多一个s是Returns不是Return
-//        //ReturnedMessage  待确认
-        rabbitTemplate.setReturnsCallback(returnedMessage ->
-        {
-            String failedMessage = new String(returnedMessage.getMessage().getBody());
-            System.out.println("消息生产失败返回成功 - " + failedMessage);
+        rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
+            System.out.println("消息生产到交换机没有路由到队列");
         });
+
+////        //比上面的方法多一个s是Returns不是Return
+////        //ReturnedMessage  //不行
+//        rabbitTemplate.setReturnsCallback(returnedMessage ->
+//        {
+//            String failedMessage = new String(returnedMessage.getMessage().getBody());
+//            System.out.println("消息生产失败返回 - " + failedMessage);
+//        });
 
 //        CachingConnectionFactory.ConfirmType
 
@@ -240,8 +262,13 @@ public class RabbitMQConfig {
         (String name, boolean durable, boolean exclusive, boolean autoDelete)
            this(name, true, false, false);
          */
-        Queue queue = new Queue(DEAD_DIRECT_QUEUE_NAME);
-        return queue;
+        Map<String, Object> map = new HashMap<>();
+        map.put("x-message-ttl", RETRY_INTERVAL);
+        map.put("x-dead-letter-exchange", DIRECT_EXCHANGE_NAME);
+        map.put("x-dead-letter-routing-key", DIRECT_ROUTING_KEY);
+        return new Queue(DEAD_DIRECT_QUEUE_NAME, true, false, false, map);
+//
+
     }
 
     /**

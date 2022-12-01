@@ -86,6 +86,7 @@ public class RedisTestController {
             //key 存在
             redisTemplate.hasKey("ds");
             redisTemplate.expire("ds", 60, TimeUnit.SECONDS);
+          //  redisTemplate.getExpire()
             //region String
             //待测试
             ValueOperations<Integer, Integer> valueOperations1 = redisTemplate.opsForValue();

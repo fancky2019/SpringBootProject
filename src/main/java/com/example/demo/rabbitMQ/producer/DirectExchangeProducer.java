@@ -1,21 +1,17 @@
 package com.example.demo.rabbitMQ.producer;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.example.demo.model.viewModel.Person;
+import com.example.demo.rabbitMQ.RabbitMqMessage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.AsyncRabbitTemplate;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
-import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -24,8 +20,8 @@ import java.util.UUID;
 public class DirectExchangeProducer {
 
     public static final String DIRECT_EXCHANGE_NAME = "DirectExchangeSpringBoot";
-//    public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot.Direct";
-    public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot1";
+    //    public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot.Direct";
+    public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot";
 
     public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
 
@@ -42,16 +38,26 @@ public class DirectExchangeProducer {
 
 
     public void producer() {
-        String msg = "MSG_DirectExchangeProducer";
+//        String msg = "MSG_DirectExchangeProducer";
         //参数：队列名称,消息内容（可以为可序列化的对象）
 //        this.amqpTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
 //        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
         Person person = new Person();
+        person.setId(1);
         person.setName("rabbitmq");
 
-        msg = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
+//        msg = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
 
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json="";
+        try {
+             json = objectMapper.writeValueAsString(person);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        RabbitMqMessage mqMsg = new RabbitMqMessage(json);
+        mqMsg.setMessageId(UUID.randomUUID().toString());
        /*
     一、mandatory 参数
         当mandatory 参数设为 true 时，交换器无法根据自身的类型和路由键找到一个符合条件 的队列，那么 RabbitMQ 会调用 Basic.Return 命令将消息返回给生产者 。当 mandatory 数设置为 false 时，出现上述情形，则消息直接被丢弃,那么生产者如何获取到没有被正确路由到合适队列的消息呢?这时候可以通过调用 channel addReturnListener 来添加 ReturnListener 监昕器实现。
@@ -66,13 +72,14 @@ public class DirectExchangeProducer {
      */
         //没有指定交换机采用默认的交换机名称“”，直接发到指定的队列，最好指定交换机名称
 //        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
-        rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME,DIRECT_ROUTING_KEY, msg);
+//        rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
 //        //json转换
 //        String jsonStr1 =   JSON.toJSONString(person);
 //        Person p=JSON.parseObject(jsonStr1,Person.class);
 //        Integer m=0;
 
         try {
+            rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -151,18 +158,18 @@ public class DirectExchangeProducer {
                      */
 //        rabbitTemplate.convertAndSend(DELAYED_MESSAGE_EXCHANGE, msg);
 //        CorrelationData correlationData = new CorrelationData("12345678909"+new Date());
-        rabbitTemplate.convertAndSend(DELAYED_MESSAGE_EXCHANGE,DELAYED_MESSAGE_KEY, msg, messagePostProcessor->
-                {
-                    //设置消息持久化
-                    messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-                    //message.getMessageProperties().setHeader("x-delay", "6000");
+        rabbitTemplate.convertAndSend(DELAYED_MESSAGE_EXCHANGE, DELAYED_MESSAGE_KEY, msg, messagePostProcessor ->
+        {
+            //设置消息持久化
+            messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+            //message.getMessageProperties().setHeader("x-delay", "6000");
                     /*
                      头部设置了x-delay参数就自动和x-delayed-message类型交换机关联。args.put("x-delayed-type", "direct");
                      */
-                    //  this.headers.put("x-delay", delay);
-                    messagePostProcessor.getMessageProperties().setDelay(6000);
-                    return messagePostProcessor;
-                });
+            //  this.headers.put("x-delay", delay);
+            messagePostProcessor.getMessageProperties().setDelay(6000);
+            return messagePostProcessor;
+        });
 
         try {
             Thread.sleep(2000);
