@@ -1,6 +1,7 @@
 package com.example.demo.model.entity.demo;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Date;
 import lombok.Data;
@@ -11,7 +12,7 @@ import lombok.Data;
  */
 @Data
 public class DemoProduct implements Serializable {
-    private Integer id;
+    private BigInteger id;
 
     private String guid;
 

@@ -1,6 +1,8 @@
 
 
-    1、时间比较
+  单个值判空
+  <if test="filmCode != null and filmCode != ''">
+  1、时间比较
      /*mysql  时间 大于等于  and co.pay_time <![CDATA[ >= ]]> #{startTime,jdbcType=DATE}*/
          <!-- 小于等于    <![CDATA[ <= ]]>-->
 
@@ -12,6 +14,7 @@
         <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
+        集合判空
 		<if test="deptDataPermissionIds != null and deptDataPermissionIds.size() > 0 ">
 					AND co1.dept_data_permission_id IN
 					<foreach collection="deptDataPermissionIds" index="index" item="deptDataPermissionId" open="(" separator="," close=")">
@@ -34,4 +37,16 @@
     6、   一级缓存：要开启事务，在同一事务内两次查询利用缓存。实际没多大用
           二级缓存 <select id="getPageData" useCache="true" resultType="com.example.demo.model.viewModel.ProductVM" >
           resultType 要实现Serializable接口，可序列化。
+    7、resultType
+    select返回类型，select指定parameterType和resultType，返回List<T>,指定resultType=T
+    单一数据 ,数值类型,字符类型(字符串) ,布尔类型等等j如ava.lang.Integer。
+    返回一个对象(pojo ,vo等)
+    返回一个集合(类型都是List 集合)
+
+
+    //参数为List<T> 指定parameterType="java.util.List" 或者pojo 都可以
+    insert ,delete update 返回的都是数值类型 ,xml中没有resultType属性
+    insert 插入成功后 返回成功的数目 ,否则为-1
+    delete 删除成功后 返回成功的数目 ,否则为-1
+    update 删更改成功后 返回成功的数目 ,否则为-1
 

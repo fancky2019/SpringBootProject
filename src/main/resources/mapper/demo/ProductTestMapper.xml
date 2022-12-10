@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.dao.demo.ProductTestMapper">
+    <!--  ddl 不会回滚  -->
+    <update id="truncateTest">
+        truncate table product_test;
+    </update>
+    <select id="getMaxId" resultType="java.math.BigInteger">
+        select max(id)
+        from product_test
+    </select>
+
+    <select id="getById" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.demo.ProductTest">
+        select *
+        from product_test
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="getByIds" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.demo.ProductTest">
+        select *
+        from product_test
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+
+
+
+
+
 
 </mapper>

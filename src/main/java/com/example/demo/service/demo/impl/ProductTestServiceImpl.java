@@ -7,10 +7,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.dao.demo.ProductTestMapper;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.service.demo.IProductTestService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +30,12 @@ import java.util.UUID;
 @Service
 public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, ProductTest> implements IProductTestService {
 
+    private ProductTestMapper productTestMapper;
+
+    public ProductTestServiceImpl(ProductTestMapper productTestMapper) {
+        this.productTestMapper = productTestMapper;
+    }
+
 
     @Override
     public void mybatisPlusTest() {
@@ -34,7 +43,10 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        this.baseMapper.deleteBatchIds();
 //        this.saveEntity();
 //        saveOrUpdateBatch();
-        queryTest();
+//        queryTest();
+//        truncateTest();
+//        deleteTableDataTest();
+        selectMaxId();
     }
 
     private void saveEntity() {
@@ -55,12 +67,12 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
     private void saveOrUpdateBatch() {
         List<ProductTest> productTests = new ArrayList<ProductTest>();
         ProductTest productTest = new ProductTest();
-        productTest.setId(100001);
+        productTest.setId(new BigInteger("100001"));
         productTest.setGuid("dssddssd");
         productTests.add(productTest);
 
         productTest = new ProductTest();
-        productTest.setId(100002);
+        productTest.setId(new BigInteger("100002"));
         productTest.setGuid("sdqwe43");
         productTests.add(productTest);
 
@@ -85,7 +97,9 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        queryWrapper.select("","");
 //        queryWrapper.eq("",1);
 //        queryWrapper.ne();
-        queryWrapper.eq("product_name", "productName_xiugai55555");
+        String productName = "";
+        //有条件拼接条件
+        queryWrapper.eq(StringUtils.isNotEmpty(productName), "product_name", productName);
         List<ProductTest> list = this.list(queryWrapper);
 
         LambdaQueryWrapper<ProductTest> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -101,5 +115,43 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         int m = 0;
     }
 
+    /*
+    1.truncate先使用create命令创建表，然后drop源表，最后rename新表。
+    2 drop只是删除元数据，所以比delete快很多，特别是大表
+    3 truncate本质是ddl，需要ddl权限。ddl本身是自提交的，所以truncate也不能rollback回滚
+    4 因为是truncate是重建表，所以truncate是可以整理表碎片的（delete不可以）
+    5 truncate在执行有外键约束的reference表时会失败
+
+     */
+
+    /**
+     * truncate 截断表是不会回滚的
+     * truncate 会删除所有数据，并且不记录日志，不可以恢复数据，相当于保留了表结构
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void truncateTest() {
+        this.productTestMapper.truncateTest();
+        int m = Integer.parseInt("m");
+    }
+
+    private void deleteTableDataTest() {
+        //DELETE FROM product_test
+        LambdaQueryWrapper<ProductTest> queryWrapper = new LambdaQueryWrapper<>();
+        this.remove(queryWrapper);
+        int m = 0;
+    }
+
+    private void selectMaxId() {
+        //注：不是LambdaQueryWrapper
+        QueryWrapper<ProductTest> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("max(id) id");
+        ProductTest productTest = this.getOne(queryWrapper);
+        //查不到为null
+        if (productTest!=null)
+        {
+            BigInteger maxId=productTest.getId();
+        }
+        int m = 0;
+    }
 
 }

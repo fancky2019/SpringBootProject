@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.PageData;
 import com.example.demo.model.viewModel.ProductVM;
+import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.mybatissql.MybatisSqlService;
 import com.example.demo.service.wms.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,9 @@ public class MybatisController {
     @Autowired
     private MybatisSqlService mybatisSqlService;
 
+    @Autowired
+    private DemoProductService demoProductService;
+
     @RequestMapping("/getPageData")
     public MessageResult<PageData<ProductVM>> getPageData(ProductVM viewModel) {
         MessageResult<PageData<ProductVM>> message = new MessageResult<>();
@@ -73,6 +77,7 @@ public class MybatisController {
             return message;
         }
     }
+
     @RequestMapping("/getPageDataByHelperCTE")
     public MessageResult<PageData<ProductVM>> getPageDataByHelperCTE(ProductVM viewModel) {
         MessageResult<PageData<ProductVM>> message = new MessageResult<>();
@@ -85,7 +90,14 @@ public class MybatisController {
             return message;
         }
     }
-    @RequestMapping("/concatSelect")
+
+    /*
+   在不设置时，也就是默认情况是任何方式的请求都可以(不管什么get/post/.....)
+在文件上传的时候只能用post（因为其post请求（数据量可以很大）是在请求体里面，而get请求（且数据量有限）是在路径后面进行拼接）
+其中RequestMapping在设置Method属性后意义为不仅要满足其value属性还要满足method属性了（RequestMethod.GET）
+
+     */
+    @RequestMapping(value = "/concatSelect")
     public MessageResult<PageData<ProductVM>> concatSelect(ProductVM viewModel) {
         MessageResult<PageData<ProductVM>> message = new MessageResult<>();
         try {
@@ -98,8 +110,17 @@ public class MybatisController {
         }
     }
 
-
-
+    @RequestMapping(value = "/test")
+    public MessageResult<PageData<Void>> test() {
+        MessageResult<PageData<Void>> message = new MessageResult<>();
+        try {
+            demoProductService.test();
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        }
+        return message;
+    }
 
 
 }

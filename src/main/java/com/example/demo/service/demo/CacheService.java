@@ -8,6 +8,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+
 /*
 <!-- ehcache依赖 -->
 <dependency>
@@ -62,7 +64,7 @@ public class CacheService {
 
     //删除数据库，再删redis缓存，纵使数据库不存在也会删除redis缓存
     @CacheEvict(value = "productTest", key = "#id")
-    public void cacheServiceEvict(int id) {
+    public void cacheServiceEvict(BigInteger id) {
         productTestService.removeById(id);
     }
 }

@@ -44,7 +44,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler<RabbitMqMessage>
             String queueName1 = message.getMessageProperties().getConsumerQueue();
             Person person = null;
             System.out.println("DirectExchange Queue:" + RabbitMQConfig.DIRECT_QUEUE_NAME + " receivedMsg: ");
-            super.onMessage(rabbitMqMessage, deliveryTag, queueName, channel, (msg, ch) -> {
+            super.onMessage(rabbitMqMessage, message, channel, (msg, ch) -> {
                 //业务处理
                 String msgContent = msg.getContent();
                 int m = Integer.parseInt("d");

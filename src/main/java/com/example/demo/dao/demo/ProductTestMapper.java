@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.demo.model.entity.demo.ProductTest;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.math.BigInteger;
+import java.util.List;
+
 /**
  * 注：手动添加@mapper注解否则iml类找不到bean报错
  *
@@ -12,5 +15,11 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface ProductTestMapper extends BaseMapper<ProductTest> {
+    void truncateTest();
 
+    BigInteger getMaxId();
+
+    ProductTest getById(BigInteger id);
+
+    List<ProductTest> getByIds(List<BigInteger> ids);
 }

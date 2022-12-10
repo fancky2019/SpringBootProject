@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author author
- * @since 2022-11-30
+ * @since 2022-12-01
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -32,7 +32,11 @@ public class MqFailLog implements Serializable {
 
     private String msgContentId;
 
+    private String exchange;
+
     private String queueName;
+
+    private String routingKey;
 
     private String message;
 

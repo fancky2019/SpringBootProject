@@ -104,6 +104,15 @@ public class RabbitMQConfig {
 
     //endregion
 
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+        // 只有设置为 true，spring 才会加载 RabbitAdmin 这个类.默认为true
+//        rabbitAdmin.setAutoStartup(true);
+        rabbitAdmin.setIgnoreDeclarationExceptions(true);
+        return rabbitAdmin;
+    }
+
 
 //    //发送消息时如不配置序列化方法则按照java默认序列化机制，则会造成发送编码不符合
 //    @Bean

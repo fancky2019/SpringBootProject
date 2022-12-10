@@ -4,6 +4,7 @@ import com.example.demo.dao.demo.DemoProductMapper;
 import com.example.demo.dao.rabc.AuthoritiesMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.Person;
+import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.Page;
 import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.DemoProductRequest;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
 import javax.annotation.Resource;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,13 @@ public class DemoProductService {
 
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
+
+    public void test() {
+//        batchInsert();
+        this.getMaxId();
+        this.getById();
+        this.getByIds();
+    }
 
 //    @Autowired
 //    private PersonService personService;
@@ -128,7 +137,7 @@ public class DemoProductService {
         List<DemoProduct> list = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             DemoProduct demoProduct = new DemoProduct();
-            demoProduct.setId(i + 1);
+            demoProduct.setId(new BigInteger ((i + 1)+""));
             demoProduct.setGuid(UUID.randomUUID().toString());
             demoProduct.setProductName("productName" + (i + 1));
             demoProduct.setProductStyle("productStyle" + (i + 1));
@@ -184,14 +193,14 @@ public class DemoProductService {
     }
 
 
-    public PageData<DemoProduct> getPageData(DemoProductRequest request)
-    {
+    public PageData<DemoProduct> getPageData(DemoProductRequest request) {
         PageData<DemoProduct> pageData = new PageData<>();
         List<DemoProduct> list = demoProductMapper.getPageData(request);
         pageData.setRows(list);
         pageData.setCount(1);
         return pageData;
     }
+
     public PageData<DemoProduct> pageHelper(DemoProductRequest request) {
         PageData<DemoProduct> pageData = new PageData<>();
         PageHelper.startPage(request.getPageIndex(), request.getPageSize());
@@ -205,5 +214,24 @@ public class DemoProductService {
             PageHelper.clearPage(); //清理 ThreadLocal 存储的分页参数,保证线程安全
         }
         return pageData;
+    }
+
+
+    void getMaxId() {
+        BigInteger result = this.demoProductMapper.getMaxId();
+        int m = 0;
+    }
+
+    void getById() {
+        ProductTest result = this.demoProductMapper.getById(new BigInteger("1"));
+        int m = 0;
+    }
+
+    void getByIds() {
+        List<BigInteger> ids = new ArrayList<>();
+        ids.add(new BigInteger("1"));
+        ids.add(new BigInteger("2"));
+        List<ProductTest> result = this.demoProductMapper.getByIds(ids);
+        int m = 0;
     }
 }

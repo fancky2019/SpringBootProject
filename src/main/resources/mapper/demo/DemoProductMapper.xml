@@ -46,7 +46,7 @@ useCache="true"
 <!--缓存会被视为读/写缓存，这意味着获取到的对象并不是共享的，可以安全地被调用者修改，而不干扰其他调用者或线程所做的潜在修改。-->
 
   <resultMap id="BaseResultMap" type="com.example.demo.model.entity.demo.DemoProduct">
-    <id column="id" jdbcType="INTEGER" property="id" />
+    <id column="id" jdbcType="BIGINT" property="id" />
     <result column="guid" jdbcType="VARCHAR" property="guid" />
     <result column="product_name" jdbcType="VARCHAR" property="productName" />
     <result column="product_style" jdbcType="VARCHAR" property="productStyle" />
@@ -58,7 +58,7 @@ useCache="true"
     <result column="timestamp" jdbcType="TIMESTAMP" property="timestamp" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, guid, product_name, product_style, image_path, create_time, modify_time, `status`, 
+    id, guid, product_name, product_style, image_path, create_time, modify_time, `status`,
     description, `timestamp`
   </sql>
 <!--  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">-->
@@ -97,17 +97,17 @@ useCache="true"
     where id = #{id,jdbcType=INTEGER}
   </select>
 
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from demo_product
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.example.demo.model.entity.demo.DemoProduct" useGeneratedKeys="true">
-    insert into demo_product (guid, product_name, product_style, 
-      image_path, create_time, modify_time, 
+    insert into demo_product (guid, product_name, product_style,
+      image_path, create_time, modify_time,
       `status`, description, `timestamp`
       )
-    values (#{guid,jdbcType=VARCHAR}, #{productName,jdbcType=VARCHAR}, #{productStyle,jdbcType=VARCHAR}, 
-      #{imagePath,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}, 
+    values (#{guid,jdbcType=VARCHAR}, #{productName,jdbcType=VARCHAR}, #{productStyle,jdbcType=VARCHAR},
+      #{imagePath,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP},
       #{status,jdbcType=TINYINT}, #{description,jdbcType=VARCHAR}, #{timestamp,jdbcType=TIMESTAMP}
       )
   </insert>
@@ -172,6 +172,7 @@ useCache="true"
       </if>
     </trim>
   </insert>
+
   <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.demo.DemoProduct">
     update demo_product
     <set>
@@ -205,6 +206,7 @@ useCache="true"
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
+
   <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.demo.DemoProduct">
     update demo_product
     set guid = #{guid,jdbcType=VARCHAR},
@@ -221,7 +223,8 @@ useCache="true"
 
 
   <!-- mysql默认接受sql的大小是1048576(1M)，即第三种方式若数据量超过1M会报如下异常：（可通过调整MySQL安装目录下的my.ini文件中[mysqld]段的＂max_allowed_packet = 1M＂）-->
-  <insert id="batchInsert" parameterType="com.example.demo.model.entity.demo.DemoProduct">
+<!--  <insert id="batchInsert" parameterType="com.example.demo.model.entity.demo.DemoProduct">-->
+  <insert id="batchInsert" parameterType="java.util.List">
       insert into demo_product (guid, product_name, product_style,
       image_path, create_time, modify_time,
       `status`, description, `timestamp`
@@ -259,6 +262,26 @@ useCache="true"
   </delete>
 
 
+  <select id="getMaxId" resultType="java.math.BigInteger">
+    select max(id)
+    from demo_product
+  </select>
 
+  <select id="getById" parameterType="java.math.BigInteger" resultType="com.example.demo.model.entity.demo.ProductTest">
+    select *
+    from demo_product
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+<!--  <select id="getByIds" parameterType="java.math.BigInteger" resultType="com.example.demo.model.entity.demo.ProductTest">-->
+
+  <select id="getByIds" parameterType="java.util.List" resultType="com.example.demo.model.entity.demo.ProductTest">
+    select *
+    from demo_product
+    where id in
+    <foreach collection="list" item="id" separator="," open="(" close=")">
+      #{id,jdbcType=BIGINT}
+    </foreach>
+  </select>
 
 </mapper>
