@@ -17,6 +17,9 @@ public class RabbitMqMessage implements Serializable {
     private String messageId;
 
     private String content;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime messageTime;
 
     public String getMessageId() {
         return messageId;
@@ -41,9 +44,12 @@ public class RabbitMqMessage implements Serializable {
     public void setMessageTime(LocalDateTime messageTime) {
         this.messageTime = messageTime;
     }
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime messageTime;
+
+    /**
+     * 要添加无参构造函数不然jackson 反序列报错
+     */
+    public RabbitMqMessage(){
+    }
 
     public RabbitMqMessage(String content){
         this.content = content;

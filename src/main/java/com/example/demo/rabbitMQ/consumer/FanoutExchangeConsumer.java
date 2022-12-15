@@ -23,6 +23,7 @@ public class FanoutExchangeConsumer {
     public void receivedMsg(String receivedMessage, Channel channel, Message message) {
         try {
             System.out.println("FanoutExchange Queue:" + FANOUT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
+//            int m = Integer.parseInt("d");
             //手动Ack
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {

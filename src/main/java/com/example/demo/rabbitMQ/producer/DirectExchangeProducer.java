@@ -1,17 +1,21 @@
 package com.example.demo.rabbitMQ.producer;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.example.demo.model.viewModel.Person;
+import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.RabbitMqMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -24,13 +28,14 @@ public class DirectExchangeProducer {
     public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot";
 
     public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
-
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-//    @Autowired
-//    private BatchingRabbitTemplate batchingRabbitTemplate;
+    @Autowired
+    private BatchingRabbitTemplate batchingRabbitTemplate;
 //    @Autowired
 //    private  AsyncRabbitTemplate asyncRabbitTemplate;
 //    @Autowired
@@ -38,26 +43,28 @@ public class DirectExchangeProducer {
 
 
     public void producer() {
+
+        for (int i = 0; i < 100; i++) {
 //        String msg = "MSG_DirectExchangeProducer";
-        //参数：队列名称,消息内容（可以为可序列化的对象）
+            //参数：队列名称,消息内容（可以为可序列化的对象）
 //        this.amqpTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
 //        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
-        Person person = new Person();
-        person.setId(1);
-        person.setName("rabbitmq");
+            Person person = new Person();
+            person.setId(1);
+            person.setName("rabbitmq");
 
 //        msg = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
 
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json="";
-        try {
-             json = objectMapper.writeValueAsString(person);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        RabbitMqMessage mqMsg = new RabbitMqMessage(json);
-        mqMsg.setMessageId(UUID.randomUUID().toString());
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = "";
+            try {
+                json = objectMapper.writeValueAsString(person);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            RabbitMqMessage mqMsg = new RabbitMqMessage(json);
+            mqMsg.setMessageId(UUID.randomUUID().toString());
        /*
     一、mandatory 参数
         当mandatory 参数设为 true 时，交换器无法根据自身的类型和路由键找到一个符合条件 的队列，那么 RabbitMQ 会调用 Basic.Return 命令将消息返回给生产者 。当 mandatory 数设置为 false 时，出现上述情形，则消息直接被丢弃,那么生产者如何获取到没有被正确路由到合适队列的消息呢?这时候可以通过调用 channel addReturnListener 来添加 ReturnListener 监昕器实现。
@@ -70,7 +77,7 @@ public class DirectExchangeProducer {
     /*
      投递消息的时候指定了交换机名称：就指定了交换机的类型，路由key ：根据交换机和队列的绑定关系交换机就可以将消息投递到对应的队列
      */
-        //没有指定交换机采用默认的交换机名称“”，直接发到指定的队列，最好指定交换机名称
+            //没有指定交换机采用默认的交换机名称“”，直接发到指定的队列，最好指定交换机名称
 //        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
 //        rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
 //        //json转换
@@ -78,47 +85,86 @@ public class DirectExchangeProducer {
 //        Person p=JSON.parseObject(jsonStr1,Person.class);
 //        Integer m=0;
 
-        try {
-            rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            try {
+                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void produceNotConvertSent() {
+
+        for (int i = 0; i < 100; i++) {
+
+            Person person = new Person();
+            person.setId(i);
+            person.setName("rabbitmq");
+
+            try {
+                String json = objectMapper.writeValueAsString(person);
+
+                RabbitMqMessage mqMsg = new RabbitMqMessage(json);
+                mqMsg.setMessageId(UUID.randomUUID().toString());
+//                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
+                Message message = new Message(objectMapper.writeValueAsString(mqMsg).getBytes(), new MessageProperties());
+                rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message);
+                Thread.sleep(1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     //region batch
-    public static final String BATCH_DIRECT_EXCHANGE_NAME = "BatchSpringBoot";
+//    public static final String BATCH_DIRECT_EXCHANGE_NAME = "BatchSpringBoot";
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
-    public static final String BATCH_DIRECT_ROUTING_KEY = "BatchRoutingKeySpringBoot";
-    public static final String BATCH_DIRECT_QUEUE_NAME = "BatchQueueSpringBoot";
+//    public static final String BATCH_DIRECT_ROUTING_KEY = "BatchRoutingKeySpringBoot";
+//    public static final String BATCH_DIRECT_QUEUE_NAME = "BatchQueueSpringBoot";
 
+    /*
+   //如果其中一条消费失败nack会有问题，ack其中一条会有问题，要么整批nack,不采用消息合并生产
+   */
     //插入后的结果：多条拼接成一条，不是多条记录。
     //{"name":"publishInBatch0"}{"name":"publishInBatch1"}{"name":"publishInBatch2"}{"name":"publishInBatch3"}{"name":"publishInBatch4"}{"name":"publishInBatch5"}{"name":"publishInBatch6"}{"name":"publishInBatch7"}{"name":"publishInBatch8"}{"name":"publishInBatch9"}
     public void publishInBatch() {
 
-//        //参数：队列名称,消息内容（可以为可序列化的对象）
-////        this.amqpTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
-////        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
-//        Person person = new Person();
-//        for (int i = 0; i < 10; i++) {
-//
-//            person.setName(MessageFormat.format("publishInBatch{0}", i));
-//
-//            String msg = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
-//            System.out.println("send:"+msg);
-//
-//            //批量发送不支持CorrelationData（消息的ID。类似官网的PublishSeqNo）
-////            CorrelationData correlationData=new CorrelationData() ;
-////            correlationData.setId(UUID.randomUUID().toString());
-//
+        //参数：队列名称,消息内容（可以为可序列化的对象）
+//        this.amqpTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
+//        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
+        Person person = new Person();
+        for (int i = 0; i < 100; i++) {
+
+            person.setName(MessageFormat.format("publishInBatch{0}", i));
+
+
+            //批量发送不支持CorrelationData（消息的ID。类似官网的PublishSeqNo）
+//            CorrelationData correlationData=new CorrelationData() ;
+//            correlationData.setId(UUID.randomUUID().toString());
+
 //            MessageProperties messageProperties = new MessageProperties();
 //            Message message = new Message(msg.getBytes(), messageProperties);
 //            batchingRabbitTemplate.send(BATCH_DIRECT_EXCHANGE_NAME,BATCH_DIRECT_ROUTING_KEY,message);
-//        }
-//        //json转换
-//        String jsonStr1 =   JSON.toJSONString(person);
-//        Person p=JSON.parseObject(jsonStr1,Person.class);
-//        Integer m=0;
+
+
+            String json = "";
+            try {
+                json = objectMapper.writeValueAsString(person);
+
+                RabbitMqMessage mqMsg = new RabbitMqMessage(json);
+                mqMsg.setMessageId(UUID.randomUUID().toString());
+                //  batchingRabbitTemplate.convertAndSend(BATCH_DIRECT_EXCHANGE_NAME,BATCH_DIRECT_ROUTING_KEY,mqMsg);
+                Message message = new Message(objectMapper.writeValueAsString(mqMsg).getBytes(), new MessageProperties());
+                batchingRabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        //json转换
+        String jsonStr1 = JSON.toJSONString(person);
+        Person p = JSON.parseObject(jsonStr1, Person.class);
+        Integer m = 0;
     }
     //endregion
 

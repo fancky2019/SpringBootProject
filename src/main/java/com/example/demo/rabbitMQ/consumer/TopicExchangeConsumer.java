@@ -6,6 +6,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+
 @Component
 //@RabbitListener(queues = "DirectExchangeQueueSpringBoot")//参数为队列名称
 public class TopicExchangeConsumer {
@@ -20,13 +22,18 @@ public class TopicExchangeConsumer {
 
     @RabbitHandler
     @RabbitListener(queues = TOPIC_QUEUE_NAME)//参数为队列名称
-    public void receivedMsg(String receivedMessage, Channel channel, Message message) {
+    public void receivedMsg(String receivedMessage, Channel channel, Message message) throws IOException {
         try {
             System.out.println("TopicExchange Queue:" + TOPIC_QUEUE_NAME + " receivedMsg: " + receivedMessage);
+//            int m = Integer.parseInt("d");
             //手动Ack
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw e;
+//            boolean multiple = false; // 单条确认
+//            boolean requeue  = true;
+//            channel.basicNack(message.getMessageProperties().getDeliveryTag(),multiple,requeue);
+//
         }
     }
 

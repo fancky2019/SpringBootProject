@@ -2,7 +2,7 @@
 
   单个值判空
   <if test="filmCode != null and filmCode != ''">
-  1、时间比较
+  1、时间比较 大于等于 小于等于 要转义 <![CDATA[ 转义字符 ]]>
      /*mysql  时间 大于等于  and co.pay_time <![CDATA[ >= ]]> #{startTime,jdbcType=DATE}*/
          <!-- 小于等于    <![CDATA[ <= ]]>-->
 

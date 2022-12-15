@@ -1,38 +1,21 @@
 package com.example.demo.rabbitMQ;
 
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.batch.SimpleBatchingStrategy;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
-import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * rabbitMQ安装目录C:\Program Files\RabbitMQ Server\rabbitmq_server-3.10.5\sbin 下控制台执行命令
@@ -49,30 +32,27 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class RabbitMQConfig {
 
     //region 常量参数
-    public static final int RETRY_INTERVAL=10000;
+    public static final int RETRY_INTERVAL = 100000;
     //region batch
     public static final String BATCH_DIRECT_EXCHANGE_NAME = "BatchSpringBoot";
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
     public static final String BATCH_DIRECT_ROUTING_KEY = "BatchRoutingKeySpringBoot";
     public static final String BATCH_DIRECT_QUEUE_NAME = "BatchQueueSpringBoot";
+
+    public static final String BATCH_DIRECT_ROUTING_KEY_DLX = "BatchRoutingKeySpringBootDlx";
+    public static final String BATCH_DIRECT_QUEUE_NAME_DLX = "BatchQueueSpringBootDlx";
     //endregion
 
 
     //region DIRECT
-    public static final String DIRECT_EXCHANGE_NAME = "DirectExchangeSpringBoot";
+    public static final String DIRECT_EXCHANGE = "DirectExchangeSpringBoot";
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
     public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot";
     public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
 
-    public static final String DIRECT_ROUTING_KEY_DLX = "DirectExchangeRoutingKeySpringBoot";
-    public static final String DIRECT_QUEUE_NAME_DLX = "DirectExchangeQueueSpringBoot";
-    //endregion
-
-    //region DIRECT
-    public static final String DEAD_DIRECT_EXCHANGE_NAME = "DeadDirectExchangeSpringBoot";
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
-    public static final String DEAD_DIRECT_ROUTING_KEY = "DeadDirectExchangeRoutingKeySpringBoot";
-    public static final String DEAD_DIRECT_QUEUE_NAME = "DeadDirectExchangeQueueSpringBoot";
+    public static final String DIRECT_ROUTING_KEY_DLX = "directRoutingKeyDlx";
+    public static final String DIRECT_QUEUE_DLX = "DirectExchangeQueueSpringBootDlx";
     //endregion
 
     //region TOPIC
@@ -173,90 +153,124 @@ public class RabbitMQConfig {
     }
 
     /*
-    多线程消费
+    多线程消费:涉及到消费顺序行要将一个大队列根据业务消息id分成多个小队列
      */
-    @Bean("customContainerFactory")
-    public SimpleRabbitListenerContainerFactory containerFactory(SimpleRabbitListenerContainerFactoryConfigurer configurer, ConnectionFactory connectionFactory) {
+    @Bean("multiplyThreadContainerFactory")
+    public SimpleRabbitListenerContainerFactory containerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConcurrentConsumers(1);  //设置线程数
-        factory.setMaxConcurrentConsumers(1); //最大线程数
-        configurer.configure(factory, connectionFactory);
+        factory.setConcurrentConsumers(5);  //设置并发消费线程数
+        factory.setMaxConcurrentConsumers(5); //最大发消费线程数
+//        消息状态：ready:准备发送给消费之
+//        unacked:发送给消费者消费还没有ack
+//        total：总消息数量=ready+unacked
+        //每次预取10条信息放在线程的消费队列里，该线程还是1条一条从从该线程的缓冲队列里取消费。直到
+        //缓冲队列里的消息消费完，再从mq的队列里取。
+        // 调试可到mq插件查看 ready unacked 消息数量，打印消费者消费线程的消息id
+        factory.setPrefetchCount(10);
+        // 是否重回队列
+//        factory.setDefaultRequeueRejected(true);
+        // 手动确认
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        factory.setConnectionFactory(connectionFactory);
         return factory;
     }
 
 
-//    @Bean
-//    public BatchingRabbitTemplate batchingRabbitTemplate(ConnectionFactory connectionFactory) {
-//        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-//        scheduler.setPoolSize(1);
-//        scheduler.initialize();
-//        SimpleBatchingStrategy batchingStrategy= new SimpleBatchingStrategy(20, Integer.MAX_VALUE, 50);
-//        BatchingRabbitTemplate batchingRabbitTemplate = new BatchingRabbitTemplate(batchingStrategy,scheduler );
-//        batchingRabbitTemplate.setConnectionFactory(connectionFactory);
-//
-//        // 消息返回, yml需要配置 publisher-returns: true
-//        batchingRabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
-//            System.out.println("消息失败返回成功 ");
-//        });
-//        // 消息确认, yml需要配置 publisher-confirms: true
-//        batchingRabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
-//            if (ack) {
-//                System.out.println("消息批量发送到交换机成功！ ");
-//            } else {
-//                System.out.println("消息批量发送到交换机失败！ ");
-//            }
-//        });
-//        return batchingRabbitTemplate;
-//    }
-
+    //region batch
 
     //批量 异步
     //    private BatchingRabbitTemplate batchingRabbitTemplate;
 //    @Autowired
 //    private  AsyncRabbitTemplate asyncRabbitTemplate;
 
+    @Bean("batchQueueRabbitListenerContainerFactory")
+    public SimpleRabbitListenerContainerFactory batchQueueRabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        //设置批量
+        factory.setBatchListener(true);
+        factory.setConsumerBatchEnabled(true);//设置BatchMessageListener生效
+        factory.setBatchSize(5);//设置监听器一次批量处理的消息数量 5x批量合并的消息=一次消费的数量
+        return factory;
+    }
 
-    //region 配置交换机、队列、RoutingKey
+    /*
+     //如果其中一条消费失败nack会有问题，ack其中一条会有问题，要么整批nack,不采用消息合并生产
+     */
 
-//    @Bean("batchExchange")
-//    public DirectExchange batchExchange() {
-//        DirectExchange directExchange = new DirectExchange(BATCH_DIRECT_EXCHANGE_NAME);
-//        return directExchange;
-//    }
-//
-//    @Bean("batchQueue")
-//    public Queue batchQueue() {
-//        Queue queue = new Queue(BATCH_DIRECT_QUEUE_NAME);
-//        return queue;
-//    }
-//
-//    /**
-//     * 绑定队列、交换机、路由Key
-//     */
-//    @Bean("bindingBatch")
-//    public Binding bindingBatch() {
-//        Binding binding = BindingBuilder.bind(batchQueue()).to(batchExchange()).with(BATCH_DIRECT_ROUTING_KEY);
-//        return binding;
-//    }
+    @Bean
+    public BatchingRabbitTemplate batchingRabbitTemplate(ConnectionFactory connectionFactory) {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.initialize();
+
+        // 一次批量的数量：spring 发送将多条合并成一条
+        //如果其中一条消费失败nack会有问题，不采用消息合并生产
+        int batchSize = 7;
+        SimpleBatchingStrategy batchingStrategy = new SimpleBatchingStrategy(batchSize, Integer.MAX_VALUE, 500);
+        BatchingRabbitTemplate batchingRabbitTemplate = new BatchingRabbitTemplate(batchingStrategy, scheduler);
+        batchingRabbitTemplate.setConnectionFactory(connectionFactory);
+
+        // 消息返回, yml需要配置 publisher-returns: true
+        batchingRabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
+            System.out.println("消息生产到交换机没有路由到队列 ");
+        });
+        // 消息确认, yml需要配置 publisher-confirms: true
+        batchingRabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
+            if (ack) {
+                System.out.println("消息批量发送到交换机成功！ ");
+            } else {
+                System.out.println("消息批量发送到交换机失败！ ");
+            }
+        });
+        return batchingRabbitTemplate;
+    }
+
+    @Bean("batchExchange")
+    public DirectExchange batchExchange() {
+        DirectExchange directExchange = new DirectExchange(BATCH_DIRECT_EXCHANGE_NAME);
+        return directExchange;
+    }
+
+    @Bean("batchQueue")
+    public Queue batchQueue() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("x-dead-letter-exchange", BATCH_DIRECT_EXCHANGE_NAME);
+        map.put("x-dead-letter-routing-key", BATCH_DIRECT_ROUTING_KEY_DLX);
+        return new Queue(BATCH_DIRECT_QUEUE_NAME, true, false, false, map);
+
+    }
+
+    /**
+     * 绑定队列、交换机、路由Key
+     */
+    @Bean("bindingBatch")
+    public Binding bindingBatch() {
+        Binding binding = BindingBuilder.bind(batchQueue()).to(batchExchange()).with(BATCH_DIRECT_ROUTING_KEY);
+        return binding;
+    }
+
+    @Bean("batchQueueDlx")
+    public Queue batchQueueDlx() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("x-message-ttl", RETRY_INTERVAL);
+        map.put("x-dead-letter-exchange", BATCH_DIRECT_EXCHANGE_NAME);
+        map.put("x-dead-letter-routing-key", BATCH_DIRECT_ROUTING_KEY);
+        return new Queue(BATCH_DIRECT_QUEUE_NAME_DLX, true, false, false, map);
+
+    }
+
+    /**
+     * 绑定队列、交换机、路由Key
+     */
+    @Bean("bindingBatchDlx")
+    public Binding bindingBatchDlx() {
+        Binding binding = BindingBuilder.bind(batchQueueDlx()).to(batchExchange()).with(BATCH_DIRECT_ROUTING_KEY_DLX);
+        return binding;
+    }
     //endregion
 
     //region DeadDirect
-
-    //    @Bean("deadLetterExchange")
-    @Bean("deadDirectExchange")
-    public DirectExchange deadDirectExchange() {
-//        autoDelete属性
-//            @Queue: 当所有消费客户端连接断开后，是否自动删除队列 true：删除false：不删除
-//
-//            @Exchange：当所有绑定队列都不在使用时，是否自动删除交换器 true：删除false：不删除
-
-        /*
-          默认持久化交换机： (String name, boolean durable, boolean autoDelete)
-                          this(name, true, false);
-         */
-        DirectExchange directExchange = new DirectExchange(DEAD_DIRECT_EXCHANGE_NAME);
-        return directExchange;
-    }
 
     @Bean("deadDirectQueue")
     public Queue deadDirectQueue() {
@@ -273,9 +287,9 @@ public class RabbitMQConfig {
          */
         Map<String, Object> map = new HashMap<>();
         map.put("x-message-ttl", RETRY_INTERVAL);
-        map.put("x-dead-letter-exchange", DIRECT_EXCHANGE_NAME);
+        map.put("x-dead-letter-exchange", DIRECT_EXCHANGE);
         map.put("x-dead-letter-routing-key", DIRECT_ROUTING_KEY);
-        return new Queue(DEAD_DIRECT_QUEUE_NAME, true, false, false, map);
+        return new Queue(DIRECT_QUEUE_DLX, true, false, false, map);
 //
 
     }
@@ -285,7 +299,7 @@ public class RabbitMQConfig {
      */
     @Bean("bindingDeadDirect")
     public Binding bindingDeadDirect() {
-        Binding binding = BindingBuilder.bind(deadDirectQueue()).to(deadDirectExchange()).with(DEAD_DIRECT_ROUTING_KEY);
+        Binding binding = BindingBuilder.bind(deadDirectQueue()).to(directExchange()).with(DIRECT_ROUTING_KEY_DLX);
         return binding;
     }
     //endregion
@@ -293,7 +307,7 @@ public class RabbitMQConfig {
     //region Direct
     @Bean
     public DirectExchange directExchange() {
-        DirectExchange directExchange = new DirectExchange(DIRECT_EXCHANGE_NAME);
+        DirectExchange directExchange = new DirectExchange(DIRECT_EXCHANGE);
         return directExchange;
     }
 
@@ -305,9 +319,9 @@ public class RabbitMQConfig {
         HashMap<String, Object> args = new HashMap<>();
 //        args.put("x-message-ttl", 30000);
         // 设置该Queue的死信的队列
-        args.put("x-dead-letter-exchange", DEAD_DIRECT_EXCHANGE_NAME);
+        args.put("x-dead-letter-exchange", DIRECT_EXCHANGE);
         // 设置死信routingKey
-        args.put("x-dead-letter-routing-key", DEAD_DIRECT_ROUTING_KEY);
+        args.put("x-dead-letter-routing-key", DIRECT_ROUTING_KEY_DLX);
 //        QueueBuilder.durable(DIRECT_QUEUE_NAME).withArguments(args).build();
         return new Queue(DIRECT_QUEUE_NAME, true, false, false, args);
 //

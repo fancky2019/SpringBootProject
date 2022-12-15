@@ -207,7 +207,7 @@ spring:
     username: guest
     password: guest
     #发布确认 publisher-confirms已经修改为publisher-confirm-type，
-    publisher-confirm-type: CORRELATED
+    publisher-confirms: true
     # 开启发送失败退回
     publisher-returns: true
     template:
@@ -221,16 +221,20 @@ spring:
       simple:
         retry:
           #是否开启消费者重试（为false时关闭消费者重试，这时消费端代码异常会一直重复收到消息）
-          enabled: true
-          #最大重试次数（包括执行一次，实际重试两次。1+2=3）
+          #默认false ,不采用spring自带的重试，自己设计死信队列达到重试次数入库
+          enabled: false
+          #最大重试次数（包括执行一次，实际重试两次。1+2=3），达到重试次数不再消费，
+          #不能在代码中吞噬异常否则无法重试，类似数据库事务
           max-attempts: 3
           #重试间隔时间（单位毫秒）
           initial-interval: 2000
         #公平分发模式 默认是1
         prefetch: 30
-        #acknowledge-mode: manual
-        #消费异常的数据进入死信队列
-        default-requeue-rejected: false
+        #默认 auto，不然消费异常业务ack掉。尽管配置重新入队auto还是会重试入队之后ack掉
+        acknowledge-mode: manual
+        #消费异常的数据重新入队。
+#        default-requeue-rejected: true
+
     #    listener:
     #      direct:
     #        acknowledge-mode: manual
