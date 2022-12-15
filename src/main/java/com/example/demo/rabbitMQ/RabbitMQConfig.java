@@ -154,6 +154,8 @@ public class RabbitMQConfig {
 
     /*
     多线程消费:涉及到消费顺序行要将一个大队列根据业务消息id分成多个小队列
+    配置文件为默认的SimpleRabbitListenerContainerFactory 配置
+    该配置为具体的listener 指定SimpleRabbitListenerContainerFactory
      */
     @Bean("multiplyThreadContainerFactory")
     public SimpleRabbitListenerContainerFactory containerFactory(ConnectionFactory connectionFactory) {
