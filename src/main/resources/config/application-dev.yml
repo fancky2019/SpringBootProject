@@ -42,7 +42,6 @@ mybatis-plus:
 #  supportMethodsArguments: true
 #  params: count=countSql
 
-
 #开发配
 spring:
 #  main:
@@ -202,12 +201,16 @@ spring:
 
 
   rabbitmq:
+    ##集群配置 ip:port,ip:port 。多个配置之间用逗号隔开
+   # addresses: 127.0.0.1:5673,127.0.0.1:5674,127.0.0.1:5675 #指定client连接到的server的地址，多个以逗号分隔(优先取addresses，然后再取host)
+
     host: 127.0.0.1
     port: 5672
     username: guest
     password: guest
     #发布确认 publisher-confirms已经修改为publisher-confirm-type，
-    publisher-confirms: true
+    #publisher-confirms: true
+    publisher-confirm-type: CORRELATED
     # 开启发送失败退回
     publisher-returns: true
     template:
@@ -286,7 +289,21 @@ spring:
 #    host: 127.0.0.1
 #    port: 8082
 
-
+#camunda 官网配置
+#https://docs.camunda.org/manual/7.9/user-guide/spring-boot-integration/configuration/#camunda-engine-properties
+camunda.bpm:
+    # 配置账户密码来访问Camunda自带的管理界面
+  admin-user:
+    id: demo
+    password: demo
+#    firstName: Demo
+  filter:
+     create: All tasks
+    #禁止自动部署resources下面的bpmn文件
+  auto-deployment-enabled: false
+    #禁止index跳转到Camunda自带的管理界面，默认true
+    #    webapp:
+    #      index-redirect-enabled: false
 
 #Feign  开启熔断
 #注意：节点不在spring内

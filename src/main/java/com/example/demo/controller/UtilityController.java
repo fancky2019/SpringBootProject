@@ -1043,7 +1043,7 @@ public class UtilityController {
         String content = "";
         List<String> strList = new ArrayList<>();
         try {
-            //idea 中可以正常运行，达成jar报错：找不到文件
+            //idea 中可以正常运行，打成jar报错：找不到文件
 //            ClassPathResource resource = new ClassPathResource(filePath);
 //            File file = resource.getFile();
 //            content = FileUtils.readFileToString(file, "UTF-8");

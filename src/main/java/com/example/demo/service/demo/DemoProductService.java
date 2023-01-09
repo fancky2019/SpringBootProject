@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.*;
 
 @Service
 public class DemoProductService {
@@ -42,9 +43,10 @@ public class DemoProductService {
 
     public void test() {
 //        batchInsert();
-        this.getMaxId();
-        this.getById();
-        this.getByIds();
+//        this.getMaxId();
+//        this.getById();
+//        this.getByIds();
+        mutiThread();
     }
 
 //    @Autowired
@@ -83,7 +85,7 @@ public class DemoProductService {
 
     public int batchInsertSession() {
         List<DemoProduct> list = new ArrayList<>();
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 300000; i++) {
             DemoProduct demoProduct = new DemoProduct();
             demoProduct.setGuid(UUID.randomUUID().toString());
             demoProduct.setProductName("productName" + i);
@@ -96,22 +98,104 @@ public class DemoProductService {
             demoProduct.setTimestamp(LocalDateTime.now());
             list.add(demoProduct);
         }
+        while (true) {
+            try {
+                Thread.sleep(60 * 1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+//        StopWatch stopWatch = new StopWatch("BatchInsert");
+//        stopWatch.start("BatchInsert_Trace1");
+//        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);
+//        //不能用spring 注入的mapper,必须从session 里取，否则是一条一条插入
+//        DemoProductMapper mapper = sqlSession.getMapper(DemoProductMapper.class);
+//        list.forEach(mapper::insert);
+////        sqlSession.clearCache();
+//        sqlSession.commit();
+//
+//        stopWatch.stop();
+////        stopWatch.start("BatchInsert_Trace2");
+//        long miils = stopWatch.getTotalTimeMillis();
+//        logger.info(stopWatch.shortSummary());
 
-        StopWatch stopWatch = new StopWatch("BatchInsert");
-        stopWatch.start("BatchInsert_Trace1");
+//        return 0;
+    }
+
+    /**
+     * 多线程批量插入性能优于单线程批量插入
+     */
+    public void mutiThread() {
+        try {
+            List<DemoProduct> list1 = new ArrayList<>();
+            List<DemoProduct> list2 = new ArrayList<>();
+            List<DemoProduct> list3 = new ArrayList<>();
+            for (int i = 0; i < 300000; i++) {
+                DemoProduct demoProduct = new DemoProduct();
+                demoProduct.setGuid(UUID.randomUUID().toString());
+                demoProduct.setProductName("productName" + i);
+                demoProduct.setProductStyle("productStyle" + i);
+                demoProduct.setImagePath("D:\\fancky\\git\\Doc");
+                demoProduct.setCreateTime(LocalDateTime.now());
+                demoProduct.setModifyTime(LocalDateTime.now());
+                demoProduct.setStatus(Short.valueOf("1"));
+                demoProduct.setDescription("setDescription_sdsdddddddddddddddd");
+                demoProduct.setTimestamp(LocalDateTime.now());
+                if (i >= 0 && i < 100000) {
+                    list1.add(demoProduct);
+                } else if (i >= 100000 && i < 200000) {
+                    list2.add(demoProduct);
+                } else {
+                    list3.add(demoProduct);
+                }
+
+            }
+
+            StopWatch stopWatch = new StopWatch("MutiThreadBatchInsert");
+            stopWatch.start("MutiThreadBatchInsert_Trace1");
+            final CountDownLatch latch = new CountDownLatch(3);
+            ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                    Runtime.getRuntime().availableProcessors(),
+                    Runtime.getRuntime().availableProcessors() * 2,
+                    60000,
+                    TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<>(1000));
+
+
+            executor.execute(() ->
+            {
+                batchInsert(list1);
+                latch.countDown();//当前线程调用此方法，则计数减一
+            });
+
+
+            executor.execute(() ->
+            {
+                batchInsert(list2);
+                latch.countDown();//当前线程调用此方法，则计数减一
+            });
+
+            executor.execute(() ->
+            {
+                batchInsert(list3);
+                latch.countDown();//当前线程调用此方法，则计数减一
+            });
+            latch.await();//阻塞当前线程，直到计数器的值为0
+            stopWatch.stop();
+            long miils = stopWatch.getTotalTimeMillis();
+            logger.info(stopWatch.shortSummary());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void batchInsert(List<DemoProduct> list) {
         SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);
         //不能用spring 注入的mapper,必须从session 里取，否则是一条一条插入
         DemoProductMapper mapper = sqlSession.getMapper(DemoProductMapper.class);
         list.forEach(mapper::insert);
 //        sqlSession.clearCache();
         sqlSession.commit();
-
-        stopWatch.stop();
-//        stopWatch.start("BatchInsert_Trace2");
-        long miils = stopWatch.getTotalTimeMillis();
-        logger.info(stopWatch.shortSummary());
-
-        return 0;
     }
 
     public int batchDelete() {
@@ -137,7 +221,7 @@ public class DemoProductService {
         List<DemoProduct> list = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             DemoProduct demoProduct = new DemoProduct();
-            demoProduct.setId(new BigInteger ((i + 1)+""));
+            demoProduct.setId(new BigInteger((i + 1) + ""));
             demoProduct.setGuid(UUID.randomUUID().toString());
             demoProduct.setProductName("productName" + (i + 1));
             demoProduct.setProductStyle("productStyle" + (i + 1));
