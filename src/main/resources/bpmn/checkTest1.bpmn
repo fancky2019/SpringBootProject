@@ -6,7 +6,7 @@
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_01ceqpj" sourceRef="StartEvent_1" targetRef="Activity_1cngfbx" />
     <bpmn:sequenceFlow id="Flow_00uezq3" sourceRef="Activity_1cngfbx" targetRef="Activity_1g5o9ux" />
-    <bpmn:userTask id="Activity_1g5o9ux" name="经理" camunda:assignee="demo1">
+    <bpmn:userTask id="Activity_1g5o9ux" name="经理" camunda:assignee="fa">
       <bpmn:incoming>Flow_00uezq3</bpmn:incoming>
       <bpmn:outgoing>Flow_1p1du6s</bpmn:outgoing>
     </bpmn:userTask>

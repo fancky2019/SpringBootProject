@@ -59,10 +59,10 @@ public class CamundaController {
     }
 
     @GetMapping("/completedTask")
-    public String completedTask(String taskId) {
+    public String completedTask(String taskId,Boolean approve) throws Exception {
 
         HashMap<String, Object> param = new HashMap<>();
-        param.put("approve", true);
+        param.put("approve", approve);
         camundaService.completedTask(taskId, param);
         return "completedTask";
     }

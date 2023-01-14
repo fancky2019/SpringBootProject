@@ -21,10 +21,12 @@ import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.service.demo.PersonService;
 import com.example.demo.shiro.ShiroRedisProperties;
+import com.example.demo.sse.ISseEmitterService;
 import com.example.demo.utility.RSAUtil;
 import com.example.demo.utility.RepeatPermission;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -347,10 +350,11 @@ public class UtilityController {
      * body 不能重复读取
      */
     @PostMapping(value = "/getPostBody")
-    public Student getPostBody(HttpServletRequest request) throws Exception {
+    public Student getPostBody(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         //请求头
         String value = request.getHeader("Content-Type");
+        response.setHeader("Content-Type", value);
         List<String> headerNames = Collections.list(request.getHeaderNames());
         String bodyString = getBodyString(request);
         //“”   request.getReader(); c
@@ -1144,6 +1148,7 @@ public class UtilityController {
 
     }
 
+    //region ehcache
     @GetMapping("/cacheServiceGet")
     public MessageResult<ProductTest> cacheServiceGet(int id) {
         MessageResult<ProductTest> messageResult = new MessageResult<>();
@@ -1164,5 +1169,27 @@ public class UtilityController {
         this.cacheService.cacheServiceEvict(request.getId());
         return "completed";
     }
+    //endregion
 
+    //region sse (sever-sent event)
+    @Autowired
+    private ISseEmitterService sseEmitterService;
+
+    @GetMapping(value = "/sseConnect/{userId}")
+    @ApiOperation(value = "建立Sse链接", notes = "建立Sse链接", httpMethod = "GET")
+    public SseEmitter push(@PathVariable("userId") String userId) throws Exception {
+        return sseEmitterService.createSseConnect(userId);
+    }
+
+
+    @GetMapping(value = "/sseSendMsg")
+    public void sendMsg(String userId) {
+        sseEmitterService.sendMsgToClient(userId, "test");
+    }
+
+    @GetMapping(value = "/close/{userId}")
+    public void close(@PathVariable("userId") String userId) {
+        sseEmitterService.closeSseConnect(userId);
+    }
+    //endregion
 }

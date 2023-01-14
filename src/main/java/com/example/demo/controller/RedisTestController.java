@@ -86,7 +86,7 @@ public class RedisTestController {
             //key 存在
             redisTemplate.hasKey("ds");
             redisTemplate.expire("ds", 60, TimeUnit.SECONDS);
-          //  redisTemplate.getExpire()
+            //  redisTemplate.getExpire()
             //region String
             //待测试
             ValueOperations<Integer, Integer> valueOperations1 = redisTemplate.opsForValue();
@@ -289,6 +289,29 @@ public class RedisTestController {
 
             //取值
             Student hashVal1 = hashOperations.get("hashKey1", "hashField1");
+
+            //  //获取redis key 下的所有hash key 的hash 对应jredis 的hKeys(rawKey);
+            Set<String> keys = hashOperations.keys("hashKey3");
+            Iterator<String> iter = keys.iterator();
+            while (iter.hasNext()) {
+                String key = iter.next();
+            }
+
+            for (String val : keys) {
+                String v = val;
+            }
+
+            List<String> hashKeysList = new ArrayList<>();
+            hashKeysList.add("hashField3");
+            List<Student> studentList1 = hashOperations.multiGet("hashKey1", hashKeysList);
+
+            HashMap<String, Student> hashMap = new HashMap<>(16);
+            hashMap.put("hashField1", student1);
+            hashMap.put("hashField2", student2);
+            hashOperations.putAll("hashKey1", hashMap);
+
+            boolean has = hashOperations.hasKey("hashKey1", "hashField1");
+
             //删除
             //  hashOperations.delete("hashKey1", new String[]{"hashField1","hashField12"});
             //返回删除的个数
@@ -319,7 +342,7 @@ public class RedisTestController {
             //HashSet--Set
             //取值
             Set<Student> setStr = setOperations.members("setKey1");
-            List<Student> studentList = new ArrayList<>(setStr);
+            List<Student> studentList = new ArrayList<>();
 
             Iterator<Student> stringIterator = setStr.iterator();
             while (stringIterator.hasNext()) {

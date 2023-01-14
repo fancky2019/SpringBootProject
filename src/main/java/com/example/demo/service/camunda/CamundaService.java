@@ -1,6 +1,7 @@
 package com.example.demo.service.camunda;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.engine.*;
 import org.camunda.bpm.engine.impl.persistence.entity.ProcessInstanceWithVariablesImpl;
 import org.camunda.bpm.engine.repository.Deployment;
@@ -92,12 +93,64 @@ public class CamundaService {
         return processInstanceId;
     }
 
-    public String completedTask(String taskId, Map<String, Object> processVariables) {
+    public String completedTask(String taskId, Map<String, Object> processVariables) throws Exception {
         //  log.debug("start process instance, processDefinitionKey: {}, businessKey={}, processVariables: {}", processName, businessKey, processVariables);
         //   Map processVariablesMap = CamundaTools.convertProcessVariablesFromEntity(processVariables);
-
+        String processInstanceId = getProcessInstanceIdByTaskId(taskId);
         taskService.complete(taskId, processVariables);
+
+        String nextTaskId = getActiveByProcessInstanceId(processInstanceId);
+        if (StringUtils.isEmpty(nextTaskId)) {
+            //流程走完
+            return "completed";
+        }
+        Task nextTask = getTaskByTaskId(nextTaskId);
+        // 任务认领
+        //  claimTask(nextTaskId, "fancky");
+
+        setTaskGroup(nextTaskId, "10000");
+        Task task = taskService.createTaskQuery().taskId(nextTaskId).singleResult();
         return "";
+    }
+
+    public void setTaskGroup(String taskId, String groupCode) throws Exception {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (task != null) {
+            taskService.addCandidateGroup(taskId, groupCode);
+        } else {
+            throw new Exception("未查询到对应的task信息！");
+        }
+    }
+
+    public String claimTask(String taskId, String assignee) throws Exception {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (task != null) {
+            if (StringUtils.isBlank(task.getAssignee())) {
+                taskService.claim(task.getId(), assignee);
+                return "";
+            } else {
+                throw new Exception("任务已被他人领取!");
+            }
+        } else {
+            throw new Exception("未查询到任务!");
+        }
+    }
+
+    public Task getTaskByTaskId(String taskId) throws Exception {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (task == null) {
+            throw new Exception("未查询到对应的task信息！");
+        }
+        return task;
+    }
+
+    public String getProcessInstanceIdByTaskId(String taskId) throws Exception {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (task == null) {
+            throw new Exception("未查询到对应的task信息！");
+        }
+        String processInstanceId = task.getProcessInstanceId();
+        return processInstanceId;
     }
 
     /**
