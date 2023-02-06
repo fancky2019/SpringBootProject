@@ -1002,11 +1002,26 @@ public class UtilityController {
 
     }
 
+    /*
+    如果maxAge属性为正数：则表示该Cookie会在maxAge秒之后自动失效。浏览器会将maxAge为正数的Cookie持久化，
+    即写到对应的Cookie文件中。无论客户关闭了浏览器还是电脑，只要还在maxAge秒之前，登录网站时该Cookie仍然有效。
+    下面代码中的Cookie信息将永远有效。
+
+
+    如果maxAge为负数：则表示该Cookie仅在本浏览器窗口以及本窗口打开的子窗口内有效，关闭窗口后该Cookie即失效。
+    maxAge为负数的Cookie，为临时性Cookie，不会被持久化，不会被写到Cookie文件中。Cookie信息保存在浏览器内存中，
+    因此关闭浏览器该Cookie就消失了。Cookie默认的maxAge值为–1。
+
+
+cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来的Cookie。
+      修改：只需要新建一个同名的Cookie，并将maxAge设置为0，并添加到response中覆盖原来的Cookie
+     */
     @RequestMapping(value = "/getCookies", method = RequestMethod.GET)
     public String getCookies(HttpServletResponse response) {
         //HttpServletRequest  装请求信息的类
         //HttpServletResponse  装相应信息的类
         Cookie cookie = new Cookie("sessionId", "10001");
+        //cookie.setMaxAge(0);//默认-1，设置0 客户端删除cookie
         response.addCookie(cookie);
         return "恭喜获得cookies信息成功";
     }

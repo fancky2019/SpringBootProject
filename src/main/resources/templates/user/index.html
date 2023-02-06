@@ -37,7 +37,7 @@
 
     if (window.EventSource) {
 
-        // 建立连接
+        // 建立连接,132.230.50.130 传承实际ip
         source = new EventSource('http://localhost:8081/sbp/utility/sseConnect/' + userId);
         setMessageInnerHTML("连接用户=" + userId);
         /**
@@ -85,6 +85,7 @@
     function closeSse() {
         source.close();
         const httpRequest = new XMLHttpRequest();
+        //132.230.50.130 传承实际ip localhost
         httpRequest.open('GET', 'http://localhost:8081/sbp/utility/close/' + userId, true);
         httpRequest.send();
         console.log("close");

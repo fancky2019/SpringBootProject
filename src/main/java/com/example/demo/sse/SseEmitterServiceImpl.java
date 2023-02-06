@@ -6,19 +6,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 @Slf4j
 @Service
 public class SseEmitterServiceImpl implements ISseEmitterService {
-    
+
     /**
      * 容器，保存连接，用于输出返回
      */
     private static Map<String, SseEmitter> sseCache = new ConcurrentHashMap<>();
-    
+
+
+
+    /*
+    当后台服务重启，http会和后天重连
+     */
     @Override
     public SseEmitter createSseConnect(String userId) throws Exception {
         // 设置超时时间，0表示不过期。默认30秒，超过时间未完成会抛出异常：AsyncRequestTimeoutException
@@ -33,32 +41,49 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
         log.info("创建新的sse连接，当前用户：{}", userId);
 
         try {
-            Object obj=SseEmitter.event().id("USER_ID").data(userId);
+            Object obj = SseEmitter.event().id("USER_ID").data(userId);
             sseEmitter.send(SseEmitter.event().id("USER_ID").data(userId));
         } catch (IOException e) {
             log.error("SseEmitterServiceImpl[createSseConnect]: 创建长链接异常，客户端ID:{}", userId, e);
             throw new Exception("创建连接异常！", e);
         }
+
+
+        CompletableFuture.runAsync(() ->
+        {
+            while (true) {
+                String msg = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                batchSendMessage(msg);
+            }
+        });
+
         return sseEmitter;
     }
 
     /**
      * 群发所有人
+     *
      * @param msg
      */
     @Override
-    public SseEmitter batchSendMessage(String msg) {
+    public void batchSendMessage(String msg) {
         sseCache.forEach((k, v) -> {
             SseEmitter sseEmitter = sseCache.get(k);
-            if(sseEmitter != null) {
+            if (sseEmitter != null) {
                 sendMsgToClientByUserId(k, msg, sseEmitter);
             }
         });
-        return null;
+        // return null;
     }
 
     /**
      * 根据客户端id关闭SseEmitter对象
+     *
      * @param userId
      */
     @Override
@@ -67,13 +92,14 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
         if (sseEmitter != null) {
             //出发completionCallBack
             sseEmitter.complete();
-            removeUser(userId);
+//            removeUser(userId);
         }
     }
 
 
     /**
      * 根据客户端id获取SseEmitter对象
+     *
      * @param userId
      * @return
      */
@@ -85,6 +111,7 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
 
     /**
      * 推送消息到客户端，此处结合业务代码，业务中需要推送消息处调用即可向客户端主动推送消息
+     *
      * @param
      * @param
      * @return
@@ -92,7 +119,7 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
     @Override
     public SseEmitter sendMsgToClient(String userId, String msg) {
         SseEmitter sseEmitter = sseCache.get(userId);
-        if(sseEmitter != null) {
+        if (sseEmitter != null) {
             sendMsgToClientByUserId(userId, msg, sseEmitter);
             return sseEmitter;
         }
@@ -104,7 +131,7 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
      * 推送消息到客户端
      * 此处做了推送失败后，重试推送机制，可根据自己业务进行修改
      *
-     * @param userId               客户端ID
+     * @param userId 客户端ID
      * @param
      * @author re
      * @date 2022/3/30

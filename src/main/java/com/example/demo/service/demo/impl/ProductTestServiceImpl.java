@@ -2,6 +2,7 @@ package com.example.demo.service.demo.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.dao.demo.ProductTestMapper;
@@ -93,6 +94,24 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
     }
 
     private void queryTest() {
+        /*
+        原符号       <       <=      >       >=      <>
+        对应函数    lt()     le()    gt()    ge()    ne()
+        Mybatis-plus写法：  queryWrapper.ge("create_time", localDateTime);
+        Mybatis写法：       where create_time >= #{localDateTime}
+
+
+        //不加last(“desc”)默认就是升序，加上是降序方式
+
+        List<Employee> list=empployeeMapper.selecList(
+        new EntityWrapper<Employee> ()
+        .eq("gender",0)
+        .orderBy("age")
+        .last("desc")
+        );
+         */
+
+
         QueryWrapper<ProductTest> queryWrapper = new QueryWrapper<ProductTest>();
 //        queryWrapper.select("","");
 //        queryWrapper.eq("",1);
@@ -100,10 +119,12 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         String productName = "";
         //有条件拼接条件
         queryWrapper.eq(StringUtils.isNotEmpty(productName), "product_name", productName);
+//        queryWrapper.orderByDesc("desc");
         List<ProductTest> list = this.list(queryWrapper);
 
         LambdaQueryWrapper<ProductTest> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(ProductTest::getProductName, "productName_xiugai55555");
+
         List<ProductTest> list1 = this.list(lambdaQueryWrapper);
 
 
@@ -147,11 +168,20 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         queryWrapper.select("max(id) id");
         ProductTest productTest = this.getOne(queryWrapper);
         //查不到为null
-        if (productTest!=null)
-        {
-            BigInteger maxId=productTest.getId();
+        if (productTest != null) {
+            BigInteger maxId = productTest.getId();
         }
         int m = 0;
+    }
+
+    /*
+    更新表的指定字段
+     */
+    private void updateField() {
+        UpdateWrapper<ProductTest> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("ID", 0);//条件
+        updateWrapper.set("SESSION_KEY", "abc");//要更新的列
+        baseMapper.update(null, updateWrapper);
     }
 
 }

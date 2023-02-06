@@ -358,6 +358,10 @@ public class ShiroConfiguration {
 //        return kickoutSessionControlFilter;
 //    }
 
+    /*
+     服务端 sessionId 保存到cookie 中返回给客户端，客户端请求携带cookie ,服务端根据cookie 找session 信息
+     登录时候 查看返回shiro.sesssion 返回的值，以后每次请求头带上cookie 值为登录shiro.sesssion返回的值
+     */
     @Bean
     public SimpleCookie sessionIdCookie() {
         //DefaultSecurityManager
