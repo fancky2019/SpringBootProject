@@ -289,6 +289,8 @@ public class DemoProductService {
         PageData<DemoProduct> pageData = new PageData<>();
         PageHelper.startPage(request.getPageIndex(), request.getPageSize());
         try {
+            //拦截要执行的sql:先执行 select count(0),然后执行select 列
+            //简单的sql  count(0) 能替换列，复杂的sql 直接包了一层sql 然后count(0)
             List<DemoProduct> list = demoProductMapper.query(request);
             //调用分页查询的方法
             PageInfo<DemoProduct> pageInfo = new PageInfo<>(list);

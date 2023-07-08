@@ -70,6 +70,7 @@ public class BaseRabbitMqHandler<T extends RabbitMqMessage> {
                     }
                 } else {
                     logger.info("msgId - {} 已经被消费,msg - {}", t.getMessageId(), objectMapper.writeValueAsString(t));
+                    channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
                     return;
                 }
 

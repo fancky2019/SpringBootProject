@@ -87,7 +87,8 @@ useCache="true"
     <if test="productName != null and productName != ''">
       and product_name LIKE CONCAT('%',#{productName,jdbcType=VARCHAR},'%')
     </if>
-
+  union
+    select * from demo_product
   </select>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.demo.DemoProduct">

@@ -181,7 +181,22 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         UpdateWrapper<ProductTest> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("ID", 0);//条件
         updateWrapper.set("SESSION_KEY", "abc");//要更新的列
+        //  实体要指定null ，不然默认更新非空字段
         baseMapper.update(null, updateWrapper);
+
+
+        //根据条件删除
+//        QueryWrapper<User> wrapper = new QueryWrapper<>();
+//        wrapper.eq("user","zyh3"); //通过wrapper设置条件
+//        baseMapper.delete(wrapper);
+//        service.remove(wrapper);
+
+
+//MyBatis-Plus updateById方法更新不了空字符串/null解决方法
+//        userService.update(null,new UpdateWrapper<User>().lambda()
+//                .set(User::getUserName,null)
+//                .eq(User::getUserId,user.getUserId()));
+
     }
 
 }
