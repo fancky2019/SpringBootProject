@@ -19,11 +19,14 @@ public class RocketmqTest {
     @Autowired
     RocketMQProducer rocketMQProducer;
     public void test() {
-        CompletableFuture.runAsync(()->
-        {
-//            rocketMQProducer.send("rocketMqTest");
-            rocketMQProducer.sendMsg("rocketMqTest");
-//            rocketMQProducer.sendAsyncMsg("rocketMqTest");
-        });
+//        CompletableFuture.runAsync(()->
+//        {
+        //不要开启线程调用否则子线程内的异常抛不出来
+////            rocketMQProducer.send("rocketMqTest");
+//            rocketMQProducer.sendMsg("rocketMqTest");
+////            rocketMQProducer.sendAsyncMsg("rocketMqTest");
+//        });
+
+        rocketMQProducer.sendMsg("rocketMqTest");
     }
 }
