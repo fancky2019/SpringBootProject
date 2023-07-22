@@ -11,6 +11,33 @@ import org.springframework.stereotype.Component;
 
 /*
 源码参见github:https://github.com/spring-projects/spring-amqp
+
+
+分布式事务设计：1、将没钱消息插入本息系统中和业务数据放在一个事务中提交从而保证原子性。
+             2、启动一个定时任务扫描消息表获取为发送到mq的消息
+             3、将本地消息表获取的数据循环发送到mq并更新本地数据库，发送状态为已发送
+             4、mq 根据消息id 判断时候重复消费。
+
+
+
+事务执行成功之后，启动一个线程异步执行发送到mq,这样避免等待一个cron 周期
+volatile cnsumerCount=0;
+concurrentHashMap<uuid,list> mapMsgs;
+sysc send(concurrentHashMap msgs)
+msgList中包含 msgs 的信息如果msgs中的状态为已发送,就从msgs中移除。
+发送到mq 代码。
+在mq 生产成功的回调中更新db,同事更新内存中的msg 状态为已发送,由于单例可能造成消息为收到生产成功的回调
+而下一个cron 调用就调用。但是可以设计while(true) sleep 1;最大等待3秒，等待所有生产确认，不然就释放锁。
+if(consumerCount==msgs.cout) break;
+consumerCount=0;
+this.mapMsgs=msgs;
+
+这样会造成已经发送到mq 更新db 失败，重复投递的情况，所以mq要判断重复消费。
+
+
+
+重复消费的msgId在redis中的过期时间设置1month
+
  */
 @Component
 public class RabbitMQTest {

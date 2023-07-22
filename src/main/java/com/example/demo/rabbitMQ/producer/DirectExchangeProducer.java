@@ -10,6 +10,7 @@ import com.example.demo.rabbitMQ.RabbitMqMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,7 @@ public class DirectExchangeProducer {
 //        Integer m=0;
 
             try {
-                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
+                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg,new CorrelationData(mqMsg.getMessageId()));
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -109,7 +110,8 @@ public class DirectExchangeProducer {
                 mqMsg.setMessageId(UUID.randomUUID().toString());
 //                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
                 Message message = new Message(objectMapper.writeValueAsString(mqMsg).getBytes(), new MessageProperties());
-                rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message);
+               //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
+                rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message,new CorrelationData(mqMsg.getMessageId()));
                 Thread.sleep(1);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -156,7 +158,7 @@ public class DirectExchangeProducer {
                 mqMsg.setMessageId(UUID.randomUUID().toString());
                 //  batchingRabbitTemplate.convertAndSend(BATCH_DIRECT_EXCHANGE_NAME,BATCH_DIRECT_ROUTING_KEY,mqMsg);
                 Message message = new Message(objectMapper.writeValueAsString(mqMsg).getBytes(), new MessageProperties());
-                batchingRabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message);
+                batchingRabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message,new CorrelationData(mqMsg.getMessageId()));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

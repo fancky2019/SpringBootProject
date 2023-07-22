@@ -143,6 +143,8 @@ public class RabbitMQConfig {
         // 消息确认, yml需要配置 publisher-confirms: true
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
             if (ack) {
+              String msgId=  correlationData.getId();
+              //更新本地消息表，消息已经发送到mq
                 System.out.println("消息发送到交换机成功！ ");
             } else {
                 System.out.println("消息发送到交换机失败！ ");

@@ -16,6 +16,7 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
+import com.example.demo.rocketmq.RocketmqTest;
 import com.example.demo.service.demo.CacheService;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.IProductTestService;
@@ -108,6 +109,9 @@ public class UtilityController {
 
     @Autowired
     private ShiroRedisProperties shiroProperties;
+
+    @Autowired
+    private RocketmqTest rocketmqTest;
 
 
     @Autowired
@@ -1207,4 +1211,10 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
         sseEmitterService.closeSseConnect(userId);
     }
     //endregion
+
+    @GetMapping(value = "/rocketMq")
+    public void sendMsg() {
+        rocketmqTest.test();
+    }
+
 }
