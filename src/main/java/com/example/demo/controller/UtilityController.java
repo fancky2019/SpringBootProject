@@ -1217,4 +1217,25 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
         rocketmqTest.test();
     }
 
+    /**
+     * 更新
+     * @param id
+     * @param age
+     * @return
+     */
+    @PutMapping("/modify/{id}/{age}")
+    public String modify(@PathVariable Integer id,@PathVariable Integer age){
+        return "更新资源，执行put请求方式：id="+id+" aeg="+age;
+    }
+
+    /**
+     * 删除
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/delete/{id}")
+    public String delete(@PathVariable Integer id) {
+        return "删除资源，执行delete请求方式：id=" + id;
+
+    }
 }
