@@ -573,7 +573,8 @@
     </dependencies>
 
 
-    <!--    整理非org.springframework.boot的版本依赖-->
+    <!-- org.springframework.cloud依赖：   整理非org.springframework.boot 的版本依赖-->
+<!--   不是org.springframework.cloud 内置的依赖，要指定依赖的版本号-->
     <dependencyManagement>
         <dependencies>
             <dependency>

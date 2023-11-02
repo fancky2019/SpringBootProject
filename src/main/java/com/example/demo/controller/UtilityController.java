@@ -31,6 +31,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -1215,8 +1216,11 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
     @GetMapping(value = "/rocketMq")
     public void sendMsg() {
         rocketmqTest.test();
+        //automapper
+//        BeanUtils.copyProperties();
     }
 
+<<<<<<< HEAD
     /**
      * 更新
      * @param id
@@ -1238,4 +1242,8 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
         return "删除资源，执行delete请求方式：id=" + id;
 
     }
+=======
+
+
+>>>>>>> master
 }

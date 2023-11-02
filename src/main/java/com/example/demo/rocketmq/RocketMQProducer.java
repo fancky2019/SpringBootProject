@@ -43,6 +43,7 @@ public class RocketMQProducer {
     public SendResult sendMsg(String msgBody) {
         try {
             RabbitMqMessage msg = new RabbitMqMessage(msgBody);
+            //同步发送
             SendResult sendResult = rocketMQTemplate.syncSend(RocketMQConfig.TOPIC, MessageBuilder.withPayload(msg).build(),30);
             //  log.info("【sendMsg】sendResult={}", JSON.toJSONString(sendResult));
             return sendResult;
@@ -61,6 +62,7 @@ public class RocketMQProducer {
         RabbitMqMessage msg = new RabbitMqMessage(msgBody);
         String uuid = msg.getMessageId();
         Message<RabbitMqMessage> message = MessageBuilder.withPayload(msg).build();
+        //异步发送，在发送回调里处理生产成功失败。
         rocketMQTemplate.asyncSend(RocketMQConfig.TOPIC, message, new SendCallback() {
             @Override
             public void onSuccess(SendResult sendResult) {

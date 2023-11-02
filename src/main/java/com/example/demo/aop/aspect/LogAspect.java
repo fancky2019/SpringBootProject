@@ -50,7 +50,7 @@ execution(public * com.spring.service.BusinessObject.businessService(java.lang.S
 方法可以有多个参数，但是第一个参数必须是java.lang.String类型的方法
 
 
-
+//日志采用ControllerAdvice,不采用Aspect
 
  *通配符：该通配符主要用于匹配单个单词，或者是以某个词为前缀或后缀的单词。
 ..通配符：该通配符表示0个或多个项，主要用于declaring-type-pattern和param-pattern中，如果用于declaring-type-pattern中，

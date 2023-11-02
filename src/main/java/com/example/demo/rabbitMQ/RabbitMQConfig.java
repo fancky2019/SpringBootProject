@@ -241,7 +241,13 @@ public class RabbitMQConfig {
         Map<String, Object> map = new HashMap<>();
         map.put("x-dead-letter-exchange", BATCH_DIRECT_EXCHANGE_NAME);
         map.put("x-dead-letter-routing-key", BATCH_DIRECT_ROUTING_KEY_DLX);
-        return new Queue(BATCH_DIRECT_QUEUE_NAME, true, false, false, map);
+       //单活队列
+//        map.put("x-single-active-consumer", true);
+//        HashMap<String,Object> args = new HashMap<String,Object>();
+//        args.put("x-single-active-consumer", true);
+//       //创建Queue
+//        channel.queueDeclare(queueName, true, false, false, args);
+          return new Queue(BATCH_DIRECT_QUEUE_NAME, true, false, false, map);
 
     }
 

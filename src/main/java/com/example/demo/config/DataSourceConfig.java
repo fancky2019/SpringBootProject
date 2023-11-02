@@ -65,6 +65,10 @@ public class DataSourceConfig {
         // 默认数据源
         dynamicDataSource.setDefaultTargetDataSource(dataSourceWriter());
         // 配置多数据源
+        //DynamicDataSource 继承AbstractRoutingDataSource，父类内部维护多数据源的map
+        //aop通过注解动态设置ThreadLocal的map key
+        // DynamicDataSource 重写父类determineCurrentLookupKey 方法，根据ThreadLocal的map key
+        //控制父类选择哪个数据源 lookupKey
         Map<Object, Object> dsMap = new HashMap<>();
         dsMap.put("dataSourceWriter", dataSourceWriter());
         dsMap.put("dataSourceReader", dataSourceReader());

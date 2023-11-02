@@ -45,6 +45,7 @@ public class BaseRabbitMqHandler<T extends RabbitMqMessage> {
         String mqMsgIdKey = RABBIT_MQ_MESSAGE_ID_PREFIX + t.getMessageId();
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
 
+        //添加重复消费redis 校验，不会存在并发同一个message
         Object retryCountObj = valueOperations.get(mqMsgIdKey);
 //        String time1 = LocalDateTimeUtil.formatNormal(t.getMessageTime());
 //        String time2 = LocalDateTimeUtil.formatNormal(LocalDateTime.now());
@@ -116,7 +117,7 @@ public class BaseRabbitMqHandler<T extends RabbitMqMessage> {
             valueOperations.set(mqMsgIdKey, retryCount);
             logger.info(" {} 开始第{}次回归到队列：", deliveryTag, retryCount);
         } else {
-            //ack 掉消息
+            //ack 掉消息，把该消息插入数据库，批处理
             if (redisTemplate.expire(mqMsgIdKey, EXPIRE_TIME, TimeUnit.SECONDS)) {
                 channel.basicAck(deliveryTag, false);
             }

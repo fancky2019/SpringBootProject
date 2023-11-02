@@ -7,10 +7,10 @@ import java.util.List;
 
 public class MessageResult<T> implements Serializable {
 
+    private Integer code;
     /**
      * 执行结果（true:成功，false:失败）
      */
-    private Integer code;
     private Boolean success;
     private String message;
     //  MDC.put("traceId", traceId);//traceId在过滤器的destroy()中生成、清除
@@ -55,5 +55,18 @@ public class MessageResult<T> implements Serializable {
 
     public String getTraceId() {
         return traceId;
+    }
+
+    public static <T> MessageResult<T>  success(T data)
+    {
+        MessageResult<T> messageResult=new MessageResult<>();
+        messageResult.setCode(200);
+        messageResult.setData(data);
+        return  messageResult;
+    }
+
+    public static  <T>  MessageResult<T>  faile()
+    {
+        return  null;
     }
 }
