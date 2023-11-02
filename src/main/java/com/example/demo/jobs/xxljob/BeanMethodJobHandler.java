@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * 将@XxlJob里的注解填入后台的JobHandler*
+ */
 @Component
 public class BeanMethodJobHandler {
 

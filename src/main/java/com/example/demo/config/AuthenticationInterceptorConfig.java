@@ -2,16 +2,23 @@ package com.example.demo.config;
 
 import com.example.demo.aop.Interceptor.AuthenticationInterceptor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @Slf4j
 @Configuration
-public class AuthenticationInterceptorConfig implements WebMvcConfigurer {
+public class AuthenticationInterceptorConfig   implements WebMvcConfigurer {
+    //extends WebMvcConfigurerAdapter 废弃了
+
+//    @Autowired
+//   private AuthenticationInterceptor authenticationInterceptor;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor(authenticationInterceptor);
         registry.addInterceptor(authenticationInterceptor())
                 .addPathPatterns("/**")
                 //白名单

@@ -20,7 +20,9 @@ public class KafkaProducerClient {
     private KafkaTemplate<String, String> kafkaTemplate;
 
     public void producer(String msg) {
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send("test_topic", msg);
+        //发送消息指定key,消息保存在同一个分区。
+        String partitionKey="table_name";
+        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send("test_topic",partitionKey, msg);
         future.addCallback(success ->
                 {
                     ProducerRecord<String, String> producerRecord = success.getProducerRecord();

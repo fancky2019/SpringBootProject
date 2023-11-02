@@ -19,6 +19,10 @@ admin,123456
 
 
 注： 表 xxl_job_lock 的内容为schedule_lock，否则锁不住 源码：select * from xxl_job_lock where lock_name='schedule_lock' for update
+
+ 调度中心调用具体执行器通过调度策略：admin有对应策略选择
+
+ 调度中心高可用设计：通过nginx 反向代理。但是要确保后天数据库是同一连接
  */
 @Component
 public class BeanClassJobHandler extends IJobHandler {

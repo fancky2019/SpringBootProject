@@ -129,7 +129,7 @@ public class ESDemoProductService {
 //        QueryBuilders.matchPhraseQuery()
 //        QueryBuilders.queryStringQuery()
 
-
+like查询：利用wildcard通配符查询实现，其中？和*分别代替一个和多个字符。
 
 
 
@@ -186,7 +186,11 @@ public class ESDemoProductService {
 //                .withQuery(QueryBuilders.queryStringQuery("合肥").field("product_name").field("produce_address"))
                 .withQuery(QueryBuilders.multiMatchQuery("安徽合肥", "product_name", "produce_address"))
 
-
+//
+                //模糊查询待测试 : Wildcard 性能会比较慢。如果非必要，尽量避免在开头加通配符 ? 或者 *，这样会明显降低查询性能
+//                .withQuery(QueryBuilders.wildcardQuery("product_name"+".keyword", "*" +"安徽合肥" + "*"))
+//                .withQuery(QueryBuilders.wildcardQuery("product_name", "*" +"安徽合肥" + "*"))//必须要加keyword，否则查不出来
+             //SEARCH_AFTER 不用指定 from size
 //                .withQuery(QueryBuilders.rangeQuery("price").from("5").to("9"))//多个条件and 的关系
                 //分页
                 .withPageable(PageRequest.of(0, 5))
@@ -198,6 +202,9 @@ public class ESDemoProductService {
         SearchHits<DemoProduct> search = elasticsearchRestTemplate.search(nativeSearchQuery, DemoProduct.class);
         List<DemoProduct> products1 = search.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
 
+
+//        System.out.println("查询状态："+response.status());
+        System.out.println("查询总条数："+search.getTotalHits());
 
 //        elasticsearchRestTemplate.bulkUpdate();
 //        elasticsearchRestTemplate.bulkIndex();

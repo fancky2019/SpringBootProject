@@ -7,6 +7,7 @@ import com.example.demo.utility.Authorize;
 import com.example.demo.utility.AuthorizeType;
 import com.example.demo.utility.JWTUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -33,6 +34,7 @@ import java.util.Date;
  * <p>
  * 拦截器：拦截不执行，返回false,在response中写入信息，如果有的要执行请用Aspect
  */
+//@Component
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
     @Autowired

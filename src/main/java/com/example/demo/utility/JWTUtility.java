@@ -42,7 +42,8 @@ token 注销：redis token 黑名单，每次请求查询校验，违背无状�
 签名的本质就是“加密”
 
 
-
+token 前段设置：header里加下 Authorization：Bearer+【空格】+token字符串，
+             或者从浏览器请求头 复制Authorization 及其内容
 
 另一个开源框架：io.jsonwebtoken 不更新了
  */

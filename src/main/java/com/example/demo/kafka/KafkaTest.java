@@ -6,6 +6,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/*
+共享消息队列模式和发布-订阅模型
+
+kafka 没有提供同步刷盘机制，由操作系统刷盘，消息发到broker 没刷盘就可能丢失
+ */
 //@Component
 public class KafkaTest {
     private static Logger logger = LogManager.getLogger(RabbitMQTest.class);

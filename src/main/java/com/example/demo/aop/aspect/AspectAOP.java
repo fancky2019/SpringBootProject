@@ -53,7 +53,7 @@ Spring中的拦截机制,如果出现异常的话，异常的顺序是从里面�
 
 /*
 Filter: filters包下实例。
-Interceptor：Interceptor包下
+Interceptor：Interceptor包下,要在WebMvcConfigurer 方法里addInterceptors添加
 ControllerAdvice：handler报下
 Aspect：aspect包下LogAspect
  */
