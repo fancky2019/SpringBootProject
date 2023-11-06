@@ -77,9 +77,10 @@ public class RabbitMQController {
 // 如果开始了事务则在这里注册一个同步事务，将监听当前线程事务的动作
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
             @Override
-            public void afterCommit() {
-                // 调用父类的事务提交方法
-                super.afterCommit();
+            public void afterCompletion(int status) {
+                //afterCommit
+                // 调用父类的事务提交方法,空方法
+//                super.afterCompletion(status);
 
             }
         });
