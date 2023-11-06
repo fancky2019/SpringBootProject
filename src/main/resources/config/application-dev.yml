@@ -126,12 +126,12 @@ spring:
     # Hikari will use the above plus the following to setup connection pooling
     hikari:
       minimum-idle: 5
-      maximum-pool-size: 15
+      maximum-pool-size: 100
       auto-commit: true #OrderManagerService 代码异常，spring自动回滚，或者手动回滚。否则正常自动提交
       idle-timeout: 60000
       #pool-name: HikariCP-Demo
       max-lifetime: 1800000
-      connection-timeout: 60000
+      connection-timeout: 600000
       #connection-test-query: SELECT 1
 
   redis:

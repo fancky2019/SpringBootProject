@@ -1,17 +1,12 @@
 package com.example.demo.service.demo;
 
 import com.example.demo.dao.demo.DemoProductMapper;
-import com.example.demo.dao.rabc.AuthoritiesMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
-import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
-import com.example.demo.model.pojo.Page;
 import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.DemoProductRequest;
-import com.example.demo.service.rabc.AuthoritiesService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import kotlin.UByte;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -23,10 +18,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
-import javax.annotation.Resource;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -57,10 +52,12 @@ public class DemoProductService {
   */
     public int batchInsert() {
         List<DemoProduct> list = new ArrayList<>();
+        String productName = "productName";
         for (int i = 0; i < 100000; i++) {
+
             DemoProduct demoProduct = new DemoProduct();
             demoProduct.setGuid(UUID.randomUUID().toString());
-            demoProduct.setProductName("productName" + i);
+            demoProduct.setProductName(productName + i);
             demoProduct.setProductStyle("productStyle" + i);
             demoProduct.setImagePath("D:\\fancky\\git\\Doc");
             demoProduct.setCreateTime(LocalDateTime.now());
@@ -124,16 +121,28 @@ public class DemoProductService {
 
     /**
      * 多线程批量插入性能优于单线程批量插入
+     * 200W数据 一3分钟
      */
     public void mutiThread() {
         try {
-            List<DemoProduct> list1 = new ArrayList<>();
-            List<DemoProduct> list2 = new ArrayList<>();
-            List<DemoProduct> list3 = new ArrayList<>();
-            for (int i = 0; i < 300000; i++) {
+            int batchCount = 20;
+            int batchSize = 100000;
+            List<List<DemoProduct>> total = new ArrayList<>();
+
+            for (int i = 0; i < batchCount; i++) {
+                List<DemoProduct> list = new ArrayList<>();
+                total.add(list);
+            }
+            String productName = "productName";
+
+            int totalCount = batchSize * batchCount;
+            for (int i = 0; i < totalCount; i++) {
+                if (i > totalCount / 2) {
+                    productName = "产品名称";
+                }
                 DemoProduct demoProduct = new DemoProduct();
                 demoProduct.setGuid(UUID.randomUUID().toString());
-                demoProduct.setProductName("productName" + i);
+                demoProduct.setProductName(productName + i);
                 demoProduct.setProductStyle("productStyle" + i);
                 demoProduct.setImagePath("D:\\fancky\\git\\Doc");
                 demoProduct.setCreateTime(LocalDateTime.now());
@@ -141,19 +150,36 @@ public class DemoProductService {
                 demoProduct.setStatus(Short.valueOf("1"));
                 demoProduct.setDescription("setDescription_sdsdddddddddddddddd");
                 demoProduct.setTimestamp(LocalDateTime.now());
-                if (i >= 0 && i < 100000) {
-                    list1.add(demoProduct);
-                } else if (i >= 100000 && i < 200000) {
-                    list2.add(demoProduct);
-                } else {
-                    list3.add(demoProduct);
-                }
+                int j = i / batchSize;
+                List<DemoProduct> list = total.get(j);
+                list.add(demoProduct);
 
             }
 
             StopWatch stopWatch = new StopWatch("MutiThreadBatchInsert");
             stopWatch.start("MutiThreadBatchInsert_Trace1");
-            final CountDownLatch latch = new CountDownLatch(3);
+
+//            for (int i = 0; i < batchCount; i++) {
+//                List<DemoProduct> list = total.get(i);
+//                batchInsert(list);
+//            }
+
+
+//            List<CompletableFuture<Void>> futures = new ArrayList<>();
+//            for (int i = 0; i < 20; i++) {
+//                List<DemoProduct> list = total.get(i);
+//                CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
+//                {
+//                    batchInsert(list);
+//                });
+//                futures.add(future);
+//            }
+//            CompletableFuture<Void>[] completableFutures = new CompletableFuture[20];
+//            futures.toArray(completableFutures);
+//            CompletableFuture.allOf(completableFutures);
+
+
+            final CountDownLatch latch = new CountDownLatch(batchCount);
             ThreadPoolExecutor executor = new ThreadPoolExecutor(
                     Runtime.getRuntime().availableProcessors(),
                     Runtime.getRuntime().availableProcessors() * 2,
@@ -161,32 +187,23 @@ public class DemoProductService {
                     TimeUnit.MILLISECONDS,
                     new ArrayBlockingQueue<>(1000));
 
-
-            executor.execute(() ->
-            {
-                batchInsert(list1);
-                latch.countDown();//当前线程调用此方法，则计数减一
-            });
-
-
-            executor.execute(() ->
-            {
-                batchInsert(list2);
-                latch.countDown();//当前线程调用此方法，则计数减一
-            });
-
-            executor.execute(() ->
-            {
-                batchInsert(list3);
-                latch.countDown();//当前线程调用此方法，则计数减一
-            });
+            for (int i = 0; i < batchCount; i++) {
+                List<DemoProduct> list = total.get(i);
+                executor.execute(() ->
+                {
+                    batchInsert(list);
+                    latch.countDown();//当前线程调用此方法，则计数减一
+                });
+            }
             latch.await();//阻塞当前线程，直到计数器的值为0
+
             stopWatch.stop();
             long miils = stopWatch.getTotalTimeMillis();
-            logger.info(stopWatch.shortSummary());
-        } catch (InterruptedException e) {
+            logger.info("会话插入时间：" + miils + "ms   ," + stopWatch.shortSummary());
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
     private void batchInsert(List<DemoProduct> list) {
