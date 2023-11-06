@@ -312,19 +312,12 @@ camunda.bpm:
 #注意：节点不在spring内
 #如果页面显示异常信息，说明熔断没有开启成功
 feign:
-<<<<<<< HEAD
-=======
 #  #携带token,未验证
->>>>>>> master
 #  oauth2:
 #    # 开启Oauth支持，这样就会在请求头中携带Token了
 #    enabled: true
 #    # 同时开启负载均衡支持
 #    load-balanced: true
-<<<<<<< HEAD
-=======
-
->>>>>>> master
   hystrix:
     enabled: true
   httpclient:
