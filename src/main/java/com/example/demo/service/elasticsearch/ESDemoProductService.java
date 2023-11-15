@@ -113,11 +113,11 @@ public class ESDemoProductService {
         termQuery	不支持分词  结果完全匹配
 
 
-
+       keyword字段不分词
 
         term	完全匹配	查询条件必须都是text分词中的，且不能多余，多个分词时必须连续，顺序不能颠倒。	否
         match	完全匹配	match分词结果和text的分词结果有相同的即可，不考虑顺序	是
-        match_phrase	完全匹配	match_phrase的分词结果必须在text字段分词中都包含，而且顺序必须相同，而且必须都是连续的。	是
+        match_phrase	完全匹配	match_phrase的分词结果必须在text字段分词中“都包含”，而且顺序必须相同，而且必须都是连续的。	是
         query_string	完全匹配	query_string中的分词结果至少有一个在text字段的分词结果中，不考虑顺序	是
 
 

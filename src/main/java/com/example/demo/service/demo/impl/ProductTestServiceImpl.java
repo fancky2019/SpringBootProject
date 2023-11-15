@@ -2,10 +2,12 @@ package com.example.demo.service.demo.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.dao.demo.ProductTestMapper;
+import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.service.demo.IProductTestService;
 import org.apache.commons.lang3.StringUtils;
@@ -126,6 +128,13 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         lambdaQueryWrapper.eq(ProductTest::getProductName, "productName_xiugai55555");
 
         List<ProductTest> list1 = this.list(lambdaQueryWrapper);
+
+        LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(MqMessage::getPublishAck,true);
+//        updateWrapper.eq(MqMessage::getMsgId, msgId);//条件
+//        mqMessageService.update(updateWrapper);
+
+
 
 
         ProductTestMapper productTestMapper = this.getBaseMapper();

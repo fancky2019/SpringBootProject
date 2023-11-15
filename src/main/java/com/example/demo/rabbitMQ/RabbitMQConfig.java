@@ -1,19 +1,31 @@
 package com.example.demo.rabbitMQ;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.example.demo.model.entity.demo.MqMessage;
+import com.example.demo.model.entity.demo.ProductTest;
+import com.example.demo.service.demo.DemoProductService;
+import com.example.demo.service.demo.IMqMessageService;
+import com.example.demo.utility.SpringApplicationContextHelper;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.batch.SimpleBatchingStrategy;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+import java.applet.AppletContext;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +42,8 @@ import java.util.Map;
  */
 @Configuration
 public class RabbitMQConfig {
-
+    //    @Autowired
+//    private DemoProductService demoProductService;
     //region 常量参数
     public static final int RETRY_INTERVAL = 100000;
     //region batch
@@ -143,8 +156,22 @@ public class RabbitMQConfig {
         // 消息确认, yml需要配置 publisher-confirms: true
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
             if (ack) {
-              String msgId=  correlationData.getId();
-              //更新本地消息表，消息已经发送到mq
+                //发送消息时候指定的消息的id，根据此id设置消息表的消息状态为已发送
+                String msgId = correlationData.getId();
+//                从容器中获取bean
+                ApplicationContext applicationContext = SpringApplicationContextHelper.getApplicationContext();
+
+                IMqMessageService mqMessageService=applicationContext.getBean(IMqMessageService.class);
+//                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+//                lambdaQueryWrapper.eq(MqMessage::getMsgId, msgId);
+//                mqMessageService.getOne(lambdaQueryWrapper);
+
+                LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.set(MqMessage::getPublishAck,true);
+                updateWrapper.eq(MqMessage::getMsgId, msgId);//条件
+                mqMessageService.update(updateWrapper);
+
+                //更新本地消息表，消息已经发送到mq
                 System.out.println("消息发送到交换机成功！ ");
             } else {
                 System.out.println("消息发送到交换机失败！ ");
@@ -241,13 +268,13 @@ public class RabbitMQConfig {
         Map<String, Object> map = new HashMap<>();
         map.put("x-dead-letter-exchange", BATCH_DIRECT_EXCHANGE_NAME);
         map.put("x-dead-letter-routing-key", BATCH_DIRECT_ROUTING_KEY_DLX);
-       //单活队列
+        //单活队列
 //        map.put("x-single-active-consumer", true);
 //        HashMap<String,Object> args = new HashMap<String,Object>();
 //        args.put("x-single-active-consumer", true);
 //       //创建Queue
 //        channel.queueDeclare(queueName, true, false, false, args);
-          return new Queue(BATCH_DIRECT_QUEUE_NAME, true, false, false, map);
+        return new Queue(BATCH_DIRECT_QUEUE_NAME, true, false, false, map);
 
     }
 

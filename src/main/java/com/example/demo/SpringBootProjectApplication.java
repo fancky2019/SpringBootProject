@@ -1,6 +1,7 @@
 package com.example.demo;
 
 
+import com.example.demo.utility.SpringApplicationContextHelper;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
@@ -83,5 +84,7 @@ public class SpringBootProjectApplication {
     public static void main(String[] args) {
         ConfigurableApplicationContext applicationContext=
         SpringApplication.run(SpringBootProjectApplication.class, args);
+
+
     }
 }

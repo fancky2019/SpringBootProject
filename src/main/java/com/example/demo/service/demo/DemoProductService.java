@@ -2,9 +2,13 @@ package com.example.demo.service.demo;
 
 import com.example.demo.dao.demo.DemoProductMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
+import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.DemoProductRequest;
+import com.example.demo.rabbitMQ.RabbitMQConfig;
+import com.example.demo.rabbitMQ.RabbitMQTest;
+import com.example.demo.rabbitMQ.RabbitMqMessage;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.ibatis.session.ExecutorType;
@@ -12,16 +16,20 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StopWatch;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -32,16 +40,21 @@ public class DemoProductService {
     private static Logger logger = LogManager.getLogger(DemoProductService.class);
     @Autowired
     DemoProductMapper demoProductMapper;
-
+    @Autowired
+    IMqMessageService mqMessageService;
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
+    @Autowired
+    private RabbitMQTest rabbitMQTest;
 
     public void test() {
 //        batchInsert();
 //        this.getMaxId();
 //        this.getById();
 //        this.getByIds();
-        mutiThread();
+//        mutiThread();
+//        spring 事务基于对象aop 代理实现的 ，不能在方法内调用，否则事务失效
+//        insertTransactional();
     }
 
 //    @Autowired
@@ -264,14 +277,17 @@ public class DemoProductService {
         return 0;
     }
 
+    /*
+    spring 事务基于对象aop 代理实现的 ，不能在方法内调用，否则事务失效
+     */
 
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-    public int insert() {
+    public int insertTransactional() {
         List<DemoProduct> list = new ArrayList<>();
         for (int i = 0; i < 1; i++) {
             DemoProduct demoProduct = new DemoProduct();
             demoProduct.setGuid(UUID.randomUUID().toString());
-            demoProduct.setProductName("productName" + i);
+            demoProduct.setProductName("productNameshish事务" + i);
             demoProduct.setProductStyle("productStyle" + i);
             demoProduct.setImagePath("D:\\fancky\\git\\Doc");
             demoProduct.setCreateTime(LocalDateTime.now());
@@ -283,7 +299,88 @@ public class DemoProductService {
         }
 
         int i = demoProductMapper.batchInsert(list);
-        int m = Integer.parseInt("m");
+        MqMessage mqMessage = new MqMessage();
+        String msgId = UUID.randomUUID().toString();
+        String msgContent = "setMsgContent";
+        mqMessage.setMsgId(msgId);
+        mqMessage.setMsgContent(msgContent);
+        mqMessage.setExchange(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME);
+        mqMessage.setRouteKey(RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY);
+        mqMessage.setQueue("");
+        mqMessage.setPublishAck(false);
+        mqMessage.setConsumeAck(false);
+        mqMessage.setConsumeFail(false);
+        mqMessage.setCreateTime(LocalDateTime.now());
+        mqMessage.setUpdateTime(LocalDateTime.now());
+
+        mqMessageService.save(mqMessage);
+//        int m = Integer.parseInt("m");
+
+
+        //处理事务回调发送信息到mq
+//        boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+//        // 判断当前是否存在事务,，如果没有开启事务是会报错的
+//        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+//            // 无事务，异步发送消息给kafk
+//            CompletableFuture.runAsync(() -> {
+//                // 发送消息给kafka
+//                try {
+//                    // 发送消息给kafka
+//                } catch (Exception e) {
+//                    // 记录异常信息，发邮件或者进入待处理列表，让开发人员感知异常
+//                }
+//            });
+//            return 0;
+//        }
+
+        //1、在一个事务内将消息连同业务信息一同写入消息表
+
+
+        // 有事务，则添加一个事务同步器，并重写afterCompletion方法（此方法在事务提交后会做回调）
+// 如果开始了事务则在这里注册一个同步事务，将监听当前线程事务的动作
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCompletion(int status) {
+                //afterCommit
+                // 调用父类的事务提交方法,空方法
+//                super.afterCompletion(status);
+                CompletableFuture.runAsync(() -> {
+                    // 发送消息给kafka
+                    try {
+
+
+//                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
+                        Message message = new Message(msgContent.getBytes(), new MessageProperties());
+                        //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
+
+                        rabbitMQTest.test(mqMessage.getExchange(), mqMessage.getRouteKey(), message, mqMessage.getMsgId());
+                        // 发送消息给kafka
+                    } catch (Exception e) {
+
+                        // 记录异常信息，发邮件或者进入待处理列表，让开发人员感知异常
+                    }
+                });
+
+            }
+        });
+
+
+//        TransactionSynchronizationManager.registerSynchronization(
+//                new TransactionSynchronizationAdapter() {
+//                    @Override
+//                    public void afterCommit() {
+//                        CompletableFuture.runAsync(() -> {
+//                            // 发送消息给kafka
+//                            try {
+//                                rabbitMQTest.test();
+//                                // 发送消息给kafka
+//                            } catch (Exception e) {
+//
+//                                // 记录异常信息，发邮件或者进入待处理列表，让开发人员感知异常
+//                            }
+//                        });
+//                    }
+//                });
 
 
         return 0;

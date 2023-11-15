@@ -87,7 +87,7 @@ public class DirectExchangeProducer {
 //        Integer m=0;
 
             try {
-                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg,new CorrelationData(mqMsg.getMessageId()));
+                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg, new CorrelationData(mqMsg.getMessageId()));
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -97,7 +97,7 @@ public class DirectExchangeProducer {
 
     public void produceNotConvertSent() {
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1; i++) {
 
             Person person = new Person();
             person.setId(i);
@@ -110,8 +110,8 @@ public class DirectExchangeProducer {
                 mqMsg.setMessageId(UUID.randomUUID().toString());
 //                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
                 Message message = new Message(objectMapper.writeValueAsString(mqMsg).getBytes(), new MessageProperties());
-               //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
-                rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message,new CorrelationData(mqMsg.getMessageId()));
+                //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
+                rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, new CorrelationData(mqMsg.getMessageId()));
                 Thread.sleep(1);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -119,6 +119,18 @@ public class DirectExchangeProducer {
         }
     }
 
+    public void produceNotConvertSent(String exchange, String routingKey, Message message, String msgId) {
+
+
+        try {
+            //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
+            rabbitTemplate.send(exchange, routingKey, message, new CorrelationData(msgId));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
     //region batch
 //    public static final String BATCH_DIRECT_EXCHANGE_NAME = "BatchSpringBoot";
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
@@ -158,7 +170,7 @@ public class DirectExchangeProducer {
                 mqMsg.setMessageId(UUID.randomUUID().toString());
                 //  batchingRabbitTemplate.convertAndSend(BATCH_DIRECT_EXCHANGE_NAME,BATCH_DIRECT_ROUTING_KEY,mqMsg);
                 Message message = new Message(objectMapper.writeValueAsString(mqMsg).getBytes(), new MessageProperties());
-                batchingRabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message,new CorrelationData(mqMsg.getMessageId()));
+                batchingRabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, new CorrelationData(mqMsg.getMessageId()));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

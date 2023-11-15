@@ -6,6 +6,7 @@ import com.example.demo.rabbitMQ.producer.FanoutExchangeProducer;
 import com.example.demo.rabbitMQ.producer.TopicExchangeProducer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.amqp.core.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -85,6 +86,10 @@ public class RabbitMQTest {
         } catch (Exception ex) {
             logger.error(ex.getMessage());
         }
+    }
+
+    public void test(String exchange, String routingKey, Message message, String msgId) {
+        directExchangeProducer.produceNotConvertSent(exchange, routingKey, message, msgId);
     }
 
 }

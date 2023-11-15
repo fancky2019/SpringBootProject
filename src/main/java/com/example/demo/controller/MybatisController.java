@@ -114,7 +114,7 @@ public class MybatisController {
     public MessageResult<PageData<Void>> test() {
         MessageResult<PageData<Void>> message = new MessageResult<>();
         try {
-            demoProductService.test();
+            demoProductService.insertTransactional();
         } catch (Exception e) {
             message.setSuccess(false);
             message.setMessage(e.getMessage());
