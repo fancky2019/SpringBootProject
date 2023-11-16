@@ -1,5 +1,6 @@
 package com.example.demo.utility;
 
+import camundajar.impl.scala.collection.mutable.ReusableBuilder;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.RabbitMQTest;
@@ -27,22 +28,36 @@ public class MqSendUtil {
     private RabbitMQTest rabbitMQTest;
 
     public synchronized void send(MqMessage mqMessage) {
+        //处理事务回调发送信息到mq
+        //boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+        // 判断当前是否存在事务,如果没有开启事务是会报错的
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            // 无事务，
+            sentAsync(mqMessage);
+            return;
+        }
+
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
             @Override
             public void afterCompletion(int status) {
-                //afterCommit
+                //afterCommit,afterCompletion
+                //afterCompletion 事务完成
                 // 调用父类的事务提交方法,空方法
                 //   super.afterCompletion(status);
-                CompletableFuture.runAsync(() -> {
-                    //主线程无法捕捉子线程抛出的异常，除非设置捕捉 Thread.setDefaultUncaughtExceptionHandler
-                    try {
-                        rabbitMQTest.test(mqMessage);
-                    } catch (Exception e) {
-                        log.error("", e);
-                    }
-                });
+                sentAsync(mqMessage);
             }
         });
 
+    }
+
+    private void sentAsync(MqMessage mqMessage) {
+        CompletableFuture.runAsync(() -> {
+            //主线程无法捕捉子线程抛出的异常，除非设置捕捉 Thread.setDefaultUncaughtExceptionHandler
+            try {
+                rabbitMQTest.test(mqMessage);
+            } catch (Exception e) {
+                log.error("", e);
+            }
+        });
     }
 }

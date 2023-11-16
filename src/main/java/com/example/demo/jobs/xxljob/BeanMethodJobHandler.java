@@ -1,10 +1,10 @@
 package com.example.demo.jobs.xxljob;
 
-import com.xxl.job.core.biz.model.ReturnT;
+import com.example.demo.service.demo.IMqMessageService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -13,10 +13,14 @@ import java.time.format.DateTimeFormatter;
 /**
  * 将@XxlJob里的注解填入后台的JobHandler*
  */
+@Slf4j
 @Component
 public class BeanMethodJobHandler {
 
-    private static final Logger LOGGER = LogManager.getLogger(BeanMethodJobHandler.class);
+    // private static final Logger LOGGER = LogManager.getLogger(BeanMethodJobHandler.class);
+
+    @Autowired
+    private IMqMessageService mqMessageService;
 
     //region 模板
     @XxlJob("beanMethodJobHandler")
@@ -27,7 +31,7 @@ public class BeanMethodJobHandler {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String timeStr = formatter.format(LocalDateTime.now());
         XxlJobHelper.log("BeanMethodJobHandler");
-        LOGGER.info("xxljob - BeanMethodJobHandler  {} ", timeStr);
+        log.info("xxljob - BeanMethodJobHandler  {} ", timeStr);
 
     }
 
@@ -36,10 +40,10 @@ public class BeanMethodJobHandler {
         // XxlJobLogger.log("bean method jobhandler running...");
 
         //param xxl admin 填写的任务参数
-        String param =   XxlJobHelper.getJobParam();
-        System.out.println("dynamicJob - "+param );
+        String param = XxlJobHelper.getJobParam();
+        System.out.println("dynamicJob - " + param);
         XxlJobHelper.log("dynamicJob");
-        LOGGER.info("dynamicJob");
+        log.info("dynamicJob");
 
     }
 
@@ -47,16 +51,18 @@ public class BeanMethodJobHandler {
     //endregion
 
 
-
     @XxlJob("mqFailHandler")
-    public void mqFailHandler() throws Exception {
+    public  void mqFailHandler() throws Exception {
         //param xxl admin 填写的任务参数
         String param = XxlJobHelper.getJobParam();
+
+        mqMessageService.mqOperation();
         // XxlJobLogger.log("bean method jobhandler running...");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String timeStr = formatter.format(LocalDateTime.now());
         XxlJobHelper.log("mqFailHandler");
-        LOGGER.info("xxljob - BeanMethodJobHandler  {} ", timeStr);
-
+        log.info("xxljob - mqFailHandler  {} ", timeStr);
     }
+
+
 }

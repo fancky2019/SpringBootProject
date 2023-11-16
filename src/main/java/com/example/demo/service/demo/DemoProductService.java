@@ -308,9 +308,9 @@ public class DemoProductService {
         String msgContent = "setMsgContent";
 
         MqMessage mqMessage = new MqMessage
-                       (RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME,
+                (RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME,
                         RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY,
-                        "",
+                        RabbitMQConfig.BATCH_DIRECT_QUEUE_NAME,
                         msgContent);
 
 

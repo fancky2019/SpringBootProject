@@ -31,7 +31,7 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
                 IMqMessageService mqMessageService = applicationContext.getBean(IMqMessageService.class);
 
 
-                //                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+//                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
 //                lambdaQueryWrapper.eq(MqMessage::getMsgId, msgId);
 //                mqMessageService.getOne(lambdaQueryWrapper);
 

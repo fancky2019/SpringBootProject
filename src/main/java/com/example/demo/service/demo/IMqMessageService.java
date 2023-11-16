@@ -13,4 +13,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IMqMessageService extends IService<MqMessage> {
 
+    /**
+     * 失败处理
+     */
+    void mqOperation();
+
 }
