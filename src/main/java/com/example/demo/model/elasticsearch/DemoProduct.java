@@ -28,32 +28,43 @@ analyzer = "ik_max_word"
 public class DemoProduct implements Serializable {
     //    @Id 如果和es的id 名称不一样映射es的id.
     private Integer id;
-
-    @Field(name = "product_style")
-    private String productStyle;
+    private String guid;
     /*
-    java 实体和es字段名映射
+          java 实体和es字段名映射
      */
-//    @Field(name = "product_name",type = FieldType.Text)
+  //    @Field(name = "product_name",type = FieldType.Text)
 
     @Field(name = "product_name",analyzer = "ik_max_word",type = FieldType.Text)//中文分词设置
     private String productName;
+    @Field(name = "product_style")
+    private String productStyle;
+
+    @Field(name = "image_path")
+    private String image_path;
+
 //    @Field(name = "create_time")
     //es 到java实体时间的转换格式
-    @Field(name = "create_time",index = true, store = true, type = FieldType.Date,format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss")
+    @Field(name = "create_time",index = true, store = true, type = FieldType.Date,format = DateFormat.custom, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 //    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
 
-    @Field(name = "modify_time",index = true, store = true, type = FieldType.Date,format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss")
+    @Field(name = "modify_time",index = true, store = true, type = FieldType.Date,format = DateFormat.custom, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 //    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime modifyTime;
 
-    private String description;
-    private String price;
-    private String count;
+
+    private long status;
+
     @Field(name = "produce_address",analyzer = "ik_max_word")
-    private String produceAddress;
+    private String description;
+//DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+// pattern = "yyyy-MM-dd HH:mm:ss.SSS"
+// pattern = "yyyy-MM-dd HH:mm:ss"
+    @Field(name = "timestamp",index = true, store = true, type = FieldType.Date,format = DateFormat.custom, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+//    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime timestamp;
 }

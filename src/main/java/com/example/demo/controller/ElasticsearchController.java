@@ -53,12 +53,12 @@ public class ElasticsearchController {
 
 
     @RequestMapping("/getByProductName")
-    public MessageResult<List<DemoProduct>> getByProductName() {
-        MessageResult<List<DemoProduct>> message = new MessageResult<>();
+    public MessageResult<PageData<DemoProduct>> getByProductName() {
+        MessageResult<PageData<DemoProduct>> message = new MessageResult<>();
         try {
-            List<DemoProduct> products = esDemoProductService.search("", 1, 20);
+            PageData<DemoProduct> pageData = esDemoProductService.search("", 1, 20);
 
-            message.setData(products);
+            message.setData(pageData);
             // Thread.sleep(10*1000);
 //            message = productService.getPageData(viewModel);//查看缓存问题
         } catch (Exception e) {

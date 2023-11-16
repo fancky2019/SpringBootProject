@@ -100,7 +100,7 @@ public class UserManagerService {
         MessageResult<PageData<UsersVM>> message = new MessageResult<>();
         try {
             PageData<UsersVM> paegData = new PageData<>();
-            Integer count = usersMapper.getPageDataCount(viewModel);
+            Long count = usersMapper.getPageDataCount(viewModel);
             paegData.setCount(count);
             List<UsersVM> list = usersMapper.getPageData(viewModel);
             paegData.setData(list);

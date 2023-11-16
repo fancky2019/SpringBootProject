@@ -35,5 +35,5 @@ public interface RoleMenuAuthoritiesMapper {
 
     List<RoleMenuAuthoritiesVM> getPageData(RoleMenuAuthoritiesVM viewModel);
 
-    Integer getPageDataCount(RoleMenuAuthoritiesVM viewModel);
+    Long getPageDataCount(RoleMenuAuthoritiesVM viewModel);
 }

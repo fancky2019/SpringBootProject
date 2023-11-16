@@ -84,7 +84,7 @@ public class UserRolesService {
         MessageResult<PageData<UserRolesVM>> message = new MessageResult<>();
         try {
             PageData<UserRolesVM> paegData = new PageData<>();
-            Integer count = userRolesMapper.getPageDataCount(viewModel);
+            Long count =  userRolesMapper.getPageDataCount(viewModel);
             paegData.setCount(count);
             List<UserRolesVM> list = userRolesMapper.getPageData(viewModel);
             paegData.setData(list);

@@ -126,7 +126,7 @@
     </select>
     <!--count-->
     <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.MenusVM"
-            resultType="java.lang.Integer">
+            resultType="java.lang.Long">
         SELECT Count(ID)
         FROM [RABC].[dbo].[Menus]
         where 1=1

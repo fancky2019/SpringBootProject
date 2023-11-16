@@ -102,7 +102,7 @@
     </select>
     <!--count-->
     <select id="getPageDataCount" parameterType="com.example.demo.model.viewModel.rabc.RoleMenuAuthoritiesVM"
-            resultType="java.lang.Integer">
+            resultType="java.lang.Long">
         SELECT Count(rma.ID)
         FROM [RABC].[dbo].[RoleMenuAuthorities] rma
         join [RABC].[dbo].[Authorities] a on rma.AuthorityID=a.ID

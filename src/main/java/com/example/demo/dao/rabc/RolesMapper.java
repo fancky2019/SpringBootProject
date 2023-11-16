@@ -35,5 +35,5 @@ public interface RolesMapper {
 
     List<RolesVM> getPageData(RolesVM viewModel);
 
-    Integer getPageDataCount(RolesVM viewModel);
+    Long getPageDataCount(RolesVM viewModel);
 }

@@ -84,7 +84,7 @@ public class MenusService {
         MessageResult<PageData<MenusVM>> message = new MessageResult<>();
         try {
             PageData<MenusVM> paegData = new PageData<>();
-            Integer count = menusMapper.getPageDataCount(viewModel);
+            Long count = menusMapper.getPageDataCount(viewModel);
             paegData.setCount(count);
             List<MenusVM> list = menusMapper.getPageData(viewModel);
             paegData.setData(list);

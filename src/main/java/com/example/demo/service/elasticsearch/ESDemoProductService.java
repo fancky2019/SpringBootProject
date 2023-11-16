@@ -2,6 +2,7 @@ package com.example.demo.service.elasticsearch;
 
 import com.example.demo.elasticsearch.DemoProductRepository;
 import com.example.demo.model.elasticsearch.DemoProduct;
+import com.example.demo.model.viewModel.PageData;
 import org.apache.poi.ss.formula.functions.T;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -73,7 +74,7 @@ public class ESDemoProductService {
     不会被分词器分词， 而是直接以一个短语的形式查询，而如果你在创建索引所使用的field的value中没有这么一个短语（顺序无差，且连接在一起），
     那么将查询不出任何结果。
      */
-    public List<DemoProduct> search(String keyword, Integer pageNum, Integer pageSize) {
+    public PageData<DemoProduct> search(String keyword, Integer pageNum, Integer pageSize) {
 
         //        public class SimpleElasticsearchRepository<T, ID> implements ElasticsearchRepository<T, ID>
 
@@ -184,12 +185,12 @@ like查询：利用wildcard通配符查询实现，其中？和*分别代替一�
 
                 //在指定字段中查找值
 //                .withQuery(QueryBuilders.queryStringQuery("合肥").field("product_name").field("produce_address"))
-                .withQuery(QueryBuilders.multiMatchQuery("安徽合肥", "product_name", "produce_address"))
+               // .withQuery(QueryBuilders.multiMatchQuery("安徽合肥", "product_name", "produce_address"))
 
 //
                 //模糊查询待测试 : Wildcard 性能会比较慢。如果非必要，尽量避免在开头加通配符 ? 或者 *，这样会明显降低查询性能
-//                .withQuery(QueryBuilders.wildcardQuery("product_name"+".keyword", "*" +"安徽合肥" + "*"))
-//                .withQuery(QueryBuilders.wildcardQuery("product_name", "*" +"安徽合肥" + "*"))//必须要加keyword，否则查不出来
+                .withQuery(QueryBuilders.matchQuery("product_name", "产品名称1570018"))
+                .withQuery(QueryBuilders.wildcardQuery("product_style", "*" +"productstyle" + "*"))//必须要加keyword，否则查不出来
              //SEARCH_AFTER 不用指定 from size
 //                .withQuery(QueryBuilders.rangeQuery("price").from("5").to("9"))//多个条件and 的关系
                 //分页
@@ -200,16 +201,19 @@ like查询：利用wildcard通配符查询实现，其中？和*分别代替一�
 //                .withHighlightFields(new HighlightBuilder.Field("product_name"))
                 .build();
         SearchHits<DemoProduct> search = elasticsearchRestTemplate.search(nativeSearchQuery, DemoProduct.class);
-        List<DemoProduct> products1 = search.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
+        List<DemoProduct> productList = search.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
 
 
 //        System.out.println("查询状态："+response.status());
         System.out.println("查询总条数："+search.getTotalHits());
 
+        PageData<DemoProduct> pageData=new PageData<>();
+        pageData.setCount(search.getTotalHits());
+        pageData.setData(productList);
 //        elasticsearchRestTemplate.bulkUpdate();
 //        elasticsearchRestTemplate.bulkIndex();
 //        elasticsearchRestTemplate.delete()
-        return null;
+        return pageData;
     }
 
 }

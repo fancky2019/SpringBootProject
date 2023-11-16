@@ -13,6 +13,48 @@
                  "count":12,
                  "produce_address":"上海市青浦区"
                }
+
+
+                PUT /product_flink
+                {
+                    "mappings": {
+                      "properties": {
+                        "create_time": {
+                        "type": "date",
+                     "format": "yyyy-MM-dd HH:mm:ss.SSS"
+                        },
+                        "description": {
+                          "type": "text"
+                        },
+                        "guid": {
+                          "type": "text"
+                        },
+                        "id": {
+                          "type": "long"
+                        },
+                        "image_path": {
+                          "type": "text"
+                        },
+                        "modify_time": {
+                            "type": "date",
+                        "format": "yyyy-MM-dd HH:mm:ss.SSS"
+                        },
+                        "product_name": {
+                          "type": "text",
+                           "analyzer": "ik_max_word",
+                          "search_analyzer": "ik_max_word"
+                        },
+                        "product_style": {
+                          "type": "text"
+                        },
+                        "status": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                }
+
+
                4、rabbitMQ  安装rabbitmq_delayed_message_exchange-3.10.2 插件并启用
                5、xxl-job 启动startup.bat
                6、mysql demo 数据库初始化

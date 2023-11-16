@@ -45,5 +45,5 @@ public interface UsersMapper {
 
     List<UsersVM> getPageData(UsersVM viewModel);
 
-    Integer getPageDataCount(UsersVM viewModel);
+    Long getPageDataCount(UsersVM viewModel);
 }

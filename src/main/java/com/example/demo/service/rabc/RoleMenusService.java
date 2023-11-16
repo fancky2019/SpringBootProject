@@ -85,7 +85,7 @@ public class RoleMenusService {
         MessageResult<PageData<RoleMenusVM>> message = new MessageResult<>();
         try {
             PageData<RoleMenusVM> paegData = new PageData<>();
-            Integer count = roleMenusMapper.getPageDataCount(viewModel);
+            Long count = roleMenusMapper.getPageDataCount(viewModel);
             paegData.setCount(count);
             List<RoleMenusVM> list = roleMenusMapper.getPageData(viewModel);
             paegData.setData(list);

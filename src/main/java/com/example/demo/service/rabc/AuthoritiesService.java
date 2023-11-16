@@ -84,7 +84,7 @@ public class AuthoritiesService {
         MessageResult<PageData<AuthoritiesVM>> message = new MessageResult<>();
         try {
             PageData<AuthoritiesVM> paegData = new PageData<>();
-            Integer count = authoritiesMapper.getPageDataCount(viewModel);
+            Long count = authoritiesMapper.getPageDataCount(viewModel);
             paegData.setCount(count);
             List<AuthoritiesVM> list = authoritiesMapper.getPageData(viewModel);
             paegData.setData(list);

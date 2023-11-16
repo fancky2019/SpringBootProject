@@ -35,5 +35,5 @@ public interface MenusMapper {
 
     List<MenusVM> getPageData(MenusVM viewModel);
 
-    Integer getPageDataCount(MenusVM viewModel);
+    Long getPageDataCount(MenusVM viewModel);
 }

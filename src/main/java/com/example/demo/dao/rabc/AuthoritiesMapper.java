@@ -35,5 +35,5 @@ public interface AuthoritiesMapper {
 
     List<AuthoritiesVM> getPageData(AuthoritiesVM viewModel);
 
-    Integer getPageDataCount(AuthoritiesVM viewModel);
+    Long getPageDataCount(AuthoritiesVM viewModel);
 }
