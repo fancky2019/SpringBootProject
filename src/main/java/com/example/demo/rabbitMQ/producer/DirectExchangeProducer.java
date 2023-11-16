@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.viewModel.Person;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.RabbitMqMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
@@ -22,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class DirectExchangeProducer {
 
     public static final String DIRECT_EXCHANGE_NAME = "DirectExchangeSpringBoot";
@@ -119,15 +122,17 @@ public class DirectExchangeProducer {
         }
     }
 
-    public void produceNotConvertSent(String exchange, String routingKey, Message message, String msgId) {
-
-
+    public void produceNotConvertSent(MqMessage mqMessage) {
         try {
+            String exchange = mqMessage.getExchange();
+            String routingKey = mqMessage.getRouteKey();
+            Message message = new Message(mqMessage.getMsgContent().getBytes(), new MessageProperties());
+            String msgId = mqMessage.getMsgId();
             //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
             rabbitTemplate.send(exchange, routingKey, message, new CorrelationData(msgId));
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
         }
 
     }

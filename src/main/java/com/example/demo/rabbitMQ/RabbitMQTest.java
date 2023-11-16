@@ -1,5 +1,6 @@
 package com.example.demo.rabbitMQ;
 
+import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.rabbitMQ.consumer.DirectExchangeConsumer;
 import com.example.demo.rabbitMQ.producer.DirectExchangeProducer;
 import com.example.demo.rabbitMQ.producer.FanoutExchangeProducer;
@@ -88,8 +89,8 @@ public class RabbitMQTest {
         }
     }
 
-    public void test(String exchange, String routingKey, Message message, String msgId) {
-        directExchangeProducer.produceNotConvertSent(exchange, routingKey, message, msgId);
+    public void test(MqMessage mqMessage) {
+        directExchangeProducer.produceNotConvertSent(mqMessage);
     }
 
 }

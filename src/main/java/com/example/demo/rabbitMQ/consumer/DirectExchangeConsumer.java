@@ -128,9 +128,10 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler<RabbitMqMessage>
         try {
 //            Thread.sleep(10000);
             String receivedMessage = new String(message.getBody());
-            RabbitMqMessage rabbitMqMessage = this.objectMapper.readValue(receivedMessage, RabbitMqMessage.class);
-            Person person = objectMapper.readValue(rabbitMqMessage.getContent(), Person.class);
-            logger.info("threadId - " + Thread.currentThread().getId() + " receivedMsg: " + person.getId());
+//            RabbitMqMessage rabbitMqMessage = this.objectMapper.readValue(receivedMessage, RabbitMqMessage.class);
+//            Person person = objectMapper.readValue(rabbitMqMessage.getContent(), Person.class);
+
+            //logger.info("threadId - " + Thread.currentThread().getId() + " receivedMsg: " + person.getId());
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
 

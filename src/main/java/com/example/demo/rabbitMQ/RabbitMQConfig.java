@@ -153,30 +153,8 @@ public class RabbitMQConfig {
 
         //当消息路由失败时候先执行  setConfirmCallsetReturnCallback后执行
 
-        // 消息确认, yml需要配置 publisher-confirms: true
-        rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
-            if (ack) {
-                //发送消息时候指定的消息的id，根据此id设置消息表的消息状态为已发送
-                String msgId = correlationData.getId();
-//                从容器中获取bean
-                ApplicationContext applicationContext = SpringApplicationContextHelper.getApplicationContext();
-
-                IMqMessageService mqMessageService=applicationContext.getBean(IMqMessageService.class);
-//                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-//                lambdaQueryWrapper.eq(MqMessage::getMsgId, msgId);
-//                mqMessageService.getOne(lambdaQueryWrapper);
-
-                LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();
-                updateWrapper.set(MqMessage::getPublishAck,true);
-                updateWrapper.eq(MqMessage::getMsgId, msgId);//条件
-                mqMessageService.update(updateWrapper);
-
-                //更新本地消息表，消息已经发送到mq
-                System.out.println("消息发送到交换机成功！ ");
-            } else {
-                System.out.println("消息发送到交换机失败！ ");
-            }
-        });
+//        // 消息生产确认, yml需要配置 publisher-confirms: true
+        rabbitTemplate.setConfirmCallback(new PushConfirmCallback());
 
         return rabbitTemplate;
     }

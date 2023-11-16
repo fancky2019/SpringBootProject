@@ -9,6 +9,7 @@ import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.RabbitMQTest;
 import com.example.demo.rabbitMQ.RabbitMqMessage;
+import com.example.demo.utility.MqSendUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.ibatis.session.ExecutorType;
@@ -37,7 +38,7 @@ import java.util.concurrent.*;
 @Service
 public class DemoProductService {
 
-    private static Logger logger = LogManager.getLogger(DemoProductService.class);
+    private static final Logger logger = LogManager.getLogger(DemoProductService.class);
     @Autowired
     DemoProductMapper demoProductMapper;
     @Autowired
@@ -46,6 +47,9 @@ public class DemoProductService {
     private SqlSessionFactory sqlSessionFactory;
     @Autowired
     private RabbitMQTest rabbitMQTest;
+
+    @Autowired
+    private MqSendUtil mqSendUtil;
 
     public void test() {
 //        batchInsert();
@@ -299,19 +303,16 @@ public class DemoProductService {
         }
 
         int i = demoProductMapper.batchInsert(list);
-        MqMessage mqMessage = new MqMessage();
+
         String msgId = UUID.randomUUID().toString();
         String msgContent = "setMsgContent";
-        mqMessage.setMsgId(msgId);
-        mqMessage.setMsgContent(msgContent);
-        mqMessage.setExchange(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME);
-        mqMessage.setRouteKey(RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY);
-        mqMessage.setQueue("");
-        mqMessage.setPublishAck(false);
-        mqMessage.setConsumeAck(false);
-        mqMessage.setConsumeFail(false);
-        mqMessage.setCreateTime(LocalDateTime.now());
-        mqMessage.setUpdateTime(LocalDateTime.now());
+
+        MqMessage mqMessage = new MqMessage
+                       (RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME,
+                        RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY,
+                        "",
+                        msgContent);
+
 
         mqMessageService.save(mqMessage);
 //        int m = Integer.parseInt("m");
@@ -338,31 +339,26 @@ public class DemoProductService {
 
         // 有事务，则添加一个事务同步器，并重写afterCompletion方法（此方法在事务提交后会做回调）
 // 如果开始了事务则在这里注册一个同步事务，将监听当前线程事务的动作
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-            @Override
-            public void afterCompletion(int status) {
-                //afterCommit
-                // 调用父类的事务提交方法,空方法
-//                super.afterCompletion(status);
-                CompletableFuture.runAsync(() -> {
-                    // 发送消息给kafka
-                    try {
-
-
-//                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
-                        Message message = new Message(msgContent.getBytes(), new MessageProperties());
-                        //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
-
-                        rabbitMQTest.test(mqMessage.getExchange(), mqMessage.getRouteKey(), message, mqMessage.getMsgId());
-                        // 发送消息给kafka
-                    } catch (Exception e) {
-
-                        // 记录异常信息，发邮件或者进入待处理列表，让开发人员感知异常
-                    }
-                });
-
-            }
-        });
+//        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+//            @Override
+//            public void afterCompletion(int status) {
+//                //afterCommit
+//                // 调用父类的事务提交方法,空方法
+////                super.afterCompletion(status);
+//                CompletableFuture.runAsync(() -> {
+//                    // 发送消息给kafka
+//                    try {
+//
+//                      rabbitMQTest.test(mqMessage);
+//                        // 发送消息给kafka
+//                    } catch (Exception e) {
+//
+//                        // 记录异常信息，发邮件或者进入待处理列表，让开发人员感知异常
+//                    }
+//                });
+//
+//            }
+//        });
 
 
 //        TransactionSynchronizationManager.registerSynchronization(
@@ -382,7 +378,7 @@ public class DemoProductService {
 //                    }
 //                });
 
-
+        mqSendUtil.send(mqMessage);
         return 0;
     }
 

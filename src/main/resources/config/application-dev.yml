@@ -349,8 +349,10 @@ hystrix:
 #  #  path没起作用
 # # path:
 #  file: logs/log.log
+#log4j2 配置,log4j2.xml不能和log4j2.yml同时存在，否则都会生效
 logging:
   config: classpath:log4j2.xml
+
 swagger2:
   enable: true #false (或者在pro环境下不写此配置):禁用就打不开swagger网页
 knife4j:

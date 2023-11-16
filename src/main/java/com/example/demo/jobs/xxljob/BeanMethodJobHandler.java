@@ -18,6 +18,7 @@ public class BeanMethodJobHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(BeanMethodJobHandler.class);
 
+    //region 模板
     @XxlJob("beanMethodJobHandler")
     public void beanMethodJobHandler() throws Exception {
         //param xxl admin 填写的任务参数
@@ -39,6 +40,23 @@ public class BeanMethodJobHandler {
         System.out.println("dynamicJob - "+param );
         XxlJobHelper.log("dynamicJob");
         LOGGER.info("dynamicJob");
+
+    }
+
+
+    //endregion
+
+
+
+    @XxlJob("mqFailHandler")
+    public void mqFailHandler() throws Exception {
+        //param xxl admin 填写的任务参数
+        String param = XxlJobHelper.getJobParam();
+        // XxlJobLogger.log("bean method jobhandler running...");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String timeStr = formatter.format(LocalDateTime.now());
+        XxlJobHelper.log("mqFailHandler");
+        LOGGER.info("xxljob - BeanMethodJobHandler  {} ", timeStr);
 
     }
 }
