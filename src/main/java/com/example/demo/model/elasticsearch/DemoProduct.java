@@ -40,7 +40,7 @@ public class DemoProduct implements Serializable {
     private String productStyle;
 
     @Field(name = "image_path")
-    private String image_path;
+    private String imagePath;
 
 //    @Field(name = "create_time")
     //es 到java实体时间的转换格式

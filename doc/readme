@@ -1,58 +1,63 @@
 项目依赖启动依赖：1、zookeeper   启动 zkServer.cmd
                2、redis 启动
                3、es ---启动 elasticsearch.bat   kibana 初始化索引
-               POST demo_product/_doc/1
-               {
-                 "id":1,
-                 "product_name":"productname",
-                 "product_style":"fancky",
-                 "create_time":"2022-03-07 20:51:57.000",
-                 "modify_time":"2022-03-07 20:51:57.000",
-                 "description": "上海",
-                 "price":1232,
-                 "count":12,
-                 "produce_address":"上海市青浦区"
-               }
+             POST demo_product/_doc/1
+             {
+              "id":1,
+              "guid":"334ba1d9-c722-4da2-a677-2e5adb8110f4",
+              "product_name":"productname",
+              "product_style":"fancky",
+               "image_path":"productname",
+              "create_time":"2022-03-07 20:51:57.000",
+              "modify_time":"2022-03-07 20:51:57.000",
+               "status": 1,
+              "description": "上海",
+              "timestamp": "2022-03-07 20:51:57"
+             }
 
 
-                PUT /product_flink
-                {
-                    "mappings": {
-                      "properties": {
-                        "create_time": {
+            PUT /demo_product
+            {
+                "mappings": {
+                  "properties": {
+                    "create_time": {
+                    "type": "date",
+                    "format": "yyyy-MM-dd HH:mm:ss"
+                    },
+                    "description": {
+                      "type": "text"
+                    },
+                    "guid": {
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "type": "long"
+                    },
+                    "image_path": {
+                      "type": "text"
+                    },
+                    "modify_time": {
                         "type": "date",
-                     "format": "yyyy-MM-dd HH:mm:ss.SSS"
-                        },
-                        "description": {
-                          "type": "text"
-                        },
-                        "guid": {
-                          "type": "text"
-                        },
-                        "id": {
-                          "type": "long"
-                        },
-                        "image_path": {
-                          "type": "text"
-                        },
-                        "modify_time": {
-                            "type": "date",
-                        "format": "yyyy-MM-dd HH:mm:ss.SSS"
-                        },
-                        "product_name": {
-                          "type": "text",
-                           "analyzer": "ik_max_word",
-                          "search_analyzer": "ik_max_word"
-                        },
-                        "product_style": {
-                          "type": "text"
-                        },
-                        "status": {
-                          "type": "long"
-                        }
-                      }
+                    "format": "yyyy-MM-dd HH:mm:ss"
+                    },
+                    "product_name": {
+                      "type": "text",
+                       "analyzer": "ik_max_word",
+                      "search_analyzer": "ik_max_word"
+                    },
+                    "product_style": {
+                      "type": "text"
+                    },
+                    "status": {
+                      "type": "long"
+                    },
+                    "timestamp": {
+                        "type": "date",
+                    "format": "yyyy-MM-dd HH:mm:ss"
                     }
+                  }
                 }
+            }
 
 
                4、rabbitMQ  安装rabbitmq_delayed_message_exchange-3.10.2 插件并启用

@@ -1,12 +1,15 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.elasticsearch.DemoProduct;
+import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.PageData;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.service.api.FeignClientTest;
 import com.example.demo.service.elasticsearch.ESDemoProductService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,8 +45,11 @@ public class ElasticsearchController {
 //    private ESDemoProductService esDemoProductService;
 
 
+    @Autowired
     private final ESDemoProductService esDemoProductService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
 
     //构造函数注入
     public ElasticsearchController(ESDemoProductService esDemoProductService) {
@@ -51,22 +57,20 @@ public class ElasticsearchController {
     }
 
 
-
     @RequestMapping("/getByProductName")
-    public MessageResult<PageData<DemoProduct>> getByProductName() {
+    public MessageResult<PageData<DemoProduct>> getByProductName(@RequestBody DemoProductRequest request) {
         MessageResult<PageData<DemoProduct>> message = new MessageResult<>();
         try {
-            PageData<DemoProduct> pageData = esDemoProductService.search("", 1, 20);
-
+            PageData<DemoProduct> pageData = esDemoProductService.search(request);
             message.setData(pageData);
             // Thread.sleep(10*1000);
 //            message = productService.getPageData(viewModel);//查看缓存问题
         } catch (Exception e) {
             message.setSuccess(false);
             message.setMessage(e.getMessage());
-        } finally {
-            return message;
         }
+        return message;
+
     }
 
 }

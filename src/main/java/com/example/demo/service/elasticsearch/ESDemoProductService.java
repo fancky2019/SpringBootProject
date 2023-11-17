@@ -2,9 +2,12 @@ package com.example.demo.service.elasticsearch;
 
 import com.example.demo.elasticsearch.DemoProductRepository;
 import com.example.demo.model.elasticsearch.DemoProduct;
+import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.PageData;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.formula.functions.T;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -74,8 +77,9 @@ public class ESDemoProductService {
     不会被分词器分词， 而是直接以一个短语的形式查询，而如果你在创建索引所使用的field的value中没有这么一个短语（顺序无差，且连接在一起），
     那么将查询不出任何结果。
      */
-    public PageData<DemoProduct> search(String keyword, Integer pageNum, Integer pageSize) {
+    public PageData<DemoProduct> search(DemoProductRequest request) {
 
+        //region backup
         //        public class SimpleElasticsearchRepository<T, ID> implements ElasticsearchRepository<T, ID>
 
         /*
@@ -173,42 +177,87 @@ like查询：利用wildcard通配符查询实现，其中？和*分别代替一�
 
         //正常使用match query 进行简单模糊就可以，query_string 功能复杂。
 
+//        指定分词
+//        searchSourceBuilder.query(QueryBuilders.matchPhraseQuery("wenti", wenti).analyzer("ik_max_word"));
         //多个字段or
+//        NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
+//                //查询条件:es支持分词查询，最小是一个词，要精确匹配分词
+//                //两个字段中or
+////                .withQuery(QueryBuilders.boolQuery()
+////                        .must(QueryBuilders.queryStringQuery("中国徐家汇").defaultField("product_name"))
+////                        .must(QueryBuilders.queryStringQuery("上海中国").defaultField("produce_address"))
+////                        .must(QueryBuilders.rangeQuery("price").from("5").to("9"))
+////                )
+//
+//                //在指定字段中查找值
+////                .withQuery(QueryBuilders.queryStringQuery("合肥").field("product_name").field("produce_address"))
+//                // .withQuery(QueryBuilders.multiMatchQuery("安徽合肥", "product_name", "produce_address"))
+//
+////
+//                //模糊查询待测试 : Wildcard 性能会比较慢。如果非必要，尽量避免在开头加通配符 ? 或者 *，这样会明显降低查询性能
+//
+//                .withQuery(QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("product_name", "产品名称1570018"))
+//
+//                .must(QueryBuilders.wildcardQuery("product_style", "*" + "productstyle" + "*")))//必须要加keyword，否则查不出来
+//                //SEARCH_AFTER 不用指定 from size
+////                .withQuery(QueryBuilders.rangeQuery("price").from("5").to("9"))//多个条件and 的关系
+//                //分页
+//                .withPageable(PageRequest.of(900000, 5))
+//                //排序
+//                .withSort(SortBuilders.fieldSort("id").order(SortOrder.DESC))
+//                //高亮字段显示
+////                .withHighlightFields(new HighlightBuilder.Field("product_name"))
+//                .withTrackTotalHits(true)//解除最大1W条限制
+//                .build();
+
+        //endregion
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        if (request.getId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("id", request.getId()));
+        }
+        if (StringUtils.isNotEmpty(request.getGuid())) {
+            //guid 设置keyword  不成功
+            boolQueryBuilder.must(QueryBuilders.termQuery("guid.keyword", request.getGuid()));
+        }
+        if (StringUtils.isNotEmpty(request.getProductName())) {
+            boolQueryBuilder.must(QueryBuilders.matchQuery("product_name", request.getProductName()));
+        }
+        if (StringUtils.isNotEmpty(request.getProductStyle())) {
+            //模糊查询待测试 : Wildcard 性能会比较慢。如果非必要，尽量避免在开头加通配符 ? 或者 *，这样会明显降低查询性能
+            boolQueryBuilder.must(QueryBuilders.wildcardQuery("product_style", "*" + request.getProductStyle().toLowerCase() + "*"));
+        }
+        if(request.getCreateTimeStart()!=null)
+        {
+            boolQueryBuilder.must(QueryBuilders.
+                    rangeQuery("create_time")
+                    .gte(request.getCreateTimeStart()).lte(request.getCreateTimeEnd()));
+        }
+
         NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
                 //查询条件:es支持分词查询，最小是一个词，要精确匹配分词
-                //两个字段中or
-//                .withQuery(QueryBuilders.boolQuery()
-//                        .must(QueryBuilders.queryStringQuery("中国徐家汇").defaultField("product_name"))
-//                        .must(QueryBuilders.queryStringQuery("上海中国").defaultField("produce_address"))
-//                        .must(QueryBuilders.rangeQuery("price").from("5").to("9"))
-//                )
-
                 //在指定字段中查找值
 //                .withQuery(QueryBuilders.queryStringQuery("合肥").field("product_name").field("produce_address"))
-               // .withQuery(QueryBuilders.multiMatchQuery("安徽合肥", "product_name", "produce_address"))
+                // .withQuery(QueryBuilders.multiMatchQuery("安徽合肥", "product_name", "produce_address"))
 
-//
-                //模糊查询待测试 : Wildcard 性能会比较慢。如果非必要，尽量避免在开头加通配符 ? 或者 *，这样会明显降低查询性能
-                .withQuery(QueryBuilders.matchQuery("product_name", "产品名称1570018"))
-                .withQuery(QueryBuilders.wildcardQuery("product_style", "*" +"productstyle" + "*"))//必须要加keyword，否则查不出来
-             //SEARCH_AFTER 不用指定 from size
+                .withQuery(boolQueryBuilder)//必须要加keyword，否则查不出来
+                //SEARCH_AFTER 不用指定 from size
 //                .withQuery(QueryBuilders.rangeQuery("price").from("5").to("9"))//多个条件and 的关系
-                //分页
-                .withPageable(PageRequest.of(0, 5))
+                //分页：page 从0开始
+                .withPageable(PageRequest.of(request.getPageIndex(), request.getPageSize()))
                 //排序
                 .withSort(SortBuilders.fieldSort("id").order(SortOrder.DESC))
                 //高亮字段显示
 //                .withHighlightFields(new HighlightBuilder.Field("product_name"))
+                .withTrackTotalHits(true)//解除最大1W条限制
                 .build();
+//        nativeSearchQuery.setTrackTotalHitsUpTo(10000000);
         SearchHits<DemoProduct> search = elasticsearchRestTemplate.search(nativeSearchQuery, DemoProduct.class);
         List<DemoProduct> productList = search.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
 
-
-//        System.out.println("查询状态："+response.status());
-        System.out.println("查询总条数："+search.getTotalHits());
-
-        PageData<DemoProduct> pageData=new PageData<>();
-        pageData.setCount(search.getTotalHits());
+        long count = search.getTotalHits();
+        PageData<DemoProduct> pageData = new PageData<>();
+        pageData.setCount(count);
         pageData.setData(productList);
 //        elasticsearchRestTemplate.bulkUpdate();
 //        elasticsearchRestTemplate.bulkIndex();
