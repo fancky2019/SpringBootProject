@@ -1,6 +1,10 @@
 项目依赖启动依赖：1、zookeeper   启动 zkServer.cmd
                2、redis 启动
-               3、es ---启动 elasticsearch.bat   kibana 初始化索引
+               3、rabbitMQ  安装rabbitmq_delayed_message_exchange-3.10.2 插件并启用
+               4、xxl-job 启动startup.bat
+               5、mysql demo 数据库初始化
+               6、启动rocketmq
+               7、es ---启动 elasticsearch.bat   kibana 初始化索引
              POST demo_product/_doc/1
              {
               "id":1,
@@ -11,18 +15,17 @@
               "create_time":"2022-03-07 20:51:57.000",
               "modify_time":"2022-03-07 20:51:57.000",
                "status": 1,
-              "description": "上海",
-              "timestamp": "2022-03-07 20:51:57"
+              "description": "上海"
              }
 
-
+           //ES8
             PUT /demo_product
             {
                 "mappings": {
                   "properties": {
                     "create_time": {
                     "type": "date",
-                    "format": "yyyy-MM-dd HH:mm:ss"
+                     "format": "yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
                     },
                     "description": {
                       "type": "text"
@@ -38,7 +41,7 @@
                     },
                     "modify_time": {
                         "type": "date",
-                    "format": "yyyy-MM-dd HH:mm:ss"
+                      "format": "yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
                     },
                     "product_name": {
                       "type": "text",
@@ -50,17 +53,46 @@
                     },
                     "status": {
                       "type": "long"
-                    },
-                    "timestamp": {
-                        "type": "date",
-                    "format": "yyyy-MM-dd HH:mm:ss"
                     }
                   }
                 }
             }
 
+         ES7
+PUT /demo_product
+{
+    "mappings": {
+      "properties": {
+        "create_time": {
+        "type": "date",
+ "format": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+        },
+        "description": {
+          "type": "text"
+        },
+        "guid": {
+          "type": "keyword"
+        },
+        "id": {
+          "type": "long"
+        },
+        "image_path": {
+          "type": "text"
+        },
+        "modify_time": {
+            "type": "date",
+ "format": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'||yyyy-MM-dd HH:mm:ss.S||yyyy-MM-dd HH:mm:ss.SS||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+        },
+        "product_name": {
+          "type": "text"
+        },
+        "product_style": {
+          "type": "keyword"
+        },
+        "status": {
+          "type": "long"
+        }
+      }
+    }
+}
 
-               4、rabbitMQ  安装rabbitmq_delayed_message_exchange-3.10.2 插件并启用
-               5、xxl-job 启动startup.bat
-               6、mysql demo 数据库初始化
-               7、启动rocketmq

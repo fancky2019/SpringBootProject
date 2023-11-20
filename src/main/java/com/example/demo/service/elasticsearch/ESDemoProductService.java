@@ -213,19 +213,26 @@ like查询：利用wildcard通配符查询实现，其中？和*分别代替一�
         //endregion
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        if (request.getId() > 0) {
+        if (request.getId()!=null&&request.getId() > 0) {
             boolQueryBuilder.must(QueryBuilders.termQuery("id", request.getId()));
         }
         if (StringUtils.isNotEmpty(request.getGuid())) {
-            //guid 设置keyword  不成功
-            boolQueryBuilder.must(QueryBuilders.termQuery("guid.keyword", request.getGuid()));
+            //guid 设置keyword  不成功 ES8
+//            boolQueryBuilder.must(QueryBuilders.termQuery("guid.keyword", request.getGuid()));
+            //es7
+            boolQueryBuilder.must(QueryBuilders.termQuery("guid", request.getGuid()));
         }
         if (StringUtils.isNotEmpty(request.getProductName())) {
             boolQueryBuilder.must(QueryBuilders.matchQuery("product_name", request.getProductName()));
         }
         if (StringUtils.isNotEmpty(request.getProductStyle())) {
+            //ES8要转消息，ES7不用转小写
+//            //模糊查询待测试 : Wildcard 性能会比较慢。如果非必要，尽量避免在开头加通配符 ? 或者 *，这样会明显降低查询性能
+//            boolQueryBuilder.must(QueryBuilders.wildcardQuery("product_style", "*" + request.getProductStyle().toLowerCase() + "*"));
+
             //模糊查询待测试 : Wildcard 性能会比较慢。如果非必要，尽量避免在开头加通配符 ? 或者 *，这样会明显降低查询性能
-            boolQueryBuilder.must(QueryBuilders.wildcardQuery("product_style", "*" + request.getProductStyle().toLowerCase() + "*"));
+            boolQueryBuilder.must(QueryBuilders.wildcardQuery("product_style", "*" + request.getProductStyle()+ "*"));
+
         }
         if(request.getCreateTimeStart()!=null)
         {
