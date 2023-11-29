@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.util.ListUtils;
+import com.example.demo.listener.UserRegisterService;
 import com.example.demo.model.dto.JacksonDto;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.Person;
@@ -27,11 +28,11 @@ import com.example.demo.utility.RSAUtil;
 import com.example.demo.utility.RepeatPermission;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,6 +56,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -135,6 +137,9 @@ public class UtilityController {
 
     @Autowired
     private CacheService cacheService;
+
+    @Autowired
+    Cache<String, Object> caffeineCache;
 
 
     // @Resource 指定bean 名称,@Autowired 通过 @Qualifier指定具体别名
@@ -1222,17 +1227,19 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
 
     /**
      * 更新
+     *
      * @param id
      * @param age
      * @return
      */
     @PutMapping("/modify/{id}/{age}")
-    public String modify(@PathVariable Integer id,@PathVariable Integer age){
-        return "更新资源，执行put请求方式：id="+id+" aeg="+age;
+    public String modify(@PathVariable Integer id, @PathVariable Integer age) {
+        return "更新资源，执行put请求方式：id=" + id + " aeg=" + age;
     }
 
     /**
      * 删除
+     *
      * @param id
      * @return
      */
@@ -1240,6 +1247,44 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
     public String delete(@PathVariable Integer id) {
         return "删除资源，执行delete请求方式：id=" + id;
 
+    }
+
+    @GetMapping(value = "/caffeineTest")
+    public void caffeineTest() {
+
+        /*
+        jdk1.8 只能用 V2.9.*   v3.0.*要java11
+         可单独使用也可以结合springboot cache 使用。代码参见 CacheService
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>2.9.3</version>
+        </dependency>
+
+         */
+        String key = "1";
+        Object object = caffeineCache.getIfPresent(key);
+        if (object != null) {
+            ProductTest  productTest=(ProductTest)object;
+        } else {
+            ProductTest productTest = new ProductTest();
+            BigInteger bigDecimal = BigInteger.valueOf(1);
+            productTest.setId(bigDecimal);
+            // 加入缓存
+            caffeineCache.put(String.valueOf(productTest.getId()), productTest);
+        }
+
+    }
+
+    @Autowired
+   private UserRegisterService userRegisterService;
+    @GetMapping(value = "/listenerTest")
+    public void listenerTest() {
+        userRegisterService.registerUser("fancky");
     }
 
 }

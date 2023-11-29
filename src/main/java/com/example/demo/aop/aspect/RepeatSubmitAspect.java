@@ -7,6 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * 注解代码浸入太大，
+ * 1、唯一索引，
+ * 2、（1）前台打开新增页面访问后台获取该表的token (存储在redis 中的uuid)key:用户id_功能.value token
+ *        获取token时候判断用户有没有没有过期时间的token，有就说明已请求，直接返回
+ *   （2） 检测前段提交的token是不是在redis 中而且过期时间不为0，验证通过入库成功更新redis 中的token过期时间
+ * 3、对于篡改的api请求通过加密方式，防止信息泄密。https://host:port//api。 nginx
+ *
+ */
 public class RepeatSubmitAspect {
 
     @Autowired

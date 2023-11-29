@@ -21,9 +21,11 @@ import java.math.BigInteger;
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-cache</artifactId>
 </dependency>
-————————————————
-版权声明：本文为CSDN博主「Asurplus」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
-原文链接：https://blog.csdn.net/qq_40065776/article/details/107560607
+
+spring-boot-starter-cache + Ehcache或
+spring-boot-starter-cache + caffeine使用 通过注解的方式
+
+也可以单独引用caffeine使用 ，put  get
  */
 @Service
 public class CacheService {
