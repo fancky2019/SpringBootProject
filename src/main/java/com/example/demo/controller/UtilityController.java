@@ -17,6 +17,7 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
+import com.example.demo.rabbitMQ.mqtt.MqttProduce;
 import com.example.demo.rocketmq.RocketmqTest;
 import com.example.demo.service.demo.CacheService;
 import com.example.demo.service.demo.DemoProductService;
@@ -1269,7 +1270,7 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
         String key = "1";
         Object object = caffeineCache.getIfPresent(key);
         if (object != null) {
-            ProductTest  productTest=(ProductTest)object;
+            ProductTest productTest = (ProductTest) object;
         } else {
             ProductTest productTest = new ProductTest();
             BigInteger bigDecimal = BigInteger.valueOf(1);
@@ -1281,10 +1282,28 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
     }
 
     @Autowired
-   private UserRegisterService userRegisterService;
+    private UserRegisterService userRegisterService;
+
     @GetMapping(value = "/listenerTest")
     public void listenerTest() {
         userRegisterService.registerUser("fancky");
     }
 
+    @Autowired
+    private MqttProduce mqttProduce;
+
+    @GetMapping(value = "/mqttTest")
+    public void mqttTest(String msg) {
+        /*
+        QoS 0（最多一次）：消息发布完全依赖底层 TCP/IP 网络。会发生消息丢失或重复。这个级别可用于如下情况，环境传感器数据，丢失一次数据无所谓，因为不久后还会有第二次发送。
+        QoS 1（至少一次）：确保消息到达，但消息重复可能会发生。
+        QoS 2（只有一次）：确保消息到达一次。这个级别可用于如下情况，在计费系统中，消息重复或丢失会导致不正确的结果。
+         */
+        int qos = 1;
+        //retained = true 只会保留最后一条消息
+        boolean retained = false;
+        String topic = "topic1";
+
+        mqttProduce.publish(qos, retained, topic, msg);
+    }
 }
