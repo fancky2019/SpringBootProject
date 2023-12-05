@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.swagger.annotations.ApiOperation;
+import jdk.nashorn.internal.ir.ReturnNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +39,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -65,6 +68,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /*
 在service类上加注解@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -110,6 +114,9 @@ public class UtilityController {
     @Value("${demo.multiEnvironment}")
     private String multiEnvironment;
 
+
+    @Autowired
+    RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     private ShiroRedisProperties shiroProperties;
@@ -1226,6 +1233,8 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
 //        BeanUtils.copyProperties();
     }
 
+    //RequestMapping  RequestMethod
+
     /**
      * 更新
      *
@@ -1246,6 +1255,8 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
      */
     @DeleteMapping("/delete/{id}")
     public String delete(@PathVariable Integer id) {
+        //DELETE
+        String httpMethod = httpServletRequest.getMethod();
         return "删除资源，执行delete请求方式：id=" + id;
 
     }
@@ -1305,5 +1316,37 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
         String topic = "topic1";
 
         mqttProduce.publish(qos, retained, topic, msg);
+    }
+
+    /**
+     * @param apiName 后端要请求保存的接口名称
+     * @return
+     */
+    @GetMapping(value = "/getRepeatToken")
+    public MessageResult<String> getRepeatToken(String apiName) {
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        BigInteger userId = new BigInteger("1");
+
+        String key = "repeat:" + userId + ":" + apiName;
+        // Object val = valueOperations.get(key);//null
+        /*
+           redis  ttl
+       如果key不存在或者已过期，返回 -2
+       如果key存在并且没有设置过期时间（永久有效），返回 -1 。
+
+         */
+        Long expireTime = redisTemplate.getExpire(key, TimeUnit.DAYS);//-2
+        String repeatToken = "";
+//        if (expireTime.==-1))
+        if (expireTime.equals(-1L)) {
+            //直接返回
+            repeatToken = valueOperations.get(key).toString();//null
+        } else {
+            //插入
+            repeatToken = UUID.randomUUID().toString().replace("-", "");
+            valueOperations.set(key, repeatToken);
+        }
+
+        return MessageResult.success(repeatToken);
     }
 }

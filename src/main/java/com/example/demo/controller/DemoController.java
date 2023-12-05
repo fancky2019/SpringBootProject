@@ -2,11 +2,13 @@ package com.example.demo.controller;
 
 import com.example.demo.aop.aspect.NoRepeatSubmit;
 import com.example.demo.model.entity.demo.DemoProduct;
+import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.IDemoOrderItemService;
 import com.example.demo.service.demo.IDemoOrderService;
 import com.example.demo.utility.RepeatPermission;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,11 +32,10 @@ public class DemoController {
         this.demoProductService=demoProductService;
     }
     @GetMapping("/demoProductTest")
-//    @RepeatPermission
+    @RepeatPermission
     @NoRepeatSubmit
-    public void demoProductTest()
-    {
-        demoProductService.test();
+    public MessageResult<Void> demoProductTest() throws Exception {
+      return   demoProductService.test();
     }
 
     @GetMapping("")

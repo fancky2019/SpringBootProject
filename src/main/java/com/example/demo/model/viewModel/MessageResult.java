@@ -57,16 +57,33 @@ public class MessageResult<T> implements Serializable {
         return traceId;
     }
 
-    public static <T> MessageResult<T>  success(T data)
-    {
-        MessageResult<T> messageResult=new MessageResult<>();
+    public static <T> MessageResult<T> success() {
+        MessageResult<T> messageResult = new MessageResult<>();
+        messageResult.setSuccess(true);
+        messageResult.setCode(200);
+        return messageResult;
+    }
+    public static <T> MessageResult<T> success(T data) {
+        MessageResult<T> messageResult = new MessageResult<>();
+        messageResult.setSuccess(true);
         messageResult.setCode(200);
         messageResult.setData(data);
-        return  messageResult;
+        return messageResult;
     }
 
-    public static  <T>  MessageResult<T>  faile()
-    {
-        return  null;
+    public static <T> MessageResult<T> faile(T data) {
+        MessageResult<T> messageResult = new MessageResult<>();
+        messageResult.setSuccess(false);
+        messageResult.setCode(500);
+        messageResult.setData(data);
+        return messageResult;
+    }
+
+    public static <T> MessageResult<T> getMessageResult( T data,boolean success, int code) {
+        MessageResult<T> messageResult = new MessageResult<>();
+        messageResult.setSuccess(success);
+        messageResult.setCode(code);
+        messageResult.setData(data);
+        return messageResult;
     }
 }

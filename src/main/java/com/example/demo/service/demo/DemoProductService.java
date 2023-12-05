@@ -6,6 +6,7 @@ import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.DemoProductRequest;
+import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.RabbitMQTest;
 import com.example.demo.utility.MqSendUtil;
@@ -48,7 +49,7 @@ public class DemoProductService {
     @Autowired
     private MqSendUtil mqSendUtil;
 
-    public void test() {
+    public MessageResult<Void> test() throws Exception {
 //        batchInsert();
 //        this.getMaxId();
 //        this.getById();
@@ -56,7 +57,9 @@ public class DemoProductService {
 //        mutiThread();
 //        spring 事务基于对象aop 代理实现的 ，不能在方法内调用，否则事务失效
 //        insertTransactional();
-        insert();
+       // throw  new Exception("controller exception test");
+//        insert();
+        return  MessageResult.success();
     }
 
 //    @Autowired

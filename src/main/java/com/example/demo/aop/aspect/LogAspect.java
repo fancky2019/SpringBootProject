@@ -1,43 +1,36 @@
 package com.example.demo.aop.aspect;
 
-import com.alibaba.fastjson.JSON;
-import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.utility.RepeatPermission;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import lombok.extern.log4j.Log4j2;
-import org.apache.poi.ss.formula.functions.T;
-import org.aspectj.lang.JoinPoint;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
-import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
-import com.example.demo.model.pojo.Student;
 import org.springframework.util.StopWatch;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /*
+
+
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+
 切点表达式:参考https://www.cnblogs.com/zhangxufeng/p/9160869.html
 execution(modifiers-pattern? ret-type-pattern declaring-type-pattern?name-pattern(param-pattern) throws-pattern?)
 modifiers-pattern：方法的可见性，如public，protected；
@@ -71,7 +64,7 @@ public class LogAspect {
     private HttpServletRequest httpServletRequest;
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     private RedissonClient redissonClient;
@@ -168,6 +161,129 @@ public class LogAspect {
     public void pointCut() {
     }
 
+    //region  redissonClient version
+//
+//    /**
+//     * 环绕增强：目标方法执行前后分别执行一些代码，发生异常的时候执行另外一些代码
+//     *
+//     * @return
+//     */
+////    @Around(value = "execution(* com.example.demo.controller.*.*(..))")
+//    @Around(value = "pointCut()")
+//    public Object aroundMethod(ProceedingJoinPoint jp) throws Throwable {
+//
+//
+//        String httpMethod = httpServletRequest.getMethod();
+//        switch (httpMethod) {
+//            case "POST":
+//                break;
+//            case "DELETE":
+//                break;
+//            case "PUT":
+//                break;
+//            case "GET":
+//                break;
+//            default:
+//                break;
+//        }
+//        String methodName = jp.getSignature().getName();
+//        //获取方法
+//        Signature signature = jp.getSignature();
+//        MethodSignature methodSignature = (MethodSignature) signature;
+//        Method method = methodSignature.getMethod();
+//        //方法参数
+//        Object[] args = jp.getArgs();
+//
+//
+//        String className = jp.getTarget().getClass().toString();
+////        String methodName = jp.getSignature().getName();
+////        Object[] args = jp.getArgs();
+////
+////
+//        log.info("{} - {} 开始处理,参数列表 - {}", className, methodName, Arrays.toString(args));
+////        Object result = jp.proceed();
+////        log.info("{} - {} 处理完成,返回结果 - {}", className, methodName,objectMapper.writeValueAsString(result));
+////
+//
+//
+//        RepeatPermission repeatPermission = method.getDeclaredAnnotation(RepeatPermission.class);
+//        MessageResult<Object> messageResult = new MessageResult<>();
+//        if (repeatPermission != null) {
+//
+//            String repeatToken = httpServletRequest.getHeader("repeat_token");
+//            if (StringUtils.isEmpty(repeatToken)) {
+//                // 抛出让ControllerAdvice全局异常处理
+//                throw new Exception("can not find token!");
+//            }
+//            /**
+//             * 注解代码浸入太大，
+//             * 1、唯一索引，
+//             * 2、（1）前台打开新增页面访问后台获取该表的token (存储在redis 中的uuid)key:用户id_功能.value token
+//             *        获取token时候判断用户有没有没有过期时间的token，有就说明已请求，直接返回
+//             *   （2） 检测前段提交的token是不是在redis 中而且过期时间不为0，验证通过入库成功更新redis 中的token过期时间
+//             * 3、对于篡改的api请求通过加密方式，防止信息泄密。https://host:port//api。 nginx
+//             *
+//             */
+//            //重复提交：redis 中设置带有过期的key,判断是否存在。  过期防止程序异常，不释放锁
+//            //在redis中判断 userid + path 是否存在
+//
+//            //redis 中设置key
+//
+//            BigInteger userId = new BigInteger("1");
+//            String uri = httpServletRequest.getRequestURI();
+//            String key = "repeat:" + uri + "_" + userId.toString();
+//
+//            RLock lock = redissonClient.getLock(key);
+//
+//            try {
+//                boolean isLocked = lock.isLocked();
+//                if (isLocked) {
+//                    //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
+//                    messageResult.setSuccess(false);
+//                    messageResult.setMessage("重复提交：服务器繁忙");
+//                    return messageResult;
+//                }
+//                //tryLock(long waitTime, long leaseTime, TimeUnit unit)
+//                long waitTime = 1;//获取锁等待时间
+//                long leaseTime = 30;//持有所超时释放锁时间  24 * 60 * 60;
+//                boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+//                isLocked = lock.isLocked();
+//                if (isLocked) {
+//                    return jp.proceed();
+//                } else {
+//                    //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
+//                    messageResult.setSuccess(false);
+//                    messageResult.setMessage("重复提交:获取锁失败");
+//                    return messageResult;
+//                }
+//            } catch (InterruptedException e) {
+//                messageResult.setSuccess(false);
+//                messageResult.setMessage(e.getMessage());
+//                return messageResult;
+//            } finally {
+//                //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
+//                //unlock 删除key
+//                lock.unlock();
+//
+//            }
+//        } else {
+//            StopWatch stopWatch = new StopWatch("");
+//            stopWatch.start("");
+//            Object obj = jp.proceed();
+//            stopWatch.stop();
+//            long costTime = stopWatch.getTotalTimeMillis();
+//            log.info("{} - {} 处理完成,耗时 {} ms ,返回结果 - {} ", className, methodName, costTime, objectMapper.writeValueAsString(messageResult));
+//            return obj;
+//            // return jp.proceed();
+//        }
+//
+//
+//    }
+//endregion
+
+
+    //region redis token version
+
     /**
      * 环绕增强：目标方法执行前后分别执行一些代码，发生异常的时候执行另外一些代码
      *
@@ -176,6 +292,21 @@ public class LogAspect {
 //    @Around(value = "execution(* com.example.demo.controller.*.*(..))")
     @Around(value = "pointCut()")
     public Object aroundMethod(ProceedingJoinPoint jp) throws Throwable {
+
+
+        String httpMethod = httpServletRequest.getMethod();
+        switch (httpMethod) {
+            case "POST":
+                break;
+            case "DELETE":
+                break;
+            case "PUT":
+                break;
+            case "GET":
+                break;
+            default:
+                break;
+        }
         String methodName = jp.getSignature().getName();
         //获取方法
         Signature signature = jp.getSignature();
@@ -197,10 +328,17 @@ public class LogAspect {
 
 
         RepeatPermission repeatPermission = method.getDeclaredAnnotation(RepeatPermission.class);
-        MessageResult<Object> messageResult = new MessageResult<>();
+
         if (repeatPermission != null) {
-
-
+            String apiName= repeatPermission.value();
+            if (StringUtils.isEmpty(apiName)) {
+                apiName=method.getName();
+            }
+            String repeatToken = httpServletRequest.getHeader("repeat_token");
+            if (StringUtils.isEmpty(repeatToken)) {
+                // 抛出让ControllerAdvice全局异常处理
+                throw new Exception("can not find token!");
+            }
             /**
              * 注解代码浸入太大，
              * 1、唯一索引，
@@ -214,55 +352,52 @@ public class LogAspect {
             //在redis中判断 userid + path 是否存在
 
             //redis 中设置key
-
             BigInteger userId = new BigInteger("1");
             String uri = httpServletRequest.getRequestURI();
-            String key = "repeat:" + uri + "_" + userId.toString();
-
-            RLock lock = redissonClient.getLock(key);
-
+            String key = "repeat:" + userId + ":" + apiName;
+//            String key = "repeat:" + userId + ":" + repeatToken;
+            ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
             try {
-                boolean isLocked = lock.isLocked();
-                if (isLocked) {
-                    //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
-                    messageResult.setSuccess(false);
-                    messageResult.setMessage("重复提交：服务器繁忙");
-                    return messageResult;
+                //getRepeatToken 时候向redis 插入一个token
+                //添加重复消费redis 校验，不会存在并发同一个message
+                Object tokenObj = valueOperations.get(key);
+                if (tokenObj == null) {
+                    return MessageResult.faile("token is not exist!");
                 }
-                boolean lockSuccessfully = lock.tryLock(1, 30, TimeUnit.SECONDS);
-                isLocked = lock.isLocked();
-                if (isLocked) {
-                    return jp.proceed();
-                } else {
-                    //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
-                    messageResult.setSuccess(false);
-                    messageResult.setMessage("重复提交:获取锁失败");
-                    return messageResult;
+                Long expireTime = redisTemplate.getExpire(key);
+                //有过期时间
+                if (expireTime != null && !expireTime.equals(-1L)) {
+                    return MessageResult.faile("repeat commit,please get token first!");
                 }
-            } catch (InterruptedException e) {
-                messageResult.setSuccess(false);
-                messageResult.setMessage(e.getMessage());
-                return messageResult;
-            } finally {
-                //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
-                //unlock 删除key
-                lock.unlock();
+                redisTemplate.expire(key, 1, TimeUnit.DAYS);
+                //先设置redis 过期，然后调用业务，业务异常就重新调用key,也就浪费一个key
+                Object obj= monitor(jp, className, methodName);
 
+                return obj;
+            } catch (Exception e) {
+                //redis 保证高可用
+                // redisTemplate.delete(key);
+                return MessageResult.faile(e.getMessage());
             }
+
         } else {
-            StopWatch stopWatch = new StopWatch("");
-            stopWatch.start("");
-            Object obj = jp.proceed();
-            stopWatch.stop();
-            long costTime = stopWatch.getTotalTimeMillis();
-            log.info("{} - {} 处理完成,耗时 {} ms ,返回结果 - {} ", className, methodName, costTime, objectMapper.writeValueAsString(messageResult));
-            return obj;
-            // return jp.proceed();
+            return monitor(jp, className, methodName);
         }
 
 
     }
 
+    private Object monitor(ProceedingJoinPoint jp, String className, String methodName) throws Throwable {
+        StopWatch stopWatch = new StopWatch("");
+        stopWatch.start("");
+        Object obj = jp.proceed();
+        stopWatch.stop();
+        long costTime = stopWatch.getTotalTimeMillis();
+        MessageResult<Object> messageResult = MessageResult.success(obj);
+        log.info("{} - {} 处理完成,耗时 {} ms ,返回结果 - {} ", className, methodName, costTime, objectMapper.writeValueAsString(messageResult));
+        return obj;
+    }
+    //endregion
 
     //        @AfterThrowing(pointcut = "execution(* com.example.demo.controller.*.*(..))", throwing = "ex")
     @AfterThrowing(pointcut = "pointCut()", throwing = "ex")

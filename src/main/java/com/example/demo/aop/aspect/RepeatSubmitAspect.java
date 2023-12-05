@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
  *   （2） 检测前段提交的token是不是在redis 中而且过期时间不为0，验证通过入库成功更新redis 中的token过期时间
  * 3、对于篡改的api请求通过加密方式，防止信息泄密。https://host:port//api。 nginx
  *
+ *
+ * 新增、修改可以在跳转的时候从后端获取token
  */
 @Aspect
 @Component
