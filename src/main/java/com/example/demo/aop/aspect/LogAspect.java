@@ -20,16 +20,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 import com.example.demo.model.pojo.Student;
+import org.springframework.util.StopWatch;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -58,6 +61,7 @@ execution(public * com.spring.service.BusinessObject.businessService(java.lang.S
  */
 @Aspect
 @Component
+@Order(101)
 //@Slf4j
 @Log4j2
 public class LogAspect {
@@ -160,12 +164,17 @@ public class LogAspect {
 //    @Around(value = "execution(* com.fnd.businessvehicleintelligent.*.controller.*.*(..))" +
 //            "||execution(* com.fnd.mq.controller.*.*(..))")
 
+    @Pointcut("execution(* com.example.demo.controller.*.*(..))")
+    public void pointCut() {
+    }
+
     /**
      * 环绕增强：目标方法执行前后分别执行一些代码，发生异常的时候执行另外一些代码
      *
      * @return
      */
-    @Around(value = "execution(* com.example.demo.controller.*.*(..))")
+//    @Around(value = "execution(* com.example.demo.controller.*.*(..))")
+    @Around(value = "pointCut()")
     public Object aroundMethod(ProceedingJoinPoint jp) throws Throwable {
         String methodName = jp.getSignature().getName();
         //获取方法
@@ -181,7 +190,7 @@ public class LogAspect {
 //        Object[] args = jp.getArgs();
 //
 //
-        log.info("{} - {} 开始处理,参数列表 - {}", className, methodName,Arrays.toString(args));
+        log.info("{} - {} 开始处理,参数列表 - {}", className, methodName, Arrays.toString(args));
 //        Object result = jp.proceed();
 //        log.info("{} - {} 处理完成,返回结果 - {}", className, methodName,objectMapper.writeValueAsString(result));
 //
@@ -192,6 +201,15 @@ public class LogAspect {
         if (repeatPermission != null) {
 
 
+            /**
+             * 注解代码浸入太大，
+             * 1、唯一索引，
+             * 2、（1）前台打开新增页面访问后台获取该表的token (存储在redis 中的uuid)key:用户id_功能.value token
+             *        获取token时候判断用户有没有没有过期时间的token，有就说明已请求，直接返回
+             *   （2） 检测前段提交的token是不是在redis 中而且过期时间不为0，验证通过入库成功更新redis 中的token过期时间
+             * 3、对于篡改的api请求通过加密方式，防止信息泄密。https://host:port//api。 nginx
+             *
+             */
             //重复提交：redis 中设置带有过期的key,判断是否存在。  过期防止程序异常，不释放锁
             //在redis中判断 userid + path 是否存在
 
@@ -202,6 +220,7 @@ public class LogAspect {
             String key = "repeat:" + uri + "_" + userId.toString();
 
             RLock lock = redissonClient.getLock(key);
+
             try {
                 boolean isLocked = lock.isLocked();
                 if (isLocked) {
@@ -223,25 +242,30 @@ public class LogAspect {
             } catch (InterruptedException e) {
                 messageResult.setSuccess(false);
                 messageResult.setMessage(e.getMessage());
+                return messageResult;
             } finally {
                 //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
                 //unlock 删除key
                 lock.unlock();
 
             }
-        log.info("{} - {} 处理完成,返回结果 - {}", className, methodName,objectMapper.writeValueAsString(messageResult));
-//
-            return messageResult;
         } else {
-            return jp.proceed();
-
+            StopWatch stopWatch = new StopWatch("");
+            stopWatch.start("");
+            Object obj = jp.proceed();
+            stopWatch.stop();
+            long costTime = stopWatch.getTotalTimeMillis();
+            log.info("{} - {} 处理完成,耗时 {} ms ,返回结果 - {} ", className, methodName, costTime, objectMapper.writeValueAsString(messageResult));
+            return obj;
+            // return jp.proceed();
         }
 
 
     }
 
 
-    @AfterThrowing(pointcut = "execution(* com.example.demo.controller.*.*(..))", throwing = "ex")
+    //        @AfterThrowing(pointcut = "execution(* com.example.demo.controller.*.*(..))", throwing = "ex")
+    @AfterThrowing(pointcut = "pointCut()", throwing = "ex")
     public void onExceptionThrow(Exception ex) {
         log.error("", ex);
     }

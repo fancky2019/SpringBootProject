@@ -2,8 +2,11 @@ package com.example.demo.aop.aspect;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
  * 3、对于篡改的api请求通过加密方式，防止信息泄密。https://host:port//api。 nginx
  *
  */
+@Aspect
+@Component
+@Order(100)//多个切面用order制定顺序，数值越小，越先执行
 public class RepeatSubmitAspect {
 
     @Autowired

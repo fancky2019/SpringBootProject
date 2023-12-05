@@ -8,7 +8,6 @@ import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.RabbitMQTest;
-import com.example.demo.rabbitMQ.RabbitMqMessage;
 import com.example.demo.utility.MqSendUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -17,15 +16,10 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StopWatch;
 
 import java.math.BigInteger;
@@ -33,7 +27,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class DemoProductService {
@@ -59,10 +56,39 @@ public class DemoProductService {
 //        mutiThread();
 //        spring 事务基于对象aop 代理实现的 ，不能在方法内调用，否则事务失效
 //        insertTransactional();
+        insert();
     }
 
 //    @Autowired
 //    private PersonService personService;
+
+    public int insert() {
+
+        String productName = "productName";
+
+        DemoProduct demoProduct = new DemoProduct();
+        demoProduct.setGuid(UUID.randomUUID().toString());
+        demoProduct.setProductName(productName);
+        demoProduct.setProductStyle("productStyle");
+        demoProduct.setImagePath("D:\\fancky\\git\\Doc");
+        demoProduct.setCreateTime(LocalDateTime.now());
+        demoProduct.setModifyTime(LocalDateTime.now());
+        demoProduct.setStatus(Short.valueOf("1"));
+        demoProduct.setDescription("setDescription_sdsdddddddddddddddd");
+        demoProduct.setTimestamp(LocalDateTime.now());
+
+
+        StopWatch stopWatch = new StopWatch("BatchInsert");
+        stopWatch.start("BatchInsert_Trace1");
+
+        int i = demoProductMapper.insert(demoProduct);
+        stopWatch.stop();
+//        stopWatch.start("BatchInsert_Trace2");
+        long miils = stopWatch.getTotalTimeMillis();
+        logger.info(stopWatch.shortSummary());
+
+        return 0;
+    }
 
     /*
    数据量过大，分批量插入：5K每次；1W条耗时1.3s左右

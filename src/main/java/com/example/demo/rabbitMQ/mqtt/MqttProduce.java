@@ -74,6 +74,10 @@ public class MqttProduce {
     }
 
     public void publish(int qos, boolean retained, String topic, String message) {
+       /*
+        rabbitmq 的mqtt性能未做测试
+        */
+
         /*
         QoS 0（最多一次）：消息发布完全依赖底层 TCP/IP 网络。会发生消息丢失或重复。这个级别可用于如下情况，环境传感器数据，丢失一次数据无所谓，因为不久后还会有第二次发送。
         QoS 1（至少一次）：确保消息到达，但消息重复可能会发生。
