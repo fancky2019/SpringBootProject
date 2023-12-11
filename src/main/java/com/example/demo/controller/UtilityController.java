@@ -19,6 +19,7 @@ import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
 import com.example.demo.rabbitMQ.mqtt.MqttProduce;
 import com.example.demo.rocketmq.RocketmqTest;
+import com.example.demo.service.RetryService;
 import com.example.demo.service.demo.CacheService;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.IProductTestService;
@@ -1349,4 +1350,26 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
 
         return MessageResult.success(repeatToken);
     }
+
+    @Autowired
+    private RetryService retryService;
+
+    @GetMapping(value = "/retryTest")
+    public MessageResult<Void> retryTest(String msg) {
+        /*
+        启动类添加 @EnableRetry,1.2.1 不要制定版本号，maven 最新的可能jdk 版本不匹配
+        proxyTargetClass 默认基于JDK 动态代理
+
+
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+            <version>2.0.4</version>
+        </dependency>
+         */
+
+
+        return retryService.test(5);
+    }
+
 }

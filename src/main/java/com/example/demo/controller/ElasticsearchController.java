@@ -61,7 +61,8 @@ public class ElasticsearchController {
     public MessageResult<PageData<DemoProduct>> getByProductName(@RequestBody DemoProductRequest request) {
         MessageResult<PageData<DemoProduct>> message = new MessageResult<>();
         try {
-            PageData<DemoProduct> pageData = esDemoProductService.search(request);
+//            PageData<DemoProduct> pageData = esDemoProductService.search(request);
+            PageData<DemoProduct> pageData = esDemoProductService.searchAfter(request);
             message.setData(pageData);
             // Thread.sleep(10*1000);
 //            message = productService.getPageData(viewModel);//查看缓存问题

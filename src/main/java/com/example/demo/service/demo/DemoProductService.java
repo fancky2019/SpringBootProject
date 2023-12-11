@@ -12,6 +12,7 @@ import com.example.demo.rabbitMQ.RabbitMQTest;
 import com.example.demo.utility.MqSendUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -27,13 +28,12 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Service
+@Slf4j
 public class DemoProductService {
 
     private static final Logger logger = LogManager.getLogger(DemoProductService.class);
@@ -57,15 +57,16 @@ public class DemoProductService {
 //        mutiThread();
 //        spring 事务基于对象aop 代理实现的 ，不能在方法内调用，否则事务失效
 //        insertTransactional();
-       // throw  new Exception("controller exception test");
-//        insert();
-        return  MessageResult.success();
+        // throw  new Exception("controller exception test");
+        insert();
+        return MessageResult.success();
     }
 
 //    @Autowired
 //    private PersonService personService;
 
-    public int insert() {
+    @Transactional(rollbackFor = Exception.class)
+    public MessageResult<Void> insert() {
 
         String productName = "productName";
 
@@ -90,7 +91,7 @@ public class DemoProductService {
         long miils = stopWatch.getTotalTimeMillis();
         logger.info(stopWatch.shortSummary());
 
-        return 0;
+        return MessageResult.success();
     }
 
     /*
@@ -447,9 +448,24 @@ public class DemoProductService {
         int m = 0;
     }
 
-    void getById() {
-        ProductTest result = this.demoProductMapper.getById(new BigInteger("1"));
-        int m = 0;
+    /**
+     * 平均 7ms 左右 ，偶尔1ms
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public MessageResult<Void> getById() {
+        Random random = ThreadLocalRandom.current();
+        //ID 要切换 ，spring 有缓存机制
+        int id = random.nextInt(100000);
+        StopWatch stopWatch = new StopWatch("");
+        stopWatch.start("");
+        ProductTest result = this.demoProductMapper.getById(new BigInteger(id + ""));
+        stopWatch.stop();
+        //7ms 左右
+        long costTime = stopWatch.getTotalTimeMillis();
+        log.info("getByIdTrace - {} cost_time {} ms  ", id,costTime);
+
+        return MessageResult.success();
     }
 
     void getByIds() {

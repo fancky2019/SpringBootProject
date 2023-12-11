@@ -79,6 +79,13 @@ public class MessageResult<T> implements Serializable {
         return messageResult;
     }
 
+    public static <T> MessageResult<T> faile() {
+        MessageResult<T> messageResult = new MessageResult<>();
+        messageResult.setSuccess(false);
+        messageResult.setCode(500);
+        return messageResult;
+    }
+
     public static <T> MessageResult<T> getMessageResult( T data,boolean success, int code) {
         MessageResult<T> messageResult = new MessageResult<>();
         messageResult.setSuccess(success);

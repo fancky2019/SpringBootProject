@@ -591,6 +591,15 @@
             <systemPath>${project.basedir}/lib/model-0.0.1-SNAPSHOT.jar</systemPath>
         </dependency>
 
+
+       <!--        retry   start-->
+        <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+        <!--        retry end-->
+
     </dependencies>
 
 

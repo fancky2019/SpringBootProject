@@ -295,6 +295,12 @@ public class LogAspect {
 
 
         String httpMethod = httpServletRequest.getMethod();
+        ///sbp/demo/demoProductTest
+        String ss = httpServletRequest.getRequestURI();
+        // /sbp
+        String contextPath = httpServletRequest.getContextPath();
+        ///demo/demoProductTest
+        String servletPath = httpServletRequest.getServletPath();
         switch (httpMethod) {
             case "POST":
                 break;
@@ -330,9 +336,9 @@ public class LogAspect {
         RepeatPermission repeatPermission = method.getDeclaredAnnotation(RepeatPermission.class);
 
         if (repeatPermission != null) {
-            String apiName= repeatPermission.value();
+            String apiName = repeatPermission.value();
             if (StringUtils.isEmpty(apiName)) {
-                apiName=method.getName();
+                apiName = method.getName();
             }
             String repeatToken = httpServletRequest.getHeader("repeat_token");
             if (StringUtils.isEmpty(repeatToken)) {
@@ -371,7 +377,7 @@ public class LogAspect {
                 }
                 redisTemplate.expire(key, 1, TimeUnit.DAYS);
                 //先设置redis 过期，然后调用业务，业务异常就重新调用key,也就浪费一个key
-                Object obj= monitor(jp, className, methodName);
+                Object obj = monitor(jp, servletPath);
 
                 return obj;
             } catch (Exception e) {
@@ -381,20 +387,20 @@ public class LogAspect {
             }
 
         } else {
-            return monitor(jp, className, methodName);
+            return monitor(jp,servletPath);
         }
 
 
     }
 
-    private Object monitor(ProceedingJoinPoint jp, String className, String methodName) throws Throwable {
+    private Object monitor(ProceedingJoinPoint jp, String servletPath) throws Throwable {
         StopWatch stopWatch = new StopWatch("");
         stopWatch.start("");
         Object obj = jp.proceed();
         stopWatch.stop();
         long costTime = stopWatch.getTotalTimeMillis();
         MessageResult<Object> messageResult = MessageResult.success(obj);
-        log.info("{} - {} 处理完成,耗时 {} ms ,返回结果 - {} ", className, methodName, costTime, objectMapper.writeValueAsString(messageResult));
+        log.info("{} 处理完成,cost_time {} ms ,返回结果 - {} ", servletPath, costTime, objectMapper.writeValueAsString(messageResult));
         return obj;
     }
     //endregion

@@ -12,6 +12,7 @@ import org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboar
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -65,6 +66,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAspectJAutoProxy(exposeProxy = true)//开启spring注解aop配置的支持
 //移动到SwaggerConfig 配置文件类处理
 //@EnableSwagger2  //EnableSwagger2  http://localhost:8081/swagger-ui.html
+@EnableRetry
 public class SpringBootProjectApplication {
 
     /*

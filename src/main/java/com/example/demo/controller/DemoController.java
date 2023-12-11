@@ -32,10 +32,12 @@ public class DemoController {
         this.demoProductService=demoProductService;
     }
     @GetMapping("/demoProductTest")
-    @RepeatPermission
+//    @RepeatPermission
     @NoRepeatSubmit
     public MessageResult<Void> demoProductTest() throws Exception {
-      return   demoProductService.test();
+        return   demoProductService.getById();
+//        return   demoProductService.test();
+//      return   demoProductService.insert();
     }
 
     @GetMapping("")
