@@ -6,6 +6,9 @@ import com.example.demo.service.demo.IMqFailLogService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
+
+import groovy.transform.Undefined;
+import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -17,12 +20,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 
 /**
  * @author ruili
  */
-public class BaseRabbitMqHandler<T extends RabbitMqMessage> {
+public class BaseRabbitMqHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseRabbitMqHandler.class);
 
@@ -38,11 +42,11 @@ public class BaseRabbitMqHandler<T extends RabbitMqMessage> {
     IMqFailLogService mqFailLogService;
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public void onMessage(T t, Message message, Channel channel,
-                          RabbitMqHandler<T> mqListener) {
+    public <T> void onMessage(Class<T> tClass, Message message, Channel channel, Consumer<T> consumer) {
 
-
-        String mqMsgIdKey = RABBIT_MQ_MESSAGE_ID_PREFIX + t.getMessageId();
+        String messageId = message.getMessageProperties().getMessageId();
+        String msgContent = new String(message.getBody());
+        String mqMsgIdKey = RABBIT_MQ_MESSAGE_ID_PREFIX + messageId;
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
 
         //添加重复消费redis 校验，不会存在并发同一个message
@@ -50,7 +54,7 @@ public class BaseRabbitMqHandler<T extends RabbitMqMessage> {
 //        String time1 = LocalDateTimeUtil.formatNormal(t.getMessageTime());
 //        String time2 = LocalDateTimeUtil.formatNormal(LocalDateTime.now());
 //        logger.info("time1 - {} time2 - {}", time1, time2);
-        logger.info("开始消费msg - {}", t.getMessageId());
+        logger.info("开始消费msg - {}", messageId);
         int retryCount = 0;
         try {
 
@@ -66,32 +70,32 @@ public class BaseRabbitMqHandler<T extends RabbitMqMessage> {
                         long deliveryTag = message.getMessageProperties().getDeliveryTag();
                         //补偿 ack--消费了却没有ack 成功。
                         channel.basicAck(deliveryTag, false);
-                        logger.info("msgId - {} 已经被消费,msg - {}", t.getMessageId(), objectMapper.writeValueAsString(t));
+                        logger.info("msgId - {} 已经被消费,msg - {}", messageId, msgContent);
                         return;
                     }
                 } else {
-                    logger.info("msgId - {} 已经被消费,msg - {}", t.getMessageId(), objectMapper.writeValueAsString(t));
+                    logger.info("msgId - {} 已经被消费,msg - {}", messageId, msgContent);
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
                     return;
                 }
 
 
             }
-
-            mqListener.handle(t, channel);
+            T t = objectMapper.readValue(msgContent, tClass);
+            consumer.accept(t);
 //             int i = Integer.parseInt("m");
 
 
             //消费成功设置过期时间删除key.
             if (redisTemplate.expire(mqMsgIdKey, EXPIRE_TIME, TimeUnit.SECONDS)) {
                 channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-                logger.info("消费成功：{}", t.getMessageId());
+                logger.info("消费成功：{}", messageId);
             }
 
 
         } catch (Exception e) {
             logger.info("消息消费失败：", e);
-            logger.info("消息消费失败 - {}", JSONUtil.toJsonStr(t));
+            logger.info("消息消费失败 - {}", msgContent);
             try {
                 /**
                  * deliveryTag:该消息的index
@@ -99,17 +103,19 @@ public class BaseRabbitMqHandler<T extends RabbitMqMessage> {
                  * requeue：被拒绝的是否重新入队列
                  */
                 //channel.basicNack(deliveryTag, false, true);
-                this.retry(t, channel, message, retryCount, e.getMessage());
+                this.retry(channel, message, retryCount, e.getMessage());
             } catch (IOException | InterruptedException ex) {
                 logger.info("被拒绝的消息重新入队列出错", ex);
             }
         }
     }
 
-    private void retry(T t, Channel channel, Message message, int retryCount, String exceptionMsg) throws IOException, InterruptedException {
+    private void retry(Channel channel, Message message, int retryCount, String exceptionMsg) throws IOException, InterruptedException {
         //   String redisCountKey = "retry:" + RabbitMqConstants.TB_CUST_LIST_ERROR_QUEUE + t.getMessageId();
+
+        String messageId = message.getMessageProperties().getMessageId();
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
-        String mqMsgIdKey = RABBIT_MQ_MESSAGE_ID_PREFIX + t.getMessageId();
+        String mqMsgIdKey = RABBIT_MQ_MESSAGE_ID_PREFIX + messageId;
         boolean requeue = ++retryCount <= TOTAL_RETRY_COUNT;
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
         if (requeue) {
@@ -121,8 +127,8 @@ public class BaseRabbitMqHandler<T extends RabbitMqMessage> {
             if (redisTemplate.expire(mqMsgIdKey, EXPIRE_TIME, TimeUnit.SECONDS)) {
                 channel.basicAck(deliveryTag, false);
             }
-
-            HashMap<String, String> map = objectMapper.readValue(t.getContent(), new TypeReference<HashMap<String, String>>() {
+            String msgContent = new String(message.getBody());
+            HashMap<String, String> map = objectMapper.readValue(msgContent, new TypeReference<HashMap<String, String>>() {
             });
             String id = "";
             for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -141,8 +147,8 @@ public class BaseRabbitMqHandler<T extends RabbitMqMessage> {
             mqFailLog.setExchange(exchange);
             mqFailLog.setQueueName(queueName);
             mqFailLog.setRoutingKey(routingKey);
-            mqFailLog.setMsgId(t.getMessageId());
-            mqFailLog.setMessage(JSONUtil.toJsonStr(t));
+            mqFailLog.setMsgId(id);
+            mqFailLog.setMessage(msgContent);
             mqFailLog.setCause(exceptionMsg);
             mqFailLogService.save(mqFailLog);
         }

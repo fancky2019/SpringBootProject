@@ -22,9 +22,9 @@ import java.util.List;
 @Slf4j
 @Component
 //public class BatchQueueListener implements BatchMessageListener {
-public class BatchQueueListener extends BaseRabbitMqHandler<RabbitMqMessage> {
+//public class BatchQueueListener extends BaseRabbitMqHandler<RabbitMqMessage> {
 
-
+public class BatchQueueListener extends BaseRabbitMqHandler {
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -74,7 +74,7 @@ public class BatchQueueListener extends BaseRabbitMqHandler<RabbitMqMessage> {
                 String exchange = message.getMessageProperties().getReceivedExchange();
                 String queueName = message.getMessageProperties().getConsumerQueue();
 
-                super.onMessage(rabbitMqMessage, message, channel, (msg, ch) -> {
+                 super.onMessage(RabbitMqMessage.class, message, channel, (msg) -> {
                     //业务处理
                     String msgContent = msg.getContent();
                     int m = Integer.parseInt("d");

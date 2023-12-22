@@ -6,7 +6,7 @@ import com.rabbitmq.client.Channel;
  * @author ruili
  */
 @FunctionalInterface
-public interface RabbitMqHandler<T extends RabbitMqMessage> {
+public interface RabbitMqHandler<T> {
     /**
      * 处理任务回调
      *

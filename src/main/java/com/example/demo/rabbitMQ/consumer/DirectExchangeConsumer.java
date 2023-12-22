@@ -2,6 +2,7 @@ package com.example.demo.rabbitMQ.consumer;
 
 
 import com.alibaba.fastjson.JSON;
+import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.viewModel.Person;
 import com.example.demo.rabbitMQ.BaseRabbitMqHandler;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -24,7 +26,7 @@ import java.util.List;
 
 @Component
 //@RabbitListener(queues = "DirectExchangeQueueSpringBoot")//参数为队列名称
-public class DirectExchangeConsumer extends BaseRabbitMqHandler<RabbitMqMessage> {
+public class DirectExchangeConsumer extends BaseRabbitMqHandler {
     @Autowired
     private ObjectMapper objectMapper;
     private static Logger logger = LogManager.getLogger(DirectExchangeConsumer.class);
@@ -32,12 +34,12 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler<RabbitMqMessage>
 //    public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
 
 
-    //发送什么类型就用什么类型接收
+    //发送什么类型就用什么类型接收.如果RabbitHandler 的方法参数类型不对将不会调用，即消息不会被消费
     //多个方法绑定同一个队列MQ会轮训发送给各个方法消费
     @RabbitHandler
     @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
-    public void receivedMsg(RabbitMqMessage rabbitMqMessage,
-                            Channel channel,
+//    public void receivedMsg(Person messageContent,Channel channel,
+    public void receivedMsg(Channel channel,
                             Message message,
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
                             @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName) throws Exception {
@@ -48,18 +50,16 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler<RabbitMqMessage>
             String queueName1 = message.getMessageProperties().getConsumerQueue();
             //发送时候要设置messageId
             String messageId = message.getMessageProperties().getMessageId();
-            Person person = null;
-            System.out.println("DirectExchange Queue:" + RabbitMQConfig.DIRECT_QUEUE_NAME + " receivedMsg: ");
 
             //序列化出来的 和方法传进来的一样
-            String messageContent = new String(message.getBody());
-            RabbitMqMessage rabbitMqMessage1 = objectMapper.readValue(messageContent, RabbitMqMessage.class);
+              String messageContentStr = new String(message.getBody());
+            //  RabbitMqMessage rabbitMqMessage1 = objectMapper.readValue(messageContentStr, Person.class);
 
-            super.onMessage(rabbitMqMessage, message, channel, (msg, ch) -> {
+            super.onMessage(Person.class, message, channel, (msg) -> {
                 //业务处理
-                String msgContent = msg.getContent();
+                Person person1 = msg;
 //                int m = Integer.parseInt("d");
-                logger.info("MQ接收到消息jsonStr : " + msgContent);
+                //    logger.info("MQ接收到消息jsonStr : " + msgContent);
 
             });
             //设置异常进入死信队列

@@ -55,7 +55,7 @@ public class DirectExchangeProducer {
 //        rabbitTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
             Person person = new Person();
             person.setId(1);
-            person.setName("rabbitmq");
+            person.setName("rabbitmqTew");
 
 //        msg = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
 
@@ -87,16 +87,14 @@ public class DirectExchangeProducer {
 
 //                MessageProperties  有消息id
                 Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
-                String msgId =UUID.randomUUID().toString();
-                CorrelationData correlationData=   new CorrelationData(msgId);
+                String msgId = UUID.randomUUID().toString();
+                CorrelationData correlationData = new CorrelationData(msgId);
                 //设置消息内容
-                ReturnedMessage returnedMessage=new ReturnedMessage(message,0,"","","");
+                ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
                 correlationData.setReturned(returnedMessage);
 
-              //  rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
-                rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE, RabbitMQConfig.DIRECT_ROUTING_KEY,  message, correlationData);
-
-
+                //  rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
+                rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE, RabbitMQConfig.DIRECT_ROUTING_KEY, message, correlationData);
 
 
                 //rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE, RabbitMQConfig.DIRECT_ROUTING_KEY, mqMsg, new CorrelationData(mqMsg.getMessageId()));
@@ -130,10 +128,10 @@ public class DirectExchangeProducer {
 //                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
                 Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
 
-                String msgId =UUID.randomUUID().toString();
-                CorrelationData correlationData=   new CorrelationData(msgId);
+                String msgId = UUID.randomUUID().toString();
+                CorrelationData correlationData = new CorrelationData(msgId);
                 //设置消息内容
-                ReturnedMessage returnedMessage=new ReturnedMessage(message,0,"","","");
+                ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
                 correlationData.setReturned(returnedMessage);
                 //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
                 rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
@@ -144,17 +142,43 @@ public class DirectExchangeProducer {
         }
     }
 
+
+    public void  standardTest()
+    {
+        String msgId = UUID.randomUUID().toString();
+        String msgContent = "";
+        Person person = new Person();
+        person.setId(5);
+        person.setName("rabbitmq");
+
+        try {
+            msgContent = objectMapper.writeValueAsString(person);
+        }
+        catch (Exception ex)
+        {
+
+        }
+        MqMessage mqMessage = new MqMessage
+                (RabbitMQConfig.DIRECT_EXCHANGE,
+                        RabbitMQConfig.DIRECT_ROUTING_KEY,
+                        RabbitMQConfig.DIRECT_QUEUE_NAME,
+                        msgContent);
+        produceNotConvertSent(mqMessage);
+    }
     public void produceNotConvertSent(MqMessage mqMessage) {
         try {
             String exchange = mqMessage.getExchange();
             String routingKey = mqMessage.getRouteKey();
-            Message message = new Message(mqMessage.getMsgContent().getBytes(), new MessageProperties());
-            String msgId = mqMessage.getMsgId();
-            //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
 
-            CorrelationData correlationData=   new CorrelationData(msgId);
+            MessageProperties messageProperties = new MessageProperties();
+            String msgId = mqMessage.getMsgId();
+            messageProperties.setMessageId(msgId);
+            //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
+            Message message = new Message(mqMessage.getMsgContent().getBytes(), messageProperties);
+
+            CorrelationData correlationData = new CorrelationData(msgId);
             //设置消息内容
-            ReturnedMessage returnedMessage=new ReturnedMessage(message,0,"","","");
+            ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
             correlationData.setReturned(returnedMessage);
 
 
@@ -204,10 +228,10 @@ public class DirectExchangeProducer {
                 //  batchingRabbitTemplate.convertAndSend(BATCH_DIRECT_EXCHANGE_NAME,BATCH_DIRECT_ROUTING_KEY,mqMsg);
                 Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
 
-                String msgId =UUID.randomUUID().toString();
-                CorrelationData correlationData=   new CorrelationData(msgId);
+                String msgId = UUID.randomUUID().toString();
+                CorrelationData correlationData = new CorrelationData(msgId);
                 //设置消息内容
-                ReturnedMessage returnedMessage=new ReturnedMessage(message,0,"","","");
+                ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
                 correlationData.setReturned(returnedMessage);
 
 
