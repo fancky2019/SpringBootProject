@@ -7,7 +7,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.viewModel.Person;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
-import com.example.demo.rabbitMQ.RabbitMqMessage;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +27,11 @@ import java.util.UUID;
 @Slf4j
 public class DirectExchangeProducer {
 
-    public static final String DIRECT_EXCHANGE_NAME = "DirectExchangeSpringBoot";
-    //    public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot.Direct";
-    public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot";
-
-    public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
+    //    public static final String DIRECT_EXCHANGE_NAME = "DirectExchangeSpringBoot";
+//    //    public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot.Direct";
+//    public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot";
+//
+//    public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -48,7 +48,7 @@ public class DirectExchangeProducer {
 
     public void producer() {
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1; i++) {
 //        String msg = "MSG_DirectExchangeProducer";
             //参数：队列名称,消息内容（可以为可序列化的对象）
 //        this.amqpTemplate.convertAndSend(DIRECT_QUEUE_NAME, msg);
@@ -60,15 +60,9 @@ public class DirectExchangeProducer {
 //        msg = JSONObject.toJSONString(person, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteNullBooleanAsFalse);
 
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            String json = "";
-            try {
-                json = objectMapper.writeValueAsString(person);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-            RabbitMqMessage mqMsg = new RabbitMqMessage(json);
-            mqMsg.setMessageId(UUID.randomUUID().toString());
+//            ObjectMapper objectMapper = new ObjectMapper();
+
+
        /*
     一、mandatory 参数
         当mandatory 参数设为 true 时，交换器无法根据自身的类型和路由键找到一个符合条件 的队列，那么 RabbitMQ 会调用 Basic.Return 命令将消息返回给生产者 。当 mandatory 数设置为 false 时，出现上述情形，则消息直接被丢弃,那么生产者如何获取到没有被正确路由到合适队列的消息呢?这时候可以通过调用 channel addReturnListener 来添加 ReturnListener 监昕器实现。
@@ -90,10 +84,33 @@ public class DirectExchangeProducer {
 //        Integer m=0;
 
             try {
-                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg, new CorrelationData(mqMsg.getMessageId()));
+
+//                MessageProperties  有消息id
+                Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
+                String msgId =UUID.randomUUID().toString();
+                CorrelationData correlationData=   new CorrelationData(msgId);
+                //设置消息内容
+                ReturnedMessage returnedMessage=new ReturnedMessage(message,0,"","","");
+                correlationData.setReturned(returnedMessage);
+
+              //  rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
+                rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE, RabbitMQConfig.DIRECT_ROUTING_KEY,  message, correlationData);
+
+
+
+
+                //rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE, RabbitMQConfig.DIRECT_ROUTING_KEY, mqMsg, new CorrelationData(mqMsg.getMessageId()));
+
+                //未绑定队列测试:发送到交换机
+//                rabbitTemplate.convertAndSend("UnBindDirectExchange", "UnBindDirectRouteKey", mqMsg, new CorrelationData(mqMsg.getMessageId()));
+                // 未路由到队列
+//                String rabbitMqMessageJson=objectMapper.writeValueAsString(mqMsg);
+//                 rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE, "UnBindDirectRouteKey", rabbitMqMessageJson, new CorrelationData(mqMsg.getMessageId()));
+
+//                rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE, "UnBindDirectRouteKey", mqMsg, new CorrelationData(mqMsg.getMessageId()));
 
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("", e);
             }
         }
     }
@@ -109,12 +126,17 @@ public class DirectExchangeProducer {
             try {
                 String json = objectMapper.writeValueAsString(person);
 
-                RabbitMqMessage mqMsg = new RabbitMqMessage(json);
-                mqMsg.setMessageId(UUID.randomUUID().toString());
+
 //                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
-                Message message = new Message(objectMapper.writeValueAsString(mqMsg).getBytes(), new MessageProperties());
+                Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
+
+                String msgId =UUID.randomUUID().toString();
+                CorrelationData correlationData=   new CorrelationData(msgId);
+                //设置消息内容
+                ReturnedMessage returnedMessage=new ReturnedMessage(message,0,"","","");
+                correlationData.setReturned(returnedMessage);
                 //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
-                rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, new CorrelationData(mqMsg.getMessageId()));
+                rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
                 Thread.sleep(1);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -129,7 +151,14 @@ public class DirectExchangeProducer {
             Message message = new Message(mqMessage.getMsgContent().getBytes(), new MessageProperties());
             String msgId = mqMessage.getMsgId();
             //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
-            rabbitTemplate.send(exchange, routingKey, message, new CorrelationData(msgId));
+
+            CorrelationData correlationData=   new CorrelationData(msgId);
+            //设置消息内容
+            ReturnedMessage returnedMessage=new ReturnedMessage(message,0,"","","");
+            correlationData.setReturned(returnedMessage);
+
+
+            rabbitTemplate.send(exchange, routingKey, message, correlationData);
 
         } catch (Exception e) {
             log.error("", e);
@@ -171,11 +200,18 @@ public class DirectExchangeProducer {
             try {
                 json = objectMapper.writeValueAsString(person);
 
-                RabbitMqMessage mqMsg = new RabbitMqMessage(json);
-                mqMsg.setMessageId(UUID.randomUUID().toString());
+
                 //  batchingRabbitTemplate.convertAndSend(BATCH_DIRECT_EXCHANGE_NAME,BATCH_DIRECT_ROUTING_KEY,mqMsg);
-                Message message = new Message(objectMapper.writeValueAsString(mqMsg).getBytes(), new MessageProperties());
-                batchingRabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, new CorrelationData(mqMsg.getMessageId()));
+                Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
+
+                String msgId =UUID.randomUUID().toString();
+                CorrelationData correlationData=   new CorrelationData(msgId);
+                //设置消息内容
+                ReturnedMessage returnedMessage=new ReturnedMessage(message,0,"","","");
+                correlationData.setReturned(returnedMessage);
+
+
+                batchingRabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

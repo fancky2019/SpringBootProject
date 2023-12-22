@@ -34,8 +34,8 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler<RabbitMqMessage>
 
     //发送什么类型就用什么类型接收
     //多个方法绑定同一个队列MQ会轮训发送给各个方法消费
-//    @RabbitHandler
-//    @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
+    @RabbitHandler
+    @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
     public void receivedMsg(RabbitMqMessage rabbitMqMessage,
                             Channel channel,
                             Message message,
@@ -46,12 +46,19 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler<RabbitMqMessage>
             String routingKey = message.getMessageProperties().getReceivedRoutingKey();
             String exchange = message.getMessageProperties().getReceivedExchange();
             String queueName1 = message.getMessageProperties().getConsumerQueue();
+            //发送时候要设置messageId
+            String messageId = message.getMessageProperties().getMessageId();
             Person person = null;
             System.out.println("DirectExchange Queue:" + RabbitMQConfig.DIRECT_QUEUE_NAME + " receivedMsg: ");
+
+            //序列化出来的 和方法传进来的一样
+            String messageContent = new String(message.getBody());
+            RabbitMqMessage rabbitMqMessage1 = objectMapper.readValue(messageContent, RabbitMqMessage.class);
+
             super.onMessage(rabbitMqMessage, message, channel, (msg, ch) -> {
                 //业务处理
                 String msgContent = msg.getContent();
-                int m = Integer.parseInt("d");
+//                int m = Integer.parseInt("d");
                 logger.info("MQ接收到消息jsonStr : " + msgContent);
 
             });

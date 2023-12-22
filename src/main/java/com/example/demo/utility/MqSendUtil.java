@@ -27,7 +27,12 @@ public class MqSendUtil {
     @Autowired
     private RabbitMQTest rabbitMQTest;
 
-    public synchronized void send(MqMessage mqMessage) {
+    /**
+     * synchronized
+     *
+     * @param mqMessage
+     */
+    public void send(MqMessage mqMessage) {
         //处理事务回调发送信息到mq
         //boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
         // 判断当前是否存在事务,如果没有开启事务是会报错的

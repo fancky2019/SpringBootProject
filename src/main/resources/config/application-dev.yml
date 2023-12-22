@@ -323,16 +323,25 @@ camunda.bpm:
     #    webapp:
     #      index-redirect-enabled: false
 
-#Feign  开启熔断
+#Feign  开启熔断。参见项目spring-cloud-nacos
 #注意：节点不在spring内
 #如果页面显示异常信息，说明熔断没有开启成功
 feign:
+
 #  #携带token,未验证
 #  oauth2:
 #    # 开启Oauth支持，这样就会在请求头中携带Token了
 #    enabled: true
 #    # 同时开启负载均衡支持
 #    load-balanced: true
+
+  # 设置 feign 超时时间:超时异常
+  client:
+    config:
+      # default、service-provider-two，指定服务名称可以设置单个服务的超时时间
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
   hystrix:
     enabled: true
   httpclient:

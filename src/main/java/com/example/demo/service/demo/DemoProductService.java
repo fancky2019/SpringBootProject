@@ -43,8 +43,6 @@ public class DemoProductService {
     IMqMessageService mqMessageService;
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
-    @Autowired
-    private RabbitMQTest rabbitMQTest;
 
     @Autowired
     private MqSendUtil mqSendUtil;

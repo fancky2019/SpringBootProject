@@ -34,7 +34,8 @@ public class QuartzJobComponent {
     private static Logger log = LogManager.getLogger(QuartzJobComponent.class);
     @Autowired
     private Scheduler scheduler;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper objectMapper ;
 //    @Value("${demo.multiEnvironment}")
 
     @Value("${cron}")

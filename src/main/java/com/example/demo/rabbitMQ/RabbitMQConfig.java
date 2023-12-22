@@ -1,31 +1,25 @@
 package com.example.demo.rabbitMQ;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.example.demo.model.entity.demo.MqMessage;
-import com.example.demo.model.entity.demo.ProductTest;
-import com.example.demo.service.demo.DemoProductService;
-import com.example.demo.service.demo.IMqMessageService;
-import com.example.demo.utility.SpringApplicationContextHelper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.batch.SimpleBatchingStrategy;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import java.applet.AppletContext;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +35,11 @@ import java.util.Map;
  * 声明RabbitMQ的交换机、队列、并将相应的队列、交换机、RoutingKey绑定。
  */
 @Configuration
+@Slf4j
 public class RabbitMQConfig {
+
+    @Autowired
+    ObjectMapper objectMapper;
     //    @Autowired
 //    private DemoProductService demoProductService;
     //region 常量参数
@@ -128,19 +126,55 @@ public class RabbitMQConfig {
         //公平分发模式在Spring-amqp中是默认的
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMandatory(true);//新版加此句
+
+        //json 序列化，默认SimpleMessageConverter jdk 序列化,需要配置objectMapper，
+        // 默认objectMapper LocalDateTime列化有问题，可以在字段上配置JsonDeserialize 参见RabbitMqMessage
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter(this.objectMapper));
+
+
         // 消息生产到交换机没有路由到队列 消息返回, yml需要配置 publisher-returns: true
         // 新版 #发布确认 publisher-confirms已经修改为publisher-confirm-type，
-        rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
-            System.out.println("消息生产到交换机没有路由到队列");
-        });
-
-////        //比上面的方法多一个s是Returns不是Return
-////        //ReturnedMessage  //不行
-//        rabbitTemplate.setReturnsCallback(returnedMessage ->
-//        {
-//            String failedMessage = new String(returnedMessage.getMessage().getBody());
-//            System.out.println("消息生产失败返回 - " + failedMessage);
+//        rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
+//
+//            int m=0;
+////            RabbitMqMessage
+//            //            System.out.println("消息生产到交换机没有路由到队列");
+////            log.info("消息 - {} 路由到队列失败！", msgId);
 //        });
+
+//////        //比上面的方法多一个s是Returns不是Return
+////        //ReturnedMessage  //不行
+        rabbitTemplate.setReturnsCallback(returnedMessage ->
+        {
+            String exchange = returnedMessage.getExchange();
+            String routingKey = returnedMessage.getRoutingKey();
+            int replyCod = returnedMessage.getReplyCode();
+            String replyText = returnedMessage.getReplyText();
+            String messageId = "";
+            RabbitMqMessage rabbitMqMessage = null;
+
+            // json 序列化，默认SimpleMessageConverter jdk 序列化
+            try {
+
+                String failedMessage = new String(returnedMessage.getMessage().getBody());
+                rabbitMqMessage = objectMapper.readValue(failedMessage, RabbitMqMessage.class);
+                messageId = rabbitMqMessage.getMessageId();
+            } catch (Exception e) {
+                log.info("", e);
+            }
+
+//            // 默认jdk 序列化：SimpleMessageConverter  序列化  rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+//            try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(returnedMessage.getMessage().getBody()))) {
+//                rabbitMqMessage = (RabbitMqMessage) ois.readObject();
+//
+//            } catch (Exception e) {
+//                log.error("", e);
+//            }
+
+            messageId = rabbitMqMessage.getMessageId();
+
+            log.info("消息 - {} 路由到队列失败.", messageId);
+        });
 
 //        CachingConnectionFactory.ConfirmType
 
@@ -151,13 +185,28 @@ public class RabbitMQConfig {
 //
 //        SIMPLE，当被ack/nack后会等待所有消息被发布，如果超时会触发异常，甚至关闭连接通道。
 
-        //当消息路由失败时候先执行  setConfirmCallsetReturnCallback后执行
+        //当消息路由失败时候先执行  setConfirmCallback, setReturnCallback后执行
 
+        //消息没有生产到交换机
 //        // 消息生产确认, yml需要配置 publisher-confirms: true
         rabbitTemplate.setConfirmCallback(new PushConfirmCallback());
 
         return rabbitTemplate;
     }
+
+
+    //json 序列化，默认SimpleMessageConverter jdk 序列化
+    //配置RabbitTemplate和RabbitListenerContainerFactory
+    @Bean
+    public RabbitListenerContainerFactory<?> rabbitListenerContainerFactory(ConnectionFactory connectionFactory){
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        // 手动确认
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        factory.setMessageConverter(new Jackson2JsonMessageConverter(this.objectMapper));
+        return factory;
+    }
+
 
     /*
     多线程消费:涉及到消费顺序行要将一个大队列根据业务消息id分成多个小队列
@@ -181,6 +230,9 @@ public class RabbitMQConfig {
         // 手动确认
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         factory.setConnectionFactory(connectionFactory);
+
+//        //json 序列化，默认SimpleMessageConverter jdk 序列化
+//        factory.setMessageConverter(new Jackson2JsonMessageConverter());
         return factory;
     }
 

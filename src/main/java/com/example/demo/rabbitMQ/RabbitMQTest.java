@@ -74,8 +74,8 @@ public class RabbitMQTest {
         try {
 
 //            directExchangeProducer.produceDelayedMessage();
-//            directExchangeProducer.producer();
-            directExchangeProducer.produceNotConvertSent();
+            directExchangeProducer.producer();
+//            directExchangeProducer.produceNotConvertSent();
 //            directExchangeProducer.publishInBatch();
 
 //        fanoutExchangeProducer.producer();

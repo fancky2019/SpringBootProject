@@ -11,6 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+
+/**
+ * 1、确认模式（confirm）：可以监听消息是否从生产者成功传递到交换。
+ * 2、退回模式（return）：可以监听消息是否从交换机成功传递到队列。
+ * 3、消费者消息确认（Ack）：可以监听消费者是否成功处理消息。
+ */
+
+
+/**
+ * 确保发送到交换机，不确定路由到队列
+ */
 @Component
 @Slf4j
 public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
@@ -21,7 +32,7 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
     @Override
     public void confirm(CorrelationData correlationData, boolean ack, String s) {
         try {
-
+// s:channel error; protocol method: #method<channel.close>(reply-code=404, reply-text=NOT_FOUND - no exchange 'UnBindDirectExchange' in vhost '/', class-id=60, method-id=40)
             String msgId = correlationData.getId();
             if (ack) {
                 //发送消息时候指定的消息的id，根据此id设置消息表的消息状态为已发送
@@ -42,7 +53,7 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
 
                 //更新本地消息表，消息已经发送到mq
                 log.info("消息 - {} 发送到交换机成功！", msgId);
-                log.info("消息 - {} 发送到交换机成功！{}", msgId,"123");
+//                log.info("消息 - {} 发送到交换机成功！{}", msgId,"123");
             } else {
                 log.info("消息 - {} 发送到交换机失败！ ", msgId);
             }
