@@ -43,8 +43,8 @@ public class RocketMQProducer {
     public SendResult sendMsg(String msgBody) {
         try {
             RabbitMqMessage msg = new RabbitMqMessage(msgBody);
-            //同步发送
-            SendResult sendResult = rocketMQTemplate.syncSend(RocketMQConfig.TOPIC, MessageBuilder.withPayload(msg).build(),30);
+            //同步发送  timeout 时间值调大，单位ms 3000
+            SendResult sendResult = rocketMQTemplate.syncSend(RocketMQConfig.TOPIC, MessageBuilder.withPayload(msg).build(),3000);
             //  log.info("【sendMsg】sendResult={}", JSON.toJSONString(sendResult));
             return sendResult;
         } catch (Exception e) {

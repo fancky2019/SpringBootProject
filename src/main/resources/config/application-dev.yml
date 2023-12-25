@@ -400,7 +400,8 @@ elasticjob:
   jobs:
     simpleJob: #job名称不能重复
       elasticJobClass: com.example.demo.jobs.SpringBootSimpleJob
-      cron: 0/20 * * * * ?   #秒分钟小时
+#      cron: 0/20 * * * * ?   #秒分钟小时
+      cron: 0 0 * * * ?   #秒分钟小时:每小时触发一次
       shardingTotalCount: 3 #3个分片，三台机器执行次任务
       shardingItemParameters: 0=Beijing,1=Shanghai,2=Guangzhou
       job-parameter: fanckytest
@@ -409,7 +410,7 @@ elasticjob:
         script.command.line: "echo SCRIPT Job: "
     testSimpleJob:
       elasticJobClass: com.example.demo.jobs.TestSimpleJob
-      cron: 0/10 * * * * ?
+      cron: 0 0 * * * ?   #秒分钟小时:每小时触发一次
       shardingTotalCount: 1
       overwrite: true #否则job接收不到参数
   dump:
