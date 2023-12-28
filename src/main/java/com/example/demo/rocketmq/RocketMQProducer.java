@@ -44,7 +44,7 @@ public class RocketMQProducer {
         try {
             RabbitMqMessage msg = new RabbitMqMessage(msgBody);
             //同步发送  timeout 时间值调大，单位ms 3000
-            SendResult sendResult = rocketMQTemplate.syncSend(RocketMQConfig.TOPIC, MessageBuilder.withPayload(msg).build(),3000);
+            SendResult sendResult = rocketMQTemplate.syncSend(RocketMQConfig.TOPIC, MessageBuilder.withPayload(msg).build());
             //  log.info("【sendMsg】sendResult={}", JSON.toJSONString(sendResult));
             return sendResult;
         } catch (Exception e) {
@@ -59,6 +59,7 @@ public class RocketMQProducer {
      * （适合对响应时间敏感的业务场景）
      */
     public void sendAsyncMsg(String msgBody) {
+
         RabbitMqMessage msg = new RabbitMqMessage(msgBody);
         String uuid = msg.getMessageId();
         Message<RabbitMqMessage> message = MessageBuilder.withPayload(msg).build();
@@ -69,13 +70,13 @@ public class RocketMQProducer {
                 //不是发送的消息的id
                 String msgId = sendResult.getMsgId();
                 String uuid1 = uuid;
-
                 // 处理消息发送成功逻辑
                 int m = 0;
             }
 
             @Override
             public void onException(Throwable throwable) {
+                RabbitMqMessage rabbitMqMessage = msg;
                 // 处理消息发送异常逻辑
                 int m = 0;
             }

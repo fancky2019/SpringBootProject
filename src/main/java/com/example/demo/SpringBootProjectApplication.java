@@ -64,7 +64,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableFeignClients//启用feign。微服务之间调用,服务发现
 @EnableHystrixDashboard //开启HystrixDashBoard
 @EnableCircuitBreaker//开启HystrixDashBoard
-@EnableAspectJAutoProxy(exposeProxy = true)//开启spring注解aop配置的支持
+@EnableAspectJAutoProxy(exposeProxy = true)//开启spring注解aop配置的支持，获取当前代理对象 (PersonService) AopContext.currentProxy();
 //移动到SwaggerConfig 配置文件类处理
 //@EnableSwagger2  //EnableSwagger2  http://localhost:8081/swagger-ui.html
 @EnableRetry

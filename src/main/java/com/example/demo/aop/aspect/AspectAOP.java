@@ -8,6 +8,20 @@ import java.lang.reflect.Method;
 
 //静态代理，jdk动态代理，cglib动态代理
 /*
+spring2 默认使用cglib 动态代理 ，设置jdk 动态代理：spring.aop.proxy-target-class=false
+AOP( 面向切面编程 )是一种思想，它的目的就是在不修改源代码的基础上，对原有功能进行增强。
+SpringAOP是对AOP思想的一种实现，Spring底层同时支持jdk和cglib动态代理。
+
+1、如果目标对象实现了接口，默认情况下会采用JDK的动态代理实现AOP；
+如果目标对象实现了接口，可以强制使用CGLIB实现AOP；
+如何强制使用CGLIB实现AOP？
+添加CGLIB库；
+在Spring配置文件中加入<aop:aspectj-autoproxy proxy-target-class="true"/>。
+
+2、如果目标对象没有实现了接口，必须采用CGLIB库，Spring会自动在JDK动态代理和CGLIB之间转换。
+
+
+
 Spring AOP面向切面：
 实现
 一、JDK动态代理的两个核心接口(类)分别是InvocationHandler和Proxy。注意：只能代理接口。
@@ -23,6 +37,9 @@ Spring AOP 属于运行时增强，而 AspectJ 是编译时增强. Spring AOP �
 
 org.springframework.core.annotation.Order，使用注解value属性指定优先级。
 @Order数值越低，表明优先级越高，@Order 默认为最低优先级，即最大数值：
+
+按照切面类的名称的首字母进行排序操作，按照字典序。比如有两个切面类：LogUtil、SecurityUtil，就是LogUtil先执行。
+如果需要人为地规定顺序，可以在切面类上添加@Order注解同时可以添加具体的值，值越小，越优先
  */
 
 

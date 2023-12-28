@@ -21,7 +21,11 @@ http://localhost:8081/doc.html
 
 
  */
-
+// 新版swagger  	<dependency>
+//			<groupId>org.springdoc</groupId>
+//			<artifactId>springdoc-openapi-ui</artifactId>
+//			<version>${springdoc.version}</version>
+//		</dependency>
 
 //@Configuration
 //@EnableSwagger2
@@ -45,4 +49,21 @@ public class SwaggerConfig {
                 .version("1.0")
                 .build();
     }
+
+
+
+    //springdoc-openapi-ui  配置
+//    @Bean
+//    public OpenAPI springShopOpenAPI() {
+//        return new OpenAPI()
+//                .info(new Info().title("SpringShop API")
+//                        .description("Spring shop sample application")
+//                        .version("v0.0.1")
+//                        .license(new License().name("Apache 2.0").url("http://springdoc.org")))
+//                .externalDocs(new ExternalDocumentation()
+//                        .description("SpringShop Wiki Documentation")
+//                        .url("https://springshop.wiki.github.org/docs"));
+//
+//
+//    }
 }

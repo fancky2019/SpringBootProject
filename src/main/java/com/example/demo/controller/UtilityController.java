@@ -20,10 +20,7 @@ import com.example.demo.model.vo.UploadData;
 import com.example.demo.rabbitMQ.mqtt.MqttProduce;
 import com.example.demo.rocketmq.RocketmqTest;
 import com.example.demo.service.RetryService;
-import com.example.demo.service.demo.CacheService;
-import com.example.demo.service.demo.DemoProductService;
-import com.example.demo.service.demo.IProductTestService;
-import com.example.demo.service.demo.PersonService;
+import com.example.demo.service.demo.*;
 import com.example.demo.shiro.ShiroRedisProperties;
 import com.example.demo.sse.ISseEmitterService;
 import com.example.demo.utility.RSAUtil;
@@ -133,7 +130,7 @@ public class UtilityController {
     private DemoProductService demoProductService;
 
     @Autowired
-    private PersonService personService;
+    private IPersonService personService;
 
 //    @Autowired
 //    private FanckyTest fanckyTest;
@@ -671,16 +668,11 @@ public class UtilityController {
      */
     @GetMapping(value = "/propagation")
     public void propagation() {
-        try {
-            Person person = new Person();
-            person.setName("fancky");
-            person.setAge(27);
-            person.setBirthday(LocalDateTime.now());
-            personService.insert(person);
-        } catch (Exception e) {
-            LOGGER.error("", e);
-        }
-
+        Person person = new Person();
+        person.setName("fancky");
+        person.setAge(27);
+        person.setBirthday(LocalDateTime.now());
+        personService.insert(person);
     }
     //endregion
 

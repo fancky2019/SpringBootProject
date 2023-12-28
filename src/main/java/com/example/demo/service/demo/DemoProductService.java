@@ -3,6 +3,7 @@ package com.example.demo.service.demo;
 import com.example.demo.dao.demo.DemoProductMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.MqMessage;
+import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.DemoProductRequest;
@@ -311,9 +312,10 @@ public class DemoProductService {
 
     /*
     spring 事务基于对象aop 代理实现的 ，不能在方法内调用，否则事务失效
+    事务内不能try catch ，不然要手动抛出异常，否则内部吞噬异常，导致事务失效
      */
-
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+//    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.NESTED)
     public int insertTransactional() {
         List<DemoProduct> list = new ArrayList<>();
         for (int i = 0; i < 1; i++) {
@@ -331,6 +333,9 @@ public class DemoProductService {
         }
 
         int i = demoProductMapper.batchInsert(list);
+
+//        int n = Integer.parseInt("ds");
+
 
         String msgId = UUID.randomUUID().toString();
         String msgContent = "setMsgContent";
@@ -473,4 +478,9 @@ public class DemoProductService {
         List<ProductTest> result = this.demoProductMapper.getByIds(ids);
         int m = 0;
     }
+
+
+    //region 事务测试
+    // UtilityController propagation 方法
+    //endregion
 }

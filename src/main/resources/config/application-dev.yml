@@ -44,6 +44,10 @@ mybatis-plus:
 
 #开发配
 spring:
+  #默认cglib 代理，设置jdk 动态代理
+#  aop:
+#    proxy-target-class: false
+  #swagger 3配置 建议使用springdoc 代替swagger
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

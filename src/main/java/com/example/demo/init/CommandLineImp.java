@@ -28,7 +28,7 @@ public class CommandLineImp implements org.springframework.boot.CommandLineRunne
     @Override
     public void run(String... args) throws Exception {
         String name = fistName;
-        LOGGER.info("CommandLineImp");
+        LOGGER.info("CommandLineImp 系统启动完成！");
         int m = 0;
     }
 }
