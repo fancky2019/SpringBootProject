@@ -6,10 +6,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /*
-spring boot 异步线程池配置
+spring boot Async线程池配置
  */
 //@Configuration
-public class SyncConfiguration {
+public class AsyncConfiguration {
     @Bean(name = "asyncPoolTaskExecutor")
     public ThreadPoolTaskExecutor executor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();

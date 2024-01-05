@@ -346,13 +346,33 @@ public class LogAspect {
                 throw new Exception("can not find token!");
             }
             /**
-             * 注解代码浸入太大，
+             *
+             * 方案一
              * 1、唯一索引，
              * 2、（1）前台打开新增页面访问后台获取该表的token (存储在redis 中的uuid)key:用户id_功能.value token
              *        获取token时候判断用户有没有没有过期时间的token，有就说明已请求，直接返回
-             *   （2） 检测前段提交的token是不是在redis 中而且过期时间不为0，验证通过入库成功更新redis 中的token过期时间
+             *         UtilityController  getRepeatToken
+             *   （2） 检测前段提交的token是不是在redis 中而且过期时间不为0，验证通过更新redis 中的token过期时间
              * 3、对于篡改的api请求通过加密方式，防止信息泄密。https://host:port//api。 nginx
              *
+             *
+             *
+             *方案二
+             *设计思路新加一个处理结果状态，
+             *
+             * 1、唯一索引，
+             *
+             * token 对象{tokenStr uuid,state枚举值：0 未处理 1：处理中 2：处理完成 }
+             * 2、（1）前台打开新增页面访问后台获取该表的token 对象key:用户id_功能.value token 对象
+             *       并将token 对象存入数据库
+             *   （2） 检测前段提交时候，获取token时候判断是不是在redis
+             *         a:token 不存在返回。
+             *         b:token 存在，判断token对象的状态是不是0，0说明没请求，否则直接返回
+             *         验证通过入库成功更新redis的状态值1和token过期时间，事务成功更新token的状态值2
+             *
+             *
+             *
+             * 3、对于篡改的api请求通过加密方式，防止信息泄密。https://host:port//api。 nginx
              */
             //重复提交：redis 中设置带有过期的key,判断是否存在。  过期防止程序异常，不释放锁
             //在redis中判断 userid + path 是否存在

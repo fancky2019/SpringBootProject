@@ -128,6 +128,7 @@ public class DemoProductService {
 
     public int batchInsertSession() {
         List<DemoProduct> list = new ArrayList<>();
+//        300000
         for (int i = 0; i < 300000; i++) {
             DemoProduct demoProduct = new DemoProduct();
             demoProduct.setGuid(UUID.randomUUID().toString());
@@ -141,28 +142,34 @@ public class DemoProductService {
             demoProduct.setTimestamp(LocalDateTime.now());
             list.add(demoProduct);
         }
-        while (true) {
-            try {
-                Thread.sleep(60 * 1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-//        StopWatch stopWatch = new StopWatch("BatchInsert");
-//        stopWatch.start("BatchInsert_Trace1");
-//        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);
-//        //不能用spring 注入的mapper,必须从session 里取，否则是一条一条插入
-//        DemoProductMapper mapper = sqlSession.getMapper(DemoProductMapper.class);
-//        list.forEach(mapper::insert);
-////        sqlSession.clearCache();
-//        sqlSession.commit();
-//
-//        stopWatch.stop();
-////        stopWatch.start("BatchInsert_Trace2");
-//        long miils = stopWatch.getTotalTimeMillis();
-//        logger.info(stopWatch.shortSummary());
+//        while (true) {
+//            try {
+//                Thread.sleep(60 * 1000);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+        StopWatch stopWatch = new StopWatch("BatchInsert");
+        stopWatch.start("BatchInsert_Trace1");
 
-//        return 0;
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);) {
+            //不能用spring 注入的mapper,必须从session 里取，否则是一条一条插入
+            DemoProductMapper mapper = sqlSession.getMapper(DemoProductMapper.class);
+            list.forEach(mapper::insert);
+//        sqlSession.clearCache();
+            sqlSession.commit();
+        }
+//        catch (Exception ex)
+//        {
+//            throw ex;
+//        }
+
+        stopWatch.stop();
+//        stopWatch.start("BatchInsert_Trace2");
+        long miils = stopWatch.getTotalTimeMillis();
+        logger.info(stopWatch.shortSummary());
+
+        return 0;
     }
 
     /**
@@ -320,7 +327,10 @@ public class DemoProductService {
         List<DemoProduct> list = new ArrayList<>();
         for (int i = 0; i < 1; i++) {
             DemoProduct demoProduct = new DemoProduct();
-            demoProduct.setGuid(UUID.randomUUID().toString());
+            String uuid = UUID.randomUUID().toString();
+            uuid = "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+                    + "dssssssssssssssssssssssssssssssssssssssssss";
+            demoProduct.setGuid(uuid);
             demoProduct.setProductName("productNameshish事务" + i);
             demoProduct.setProductStyle("productStyle" + i);
             demoProduct.setImagePath("D:\\fancky\\git\\Doc");
@@ -411,6 +421,8 @@ public class DemoProductService {
 //                    }
 //                });
 
+
+        //mybatis 操作数据库异常会抛出异常，mybatis貌似单线程执行。代码不会执行到发送mq
         mqSendUtil.send(mqMessage);
         return 0;
     }
@@ -453,6 +465,7 @@ public class DemoProductService {
 
     /**
      * 平均 7ms 左右 ，偶尔1ms
+     *
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
@@ -466,7 +479,7 @@ public class DemoProductService {
         stopWatch.stop();
         //7ms 左右
         long costTime = stopWatch.getTotalTimeMillis();
-        log.info("getByIdTrace - {} cost_time {} ms  ", id,costTime);
+        log.info("getByIdTrace - {} cost_time {} ms  ", id, costTime);
 
         return MessageResult.success();
     }
