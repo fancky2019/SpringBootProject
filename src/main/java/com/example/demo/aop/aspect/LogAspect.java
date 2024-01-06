@@ -9,6 +9,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -20,6 +21,7 @@ import org.springframework.util.StopWatch;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -395,10 +397,48 @@ public class LogAspect {
                 if (expireTime != null && !expireTime.equals(-1L)) {
                     return MessageResult.faile("repeat commit,please get token first!");
                 }
-                redisTemplate.expire(key, 1, TimeUnit.DAYS);
+                //设置过期时间：此处要加锁，防止并发（两个线程同时访问过期时间都为-1）
+                //加锁可以设置redisson 或者jdk synchronized  ReentrantLock cas
+                //单机使用cas AtomicInteger 性能好点。 web 服务考虑可拓展 使用分布式锁
+//                redisTemplate.expire(key, 1, TimeUnit.DAYS);
                 //先设置redis 过期，然后调用业务，业务异常就重新调用key,也就浪费一个key
-                Object obj = monitor(jp, servletPath);
 
+
+
+                String expireLockKey = key + ":expire";
+                RLock lock = redissonClient.getLock(expireLockKey);
+
+                try {
+                    boolean isLocked = lock.isLocked();
+                    if (isLocked) {
+                        //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
+                        return MessageResult.faile("重复提交：服务器繁忙");
+                    }
+                    //tryLock(long waitTime, long leaseTime, TimeUnit unit)
+                    //获取锁等待时间
+                    long waitTime = 1;
+                    //持有所超时释放锁时间  24 * 60 * 60;
+                    long leaseTime = 30;
+                    boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+                    isLocked = lock.isLocked();
+                    if (isLocked) {
+                        redisTemplate.expire(key, 1, TimeUnit.DAYS);
+                    } else {
+                        //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
+
+                        return MessageResult.faile("重复提交:获取锁失败");
+                    }
+                } catch (InterruptedException e) {
+                    // throw  e;
+                    return MessageResult.faile(e.getMessage());
+                } finally {
+                    //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
+                    //unlock 删除key
+                    lock.unlock();
+
+                }
+
+                Object obj = monitor(jp, servletPath);
                 return obj;
             } catch (Exception e) {
                 //redis 保证高可用
@@ -407,7 +447,7 @@ public class LogAspect {
             }
 
         } else {
-            return monitor(jp,servletPath);
+            return monitor(jp, servletPath);
         }
 
 

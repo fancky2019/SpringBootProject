@@ -645,7 +645,7 @@ public class UtilityController {
 
     //region 事务传播
 
-    /*
+    /**
      @Transactional：
     Propagation propagation() default Propagation.REQUIRED;
 
@@ -771,7 +771,7 @@ public class UtilityController {
     }
 
 
-    /*
+    /**
     异常不会抛出到主线程，主线程代码已经执行完
      */
     private void threadExceptionTestFun() {
@@ -1014,7 +1014,7 @@ public class UtilityController {
 
     }
 
-    /*
+    /**
     如果maxAge属性为正数：则表示该Cookie会在maxAge秒之后自动失效。浏览器会将maxAge为正数的Cookie持久化，
     即写到对应的Cookie文件中。无论客户关闭了浏览器还是电脑，只要还在maxAge秒之前，登录网站时该Cookie仍然有效。
     下面代码中的Cookie信息将永远有效。
