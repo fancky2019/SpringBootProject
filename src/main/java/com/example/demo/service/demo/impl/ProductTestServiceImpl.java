@@ -7,20 +7,31 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.dao.demo.ProductTestMapper;
+import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
+import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.demo.IProductTestService;
+import com.example.demo.utility.ConfigConst;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -31,9 +42,18 @@ import java.util.UUID;
  * @since 2022-11-17
  */
 @Service
+@Slf4j
 public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, ProductTest> implements IProductTestService {
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+    @Autowired
+    private RedissonClient redissonClient;
+    @Autowired
     private ProductTestMapper productTestMapper;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public ProductTestServiceImpl(ProductTestMapper productTestMapper) {
         this.productTestMapper = productTestMapper;
@@ -130,11 +150,9 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         List<ProductTest> list1 = this.list(lambdaQueryWrapper);
 
         LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(MqMessage::getPublishAck,true);
+        updateWrapper.set(MqMessage::getPublishAck, true);
 //        updateWrapper.eq(MqMessage::getMsgId, msgId);//条件
 //        mqMessageService.update(updateWrapper);
-
-
 
 
         ProductTestMapper productTestMapper = this.getBaseMapper();
@@ -207,5 +225,85 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //                .eq(User::getUserId,user.getUserId()));
 
     }
+
+    //region redis
+
+    /**
+     * * 雪崩：随机过期时间
+     * * 击穿：分布式锁（表名），没有取到锁，sleep(50)+重试
+     * * 穿透：分布式锁（表名）+设置一段时间的null值，没有取到锁，sleep(50)+重试
+     *
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    public String getStringKey(@PathVariable int id) throws Exception {
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        String key = ConfigConst.DEMO_PRODUCT_PREFIX + id;
+        String val = valueOperations.get(key);
+        if (StringUtils.isEmpty(val)) {
+
+            String lockKey = ConfigConst.DEMO_PRODUCT_PREFIX + "redisson";
+            //获取分布式锁，此处单体应用可用synchronic，分布式就用redisson 锁
+            RLock lock = redissonClient.getLock(lockKey);
+
+
+            long maxRetryTimes = 3;
+            int retryTimes = 1;
+            long step = 5;
+
+            while (true) {
+                if (lock.isLocked()) {
+                    Thread.sleep(step * retryTimes);
+                    retryTimes++;
+                    lock = redissonClient.getLock(lockKey);
+                } else {
+                    break;
+                }
+                if (retryTimes > maxRetryTimes) {
+                    log.info("Thread - {} 获得锁 {}失败！锁被占用！", Thread.currentThread().getId(), lockKey);
+                    return null;
+                }
+
+            }
+
+            try {
+
+                boolean lockSuccessfully = lock.tryLock(1, 30, TimeUnit.SECONDS);
+                if (!lockSuccessfully) {
+                    log.info("Thread - {} 获得锁 {}失败！锁被占用！", Thread.currentThread().getId(), lockKey);
+                    return null;
+                }
+                BigInteger idB = BigInteger.valueOf(id);
+                ProductTest productTest = this.baseMapper.getById(idB);
+                //穿透：设置个空值
+                if (productTest == null) {
+                    valueOperations.set(key, ConfigConst.EMPTY_VALUE);
+                    redisTemplate.expire(key, 60, TimeUnit.SECONDS);
+                } else {
+                    String json = objectMapper.writeValueAsString(productTest);
+                    valueOperations.set(key, json);
+                }
+            } catch (Exception e) {
+                throw e;
+            } finally {
+                //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
+                //unlock 删除key
+                lock.unlock();
+            }
+
+
+        }
+        else {
+            if(ConfigConst.EMPTY_VALUE.equals(val))
+            {
+                return null;
+            }
+        }
+
+
+        return val;
+    }
+    //endregion
 
 }

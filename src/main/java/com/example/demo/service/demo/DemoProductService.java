@@ -10,22 +10,32 @@ import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.RabbitMQTest;
+import com.example.demo.utility.ConfigConst;
 import com.example.demo.utility.MqSendUtil;
+import com.example.demo.utility.RedisUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigInteger;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +47,7 @@ import java.util.concurrent.*;
 @Slf4j
 public class DemoProductService {
 
-    private static final Logger logger = LogManager.getLogger(DemoProductService.class);
+//    private static final Logger logger = LogManager.getLogger(DemoProductService.class);
     @Autowired
     DemoProductMapper demoProductMapper;
     @Autowired
@@ -47,6 +57,8 @@ public class DemoProductService {
 
     @Autowired
     private MqSendUtil mqSendUtil;
+
+
 
     public MessageResult<Void> test() throws Exception {
 //        batchInsert();
@@ -88,7 +100,7 @@ public class DemoProductService {
         stopWatch.stop();
 //        stopWatch.start("BatchInsert_Trace2");
         long miils = stopWatch.getTotalTimeMillis();
-        logger.info(stopWatch.shortSummary());
+        log.info(stopWatch.shortSummary());
 
         return MessageResult.success();
     }
@@ -121,7 +133,7 @@ public class DemoProductService {
         stopWatch.stop();
 //        stopWatch.start("BatchInsert_Trace2");
         long miils = stopWatch.getTotalTimeMillis();
-        logger.info(stopWatch.shortSummary());
+        log.info(stopWatch.shortSummary());
 
         return 0;
     }
@@ -167,7 +179,7 @@ public class DemoProductService {
         stopWatch.stop();
 //        stopWatch.start("BatchInsert_Trace2");
         long miils = stopWatch.getTotalTimeMillis();
-        logger.info(stopWatch.shortSummary());
+        log.info(stopWatch.shortSummary());
 
         return 0;
     }
@@ -252,7 +264,7 @@ public class DemoProductService {
 
             stopWatch.stop();
             long miils = stopWatch.getTotalTimeMillis();
-            logger.info("会话插入时间：" + miils + "ms   ," + stopWatch.shortSummary());
+            log.info("会话插入时间：" + miils + "ms   ," + stopWatch.shortSummary());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -282,7 +294,7 @@ public class DemoProductService {
         stopWatch.stop();
 //        stopWatch.start("BatchInsert_Trace2");
         long miils = stopWatch.getTotalTimeMillis();
-        logger.info(stopWatch.shortSummary());
+        log.info(stopWatch.shortSummary());
 
         return 0;
     }
@@ -312,7 +324,7 @@ public class DemoProductService {
         stopWatch.stop();
 //        stopWatch.start("BatchInsert_Trace2");
         long miils = stopWatch.getTotalTimeMillis();
-        logger.info(stopWatch.shortSummary());
+        log.info(stopWatch.shortSummary());
 
         return 0;
     }
@@ -496,4 +508,6 @@ public class DemoProductService {
     //region 事务测试
     // UtilityController propagation 方法
     //endregion
+
+
 }

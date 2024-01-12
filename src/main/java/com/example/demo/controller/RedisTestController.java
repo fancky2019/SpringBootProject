@@ -4,6 +4,9 @@ import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.Student;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.demo.IProductTestService;
+import com.example.demo.utility.ConfigConst;
+import com.example.demo.utility.RedisUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,13 +50,14 @@ import java.util.concurrent.TimeUnit;
  * 雪崩：随机过期时间
  * 击穿：分布式锁（表名），没有取到锁，sleep(50)+重试
  * 穿透：分布式锁（表名）+设置一段时间的null值，没有取到锁，sleep(50)+重试
- *
+ * <p>
  * redis key 过期订阅：
  */
-/*
-指定前缀的key放在一个文件夹下。如：key_sb:UserInfo:1 路径前缀之间用冒号分开，当key超过两个RedisDesktop会显示在一个文件夹下。
 
- redis key 过期订阅：
+/**
+ * 指定前缀的key放在一个文件夹下。如：key_sb:UserInfo:1 路径前缀之间用冒号分开，当key超过两个RedisDesktop会显示在一个文件夹下。
+ * <p>
+ * redis key 过期订阅：
  */
 @RestController
 @RequestMapping("/redisTest")
@@ -78,6 +82,8 @@ public class RedisTestController {
 
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    private RedisUtil redisUtil;
 
     //region redis basic operation
     @GetMapping("")
@@ -174,9 +180,7 @@ public class RedisTestController {
             Set<String> zSetStr = zSetOperations.range("zSetKey1", 0, -1);
             //取三个
             Set<String> zSetStr1 = zSetOperations.range("zSetKey1", 0, 2);
-            Iterator<String> zSetStringIterator = zSetStr.iterator();
-            while (zSetStringIterator.hasNext()) {
-                String str = zSetStringIterator.next();
+            for (String str : zSetStr) {
                 Integer n = 0;
             }
             //删除
@@ -438,14 +442,15 @@ public class RedisTestController {
 
     //region Redisson
     //配置集群的时候;@SpringBootApplication(exclude = {RedissonAutoConfiguration.class})
-    /*
-    单Redis节点模式
-    doc:https://github.com/redisson/redisson/wiki/%E7%9B%AE%E5%BD%95
 
-    使用redisson 的配置没有成功。让redisson采用springboot的redis的配置
+    /**
+     * 单Redis节点模式
+     * doc:https://github.com/redisson/redisson/wiki/%E7%9B%AE%E5%BD%95
+     * <p>
+     * 使用redisson 的配置没有成功。让redisson采用springboot的redis的配置
      */
     @RequestMapping("/testRedisson")
-    public String testRedisson() {
+    public String testRedisson() throws InterruptedException {
         //获取分布式锁，只要锁的名字一样，就是同一把锁
         RLock lock = redissonClient.getLock("redisKey_testRedisson");
 
@@ -469,11 +474,11 @@ public class RedisTestController {
             //或者直接返回
             isLocked = lock.isLocked();
 
-            if (isLocked) {
+            if (lockSuccessfully) {
                 logger.info(MessageFormat.format("Thread - {0} 获得锁！", Thread.currentThread().getId()));
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw e;
         } finally {
             //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
             //unlock 删除key
@@ -483,4 +488,16 @@ public class RedisTestController {
         return "Hello Redisson!";
     }
     //endregion
+
+    /**
+     * redis 穿透 击穿
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/getStringKey/{id}")
+    public MessageResult<String> getStringKey(@PathVariable int id) throws Exception {
+        String val = productTestService.getStringKey(id);
+        return MessageResult.success(val);
+    }
 }

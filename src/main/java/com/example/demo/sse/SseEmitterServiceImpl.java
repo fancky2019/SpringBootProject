@@ -13,6 +13,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+/**
+ * SSE	                      WebScoket
+ * http 协议	独立的             websocket 协议
+ * 轻量，使用简单	              相对复杂
+ * 默认支持断线重连	          需要自己实现断线重连
+ * 文本传输	                  二进制传输
+ * 支持自定义发送的消息类型	       -
+ */
 @Slf4j
 @Service
 public class SseEmitterServiceImpl implements ISseEmitterService {

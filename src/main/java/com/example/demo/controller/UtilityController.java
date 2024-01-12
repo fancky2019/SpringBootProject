@@ -1202,6 +1202,12 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
     @Autowired
     private ISseEmitterService sseEmitterService;
 
+    /**
+     * 前段页面 user /index.html
+     * @param userId
+     * @return
+     * @throws Exception
+     */
     @GetMapping(value = "/sseConnect/{userId}")
     @ApiOperation(value = "建立Sse链接", notes = "建立Sse链接", httpMethod = "GET")
     public SseEmitter push(@PathVariable("userId") String userId) throws Exception {
