@@ -246,30 +246,9 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
             String lockKey = ConfigConst.DEMO_PRODUCT_PREFIX + "redisson";
             //获取分布式锁，此处单体应用可用synchronic，分布式就用redisson 锁
             RLock lock = redissonClient.getLock(lockKey);
-
-
-            long maxRetryTimes = 3;
-            int retryTimes = 1;
-            long step = 5;
-
-            while (true) {
-                if (lock.isLocked()) {
-                    Thread.sleep(step * retryTimes);
-                    retryTimes++;
-                    lock = redissonClient.getLock(lockKey);
-                } else {
-                    break;
-                }
-                if (retryTimes > maxRetryTimes) {
-                    log.info("Thread - {} 获得锁 {}失败！锁被占用！", Thread.currentThread().getId(), lockKey);
-                    return null;
-                }
-
-            }
-
             try {
 
-                boolean lockSuccessfully = lock.tryLock(1, 30, TimeUnit.SECONDS);
+                boolean lockSuccessfully = lock.tryLock(30, 60, TimeUnit.SECONDS);
                 if (!lockSuccessfully) {
                     log.info("Thread - {} 获得锁 {}失败！锁被占用！", Thread.currentThread().getId(), lockKey);
                     return null;
@@ -289,6 +268,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
             } finally {
                 //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
                 //unlock 删除key
+                //如果锁因超时（leaseTime）会抛异常
                 lock.unlock();
             }
 
