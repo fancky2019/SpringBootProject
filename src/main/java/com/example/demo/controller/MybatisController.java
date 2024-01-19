@@ -122,5 +122,24 @@ public class MybatisController {
         return message;
     }
 
+    /**
+     * 更新覆盖：两个事务对数据库写，要加悲观锁（redisson，for update 容易死锁）使得事务串化。更新的时候加上版本号条件
+     *         如果返回受影响行为0，更新失败。抛异常，否则继续执行。
+     * @return
+     */
+    @RequestMapping(value = "/coverUpdate")
+    public MessageResult<Void> coverUpdate() {
+        MessageResult<Void> message = new MessageResult<>();
+
+        try {
+            demoProductService.insertTransactional();
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        }
+        return message;
+    }
+
+
 
 }

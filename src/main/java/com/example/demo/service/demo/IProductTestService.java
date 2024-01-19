@@ -2,6 +2,8 @@ package com.example.demo.service.demo;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.demo.model.entity.demo.ProductTest;
+import com.example.demo.model.viewModel.MessageResult;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * <p>
@@ -14,4 +16,7 @@ import com.example.demo.model.entity.demo.ProductTest;
 public interface IProductTestService extends IService<ProductTest> {
 
     void mybatisPlusTest();
-}
+
+     String getStringKey( int id) throws Exception ;
+
+    }

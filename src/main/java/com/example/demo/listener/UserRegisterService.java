@@ -1,13 +1,18 @@
 package com.example.demo.listener;
 
 import com.example.demo.listener.UserRegisterEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserRegisterService implements ApplicationEventPublisherAware {
+//public class UserRegisterService implements ApplicationEventPublisherAware {
+public class UserRegisterService{
 
+//        private ApplicationEventPublisher applicationEventPublisher;
+
+    @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
     /**
@@ -26,8 +31,8 @@ public class UserRegisterService implements ApplicationEventPublisherAware {
         this.applicationEventPublisher.publishEvent(new UserRegisterEvent(userName));
     }
 
-    @Override
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) { //@1
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
+//    @Override
+//    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) { //@1
+//        this.applicationEventPublisher = applicationEventPublisher;
+//    }
 }

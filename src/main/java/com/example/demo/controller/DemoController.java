@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.aop.aspect.NoRepeatSubmit;
 import com.example.demo.model.entity.demo.DemoProduct;
+import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.service.demo.IDemoOrderItemService;
@@ -34,7 +35,7 @@ public class DemoController {
     @GetMapping("/demoProductTest")
     @RepeatPermission
     @NoRepeatSubmit
-    public MessageResult<Void> demoProductTest() throws Exception {
+    public MessageResult<ProductTest> demoProductTest() throws Exception {
         return   demoProductService.getById();
 //        return   demoProductService.test();
 //      return   demoProductService.insert();

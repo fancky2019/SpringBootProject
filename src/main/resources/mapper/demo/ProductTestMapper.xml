@@ -7,18 +7,18 @@
     </update>
     <select id="getMaxId" resultType="java.math.BigInteger">
         select max(id)
-        from product_test
+        from demo_product
     </select>
 
-    <select id="getById" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.demo.ProductTest">
+    <select id="getById" parameterType="java.math.BigInteger" resultType="com.example.demo.model.entity.demo.ProductTest">
         select *
-        from product_test
+        from demo_product
         where id = #{id,jdbcType=BIGINT}
     </select>
 
     <select id="getByIds" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.demo.ProductTest">
         select *
-        from product_test
+        from demo_product
         where id = #{id,jdbcType=BIGINT}
     </select>
 

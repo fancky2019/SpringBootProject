@@ -11,6 +11,10 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class ThreadPoolExecutorConfig {
 
+    /**
+     * 异步方法上直接加 @Async("threadPoolExecutor")
+     * @return
+     */
     @Bean(name="threadPoolExecutor")
     public Executor threadPoolExecutor(){
         ThreadPoolTaskExecutor threadPoolExecutor = new ThreadPoolTaskExecutor();
