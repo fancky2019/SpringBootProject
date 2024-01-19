@@ -3,9 +3,18 @@ package com.example.demo.listener;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.stereotype.Component;
 
-
+/**
+ * 事件参数类
+ *
+ *
+ * springboot  事件
+ * 1、事件参数 继承自ApplicationEvent，内部object 保存事件对象
+ * 2、注册事件添加Listener  a、实现ApplicationListener<T> 接口，T为时间参数。
+ *                       b、加@EventListener注解的方法，方法参数为
+ * 3、在事件触发地方调用 ApplicationEventPublisher  publishEvent() 方法
+ */
 public class UserRegisterEvent extends ApplicationEvent {
-    //用户名
+
     private String userName;
 
     public UserRegisterEvent(Object source) {
