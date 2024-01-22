@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.dao.demo.ProductTestMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
@@ -67,9 +68,10 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        this.saveEntity();
 //        saveOrUpdateBatch();
 //        queryTest();
+        queryParam();
 //        truncateTest();
 //        deleteTableDataTest();
-        selectMaxId();
+//        selectMaxId();
     }
 
     private void saveEntity() {
@@ -115,6 +117,15 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         this.list(queryWrapper);
     }
 
+    private void queryParam() {
+        LambdaQueryWrapper<ProductTest> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(ProductTest::getProductName, "productName_xiugai55555");
+        lambdaQueryWrapper.last("limit 3");
+        //分页
+        List<ProductTest> list1 = this.list(lambdaQueryWrapper);
+        int m = 0;
+    }
+
     private void queryTest() {
         /*
         原符号       <       <=      >       >=      <>
@@ -146,7 +157,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 
         LambdaQueryWrapper<ProductTest> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(ProductTest::getProductName, "productName_xiugai55555");
-
+        lambdaQueryWrapper.last("limit 3");
         List<ProductTest> list1 = this.list(lambdaQueryWrapper);
 
         LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();
@@ -273,10 +284,8 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
             }
 
 
-        }
-        else {
-            if(ConfigConst.EMPTY_VALUE.equals(val))
-            {
+        } else {
+            if (ConfigConst.EMPTY_VALUE.equals(val)) {
                 return null;
             }
         }
