@@ -1,11 +1,13 @@
 package com.example.demo.listener;
 
 import com.example.demo.listener.UserRegisterEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 //public class UserRegisterService implements ApplicationEventPublisherAware {
 public class UserRegisterService{
@@ -24,6 +26,8 @@ public class UserRegisterService{
 
         //用户注册(将用户信息入库等操作)
         System.out.println(String.format("用户【%s】注册成功", userName));
+        log.info("UserRegisterEvent publish thread id - {}",Thread.currentThread().getId());
+        int m = 0;
         //发布注册成功事件
 //        this.applicationEventPublisher.publishEvent(new UserRegisterEvent(this, userName));
 //        this.applicationEventPublisher.publishEvent(new ApplicationEvent(userName){});

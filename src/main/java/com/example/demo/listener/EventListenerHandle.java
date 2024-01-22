@@ -1,9 +1,11 @@
 package com.example.demo.listener;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,7 +17,8 @@ springboot 两种事件模式：
 
  */
 @Component
-public class UserRegisterListener {
+@Slf4j
+public class EventListenerHandle {
 
     /*
     先按照order 大小顺序执行，然后执行实现接口的方法
@@ -32,10 +35,15 @@ public class UserRegisterListener {
         int m = 0;
     }
 
+    /**
+     * 使用异步处理，可以不用阻塞原线程
+     * @param event
+     */
+    @Async("threadPoolExecutor")
     @EventListener
     @Order(1)
-    public void sendCompon(UserRegisterEvent event) {
-
+    public void sendCommon(UserRegisterEvent event) {
+        log.info("UserRegisterEvent listener thread id - {}",Thread.currentThread().getId());
         int m = 0;
     }
 

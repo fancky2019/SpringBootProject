@@ -23,12 +23,20 @@ eureka:
 #否则项目中同时存在的myabtis 和mybatis0plus因引用的mybatis版本不一致无法共存。
 #mybatis:
 mybatis-plus:
-#  mybatis全局配置文件
+##  mybatis全局配置文件
   config-location: classpath:mybatis-config.xml
-  #  Mapper文件存放的位置
+  #  Mapper文件存放的位置，多了层文件夹，默认不用配置
   mapper-locations: classpath:mapper/**/*.xml
   #  实体类所在的包
   type-aliases-package: com.example.demo.model.entity
+  #配置日志  打印sql语句 。config-location和configuration 不能同时存在
+  #NoLoggingImpl不打印日志，StdOutImpl(默认)打印日志在控制台，不会打印到日志文件中。slf4j.Slf4jImpl 输出到日志文件
+  #debug 查看日志通过mybatis log plugin
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
 #配置日志  打印sql语句
 #mybatis-plus:
 #  configuration:
@@ -41,6 +49,19 @@ mybatis-plus:
 #  reasonable: true
 #  supportMethodsArguments: true
 #  params: count=countSql
+
+#默认log
+#logging:
+#  #  path没起作用
+# # path:
+#  file: logs/log.log
+#log4j2 配置,log4j2.xml不能和log4j2.yml同时存在，否则都会生效
+logging:
+  config: classpath:log4j2.xml
+  #mybatis-plus 日志级别配置，不用配置
+#  level:
+#    com.baomidou.mybatisplus: DEBUG
+
 
 #开发配
 spring:
@@ -372,14 +393,6 @@ hystrix:
           thread:
             timeoutInMilliseconds: 10000 #断路器超时时间，默认1000ms
 
-#默认log
-#logging:
-#  #  path没起作用
-# # path:
-#  file: logs/log.log
-#log4j2 配置,log4j2.xml不能和log4j2.yml同时存在，否则都会生效
-logging:
-  config: classpath:log4j2.xml
 
 swagger2:
   enable: true #false (或者在pro环境下不写此配置):禁用就打不开swagger网页

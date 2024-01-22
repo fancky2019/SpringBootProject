@@ -25,7 +25,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("product_test")
+@TableName("demo_product")
 public class ProductTest implements Serializable {
 
     private static final long serialVersionUID = 1L;

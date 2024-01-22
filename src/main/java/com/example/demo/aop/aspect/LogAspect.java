@@ -392,6 +392,10 @@ public class LogAspect {
                 if (tokenObj == null) {
                     return MessageResult.faile("token is not exist!");
                 }
+                if(!repeatToken.equals(tokenObj.toString()))
+                {
+                    return MessageResult.faile("token is incorrect!");
+                }
                 Long expireTime = redisTemplate.getExpire(key);
                 //有过期时间
                 if (expireTime != null && !expireTime.equals(-1L)) {
@@ -402,6 +406,7 @@ public class LogAspect {
                 //单机使用cas AtomicInteger 性能好点。 web 服务考虑可拓展 使用分布式锁
 //                redisTemplate.expire(key, 1, TimeUnit.DAYS);
                 //先设置redis 过期，然后调用业务，业务异常就重新调用key,也就浪费一个key
+                //否则设计 异常的时候要把过期时间设置为-1，建议采用上面毕竟已经处理过，尽管异常了
 
 
 
@@ -409,20 +414,24 @@ public class LogAspect {
                 RLock lock = redissonClient.getLock(expireLockKey);
 
                 try {
-                    boolean isLocked = lock.isLocked();
-                    if (isLocked) {
-                        //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
-                        return MessageResult.faile("重复提交：服务器繁忙");
-                    }
                     //tryLock(long waitTime, long leaseTime, TimeUnit unit)
                     //获取锁等待时间
                     long waitTime = 1;
                     //持有所超时释放锁时间  24 * 60 * 60;
                     long leaseTime = 30;
                     boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
-                    isLocked = lock.isLocked();
-                    if (isLocked) {
+                    if (lockSuccessfully) {
+                        //获取锁之后判断过期时间是否被之前线程设置过，设置过就处理过业务
+                         expireTime = redisTemplate.getExpire(key);
+                        //有过期时间
+                        if (expireTime != null && !expireTime.equals(-1L)) {
+                            return MessageResult.faile("repeat commit,please get token first!");
+                        }
+
+//                        Object obj = monitor(jp, servletPath);
+//                        //业务处理成功再设计才设置过期时间
                         redisTemplate.expire(key, 1, TimeUnit.DAYS);
+//                        return obj;
                     } else {
                         //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
 
