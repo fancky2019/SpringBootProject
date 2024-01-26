@@ -18,7 +18,7 @@ springboot 两种事件模式：
  */
 @Component
 @Slf4j
-public class EventListenerHandle {
+public class EventListenerHandler {
 
     /*
     先按照order 大小顺序执行，然后执行实现接口的方法

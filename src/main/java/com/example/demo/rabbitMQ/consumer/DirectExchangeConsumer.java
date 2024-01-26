@@ -33,6 +33,12 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
 
 //    public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
 
+/*
+  @RabbitHandler 监听不同的消息体，处理不同类型的消息
+ @RabbitListener 标注在类上面表示当有收到消息的时候，就交给 @RabbitHandler 的方法处理，
+ 具体使用哪个方法处理，根据 MessageConverter 转换后的参数类型
+*/
+
 
     //发送什么类型就用什么类型接收.如果RabbitHandler 的方法参数类型不对将不会调用，即消息不会被消费
     //多个方法绑定同一个队列MQ会轮训发送给各个方法消费
