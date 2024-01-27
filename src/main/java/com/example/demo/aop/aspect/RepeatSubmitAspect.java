@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * 前段请求：
+ * 一锁二判三更新四数据库兜底 唯一约束
+ *
+ * rpc ：request消息中加requestId
+ *
  * 1、唯一索引，
  * 2、（1）前台打开新增页面访问后台获取该表的token (存储在redis 中的uuid)key:用户id_功能.value token
  *        获取token时候判断用户有没有没有过期时间的token，有就说明已请求，直接返回

@@ -1,6 +1,7 @@
 package com.example.demo.aop.aspect;
 
 import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.utility.RedisKeyConfigConst;
 import com.example.demo.utility.RepeatPermission;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
@@ -298,7 +299,7 @@ public class LogAspect {
 
         String httpMethod = httpServletRequest.getMethod();
         ///sbp/demo/demoProductTest
-        String ss = httpServletRequest.getRequestURI();
+        String uri = httpServletRequest.getRequestURI();
         // /sbp
         String contextPath = httpServletRequest.getContextPath();
         ///demo/demoProductTest
@@ -329,14 +330,14 @@ public class LogAspect {
 //        Object[] args = jp.getArgs();
 //
 //
-        log.info("{} - {} 开始处理,参数列表 - {}", className, methodName, Arrays.toString(args));
+        log.info("{} : {} - {} 开始处理,参数列表 - {}", uri, className, methodName, Arrays.toString(args));
 //        Object result = jp.proceed();
 //        log.info("{} - {} 处理完成,返回结果 - {}", className, methodName,objectMapper.writeValueAsString(result));
 //
 
 
         RepeatPermission repeatPermission = method.getDeclaredAnnotation(RepeatPermission.class);
-
+        Object result = null;
         if (repeatPermission != null) {
             String apiName = repeatPermission.value();
             if (StringUtils.isEmpty(apiName)) {
@@ -348,7 +349,9 @@ public class LogAspect {
                 throw new Exception("can not find token!");
             }
             /**
+             * 一锁二判三更新四数据库兜底 唯一约束
              *
+             * rpc ：request消息中加requestId
              * 方案一
              * 1、唯一索引，
              * 2、（1）前台打开新增页面访问后台获取该表的token (存储在redis 中的uuid)key:用户id_功能.value token
@@ -381,7 +384,7 @@ public class LogAspect {
 
             //redis 中设置key
             BigInteger userId = new BigInteger("1");
-            String uri = httpServletRequest.getRequestURI();
+//            String uri = httpServletRequest.getRequestURI();
             String key = "repeat:" + userId + ":" + apiName;
 //            String key = "repeat:" + userId + ":" + repeatToken;
             ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
@@ -392,8 +395,7 @@ public class LogAspect {
                 if (tokenObj == null) {
                     return MessageResult.faile("token is not exist!");
                 }
-                if(!repeatToken.equals(tokenObj.toString()))
-                {
+                if (!repeatToken.equals(tokenObj.toString())) {
                     return MessageResult.faile("token is incorrect!");
                 }
                 Long expireTime = redisTemplate.getExpire(key);
@@ -409,9 +411,8 @@ public class LogAspect {
                 //否则设计 异常的时候要把过期时间设置为-1，建议采用上面毕竟已经处理过，尽管异常了
 
 
-
-                String expireLockKey = key + ":expire";
-                RLock lock = redissonClient.getLock(expireLockKey);
+                String operationLockKey = key + RedisKeyConfigConst.KEY_LOCK_SUFFIX;
+                RLock lock = redissonClient.getLock(operationLockKey);
 
                 try {
                     //tryLock(long waitTime, long leaseTime, TimeUnit unit)
@@ -422,7 +423,7 @@ public class LogAspect {
                     boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
                     if (lockSuccessfully) {
                         //获取锁之后判断过期时间是否被之前线程设置过，设置过就处理过业务
-                         expireTime = redisTemplate.getExpire(key);
+                        expireTime = redisTemplate.getExpire(key);
                         //有过期时间
                         if (expireTime != null && !expireTime.equals(-1L)) {
                             return MessageResult.faile("repeat commit,please get token first!");
@@ -444,11 +445,8 @@ public class LogAspect {
                     //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
                     //unlock 删除key
                     lock.unlock();
-
                 }
-
-                Object obj = monitor(jp, servletPath);
-                return obj;
+                result = monitor(jp, servletPath);
             } catch (Exception e) {
                 //redis 保证高可用
                 // redisTemplate.delete(key);
@@ -456,9 +454,11 @@ public class LogAspect {
             }
 
         } else {
-            return monitor(jp, servletPath);
+            result = monitor(jp, servletPath);
         }
-
+//        如果是列别插叙数据量大，会影响性能
+        log.debug("{} : {} - {} 处理完成,返回结果 - {}", uri, className, methodName, objectMapper.writeValueAsString(result));
+        return result;
 
     }
 

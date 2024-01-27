@@ -63,6 +63,7 @@ public class RabbitMQController {
     @Retryable注解的方法不能有返回值，不然@Recover注解的方法无效
 
      */
+
     @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000L, multiplier = 2))
     public void send() {
         CompletableFuture.runAsync(() -> {
