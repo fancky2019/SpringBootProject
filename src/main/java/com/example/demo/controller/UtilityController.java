@@ -20,19 +20,23 @@ import com.example.demo.model.vo.UploadData;
 import com.example.demo.rabbitMQ.mqtt.MqttProduce;
 import com.example.demo.rocketmq.RocketmqTest;
 import com.example.demo.service.RetryService;
+import com.example.demo.service.TokenService;
 import com.example.demo.service.demo.*;
 import com.example.demo.shiro.ShiroRedisProperties;
 import com.example.demo.sse.ISseEmitterService;
 import com.example.demo.utility.RSAUtil;
+import com.example.demo.utility.RedisKeyConfigConst;
 import com.example.demo.utility.RepeatPermission;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.swagger.annotations.ApiOperation;
+import javassist.bytecode.stackmap.BasicBlock;
 import jdk.nashorn.internal.ir.ReturnNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -131,7 +135,8 @@ public class UtilityController {
 
     @Autowired
     private IPersonService personService;
-
+    @Autowired
+    private TokenService tokenService;
 //    @Autowired
 //    private FanckyTest fanckyTest;
 
@@ -646,25 +651,24 @@ public class UtilityController {
     //region 事务传播
 
     /**
-     @Transactional：
-    Propagation propagation() default Propagation.REQUIRED;
-
-    Isolation isolation() default Isolation.DEFAULT;
-     ESTED：嵌套事务回滚到回滚点。
-    NESTED是为被嵌套的方法开启了一个子事务，这个事务与父类使用的是同一个连接。
-    REQUIRES_NEW是使用一个全新的事务，这个事务属于另外一条全新的连接。
-    两者最重要的体现，就是在多数据源中，REQUIRES_NEW会再次触发一下数据源的获取，而NESTED则不会
-
-
-
-
-    REQUIRED： 没有事务就开启，有事务就加入，不指定的话默认为该类型
-    SUPPORTS： 有事务就加入，没有就无事务运行
-    MANDATORY： 加入当前事务，如果不存在则抛出异常
-    REQUIRES_NEW： 没有就开启，有了挂起原来的，开启新的事务：调用者在老事务，新事物不影响外层食物，外层事务回滚整个事务。
-    NOT_SUPPORTED： 有了挂起，没有就无事务运行
-    NEVER： 以非事务方式执行，如果存在事务则抛出异常
-    Propagation.NESTED: 调用者事务存在调用者事务和被调用者事务分别在两个事务中执行，嵌套事务回滚到回滚点。外层事务回滚整个事务。
+     * @Transactional： Propagation propagation() default Propagation.REQUIRED;
+     * <p>
+     * Isolation isolation() default Isolation.DEFAULT;
+     * ESTED：嵌套事务回滚到回滚点。
+     * NESTED是为被嵌套的方法开启了一个子事务，这个事务与父类使用的是同一个连接。
+     * REQUIRES_NEW是使用一个全新的事务，这个事务属于另外一条全新的连接。
+     * 两者最重要的体现，就是在多数据源中，REQUIRES_NEW会再次触发一下数据源的获取，而NESTED则不会
+     * <p>
+     * <p>
+     * <p>
+     * <p>
+     * REQUIRED： 没有事务就开启，有事务就加入，不指定的话默认为该类型
+     * SUPPORTS： 有事务就加入，没有就无事务运行
+     * MANDATORY： 加入当前事务，如果不存在则抛出异常
+     * REQUIRES_NEW： 没有就开启，有了挂起原来的，开启新的事务：调用者在老事务，新事物不影响外层食物，外层事务回滚整个事务。
+     * NOT_SUPPORTED： 有了挂起，没有就无事务运行
+     * NEVER： 以非事务方式执行，如果存在事务则抛出异常
+     * Propagation.NESTED: 调用者事务存在调用者事务和被调用者事务分别在两个事务中执行，嵌套事务回滚到回滚点。外层事务回滚整个事务。
      */
     @GetMapping(value = "/propagation")
     public void propagation() {
@@ -772,7 +776,7 @@ public class UtilityController {
 
 
     /**
-    异常不会抛出到主线程，主线程代码已经执行完
+     * 异常不会抛出到主线程，主线程代码已经执行完
      */
     private void threadExceptionTestFun() {
 
@@ -1015,18 +1019,18 @@ public class UtilityController {
     }
 
     /**
-    如果maxAge属性为正数：则表示该Cookie会在maxAge秒之后自动失效。浏览器会将maxAge为正数的Cookie持久化，
-    即写到对应的Cookie文件中。无论客户关闭了浏览器还是电脑，只要还在maxAge秒之前，登录网站时该Cookie仍然有效。
-    下面代码中的Cookie信息将永远有效。
-
-
-    如果maxAge为负数：则表示该Cookie仅在本浏览器窗口以及本窗口打开的子窗口内有效，关闭窗口后该Cookie即失效。
-    maxAge为负数的Cookie，为临时性Cookie，不会被持久化，不会被写到Cookie文件中。Cookie信息保存在浏览器内存中，
-    因此关闭浏览器该Cookie就消失了。Cookie默认的maxAge值为–1。
-
-
-cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来的Cookie。
-      修改：只需要新建一个同名的Cookie，并将maxAge设置为0，并添加到response中覆盖原来的Cookie
+     * 如果maxAge属性为正数：则表示该Cookie会在maxAge秒之后自动失效。浏览器会将maxAge为正数的Cookie持久化，
+     * 即写到对应的Cookie文件中。无论客户关闭了浏览器还是电脑，只要还在maxAge秒之前，登录网站时该Cookie仍然有效。
+     * 下面代码中的Cookie信息将永远有效。
+     * <p>
+     * <p>
+     * 如果maxAge为负数：则表示该Cookie仅在本浏览器窗口以及本窗口打开的子窗口内有效，关闭窗口后该Cookie即失效。
+     * maxAge为负数的Cookie，为临时性Cookie，不会被持久化，不会被写到Cookie文件中。Cookie信息保存在浏览器内存中，
+     * 因此关闭浏览器该Cookie就消失了。Cookie默认的maxAge值为–1。
+     * <p>
+     * <p>
+     * cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来的Cookie。
+     * 修改：只需要新建一个同名的Cookie，并将maxAge设置为0，并添加到response中覆盖原来的Cookie
      */
     @RequestMapping(value = "/getCookies", method = RequestMethod.GET)
     public String getCookies(HttpServletResponse response) {
@@ -1204,6 +1208,7 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
 
     /**
      * 前段页面 user /index.html
+     *
      * @param userId
      * @return
      * @throws Exception
@@ -1324,30 +1329,7 @@ cookie 删除：新建一个同名的Cookie，添加到response中覆盖原来�
      */
     @GetMapping(value = "/getRepeatToken")
     public MessageResult<String> getRepeatToken(String apiName) {
-        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
-        BigInteger userId = new BigInteger("1");
-
-        String key = "repeat:" + userId + ":" + apiName;
-        // Object val = valueOperations.get(key);//null
-        /*
-           redis  ttl
-       如果key不存在或者已过期，返回 -2
-       如果key存在并且没有设置过期时间（永久有效），返回 -1 。
-
-         */
-        Long expireTime = redisTemplate.getExpire(key, TimeUnit.DAYS);//-2
-        String repeatToken = "";
-//        if (expireTime.==-1))
-        if (expireTime.equals(-1L)) {
-            //直接返回
-            repeatToken = valueOperations.get(key).toString();//null
-        } else {
-            //插入
-            repeatToken = UUID.randomUUID().toString().replace("-", "");
-            valueOperations.set(key, repeatToken);
-        }
-
-        return MessageResult.success(repeatToken);
+        return tokenService.getRepeatToken(apiName);
     }
 
     @Autowired
