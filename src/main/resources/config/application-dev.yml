@@ -52,7 +52,7 @@ mybatis-plus:
 
 #默认log
 #logging:
-#  #  path没起作用
+#  # log4j2 path没起作用.logback的配置
 # # path:
 #  file: logs/log.log
 #log4j2 配置,log4j2.xml不能和log4j2.yml同时存在，否则都会生效

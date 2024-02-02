@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+	<property name="log.pattern"
+		value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%tid] %-5level %logger{50}[%line] - %msg%n" />
+
+	<!-- 控制台输出日志 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+				<pattern>${log.pattern}</pattern>
+			</layout>
+		</encoder>
+	</appender>
+	<!--每天生成一个日志文件，保存30天的日志文件。 -->
+	<appender name="DayFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>/applog/spring-boot-project/demo-admin.log}</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>/applog/spring-boot-project/demo-admin.%d{yyyy-MM-dd}.log}</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+				<pattern>${log.pattern}</pattern>
+			</layout>
+            <charset>utf-8</charset>
+		</encoder>
+	</appender>
+	<appender name="grpc-log" class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.log.GRPCLogClientAppender">
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.mdc.TraceIdMDCPatternLogbackLayout">
+				<pattern>${log.pattern}</pattern>
+			</layout>
+            <charset>utf-8</charset>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+	</appender>
+
+    <springProfile name="pro">
+        <root>
+            <level value="info" />
+            <appender-ref ref="DayFile" />
+            <appender-ref ref="grpc-log" />
+            <appender-ref ref="STDOUT" />
+        </root>
+    </springProfile>
+
+    <springProfile name="sit">
+        <root>
+            <level value="info" />
+            <appender-ref ref="DayFile" />
+            <appender-ref ref="grpc-log" />
+            <appender-ref ref="STDOUT" />
+        </root>
+    </springProfile>
+
+	<!--根logger控制 --> 
+	<springProfile name="dev,default,local">
+		<root>
+			<level value="info" />
+            <appender-ref ref="grpc-log" />
+			<appender-ref ref="STDOUT" />
+			<appender-ref ref="DayFile" />
+		</root>
+	</springProfile>
+</configuration>
