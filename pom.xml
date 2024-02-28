@@ -574,6 +574,16 @@
 
 
 
+        <!--        retry   start-->
+        <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+        <!--        retry end-->
+
+
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -591,14 +601,12 @@
             <systemPath>${project.basedir}/lib/model-0.0.1-SNAPSHOT.jar</systemPath>
         </dependency>
 
-
-       <!--        retry   start-->
-        <!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
         <dependency>
-            <groupId>org.springframework.retry</groupId>
-            <artifactId>spring-retry</artifactId>
+            <groupId>com.fancky</groupId>
+<!--            <artifactId>fancky-spring-boot-starter</artifactId>-->
+            <artifactId>fancky-spring-boot-starter</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
-        <!--        retry end-->
 
     </dependencies>
 

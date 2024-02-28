@@ -10,6 +10,7 @@ import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.entity.rabc.Users;
+import com.example.demo.model.impot.ImportModelTest;
 import com.example.demo.model.pojo.*;
 import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.request.TestRequest;
@@ -27,6 +28,8 @@ import com.example.demo.sse.ISseEmitterService;
 import com.example.demo.utility.RSAUtil;
 import com.example.demo.utility.RedisKeyConfigConst;
 import com.example.demo.utility.RepeatPermission;
+import com.example.demo.utility.SpringApplicationContextHelper;
+import com.example.fanckyspringbootstarter.service.ToolService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -36,6 +39,7 @@ import jdk.nashorn.internal.ir.ReturnNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -584,6 +588,7 @@ public class UtilityController {
         //MD5加密不可逆  比较密码  和MD5加密后的字符串比较
         //对密码进行 md5 加密
         String md5Password = DigestUtils.md5DigestAsHex(password.getBytes());
+        //6dff2291fe2e822de2e8068a182c4759 .32字符
         String upperStr = md5Password.toUpperCase();
         String str16 = md5Password.substring(8, 24);
         return md5Password;
@@ -724,15 +729,6 @@ public class UtilityController {
     //endregion
 
 
-    //region starterTest
-
-    @GetMapping(value = "/starterTest")
-    public String starterTest() {
-//        return this.fanckyTest.getHost()+":"+this.fanckyTest.getPort();
-        return null;
-    }
-    //endregion
-
 
     //region threadExceptionTest
 
@@ -813,7 +809,7 @@ public class UtilityController {
     //region form-data 文件和数据 @RequestPart
     //不指定盘符要加入 commons-io 依赖
 
-
+     // content-type multipart/form-data
     //文件：单个文件用 MultipartFile file 接收，多个用MultipartFile[] files.注意别名设置
     //     前台postman 设置 点击 description 右侧... 选中 content-type .在contentType设置multipart/form-data
     //表单数据：前台postman 设置json 字符串提交
@@ -926,7 +922,7 @@ public class UtilityController {
     }
 
     /**
-     * 文件上传 导入excel
+     * 文件上传 导入excel。excel 中的列可以不和实体类字段严格匹配
      * 1. 创建excel对应的实体对象
      * 2. 由于默认一行行的读取excel，所以需要创建excel一行一行的回调监听器
      * 3. 直接读即可
@@ -1142,7 +1138,7 @@ public class UtilityController {
     }
 
     @GetMapping("/mybatisPlusTest")
-    public String mybatisPlusTest(DemoProductRequest request) {
+    public String mybatisPlusTest(DemoProductRequest request) throws InterruptedException {
         productTestService.mybatisPlusTest();
         return "completed";
 
@@ -1353,4 +1349,41 @@ public class UtilityController {
         return retryService.test(5);
     }
 
+    //region @Import
+    @Autowired
+    ImportModelTest importModelTest22;
+
+    @GetMapping(value = "/importTest")
+    public MessageResult<List<String>> importTest() {
+
+        List<String> nameList = new ArrayList<>();
+        ApplicationContext applicationContext = SpringApplicationContextHelper.getApplicationContext();
+        String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
+        // 遍历Spring容器中的beanName
+        for (String beanDefinitionName : beanDefinitionNames) {
+            if (beanDefinitionName.toLowerCase().contains("importModelTest".toLowerCase())) {
+                nameList.add(beanDefinitionName);
+            }
+        }
+        String name = importModelTest22.getFistName();
+        return MessageResult.success(nameList);
+    }
+    //endregion
+
+    //region starterTest  项目fancky-spring-boot-starter
+
+    /**
+    1、定义字段配置文件类
+    2、定义自动配置类：启用配置属性加入IOC、starter业务类通过bean加入IOC
+    3、添加spring.factories文件配置自动装配
+    4、pom配置无main类启动 install到本地仓库
+    5、其他工程引入依赖
+     */
+    @Autowired
+    ToolService toolService;
+    @GetMapping(value = "/starterTest")
+    public MessageResult<String> starterTest() {
+        return MessageResult.success(toolService.CommonFun());
+    }
+    //endregion
 }

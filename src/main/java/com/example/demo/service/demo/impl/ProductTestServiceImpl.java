@@ -62,16 +62,29 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 
 
     @Override
-    public void mybatisPlusTest() {
+//    @Transactional(rollbackFor = Exception.class)
+    public void mybatisPlusTest() throws InterruptedException {
 
 //        this.baseMapper.deleteBatchIds();
 //        this.saveEntity();
 //        saveOrUpdateBatch();
+//        queryById();
 //        queryTest();
-        queryParam();
+//        queryParam();
 //        truncateTest();
 //        deleteTableDataTest();
 //        selectMaxId();
+
+        /*
+        mybatis  缓存默认 一级缓存 sqlSession 级别 ，二级缓存 mapper 级别
+        spring mybatis 缓存需要在事务内开启，否则无效。
+
+        下面两次查询如果开启事务只会执行一次数据库查询，不开启事务会执行两次数据库查询
+         */
+        ProductTest productTest = this.getById(17);
+
+        Thread.sleep(5000);
+        ProductTest productTest1 = this.getById(17);
     }
 
     private void saveEntity() {
@@ -123,6 +136,11 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         lambdaQueryWrapper.last("limit 3");
         //分页
         List<ProductTest> list1 = this.list(lambdaQueryWrapper);
+        int m = 0;
+    }
+
+    private void queryById() {
+        ProductTest list1 = this.getById(17);
         int m = 0;
     }
 
@@ -255,7 +273,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         if (StringUtils.isEmpty(val)) {
 
             String lockKey = ConfigConst.DEMO_PRODUCT_PREFIX + "redisson";
-            //获取分布式锁，此处单体应用可用synchronic，分布式就用redisson 锁
+            //获取分布式锁，此处单体应用可用 synchronized，分布式就用redisson 锁
             RLock lock = redissonClient.getLock(lockKey);
             try {
 
