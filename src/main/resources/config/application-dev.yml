@@ -460,6 +460,10 @@ config:
         age: 29
     conditional-on-property: false
 
+##项目fancky-spring-boot-starter 配置
+fanckytest:
+  host: 192.168.5.7
+  port: 8888
 
 xxl:
   job:

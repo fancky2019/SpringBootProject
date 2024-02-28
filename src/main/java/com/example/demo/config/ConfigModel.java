@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 import com.example.demo.model.viewModel.Person;
 import lombok.Data;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -9,6 +10,12 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+
+/*
+@import 导入第三方类库的类到ioc 容器，id 是全类名
+@bean id 是方法名
+ */
+
 
 /*
 使用@ConfigurationProperties注入对象，@value不能很好的解析复杂对象。
@@ -54,14 +61,15 @@ public @interface ConditionalOnProperty {
 
 @Data
 @Component
+//如果不配置，不报错，对象没有值
 @ConfigurationProperties(prefix = "config.config-model") //prefix= "配置项"   读取并与 bean 绑定。
 
 //@ConditionalOnProperty(name = "config.config-model.conditional-on-property", matchIfMissing = false)// name 没有配置就不加载
 //@ConditionalOnProperty(name = "config.config-model.conditional-on-property", havingValue = "true", matchIfMissing = true)// name + havingValue 控制配置bean 是否加载
 //@ConditionalOnProperty(prefix = "config.config-model.conditional-on-property", value = "true", matchIfMissing = true)
-//// 或者可以省略prefix前缀
-@ConditionalOnProperty(value = "config.config-model.conditional-on-property", havingValue = "false")//配置项的值是否匹配控制是否加载bean
-
+//// 或者可以省略prefix前缀，如果没有配置会报错
+//@ConditionalOnProperty(value = "config.config-model.conditional-on-property", havingValue = "false")//配置项的值是否匹配控制是否加载bean
+//@ConditionalOnClass(ConfigModel.class)
 public class ConfigModel {
     private String fistName;
     private  String address;

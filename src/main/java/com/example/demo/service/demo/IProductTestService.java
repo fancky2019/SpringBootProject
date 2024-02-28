@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  */
 public interface IProductTestService extends IService<ProductTest> {
 
-    void mybatisPlusTest();
+    void mybatisPlusTest() throws InterruptedException;
 
      String getStringKey( int id) throws Exception ;
 

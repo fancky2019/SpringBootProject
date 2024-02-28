@@ -81,7 +81,13 @@ public enum UnitEnum {
         return this.value;
     }
 
-    //JsonCreator ：反序列化时的 初始化函数，入参为 对应该枚举的 json值
+
+
+    /**
+     * JsonCreator ：反序列化时的 初始化函数，入参为 对应该枚举的 json值
+     * @param value
+     * @return
+     */
     @JsonCreator
     public static UnitEnum getUnitEnum(int value) {
         //values= MessageType.values()

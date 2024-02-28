@@ -11,7 +11,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/*
+/**
 源码参见github:https://github.com/spring-projects/spring-amqp
 
 spring cloud 消息总线默认集成了rabbitmq和kafka，使用上面和springboot没有区别
@@ -43,7 +43,7 @@ this.mapMsgs=msgs;
 
 单活模式队列：
 单活模式队列：微服务分布式集群，多个生产者写一个队列，多个消费者只有一个消费者消费队列
-x-single-active-consumer：单活模式，表示是否最多只允许一个消费者消费，如果有多个消费者同时绑定，
+x-single-active-consumer：默认false,单活模式，表示是否最多只允许一个消费者消费，如果有多个消费者同时绑定，
 则只会激活第一个，除非第一个消费者被取消或者死亡，才会自动转到下一个消费者。
 消息积压：将一个大队列分成几个小队列，根据messageId生产到相应队列，这样再配置单活队列，提高了消费能力，降低消息积压。
  */
