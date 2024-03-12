@@ -3,6 +3,7 @@ package com.example.demo.rabbitMQ.consumer;
 
 import com.alibaba.fastjson.JSON;
 import com.example.demo.model.entity.demo.DemoProduct;
+import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.viewModel.Person;
 import com.example.demo.rabbitMQ.BaseRabbitMqHandler;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
@@ -41,12 +42,16 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
 
 
     //发送什么类型就用什么类型接收.如果RabbitHandler 的方法参数类型不对将不会调用，即消息不会被消费
+    //sac:x-single-active-consumer=true (默认false)多个服务监听一个队列，只会有一个服务接受到消息，
+    //只有当这个服务挂了，其他服务才能接受到消息，可用于主备模式
+    //rabbitmq 默认轮训向所有服务中的一个发送消息
     //多个方法绑定同一个队列MQ会轮训发送给各个方法消费
     @RabbitHandler
     @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
 //    public void receivedMsg(Person messageContent,Channel channel,
     public void receivedMsg(Channel channel,
                             Message message,
+
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
                             @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName) throws Exception {
         try {
@@ -58,7 +63,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
             String messageId = message.getMessageProperties().getMessageId();
 
             //序列化出来的 和方法传进来的一样
-              String messageContentStr = new String(message.getBody());
+            String messageContentStr = new String(message.getBody());
             //  RabbitMqMessage rabbitMqMessage1 = objectMapper.readValue(messageContentStr, Person.class);
 
             super.onMessage(Person.class, message, channel, (msg) -> {
@@ -91,18 +96,22 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
     }
 
     //发送什么类型就用什么类型接收
+    //sac:x-single-active-consumer=true (默认false)多个服务监听一个队列，只会有一个服务接受到消息，
+    //只有当这个服务挂了，其他服务才能接受到消息，可用于主备模式
+    //rabbitmq 默认轮训向所有服务中的一个发送消息
     //多个方法绑定同一个队列MQ会轮训发送给各个方法消费
     //string 接收
-//    @RabbitHandler
-//    @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
-    public void receivedMsg(String receivedMessage, Channel channel,
+    @RabbitHandler
+    @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
+    public void receivedMsg(Message message, Channel channel,
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
                             @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName) throws Exception {
         try {
+            Object msg = message;
             //  System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
-
-            Person person = JSON.parseObject(receivedMessage, Person.class);
-            System.out.println("DirectExchange Queue:" + RabbitMQConfig.DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
+            int m = 0;
+//            Person person = JSON.parseObject(receivedMessage, Person.class);
+//            System.out.println("DirectExchange Queue:" + RabbitMQConfig.DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
 //            super.onMessage(deliveryTag, queueName, channel, (msg, ch) -> {
 //                        //业务处理
 //                        String errorDetail = msg.getContent();

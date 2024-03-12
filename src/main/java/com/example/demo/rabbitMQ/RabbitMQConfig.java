@@ -384,11 +384,21 @@ public class RabbitMQConfig {
         //设置死信队列的参数（交换机、路由key）
         // Queue(String name, boolean durable, boolean exclusive, boolean autoDelete, Map<String, Object> arguments)
         HashMap<String, Object> args = new HashMap<>();
+        //设置队列最大优先级[0,9]，发送消息时候指定优先级
+        args.put("x-max-priority", 10);
 //        args.put("x-message-ttl", 30000);
         // 设置该Queue的死信的队列
         args.put("x-dead-letter-exchange", DIRECT_EXCHANGE);
         // 设置死信routingKey
         args.put("x-dead-letter-routing-key", DIRECT_ROUTING_KEY_DLX);
+        //rabiitmq 默认发送给所有消费中的一个，机关集群也只会发给一个服务中的一个消费者
+        args.put("x-single-active-consumer", true);
+
+
+        //sac:单活队列
+//        map.put("x-single-active-consumer", true);
+//        HashMap<String,Object> args = new HashMap<String,Object>();
+//        args.put("x-single-active-consumer", true);
 //        QueueBuilder.durable(DIRECT_QUEUE_NAME).withArguments(args).build();
         return new Queue(DIRECT_QUEUE_NAME, true, false, false, args);
 //

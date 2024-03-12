@@ -1,6 +1,7 @@
 package com.example.demo;
 
 
+import com.example.demo.init.CommandLineImp;
 import com.example.demo.model.impot.EnableSelector;
 import com.example.fanckyspringbootstarter.config.EnableFanckyStarter;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
@@ -8,6 +9,7 @@ import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
+import org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -16,6 +18,7 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboard;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.retry.annotation.EnableRetry;
@@ -29,26 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 /*
- springboot springcloud 版本对应 https://spring.io/projects/spring-cloud#overview
+ springboot SpringCloud 版本对应 https://spring.io/projects/spring-cloud#overview
  */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //默认扫描的是启动类所在的包及其子包
@@ -92,8 +77,34 @@ public class SpringBootProjectApplication {
 
     //    RedisAutoConfiguration re=new RedisAutoConfiguration();
     public static void main(String[] args) {
-        ConfigurableApplicationContext applicationContext=
-        SpringApplication.run(SpringBootProjectApplication.class, args);
+        ConfigurableApplicationContext applicationContext =
+                SpringApplication.run(SpringBootProjectApplication.class, args);
+
+        /*
+           populateBean(beanName, mbd, instanceWrapper);
+            会生成bean
+			exposedObject = initializeBean(beanName, exposedObject, mbd);
+
+			//bean 生成 执行步骤
+			run 方法
+			refreshContext(context);
+			refresh
+				registerBeanPostProcessors(beanFactory);
+			PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors
+         */
+        //RabbitMQConfig commandLineImp
+//        Object cm= applicationContext.getBean("");
+//        AnnotationConfigApplicationContext
+
+        //region
+        /*
+        注册BeanDefinition : 入库run 方法内1、 context = createApplicationContext();
+       2、
+      	case SERVLET:
+				return new AnnotationConfigServletWebServerApplicationContext();
+         */
+        //endregion
+
 
         // ConfigurableApplicationContext 实现beanFactory 接口，
         //beanFactory getBean 的内部实现还是通过 FactoryBean 的getObject 方法
