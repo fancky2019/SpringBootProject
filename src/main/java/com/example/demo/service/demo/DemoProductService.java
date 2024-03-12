@@ -367,7 +367,7 @@ public class DemoProductService {
 
         String msgId = UUID.randomUUID().toString();
         String msgContent = "setMsgContent";
-
+       //rabbitMq 发送消息线程和spring事务不在同一个线程内，mq 内部抛出异常无法被spring 事务捕获，spring 无法事务回滚
         MqMessage mqMessage = new MqMessage
                 (RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME,
                         RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY,

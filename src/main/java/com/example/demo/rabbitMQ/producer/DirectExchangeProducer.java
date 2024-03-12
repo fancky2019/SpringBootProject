@@ -172,6 +172,8 @@ public class DirectExchangeProducer {
 
             MessageProperties messageProperties = new MessageProperties();
             String msgId = mqMessage.getMsgId();
+            //设置优先级
+            messageProperties.setPriority(9);
             messageProperties.setMessageId(msgId);
             //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
             Message message = new Message(mqMessage.getMsgContent().getBytes(), messageProperties);

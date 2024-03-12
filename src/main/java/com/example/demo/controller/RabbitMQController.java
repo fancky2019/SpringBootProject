@@ -31,7 +31,7 @@ public class RabbitMQController {
     private MqSendUtil mqSendUtil;
 
     @GetMapping("")
-    public MessageResult<Void> rabbitMQTest() {
+    public MessageResult<String> rabbitMQTest() {
 
         /*
           1、将消息和数据库业务对象一起提交
@@ -39,12 +39,12 @@ public class RabbitMQController {
           3、rabbitMQ 生产成功，回调将消息状态设置成已生产。
           4、rabbit 生产失败
         */
-       //rabbitMQ事务回调发送封装在  MqSendUtil
+        //rabbitMQ事务回调发送封装在  MqSendUtil
 
         rabbitMQTest.test();
 
 
-        return null;
+        return MessageResult.success("complete");
     }
 
     /*
