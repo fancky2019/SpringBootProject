@@ -351,7 +351,7 @@ public class LogAspect {
             /**
              * 一锁二判三更新四数据库兜底 唯一约束
              *
-             * rpc ：request消息中加requestId
+             * rpc ：request消息中加requestId或者把请求参数md5摘要成字符串
              * 方案一
              * 1、唯一索引，
              * 2、（1）前台打开新增页面访问后台获取该表的token (存储在redis 中的uuid)key:用户id_功能.value token

@@ -39,7 +39,8 @@ public class DemoOrderItemServiceImpl extends ServiceImpl<DemoOrderItemMapper, D
         LocalDateTime localDateTime=LocalDateTime.parse("2010-07-02 00:00:00",dateTimeFormatter);
 
         List<DemoOrderItem> list = new ArrayList<>();
-        for (int i = 0; i < 2000000; i++) {
+//        2000000
+        for (int i = 0; i < 2; i++) {
 
             localDateTime=localDateTime.plusSeconds(200);
             DemoOrderItem demoOrderItem = new DemoOrderItem();
@@ -59,7 +60,13 @@ public class DemoOrderItemServiceImpl extends ServiceImpl<DemoOrderItemMapper, D
         stopWatch.start("DemoOrderItemBatchInsert_Trace1");
 
         try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+            //MybatisMapperProxy
             //不能用spring 注入的mapper,必须从session 里取，否则是一条一条插入
+            //mapper:MybatisMapperProxy 内部newInstance 调用jdk 动态代理生成mapper 代理类 ,
+            // invoke 内部调用，
+            // 实现接口MapperMethodInvoker 的Invoke
+            //内部 MybatisMapperMethod
+            //DynamicContext  的 DynamicSqlSource  的 getBoundSql 拼接生成sql语句
             DemoOrderItemMapper demoOrderItemMapper = sqlSession.getMapper(DemoOrderItemMapper.class);
             list.forEach(demoOrderItemMapper::insert);
 //        sqlSession.clearCache();

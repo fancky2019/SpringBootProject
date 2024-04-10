@@ -42,6 +42,7 @@ public class MqSendUtil {
             return;
         }
 
+        //事务回调：事务同步，此处待处理，
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
             @Override
             public void afterCompletion(int status) {

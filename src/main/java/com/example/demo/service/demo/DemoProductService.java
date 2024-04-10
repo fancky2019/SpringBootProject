@@ -13,6 +13,7 @@ import com.example.demo.rabbitMQ.RabbitMQTest;
 import com.example.demo.utility.ConfigConst;
 import com.example.demo.utility.MqSendUtil;
 import com.example.demo.utility.RedisUtil;
+import com.example.demo.utility.SpringApplicationContextHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
@@ -28,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Async;
@@ -421,7 +423,7 @@ public class DemoProductService {
 //            }
 //        });
 
-
+        //事务回调：事务同步，此处待处理，
 //        TransactionSynchronizationManager.registerSynchronization(
 //                new TransactionSynchronizationAdapter() {
 //                    @Override
@@ -446,7 +448,11 @@ public class DemoProductService {
     }
 
     public DemoProduct selectByPrimaryKey(Integer id) {
+//        ApplicationContext applicationContext = SpringApplicationContextHelper.getApplicationContext();
+//        DemoProductMapper mapper= (DemoProductMapper)applicationContext.getBean(DemoProductMapper.class.getName());
         return this.demoProductMapper.selectByPrimaryKey(id);
+
+//        return mapper.selectByPrimaryKey(id);
     }
 
 
