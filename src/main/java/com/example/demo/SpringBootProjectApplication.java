@@ -3,6 +3,7 @@ package com.example.demo;
 
 import com.example.demo.init.CommandLineImp;
 import com.example.demo.model.impot.EnableSelector;
+import com.example.demo.service.demo.DemoProductService;
 import com.example.fanckyspringbootstarter.config.EnableFanckyStarter;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
@@ -127,8 +128,11 @@ public class SpringBootProjectApplication {
 
 
          */
-
-//        applicationContext.getBean("");
+//CommandLineImp.class.getName() 不能用这种全路径名
+        //CommandLineImp
+        String name = CommandLineImp.class.getSimpleName();
+        Object obj = applicationContext.getBean("demoProductService");
+        int m = 0;
 //        AbstractAutowireCapableBeanFactory#doCreateBean()中：
         //endregion
 

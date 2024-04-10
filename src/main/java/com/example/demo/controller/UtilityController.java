@@ -1,9 +1,19 @@
 package com.example.demo.controller;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.read.listener.ReadListener;
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.util.ListUtils;
+import com.alibaba.excel.write.builder.ExcelWriterBuilder;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.example.demo.easyexcel.DropDownSetField;
+import com.example.demo.easyexcel.ExcelStyleConfig;
+import com.example.demo.easyexcel.GXDetailListVO;
+import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
+import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
 import com.example.demo.listener.UserRegisterService;
 import com.example.demo.model.dto.JacksonDto;
 import com.example.demo.model.entity.demo.DemoProduct;
@@ -33,7 +43,9 @@ import com.example.fanckyspringbootstarter.service.ToolService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import javassist.bytecode.stackmap.BasicBlock;
 import jdk.nashorn.internal.ir.ReturnNode;
 import org.apache.commons.io.IOUtils;
@@ -58,6 +70,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,6 +78,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
@@ -729,7 +743,6 @@ public class UtilityController {
     //endregion
 
 
-
     //region threadExceptionTest
 
     @GetMapping(value = "/threadExceptionTest")
@@ -809,7 +822,7 @@ public class UtilityController {
     //region form-data 文件和数据 @RequestPart
     //不指定盘符要加入 commons-io 依赖
 
-     // content-type multipart/form-data
+    // content-type multipart/form-data
     //文件：单个文件用 MultipartFile file 接收，多个用MultipartFile[] files.注意别名设置
     //     前台postman 设置 点击 description 右侧... 选中 content-type .在contentType设置multipart/form-data
     //表单数据：前台postman 设置json 字符串提交
@@ -874,6 +887,7 @@ public class UtilityController {
     //endregion
 
     //region EasyExcel
+//    EasyExcel 不能设置数字格式、日期格式。貌似excel 中设置了数字格式 也能输入中文
     //注意：easyExcel 和easyPoi 不兼容，两个不能同时引用，否则easyExcel 下载的excel 打不开
     //     easyexcel 的性能不easypoi性能好点。
 
@@ -919,6 +933,117 @@ public class UtilityController {
             list.add(data);
         }
         return list;
+    }
+
+    @ApiOperation(value = "exportExcel")
+    @GetMapping(value = "/exportExcel")
+    public void exportExcel(HttpServletResponse response, @ApiParam("共享协议号") @RequestParam String gbAgrtCode) throws IOException {
+
+        GXDetailListVO GXDetailListVO = new GXDetailListVO();
+        List<GXDetailListVO> data = new LinkedList<>();
+        data.add(GXDetailListVO);
+        exportExcel("exportExcelTest", response, data);
+
+    }
+
+    @ApiOperation(value = "importExcel")
+    @PostMapping(value = "/importExcel")
+    public void importExcel(MultipartFile file) throws IOException {
+
+        List<GXDetailListVO> list = new ArrayList<GXDetailListVO>();
+        EasyExcel.read(file.getInputStream(), GXDetailListVO.class, new ReadListener<GXDetailListVO>() {
+
+                    /**
+                     * 这个每一条数据解析都会来调用
+                     * @param o
+                     * @param analysisContext
+                     */
+                    @Override
+                    public void invoke(GXDetailListVO o, AnalysisContext analysisContext) {
+                        int m = 0;
+                        list.add(o);
+
+                    }
+
+                    /**
+                     *所有的都读取完 回调 ，
+                     * @param analysisContext
+                     */
+                    @Override
+                    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
+
+                    }
+
+                    @Override
+                    public void onException(Exception exception, AnalysisContext context) throws Exception {
+                        int m=0;
+//                        CellDataTypeEnum
+                        throw exception;
+                    }
+                }
+        ).sheet().doRead();
+
+        int size = list.size();
+
+    }
+
+    /**
+     * 导出excel
+     *
+     * @param fileName
+     * @param response
+     * @param data    导出模板，1 导出错误信息，2 导出数据
+     * @throws IOException
+     */
+    private void exportExcel(String fileName, HttpServletResponse response, List<GXDetailListVO> data) throws IOException {
+        prepareResponds(fileName, response);
+        ServletOutputStream outputStream = response.getOutputStream();
+        // 获取改类声明的所有字段
+        Field[] fields = GXDetailListVO.class.getDeclaredFields();
+        // 响应字段对应的下拉集合
+        Map<Integer, String[]> map = new HashMap<>();
+        Field field = null;
+        // 循环判断哪些字段有下拉数据集，并获取
+        for (int i = 0; i < fields.length; i++) {
+            field = fields[i];
+            // 解析注解信息
+            DropDownSetField dropDownSetField = field.getAnnotation(DropDownSetField.class);
+            if (null != dropDownSetField) {
+                String[] sources = ResoveDropAnnotationUtil.resove(dropDownSetField);
+                if (null != sources && sources.length > 0) {
+                    map.put(i, sources);
+                }
+            }
+        }
+        //多个sheet页写入
+        ExcelWriterBuilder builder = new ExcelWriterBuilder();
+        builder.autoCloseStream(true);
+//        if (flag == 0 || flag == 2) {
+        builder.registerWriteHandler(new ExcelStyleConfig(Lists.newArrayList(20), null, null));
+        builder.head(GXDetailListVO.class);
+//        } else {
+//            builder.registerWriteHandler(new ExcelStyleConfig(null,null,null));
+//            builder.head(GXDetailListLogVO.class);
+//        }
+        WriteSheet sheet1 = EasyExcel.writerSheet(0, "共享明细清单").build();
+        builder.registerWriteHandler(new DropDownCellWriteHandler(map));
+        builder.file(outputStream);
+
+        //不能重命名，重命名就没有XLSX格式后缀
+        builder.excelType(ExcelTypeEnum.XLSX);
+        ExcelWriter writer = builder.build();
+        writer.write(data, sheet1);
+        writer.finish();
+    }
+
+    /**
+     * 将文件输出到浏览器(导出)
+     */
+    private static void prepareResponds(String fileName, HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        fileName = URLEncoder.encode(fileName, "UTF-8");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8'zh_cn'" + fileName + ExcelTypeEnum.XLSX.getValue());
     }
 
     /**
@@ -1373,14 +1498,15 @@ public class UtilityController {
     //region starterTest  项目fancky-spring-boot-starter
 
     /**
-    1、定义字段配置文件类
-    2、定义自动配置类：启用配置属性加入IOC、starter业务类通过bean加入IOC
-    3、添加spring.factories文件配置自动装配
-    4、pom配置无main类启动 install到本地仓库
-    5、其他工程引入依赖
+     * 1、定义字段配置文件类
+     * 2、定义自动配置类：启用配置属性加入IOC、starter业务类通过bean加入IOC
+     * 3、添加spring.factories文件配置自动装配
+     * 4、pom配置无main类启动 install到本地仓库
+     * 5、其他工程引入依赖
      */
     @Autowired
     ToolService toolService;
+
     @GetMapping(value = "/starterTest")
     public MessageResult<String> starterTest() {
         return MessageResult.success(toolService.CommonFun());

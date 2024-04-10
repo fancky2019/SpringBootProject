@@ -114,7 +114,8 @@ public class MybatisController {
     public MessageResult<PageData<Void>> test() {
         MessageResult<PageData<Void>> message = new MessageResult<>();
 
-        demoProductService.insertTransactional();
+//        demoProductService.insertTransactional();
+        demoProductService.selectByPrimaryKey(999);
 
         return message;
     }
