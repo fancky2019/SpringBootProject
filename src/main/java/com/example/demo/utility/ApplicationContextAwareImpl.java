@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 从容器中获取bean
  */
 @Component
-public class SpringApplicationContextHelper implements ApplicationContextAware {
+public class ApplicationContextAwareImpl implements ApplicationContextAware {
 
-    private static ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        if (SpringApplicationContextHelper.applicationContext == null) {
-            SpringApplicationContextHelper.applicationContext = applicationContext;
+        if (this.applicationContext == null) {
+            this.applicationContext = applicationContext;
         }
     }
 
@@ -25,7 +25,7 @@ public class SpringApplicationContextHelper implements ApplicationContextAware {
      *
      * @return
      */
-    public static ApplicationContext getApplicationContext() {
+    public ApplicationContext getApplicationContext() {
         return applicationContext;
     }
 
@@ -35,7 +35,7 @@ public class SpringApplicationContextHelper implements ApplicationContextAware {
      * @param name
      * @return
      */
-    public static Object getBean(String name) {
+    public Object getBean(String name) {
         return getApplicationContext().getBean(name);
     }
 
@@ -45,7 +45,7 @@ public class SpringApplicationContextHelper implements ApplicationContextAware {
      * @param clazz
      * @return
      */
-    public static <T> T getBean(Class<T> clazz) {
+    public <T> T getBean(Class<T> clazz) {
         return getApplicationContext().getBean(clazz);
     }
 
@@ -56,7 +56,7 @@ public class SpringApplicationContextHelper implements ApplicationContextAware {
      * @param clazz
      * @return
      */
-    public static <T> T getBean(String name, Class<T> clazz) {
+    public <T> T getBean(String name, Class<T> clazz) {
         return getApplicationContext().getBean(name, clazz);
     }
 

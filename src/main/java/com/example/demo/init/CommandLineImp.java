@@ -32,6 +32,7 @@ public class CommandLineImp implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         String name = fistName;
+        Object obj = this.applicationContext.getBean("demoProductService");
         LOGGER.info("CommandLineImp 系统启动完成！");
         int m = 0;
     }

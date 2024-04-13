@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
-import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.util.ListUtils;
@@ -36,9 +35,8 @@ import com.example.demo.service.demo.*;
 import com.example.demo.shiro.ShiroRedisProperties;
 import com.example.demo.sse.ISseEmitterService;
 import com.example.demo.utility.RSAUtil;
-import com.example.demo.utility.RedisKeyConfigConst;
 import com.example.demo.utility.RepeatPermission;
-import com.example.demo.utility.SpringApplicationContextHelper;
+import com.example.demo.utility.ApplicationContextAwareImpl;
 import com.example.fanckyspringbootstarter.service.ToolService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,19 +44,14 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import javassist.bytecode.stackmap.BasicBlock;
-import jdk.nashorn.internal.ir.ReturnNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -88,7 +81,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /*
 在service类上加注解@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -976,7 +968,7 @@ public class UtilityController {
 
                     @Override
                     public void onException(Exception exception, AnalysisContext context) throws Exception {
-                        int m=0;
+                        int m = 0;
 //                        CellDataTypeEnum
                         throw exception;
                     }
@@ -992,7 +984,7 @@ public class UtilityController {
      *
      * @param fileName
      * @param response
-     * @param data    导出模板，1 导出错误信息，2 导出数据
+     * @param data     导出模板，1 导出错误信息，2 导出数据
      * @throws IOException
      */
     private void exportExcel(String fileName, HttpServletResponse response, List<GXDetailListVO> data) throws IOException {
@@ -1482,7 +1474,8 @@ public class UtilityController {
     public MessageResult<List<String>> importTest() {
 
         List<String> nameList = new ArrayList<>();
-        ApplicationContext applicationContext = SpringApplicationContextHelper.getApplicationContext();
+//        ApplicationContext applicationContext = ApplicationContextAwareImpl.getApplicationContext();
+        ApplicationContext applicationContext = this.applicationContext;
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
         // 遍历Spring容器中的beanName
         for (String beanDefinitionName : beanDefinitionNames) {
@@ -1512,4 +1505,11 @@ public class UtilityController {
         return MessageResult.success(toolService.CommonFun());
     }
     //endregion
+
+    @GetMapping(value = "/applicationContextTest")
+    public MessageResult<String> applicationContextTest() {
+        Object obj = this.applicationContext.getBean("demoProductService");
+        return MessageResult.success();
+
+    }
 }
