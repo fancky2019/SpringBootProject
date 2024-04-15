@@ -36,7 +36,7 @@ import com.example.demo.shiro.ShiroRedisProperties;
 import com.example.demo.sse.ISseEmitterService;
 import com.example.demo.utility.RSAUtil;
 import com.example.demo.utility.RepeatPermission;
-import com.example.demo.utility.ApplicationContextAwareImpl;
+//import com.example.demo.utility.ApplicationContextAwareImpl;
 import com.example.fanckyspringbootstarter.service.ToolService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

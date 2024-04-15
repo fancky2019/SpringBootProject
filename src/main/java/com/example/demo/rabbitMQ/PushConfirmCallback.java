@@ -3,7 +3,7 @@ package com.example.demo.rabbitMQ;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.service.demo.IMqMessageService;
-import com.example.demo.utility.ApplicationContextAwareImpl;
+//import com.example.demo.utility.ApplicationContextAwareImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

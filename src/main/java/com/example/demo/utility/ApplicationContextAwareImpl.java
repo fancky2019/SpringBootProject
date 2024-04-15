@@ -5,8 +5,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-/*
+/**
+ * 注释此实现类 直接在引用的地方注入  ApplicationContext applicationContext 可以访问到
 从容器中获取bean
+ * @author lirui
  */
 @Component
 public class ApplicationContextAwareImpl implements ApplicationContextAware {
