@@ -1,5 +1,6 @@
 package com.example.demo.service.interfaceAndImp;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 //@Service
 //@Service("InterfaceTestImpB")
 @Component
+@Order(1)
 public class InterfaceTestImpB implements InterfaceTest {
     @Override
     public String fun() {

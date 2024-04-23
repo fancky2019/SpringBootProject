@@ -1,5 +1,6 @@
 package com.example.demo.service.interfaceAndImp;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
  */
 //@Service
 @Service("InterfaceTestImpA")
+@Order(2)//指定装配先后顺序，越小越先执行。从小到大
 //@Component
 public class InterfaceTestImpA implements InterfaceTest{
 

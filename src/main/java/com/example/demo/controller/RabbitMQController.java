@@ -4,13 +4,9 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.rabbitMQ.RabbitMQTest;
 import com.example.demo.rabbitMQ.RabbitMqManager;
 import com.example.demo.utility.MqSendUtil;
-import io.netty.util.concurrent.CompleteFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,7 +37,7 @@ public class RabbitMQController {
         */
         //rabbitMQ事务回调发送封装在  MqSendUtil
 
-        rabbitMQTest.test();
+        rabbitMQTest.produceTest();
 
 
         return MessageResult.success("complete");
@@ -75,14 +71,14 @@ public class RabbitMQController {
 //                    System.out.println(ex.getMessage());
 //                }
 
-            rabbitMQTest.test();
+            rabbitMQTest.produceTest();
         });
     }
 
     @GetMapping("/getMessageCount")
     public MessageResult<Void> getMessageCount(String queueName) {
         try {
-            rabbitMQTest.test();
+            rabbitMQTest.produceTest();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

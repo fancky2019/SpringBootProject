@@ -374,6 +374,8 @@ public class RabbitMQConfig {
     //region Direct
     @Bean
     public DirectExchange directExchange() {
+        //  this(name, true, false);(String name, boolean durable, boolean autoDelete)
+        //交换机默认持久化true
         DirectExchange directExchange = new DirectExchange(DIRECT_EXCHANGE);
         return directExchange;
     }
@@ -400,6 +402,8 @@ public class RabbitMQConfig {
 //        HashMap<String,Object> args = new HashMap<String,Object>();
 //        args.put("x-single-active-consumer", true);
 //        QueueBuilder.durable(DIRECT_QUEUE_NAME).withArguments(args).build();
+        //this(name, true, false, false);  (String name, boolean durable, boolean exclusive, boolean autoDelete)
+        //队列默认持久化：true
         return new Queue(DIRECT_QUEUE_NAME, true, false, false, args);
 //
 //        return new Queue(DIRECT_QUEUE_NAME);

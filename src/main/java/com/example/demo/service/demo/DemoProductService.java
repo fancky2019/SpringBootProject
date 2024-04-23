@@ -8,6 +8,7 @@ import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
+import com.example.demo.rabbitMQ.RabbitMQTest;
 import com.example.demo.utility.MqSendUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +49,8 @@ public class DemoProductService {
 
     @Autowired
     private MqSendUtil mqSendUtil;
-
+    @Autowired
+    private RabbitMQTest rabbitMQTest;
     @Autowired
     private RedisTemplate redisTemplate;
     @Autowired
@@ -334,8 +336,8 @@ public class DemoProductService {
         for (int i = 0; i < 1; i++) {
             DemoProduct demoProduct = new DemoProduct();
             String uuid = UUID.randomUUID().toString();
-            uuid = "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
-                    + "dssssssssssssssssssssssssssssssssssssssssss";
+//            uuid = "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+//                    + "dssssssssssssssssssssssssssssssssssssssssss";
             demoProduct.setGuid(uuid);
             demoProduct.setProductName("productNameshish事务" + i);
             demoProduct.setProductStyle("productStyle" + i);
@@ -347,7 +349,7 @@ public class DemoProductService {
             demoProduct.setTimestamp(LocalDateTime.now());
             list.add(demoProduct);
         }
-
+//执行dml 同步操作，失败不会继续往下执行
         int i = demoProductMapper.batchInsert(list);
 
 //        int n = Integer.parseInt("ds");
@@ -355,7 +357,7 @@ public class DemoProductService {
 
         String msgId = UUID.randomUUID().toString();
         String msgContent = "setMsgContent";
-       //rabbitMq 发送消息线程和spring事务不在同一个线程内，mq 内部抛出异常无法被spring 事务捕获，spring 无法事务回滚
+        //rabbitMq 发送消息线程和spring事务不在同一个线程内，mq 内部抛出异常无法被spring 事务捕获，spring 无法事务回滚
         MqMessage mqMessage = new MqMessage
                 (RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME,
                         RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY,
@@ -429,7 +431,15 @@ public class DemoProductService {
 
 
         //mybatis 操作数据库异常会抛出异常，mybatis貌似单线程执行。代码不会执行到发送mq
-        mqSendUtil.send(mqMessage);
+//        mqSendUtil.send(mqMessage);
+
+        //事务机制和 confirm 机制，事务机制是同步的， confirm 机制是异步的
+        //建立连接是同步
+        //rabbitmq 内部默认异步发送，不能保证一定发送成功。才会有setConfirmCallback 确认消息发送到交换机
+        rabbitMQTest.produceTest(mqMessage);
+        //mq 内部执行失败此时事务已提交，就造成不是原子性
+
+//        int m=11;
         return 0;
     }
 

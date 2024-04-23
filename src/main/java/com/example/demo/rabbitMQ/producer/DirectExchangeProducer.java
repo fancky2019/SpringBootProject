@@ -23,6 +23,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+/**
+ * rabbitmq默认消息、队列、交换机都是持久化：
+ * 发送时候指定消息持久化（deliveryMode=2）、
+ * 声明队列时持久化（durable字段设置为true）、
+ * 声明交换机时持久化（durable字段设置为true）
+ */
 @Component
 @Slf4j
 public class DirectExchangeProducer {
@@ -143,8 +149,7 @@ public class DirectExchangeProducer {
     }
 
 
-    public void  standardTest()
-    {
+    public void standardTest() {
         String msgId = UUID.randomUUID().toString();
         String msgContent = "";
         Person person = new Person();
@@ -153,9 +158,7 @@ public class DirectExchangeProducer {
 
         try {
             msgContent = objectMapper.writeValueAsString(person);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
 
         }
         MqMessage mqMessage = new MqMessage
@@ -165,30 +168,32 @@ public class DirectExchangeProducer {
                         msgContent);
         produceNotConvertSent(mqMessage);
     }
+
     public void produceNotConvertSent(MqMessage mqMessage) {
-        try {
-            String exchange = mqMessage.getExchange();
-            String routingKey = mqMessage.getRouteKey();
+//        try {
+        String exchange = mqMessage.getExchange();
+        String routingKey = mqMessage.getRouteKey();
 
-            MessageProperties messageProperties = new MessageProperties();
-            String msgId = mqMessage.getMsgId();
-            //设置优先级
-            messageProperties.setPriority(9);
-            messageProperties.setMessageId(msgId);
-            //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
-            Message message = new Message(mqMessage.getMsgContent().getBytes(), messageProperties);
+        MessageProperties messageProperties = new MessageProperties();
+        String msgId = mqMessage.getMsgId();
+        //设置优先级
+        messageProperties.setPriority(9);
+        messageProperties.setMessageId(msgId);
+        //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
+        Message message = new Message(mqMessage.getMsgContent().getBytes(), messageProperties);
 
-            CorrelationData correlationData = new CorrelationData(msgId);
-            //设置消息内容
-            ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
-            correlationData.setReturned(returnedMessage);
+        CorrelationData correlationData = new CorrelationData(msgId);
+        //设置消息内容
+        ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
+        correlationData.setReturned(returnedMessage);
 
-
-            rabbitTemplate.send(exchange, routingKey, message, correlationData);
-
-        } catch (Exception e) {
-            log.error("", e);
-        }
+//      //事务机制和 confirm 机制，事务机制是同步的， confirm 机制是异步的
+        rabbitTemplate.send(exchange, routingKey, message, correlationData);
+        //内部调用的还是send
+//        rabbitTemplate.convertAndSend(exchange, routingKey, message, correlationData);
+//        } catch (Exception e) {
+//            log.error("", e);
+//        }
 
     }
     //region batch
@@ -287,7 +292,8 @@ public class DirectExchangeProducer {
 //        CorrelationData correlationData = new CorrelationData("12345678909"+new Date());
         rabbitTemplate.convertAndSend(DELAYED_MESSAGE_EXCHANGE, DELAYED_MESSAGE_KEY, msg, messagePostProcessor ->
         {
-            //设置消息持久化
+            //设置消息持久化：deliveryMode=2.默认持久化
+            // MessageProperties 默认 DEFAULT_DELIVERY_MODE = MessageDeliveryMode.PERSISTENT;
             messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
             //message.getMessageProperties().setHeader("x-delay", "6000");
                     /*

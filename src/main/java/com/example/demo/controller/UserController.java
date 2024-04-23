@@ -86,12 +86,17 @@ public class UserController {
 
     @Autowired
     @Qualifier("InterfaceTestImpA")
-    InterfaceTest interfaceTestImpA;
+    private InterfaceTest interfaceTestImpA;
 
     @Autowired
 //    @Qualifier("InterfaceTestImpB")
-    InterfaceTest interfaceTestImpB;
+    private InterfaceTest interfaceTestImpB;
 
+    /**
+     * 接口的实现类会自动加入到集合中 interfaceTestImpB interfaceTestImpA
+     */
+    @Autowired
+    private List<InterfaceTest> interfaceTestList;
 
     //获取配置文件的值
     @Value("${spring.datasource.username}")
@@ -111,6 +116,7 @@ public class UserController {
     //get请求：url  传参
     //@RequestMapping("/getUser")
     //如果不指定方法，会出现;GET、HEAD、POST、PUT、DELETE、OPTIONS、PATCH方法。
+    // 没有指定method属性，默认情况下会映射所有HTTP请求方法：
     //@RequestMapping(value = "/getUser",method = RequestMethod.GET)
     @GetMapping("/getUser")
     @ResponseBody//当使用@Controller返回数据必须要加上@ResponseBody
@@ -210,13 +216,13 @@ public class UserController {
     //SpringBootProject:fancky,2
     @GetMapping("/getPersonRequestParam")//注：参数占位符中的名称要和形参的名称一样，否则无法赋值
     @ResponseBody
-    public String getPersonRequestParam(Person person, HttpServletRequest request,HttpServletResponse response) {
+    public String getPersonRequestParam(Person person, HttpServletRequest request, HttpServletResponse response) {
 
 //         org.apache.catalina.connector.RequestFacade
 //        public class RequestFacade implements HttpServletRequest
 //         org.apache.catalina.connector.ResponseFacade
 //        public class ResponseFacade implements HttpServletResponse
-                //请求头
+        //请求头
         String value = request.getHeader("Content-Type");
         List<String> headerNames = Collections.list(request.getHeaderNames());
         return MessageFormat.format("{0}:{1}", applicationName, person.getName() + "," + person.getAge());
@@ -225,6 +231,7 @@ public class UserController {
     @GetMapping("/autowiredTest")
     @ResponseBody
     public String autowiredTest() {
+
         return this.interfaceTestImpA.fun() + ":" + interfaceTestImpB.fun();
     }
 }

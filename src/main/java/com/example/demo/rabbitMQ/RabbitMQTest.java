@@ -1,13 +1,11 @@
 package com.example.demo.rabbitMQ;
 
 import com.example.demo.model.entity.demo.MqMessage;
-import com.example.demo.rabbitMQ.consumer.DirectExchangeConsumer;
 import com.example.demo.rabbitMQ.producer.DirectExchangeProducer;
 import com.example.demo.rabbitMQ.producer.FanoutExchangeProducer;
 import com.example.demo.rabbitMQ.producer.TopicExchangeProducer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.amqp.core.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +44,16 @@ import org.springframework.stereotype.Component;
  * x-single-active-consumer：默认false,单活模式，表示是否最多只允许一个消费者消费，如果有多个消费者同时绑定，
  * 则只会激活第一个，除非第一个消费者被取消或者死亡，才会自动转到下一个消费者。
  * 消息积压：将一个大队列分成几个小队列，根据messageId生产到相应队列，这样再配置单活队列，提高了消费能力，降低消息积压。
+ *
+ *
+ *  * rabbitmq默认消息、队列、交换机都是持久化：
+ *  * 发送时候指定消息持久化（deliveryMode=2）、
+ *  * 声明队列时持久化（durable字段设置为true）、
+ *  * 声明交换机时持久化（durable字段设置为true）
+ *
+ * 消息默认持久化（deliveryMode=2：MessageProperties 默认 DEFAULT_DELIVERY_MODE = MessageDeliveryMode.PERSISTENT;）、
+ * 队列默认持久化true、交换机默认持久化true
+ *
  */
 @Component
 public class RabbitMQTest {
@@ -57,7 +65,7 @@ public class RabbitMQTest {
     @Autowired
     private TopicExchangeProducer topicExchangeProducer;
 
-    public void test() {
+    public void produceTest() {
         //DEMO  链接：http://www.rabbitmq.com/getstarted.html
         //NuGet添加RabbitMQ.Client引用
         //RabbitMQ UI管理:http://localhost:15672/   账号:guest 密码:guest
@@ -90,7 +98,7 @@ public class RabbitMQTest {
         }
     }
 
-    public void test(MqMessage mqMessage) {
+    public void produceTest(MqMessage mqMessage) {
         directExchangeProducer.produceNotConvertSent(mqMessage);
     }
 
