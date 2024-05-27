@@ -38,12 +38,28 @@ public class MqSendUtil {
 
         //事务回调：事务同步，此处待处理，
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+//            @Override
+//            public void afterCompletion(int status) {
+//                //限制性事务afterCommit，然后执行afterCompletion
+//                //afterCommit,afterCompletion
+//                //afterCompletion 事务完成
+//                // 调用父类的事务提交方法,空方法
+//                //   super.afterCompletion(status);
+//
+//                //事务完成有可能是 回滚
+////                int STATUS_COMMITTED = 0;
+////                int STATUS_ROLLED_BACK = 1;
+////                int STATUS_UNKNOWN = 2;
+//                if (status == 0) {
+//                    sentAsync(mqMessage);
+//                    int m=0;
+//                }
+//
+//            }
+
             @Override
-            public void afterCompletion(int status) {
-                //afterCommit,afterCompletion
-                //afterCompletion 事务完成
-                // 调用父类的事务提交方法,空方法
-                //   super.afterCompletion(status);
+            public void afterCommit() {
+                System.out.println("send email after transaction commit...");
                 sentAsync(mqMessage);
             }
         });

@@ -33,6 +33,17 @@ public class TraceIdFilter implements Filter {
         MDC.put("traceId", traceId);
         traceId = MDC.get("traceId");
         filterChain.doFilter(servletRequest, servletResponse);
+
+
+//        try
+//        {
+//            MDC.put("traceId", traceId);
+//            traceId = MDC.get("traceId");
+//            filterChain.doFilter(servletRequest, servletResponse);
+//        }
+//        finally {
+//            MDC.clear();
+//        }
     }
 
     @Override

@@ -230,7 +230,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         int m = 0;
     }
 
-    /*
+    /**
     更新表的指定字段
      */
     private void updateField() {

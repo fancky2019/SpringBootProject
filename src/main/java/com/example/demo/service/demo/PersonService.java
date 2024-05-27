@@ -69,8 +69,9 @@ public class PersonService implements IPersonService {
         if (proxyObj instanceof IPersonService) {
              personService = (IPersonService) proxyObj;
         }
-         demoProductService.insertTransactional();
         int i = personMapper.insert(person);
+         demoProductService.insertTransactional();
+
 
         //没有走动态代理，相当于和当前事务在同一个事务内
 //        this.insertB();
@@ -86,7 +87,7 @@ public class PersonService implements IPersonService {
         //spring 不会处理异常，会把异常继续抛出
 
 
-        int n = Integer.parseInt("ds");
+//        int n = Integer.parseInt("ds");
         return 0;
     }
 

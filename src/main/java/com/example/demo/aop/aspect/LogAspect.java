@@ -412,6 +412,7 @@ public class LogAspect {
 
 
                 String operationLockKey = key + RedisKeyConfigConst.KEY_LOCK_SUFFIX;
+                //并发访问，加锁控制
                 RLock lock = redissonClient.getLock(operationLockKey);
 
                 try {
@@ -419,6 +420,7 @@ public class LogAspect {
                     //获取锁等待时间
                     long waitTime = 1;
                     //持有所超时释放锁时间  24 * 60 * 60;
+                    // 注意：锁超时自动释放，另外一个线程就会获取锁继续执行，代码版本号处理
                     long leaseTime = 30;
                     boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
                     if (lockSuccessfully) {
@@ -435,7 +437,7 @@ public class LogAspect {
 //                        return obj;
                     } else {
                         //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
-
+                        //超过waitTime ，扔未获得锁
                         return MessageResult.faile("重复提交:获取锁失败");
                     }
                 } catch (InterruptedException e) {

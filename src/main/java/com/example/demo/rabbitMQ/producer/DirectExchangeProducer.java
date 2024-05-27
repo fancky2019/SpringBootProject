@@ -18,6 +18,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.swing.*;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -186,9 +187,14 @@ public class DirectExchangeProducer {
         //设置消息内容
         ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
         correlationData.setReturned(returnedMessage);
-
-//      //事务机制和 confirm 机制，事务机制是同步的， confirm 机制是异步的
+//        Spring Boot 集成 Elasticsearch 可以是同步的也可以是异步的。默认情况下，Spring Data Elasticsearch 的操作是同步的，意味着在执行索引、搜索等操作时，当前线程会阻塞直到操作完成。
+        //Spring Boot 整合 RabbitMQ 默认是异步的。你可以使用 RabbitTemplate 来发送消息，并通过回调来确认消息是否成功发送
+//      //默认异步调用 ：事务机制和 confirm 机制，事务机制是同步的， confirm 机制是异步的
         rabbitTemplate.send(exchange, routingKey, message, correlationData);
+
+        //同步调用
+        Message responseMessage = rabbitTemplate.sendAndReceive(exchange, routingKey, message, correlationData);
+//        rabbitTemplate.convertSendAndReceive(exchange, routingKey, message, correlationData);
         //内部调用的还是send
 //        rabbitTemplate.convertAndSend(exchange, routingKey, message, correlationData);
 //        } catch (Exception e) {

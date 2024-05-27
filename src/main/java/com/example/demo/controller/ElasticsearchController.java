@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/*
+/**
 es和关系数据库都存在跳页问题。性能差
 search_after可以避免深度分页带来的性能问题，可以实时的获取下一页文档；
 (上一页下一页 app 下拉获取、游标只读向前)
@@ -36,6 +36,11 @@ scroll api 查询
 其中scrollRequest.scroll("1m");中设置的是scroll请求的上下文的存活时间
 
 不再建议使用scroll API进行深度分页。如果要分页检索超过 Top 10,000+ 结果时，推荐使用：PIT + search_after。
+
+ 1、单个索引里字段数量上限为1000
+ 2、单个索引里文档数量上限为2,147,483,519
+ 3、查询结果数量上限默认为10000
+
  */
 @RestController
 @RequestMapping("/Elasticsearch")

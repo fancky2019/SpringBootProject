@@ -1512,4 +1512,14 @@ public class UtilityController {
         return MessageResult.success();
 
     }
+
+
+    @GetMapping(value = "/transactionalTest")
+    public void transactionalTest() {
+        Person person = new Person();
+        person.setName("fancky");
+        person.setAge(27);
+        person.setBirthday(LocalDateTime.now());
+        personService.insert(person);
+    }
 }

@@ -58,6 +58,23 @@ import java.util.concurrent.TimeUnit;
  * 指定前缀的key放在一个文件夹下。如：key_sb:UserInfo:1 路径前缀之间用冒号分开，当key超过两个RedisDesktop会显示在一个文件夹下。
  * <p>
  * redis key 过期订阅：
+ *
+ *
+ *
+ *
+ *
+ * spring boot 2的spring-boot-starter-data-redis中，默认使用的是lettuce作为redis客户端，它与jedis的主要区别如下：
+ *
+ * Jedis是同步的，不支持异步，Jedis客户端实例不是线程安全的，需要每个线程一个Jedis实例，所以一般通过连接池来使用Jedis
+ * Lettuce是基于Netty框架的事件驱动的Redis客户端，其方法调用是异步的，Lettuce的API也是线程安全的，所以多个线程可以操作单个Lettuce连接来完成各种操作，同时Lettuce也支持连接池
+ * 如果不使用默认的lettuce，使用jedis的话，可以排除lettuce的依赖，手动加入jedis依赖，配置如下
+ *
+ *
+ *  Jedis：采用的是直连，就是直接去连接数据库，如果有多个线程操作的话就是不安全的，想要避免不安全，就需要使用Jedis pool连接池。
+ *     Lettuce：底层采用的Netty，异步请求，实例可以在多个线程中共享，所以不存在线程不安全的情况，可以减少线程数量，就不需要再开连接池
+ *
+ *
+ *
  */
 @RestController
 @RequestMapping("/redisTest")

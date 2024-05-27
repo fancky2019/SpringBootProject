@@ -431,12 +431,12 @@ public class DemoProductService {
 
 
         //mybatis 操作数据库异常会抛出异常，mybatis貌似单线程执行。代码不会执行到发送mq
-//        mqSendUtil.send(mqMessage);
+        mqSendUtil.send(mqMessage);
 
         //事务机制和 confirm 机制，事务机制是同步的， confirm 机制是异步的
         //建立连接是同步
         //rabbitmq 内部默认异步发送，不能保证一定发送成功。才会有setConfirmCallback 确认消息发送到交换机
-        rabbitMQTest.produceTest(mqMessage);
+//        rabbitMQTest.produceTest(mqMessage);
         //mq 内部执行失败此时事务已提交，就造成不是原子性
 
 //        int m=11;
