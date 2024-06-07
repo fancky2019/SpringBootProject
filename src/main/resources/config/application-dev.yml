@@ -8,7 +8,7 @@ server:
       #multipart:
     #max-file-size: 1024MB
     #max-request-size: 1024MB
-
+  shutdown: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
 eureka:
   client:
     # 下面两句不注册到注册中心。Eureka会默认把自己注册到注册中心：http://localhost:8761/eureka/
@@ -63,8 +63,13 @@ logging:
 #    com.baomidou.mybatisplus: DEBUG
 
 
+
 #开发配
 spring:
+  lifecycle:
+    #默认30s #  shutdown: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
+    timeout-per-shutdown-phase: 60s
+
   #默认cglib 代理，设置jdk 动态代理
 #  aop:
 #    proxy-target-class: false

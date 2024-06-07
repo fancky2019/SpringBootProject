@@ -19,7 +19,18 @@ import java.util.function.Consumer;
  * 轻量，使用简单	              相对复杂
  * 默认支持断线重连	          需要自己实现断线重连
  * 文本传输	                  二进制传输
- * 支持自定义发送的消息类型	       -
+ * 支持自定义发送的消息类型
+ *
+ *
+ *
+ * 简单易用：SSE使用简单的API，只需要创建EventSource对象并监听事件即可实现实时通信。
+ * 单向通信：SSE是一种单向通信方式，只允许服务器向客户端推送数据，而不支持客户端向服务器发送请求。
+ * 实时性：SSE建立了持久连接，服务器可以随时向客户端发送更新的数据，实现实时的数据推送。
+ * 自动重连：如果连接中断，SSE会自动尝试重新建立连接，确保持久连接的稳定性。
+ * 支持事件流：SSE使用事件流（event stream）的格式来传输数据，可以发送不同类型的事件，方便客户端进行处理
+ *
+ *
+ * websocket 双工，sse 单工
  */
 @Slf4j
 @Service
@@ -31,9 +42,8 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
     private static Map<String, SseEmitter> sseCache = new ConcurrentHashMap<>();
 
 
-
-    /*
-    当后台服务重启，http会和后天重连
+    /**
+     * 当后台服务重启，http会和后台重连
      */
     @Override
     public SseEmitter createSseConnect(String userId) throws Exception {

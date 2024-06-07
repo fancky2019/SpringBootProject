@@ -44,6 +44,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -110,7 +111,7 @@ global session作用域类似于标准的HTTP Session作用域，不过它仅仅
 <!--tomcat默认30分钟 -->
  */
 
-
+@Slf4j
 @RestController
 @RequestMapping("/utility")
 //@Scope("prototype")
@@ -1521,5 +1522,54 @@ public class UtilityController {
         person.setAge(27);
         person.setBirthday(LocalDateTime.now());
         personService.insert(person);
+    }
+
+
+    /**
+     * # 开启优雅停机，默认值：immediate 为立即关闭
+     * server.shutdown=graceful
+     *
+     * # 设置缓冲期，最大等待时间，默认：30秒
+     * spring.lifecycle.timeout-per-shutdown-phase=60s
+     *
+     *
+     * 优雅停机设置：
+     *
+     * server:
+     *   shutdown: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
+     * spring:
+     *   lifecycle:
+     *     #默认30s #  shutdown: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
+     *     timeout-per-shutdown-phase: 60s
+     *
+     * sringbootproject:
+     * 当stop  idea 时候，后续请求还可以进来，等所有请求都完成时候，idea 自动stop
+     *springboot 2.7.6
+     *一个请求之后stop,后续的请求无法进来，时间到之后服务自动停止，
+     *在虚拟机测试：一个请求之后kill -2 pid,后续的请求无法进来，时间到之后服务自动停止，
+     *
+     * win taskkill /pid /f 直接杀掉进程。不会优雅停机
+     *
+     *
+     * 关闭服务，执行kill -2或者Ctrl + C。
+     * 此处执行kill -2 而不是kill -9。kill -2 相当于快捷键Ctrl + C会触发 Java 的 ShutdownHook 事件处理。
+     *
+     *
+     * @throws InterruptedException
+     */
+    @GetMapping(value = "/shutdownGracefulTest")
+    public void shutdownGracefulTest() throws InterruptedException {
+        log.info("before trace_shutdownGracefulTest");
+        Thread.sleep(50 * 1000);
+        log.info("after trace_shutdownGracefulTest");
+
+    }
+
+
+    @GetMapping(value = "/shutdownGracefulTest1")
+    public void shutdownGracefulTest1() throws InterruptedException {
+        log.info("before trace_shutdownGracefulTest1");
+        Thread.sleep(50 * 1000);
+        log.info("after trace_shutdownGracefulTest1");
     }
 }

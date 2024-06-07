@@ -52,6 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @EnableScheduling //quartz
 @EnableRabbit     //EnableRabbit
 @EnableAsync     //启用异步
+
 //@EnableSelector
 //@EnableFanckyStarter
 
@@ -73,6 +74,14 @@ public class SpringBootProjectApplication {
     @EnableAutoConfiguration
     @ComponentScan
     @Filter
+     */
+
+    /* 优雅停机
+    # 开启优雅停机，默认值：immediate 为立即关闭
+server.shutdown=graceful
+
+# 设置缓冲期，最大等待时间，默认：30秒
+spring.lifecycle.timeout-per-shutdown-phase=60s
      */
 
 
