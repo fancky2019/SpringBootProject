@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -70,7 +71,8 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        saveOrUpdateBatch();
 //        queryById();
 //        queryTest();
-        updateTest();
+//        updateTest();
+        page();
 //        queryParam();
 //        truncateTest();
 //        deleteTableDataTest();
@@ -132,8 +134,12 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
     }
 
     private void queryParam() {
+        ProductTest productTest = new ProductTest();
         LambdaQueryWrapper<ProductTest> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(ProductTest::getProductName, "productName_xiugai55555");
+        //不为空查询
+        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(productTest.getProductName()),
+                ProductTest::getProductName, productTest.getProductName());
         lambdaQueryWrapper.last("limit 3");
         //分页
         List<ProductTest> list1 = this.list(lambdaQueryWrapper);
@@ -144,6 +150,23 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 
     private void queryById() {
         ProductTest list1 = this.getById(17);
+        int m = 0;
+    }
+
+    /**
+     * 内存分页
+     *
+     * SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp  FROM demo_product
+     *
+     *  WHERE (id = 1)
+     */
+    private void page() {
+        Page<ProductTest> page = new Page<>(1, 10);
+        LambdaQueryWrapper<ProductTest> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProductTest::getId, 1L);
+        IPage<ProductTest> orderPage = this.page(page, wrapper);
+        List<ProductTest> orders = orderPage.getRecords();
+        long total = orderPage.getTotal();
         int m = 0;
     }
 
@@ -193,7 +216,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
     }
 
     /**
-     *  一定要在 LambdaUpdateWrapper 指定更新条件否则全表更新
+     * 一定要在 LambdaUpdateWrapper 指定更新条件否则全表更新
      */
 
     private void updateTest() {
@@ -226,15 +249,16 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
          WHERE (id = 2 AND status = 2)
 
          */
-        ProductTest productTest= this.getById(2);
+        ProductTest productTest = this.getById(2);
         LambdaUpdateWrapper<ProductTest> updateWrapper2 = new LambdaUpdateWrapper<>();
+        //设置空
         updateWrapper2.set(ProductTest::getProductName, null);
         updateWrapper2.eq(ProductTest::getId, 2);
         updateWrapper2.eq(ProductTest::getStatus, 1);
         //更新指定条件的 为productTest 对象的值，ID 字段除外。
-        boolean re1 = this.update(productTest,updateWrapper2);
+        boolean re1 = this.update(productTest, updateWrapper2);
 
-        int m=0;
+        int m = 0;
         /*  全表更新，没有where 条件。
         UPDATE demo_product  SET guid='a02a0ed4-c685-4d9a-949e-bcba60f17c97',
             product_name='产品名称1200002',
@@ -252,6 +276,20 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
 //        updateWrapper3.set(ProductTest::getProductName, "update3");
 //        boolean re3 = this.update(productTest3,updateWrapper3);
+
+
+        ProductTest productTest3 = this.getById(3);
+        //修改了实体的值，如果指定实体更新，会在update 语句内。
+        productTest3.setProductName("");
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(StringUtils.isNotEmpty(productTest3.getProductName()),
+                ProductTest::getProductName, "ProductName3");
+        updateWrapper3.set(ProductTest::getProductStyle, "getProductStyle111");
+        updateWrapper3.eq(ProductTest::getId, productTest3.getId());
+        updateWrapper3.eq(ProductTest::getStatus, productTest3.getStatus());
+        //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        boolean re3 = this.update(updateWrapper3);
+
 
     }
 

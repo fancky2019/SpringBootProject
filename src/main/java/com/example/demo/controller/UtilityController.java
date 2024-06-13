@@ -1555,6 +1555,17 @@ public class UtilityController {
      * 此处执行kill -2 而不是kill -9。kill -2 相当于快捷键Ctrl + C会触发 Java 的 ShutdownHook 事件处理。
      *
      *
+     *
+     *
+     *
+     * 如果服务关闭，通过nginx 访问会报 Could not send request
+     * Error: Request timed out
+     *
+     *在使用 kill -9 前，应该先使用 kill -15，
+     *kill pid  默认 kill -15 pid. kill15不会停止子进程，kill2会停止子进程
+     * kill pid 或  kill -2 pid 关闭服务，请求的任务会继续执行直到返回，此时jps今晨还在，请他新的请求
+     * 不会请求成功，之前请求结束之后，进程会结束
+     *
      * @throws InterruptedException
      */
     @GetMapping(value = "/shutdownGracefulTest")
