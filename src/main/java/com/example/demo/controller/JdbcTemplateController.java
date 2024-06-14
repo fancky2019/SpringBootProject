@@ -3,17 +3,17 @@ package com.example.demo.controller;
 import com.alibaba.fastjson.JSON;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.entity.wms.Product;
+import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.viewModel.MessageResult;
-import com.example.demo.model.viewModel.PageData;
 import com.example.demo.model.viewModel.ProductVM;
-import com.example.demo.service.rabc.UserManagerService;
-import com.rabbitmq.client.Return;
-//import jdk.nashorn.internal.ir.ReturnNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.CallableStatementCallback;
+import org.springframework.jdbc.core.CallableStatementCreator;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +22,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.*;
-//import java.sql.*;
-
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 /**
  * execute：可以执行所有SQL语句，一般用于执行DDL语句。

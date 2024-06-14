@@ -6,6 +6,6 @@ import java.util.List;
 
 @Data
 public class PageData<T> {
-    private Integer count;
-    private List<T> rows;
+    private Long count;
+    private List<T> data;
 }

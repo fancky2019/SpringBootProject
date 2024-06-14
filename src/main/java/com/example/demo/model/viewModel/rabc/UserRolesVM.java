@@ -1,6 +1,6 @@
 package com.example.demo.model.viewModel.rabc;
 
-import com.example.demo.model.viewModel.Page;
+import com.example.demo.model.pojo.Page;
 
 public class UserRolesVM extends Page {
     private Integer id;

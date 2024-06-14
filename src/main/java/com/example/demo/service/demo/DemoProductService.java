@@ -455,8 +455,8 @@ public class DemoProductService {
     public PageData<DemoProduct> getPageData(DemoProductRequest request) {
         PageData<DemoProduct> pageData = new PageData<>();
         List<DemoProduct> list = demoProductMapper.getPageData(request);
-        pageData.setRows(list);
-        pageData.setCount(1);
+        pageData.setData(list);
+        pageData.setCount(1L);
         return pageData;
     }
 
@@ -469,8 +469,8 @@ public class DemoProductService {
             List<DemoProduct> list = demoProductMapper.query(request);
             //调用分页查询的方法
             PageInfo<DemoProduct> pageInfo = new PageInfo<>(list);
-            pageData.setRows(pageInfo.getList());
-            pageData.setCount(pageInfo.getSize());
+            pageData.setData(pageInfo.getList());
+            pageData.setCount(Long.valueOf(pageInfo.getSize()));
         } finally {
             PageHelper.clearPage(); //清理 ThreadLocal 存储的分页参数,保证线程安全
         }

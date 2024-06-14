@@ -2,8 +2,9 @@ package com.example.demo.service.wms;
 
 import com.example.demo.dao.wms.ProductMapper;
 import com.example.demo.model.entity.wms.Product;
+import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.viewModel.MessageResult;
-import com.example.demo.model.viewModel.PageData;
+import com.example.demo.model.pojo.Page;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.model.viewModel.rabc.UsersVM;
 import com.example.demo.service.rabc.UserManagerService;

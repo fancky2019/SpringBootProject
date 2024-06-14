@@ -1,8 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.entity.wms.Product;
+import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.viewModel.MessageResult;
-import com.example.demo.model.viewModel.PageData;
+import com.example.demo.model.pojo.Page;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.service.wms.ProductService;
 import org.springframework.web.bind.annotation.PostMapping;

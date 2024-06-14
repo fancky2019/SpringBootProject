@@ -1,17 +1,19 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.elasticsearch.DemoProduct;
+import com.example.demo.model.elasticsearch.ShipOrderInfo;
+import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.DemoProductRequest;
+import com.example.demo.model.request.ShipOrderInfoRequest;
 import com.example.demo.model.viewModel.MessageResult;
-import com.example.demo.model.viewModel.PageData;
+import com.example.demo.model.pojo.Page;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.service.api.FeignClientTest;
 import com.example.demo.service.elasticsearch.ESDemoProductService;
+import com.example.demo.service.elasticsearch.ShipOrderInfoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -54,6 +56,9 @@ public class ElasticsearchController {
     private final ESDemoProductService esDemoProductService;
 
     @Autowired
+    private  ShipOrderInfoService shipOrderInfoService;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     //构造函数注入
@@ -77,6 +82,23 @@ public class ElasticsearchController {
         }
         return message;
 
+    }
+
+    @GetMapping("/getShipOrderInfoList")
+    public MessageResult<PageData<ShipOrderInfo>> getShipOrderInfoList(ShipOrderInfoRequest request) {
+        return MessageResult.success(shipOrderInfoService.search(request));
+    }
+
+    @GetMapping("/addBatch")
+    public MessageResult<Void> addBatch() throws Exception {
+        shipOrderInfoService.addBatch();
+        return MessageResult.success();
+    }
+
+    @PostMapping("/deleteShipOrderInfo")
+    public MessageResult<Void> deleteShipOrderInfo() throws Exception {
+        shipOrderInfoService.deleteShipOrderInfo();
+        return MessageResult.success();
     }
 
 }

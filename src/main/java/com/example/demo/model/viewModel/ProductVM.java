@@ -1,5 +1,7 @@
 package com.example.demo.model.viewModel;
 
+import com.example.demo.model.pojo.Page;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;

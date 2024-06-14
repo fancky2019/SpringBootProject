@@ -1,8 +1,9 @@
 package com.example.demo.service.mybatissql;
 
 import com.example.demo.dao.mybatissql.MybatisSqlMapper;
+import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.viewModel.MessageResult;
-import com.example.demo.model.viewModel.PageData;
+import com.example.demo.model.pojo.Page;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.service.rabc.UserManagerService;
 import org.apache.logging.log4j.LogManager;

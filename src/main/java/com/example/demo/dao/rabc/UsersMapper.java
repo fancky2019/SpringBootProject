@@ -1,7 +1,7 @@
 package com.example.demo.dao.rabc;
 
 import com.example.demo.model.entity.rabc.Users;
-import com.example.demo.model.viewModel.PageData;
+import com.example.demo.model.pojo.Page;
 import com.example.demo.model.viewModel.ProductVM;
 import com.example.demo.model.viewModel.rabc.UsersVM;
 import org.apache.ibatis.annotations.Mapper;
