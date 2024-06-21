@@ -12,17 +12,24 @@
   <sql id="Base_Column_List">
     id, name, age, birthday
   </sql>
-<!--  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">-->
-<!--    select -->
-<!--    <include refid="Base_Column_List" />-->
-<!--    from person-->
-<!--    where id = #{id,jdbcType=BIGINT}-->
-<!--  </select>-->
-<!--  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">-->
-<!--    delete from person-->
-<!--    where id = #{id,jdbcType=BIGINT}-->
-<!--  </delete>-->
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from person
+    where id = #{id,jdbcType=BIGINT}
+  </select>
 
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from person
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <select id="selectByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from person
+    where name = #{name,jdbcType=VARCHAR}
+  </select>
 
   <insert id="insert" parameterType="com.example.demo.model.entity.demo.Person">
     insert into person (id, name, age, 
@@ -77,12 +84,12 @@
 <!--    </set>-->
 <!--    where id = #{id,jdbcType=BIGINT}-->
 <!--  </update>-->
-<!--  <update id="updateByPrimaryKey" parameterType="com.example.mybatisgenerator.model.entity.online.Person">-->
-<!--    update person-->
-<!--    set name = #{name,jdbcType=VARCHAR},-->
-<!--      age = #{age,jdbcType=INTEGER},-->
-<!--      birthday = #{birthday,jdbcType=TIMESTAMP}-->
-<!--    where id = #{id,jdbcType=BIGINT}-->
-<!--  </update>-->
+  <update id="updateByPrimaryKey" parameterType="com.example.demo.model.entity.demo.Person">
+    update person
+    set name = #{name,jdbcType=VARCHAR},
+      age = #{age,jdbcType=INTEGER},
+      birthday = #{birthday,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
 
 </mapper>

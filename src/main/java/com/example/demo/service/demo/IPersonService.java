@@ -7,5 +7,8 @@ public interface IPersonService {
     void test();
 
     int insert(Person person);
+     int insertUnCommit(Person record);
+    void transactionalSynchronizedTest(Integer i) throws InterruptedException;
 
+    void  proTest();
 }

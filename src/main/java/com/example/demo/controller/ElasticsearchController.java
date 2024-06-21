@@ -6,16 +6,11 @@ import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.request.ShipOrderInfoRequest;
 import com.example.demo.model.viewModel.MessageResult;
-import com.example.demo.model.pojo.Page;
-import com.example.demo.model.viewModel.ProductVM;
-import com.example.demo.service.api.FeignClientTest;
 import com.example.demo.service.elasticsearch.ESDemoProductService;
 import com.example.demo.service.elasticsearch.ShipOrderInfoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
 es和关系数据库都存在跳页问题。性能差
@@ -85,7 +80,7 @@ public class ElasticsearchController {
     }
 
     @GetMapping("/getShipOrderInfoList")
-    public MessageResult<PageData<ShipOrderInfo>> getShipOrderInfoList(ShipOrderInfoRequest request) {
+    public MessageResult<PageData<ShipOrderInfo>> getShipOrderInfoList(@RequestBody ShipOrderInfoRequest request) throws Exception {
         return MessageResult.success(shipOrderInfoService.search(request));
     }
 
@@ -100,5 +95,25 @@ public class ElasticsearchController {
         shipOrderInfoService.deleteShipOrderInfo();
         return MessageResult.success();
     }
+
+
+    @GetMapping("/aggregationTopBucketQuery")
+    public MessageResult<Void> aggregationTopBucketQuery(ShipOrderInfoRequest request) throws Exception {
+        shipOrderInfoService.aggregationTopBucketQuery(request);
+        return MessageResult.success();
+    }
+
+    @GetMapping("/scriptQuery")
+    public MessageResult<Void> scriptQuery( ) throws Exception {
+     //   shipOrderInfoService.scriptQuery();
+        return MessageResult.success();
+    }
+
+    @GetMapping("/aggregationStatisticsQuery")
+    public MessageResult<Void> aggregationStatisticsQuery( ShipOrderInfoRequest request) throws Exception {
+           shipOrderInfoService.aggregationStatisticsQuery(request);
+        return MessageResult.success();
+    }
+
 
 }

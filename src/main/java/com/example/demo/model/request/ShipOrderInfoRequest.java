@@ -1,5 +1,6 @@
 package com.example.demo.model.request;
 
+import com.example.demo.model.pojo.EsRequestPage;
 import com.example.demo.model.pojo.Page;
 import lombok.Data;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
@@ -10,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-public class ShipOrderInfoRequest extends Page {
+public class ShipOrderInfoRequest extends EsRequestPage {
     private Long applyShipOrderId;
     private String applyShipOrderCode;
     private Long applyShipOrderItemId;

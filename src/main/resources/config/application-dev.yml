@@ -520,3 +520,11 @@ rocketmq:
     retry-times-when-send-failed: 2 # 同步发送消息时，失败重试次数。默认为 2 次。
     retry-times-when-send-async-failed: 2 # 异步发送消息时，失败重试次数。默认为 2 次。
     retry-next-server: false # 发送消息给 Broker 时，如果发送失败，是否重试另外一台 Broker
+#springfox:
+#  documentation:
+#    base-url: http://example.com/api/v2/api-docs
+#    host: http://example.com
+#    path: /
+#  spring:
+#    profiles:
+#      active: ['!docs', '!documenation']

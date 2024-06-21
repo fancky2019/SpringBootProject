@@ -25,6 +25,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @EnableCircuitBreaker//开启HystrixDashBoard
 @EnableAspectJAutoProxy(exposeProxy = true)//开启spring注解aop配置的支持，获取当前代理对象 (PersonService) AopContext.currentProxy();
 //移动到SwaggerConfig 配置文件类处理
-//@EnableSwagger2  //EnableSwagger2  http://localhost:8081/swagger-ui.html
+@EnableSwagger2  //EnableSwagger2  http://localhost:8081/swagger-ui.html
 @EnableRetry
 public class SpringBootProjectApplication {
 

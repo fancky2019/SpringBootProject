@@ -42,6 +42,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.Lists;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
@@ -110,7 +111,7 @@ global session作用域类似于标准的HTTP Session作用域，不过它仅仅
     </session-config>
 <!--tomcat默认30分钟 -->
  */
-
+@Api  //方法上  @ApiOperation()
 @Slf4j
 @RestController
 @RequestMapping("/utility")
@@ -684,11 +685,14 @@ public class UtilityController {
      */
     @GetMapping(value = "/propagation")
     public void propagation() {
-        Person person = new Person();
-        person.setName("fancky");
-        person.setAge(27);
-        person.setBirthday(LocalDateTime.now());
-        personService.insert(person);
+//        Person person = new Person();
+//        person.setName("fancky");
+//        person.setAge(27);
+//        person.setBirthday(LocalDateTime.now());
+//        personService.insert(person);
+
+
+        personService. proTest();
     }
     //endregion
 
@@ -1514,6 +1518,11 @@ public class UtilityController {
 
     }
 
+    /**
+     * 此类 propagation 事务传播方法
+     * 手动事务OrderManagerService 方法 addOrder
+     * TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+     */
 
     @GetMapping(value = "/transactionalTest")
     public void transactionalTest() {
@@ -1522,6 +1531,12 @@ public class UtilityController {
         person.setAge(27);
         person.setBirthday(LocalDateTime.now());
         personService.insert(person);
+    }
+
+    @GetMapping(value = "/transactionalSynchronizedTest")
+    public void transactionalSynchronizedTest(Integer i) throws InterruptedException {
+
+        personService.transactionalSynchronizedTest(i);
     }
 
 

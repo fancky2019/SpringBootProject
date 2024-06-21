@@ -17,6 +17,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -117,9 +118,8 @@ public class RedisConfig {
                 // 设置缓存的默认过期时间
                 .entryTtl(Duration.ofSeconds(180))
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(this.jackson2JsonRedisSerializer()))
-               ;
-                // 不缓存空值
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(this.jackson2JsonRedisSerializer()));
+        // 不缓存空值
 //                .disableCachingNullValues();
         //根据redis缓存配置和reid连接工厂生成redis缓存管理器
         RedisCacheManager redisCacheManager = RedisCacheManager.builder(factory)
@@ -137,6 +137,7 @@ public class RedisConfig {
     private Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer() {
         Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer =
                 new Jackson2JsonRedisSerializer<>(Object.class);
+
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         objectMapper.configure(MapperFeature.USE_ANNOTATIONS, false);

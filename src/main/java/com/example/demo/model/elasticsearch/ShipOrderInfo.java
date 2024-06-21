@@ -111,7 +111,7 @@ public class ShipOrderInfo {
     private String shipOrderItemProperty19;
     private String shipOrderItemProperty20;
 
-
+    //@Field(name = "task_completed_time",index = true, store = true, type = FieldType.Date,format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     @Field( store = true, type = FieldType.Date,format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private LocalDateTime taskCompletedTime;
 }
