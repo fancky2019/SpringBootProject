@@ -16,15 +16,12 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
-import org.elasticsearch.search.aggregations.Aggregation;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.*;
+import org.elasticsearch.search.aggregations.bucket.histogram.*;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.*;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -42,6 +39,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -313,22 +311,19 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
 //        String[] includes = new String[]{"applyShipOrderId", "materialName"};
 
 
-        List<SortBuilder<?>> sortBuilderList=new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(request.getSortList()))
-        {
-            SortOrder sortOrder=null;
-            for(Sort sort:request.getSortList())
-            {
-                switch (sort.getSortOrder().toLowerCase())
-                {
+        List<SortBuilder<?>> sortBuilderList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(request.getSortList())) {
+            SortOrder sortOrder = null;
+            for (Sort sort : request.getSortList()) {
+                switch (sort.getSortOrder().toLowerCase()) {
                     case "asc":
-                        sortOrder=  SortOrder.ASC;
+                        sortOrder = SortOrder.ASC;
                         break;
                     case "desc":
-                        sortOrder=  SortOrder.DESC;
+                        sortOrder = SortOrder.DESC;
                         break;
                     default:
-                        throw  new Exception("不支持的排序");
+                        throw new Exception("不支持的排序");
                 }
                 sortBuilderList.add(SortBuilders.fieldSort(sort.getSortField())
                         .order(sortOrder));
@@ -338,8 +333,6 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
 //        sortBuilderList.add(SortBuilders.fieldSort("id").order(SortOrder.DESC));
 //        //taskCompletedTime task_completed_time
 //        sortBuilderList.add(SortBuilders.fieldSort("taskCompletedTime").order(SortOrder.DESC));
-
-
 
 
         NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
@@ -367,11 +360,9 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
                     public String[] getIncludes() {
 //                        return includeList.toArray(new String[0]);
 //
-                        if(request.getSourceField()!=null)
-                        {
+                        if (request.getSourceField() != null) {
                             return request.getSourceField().toArray(new String[0]);
-                        }
-                        else {
+                        } else {
                             return new String[0];
                         }
 
@@ -680,6 +671,11 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
 
     //endregion
 
+    /**
+     * 最大、最小、求和、平均
+     * @param request
+     * @throws JsonProcessingException
+     */
     public void aggregationStatisticsQuery(ShipOrderInfoRequest request) throws JsonProcessingException {
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
@@ -761,21 +757,23 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
         //根据productGroupId进行分桶
         TermsAggregationBuilder applyShipOrderCodeAgg = AggregationBuilders.terms("agg_applyShipOrderCode").field("applyShipOrderCode").size(Integer.MAX_VALUE);
         //对桶进行统计
-        AvgAggregationBuilder avgAggregationBuilder = AggregationBuilders.avg("avgName_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity");
+        AvgAggregationBuilder avgAggregationBuilder = AggregationBuilders.avg("avg_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity");
         SumAggregationBuilder sumAggregationBuilder = AggregationBuilders.sum("sum_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity");
         MaxAggregationBuilder maxAggregationBuilder = AggregationBuilders.max("max_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity");
         MinAggregationBuilder minAggregationBuilder = AggregationBuilders.min("min_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity");
-//       //直方图  根据天统计
-//        DateHistogramAggregationBuilder dateHistogramAggregationBuilder=
+//        //直方图  根据天统计  单独写一个
+//        DateHistogramAggregationBuilder dateHistogramAggregationBuilder =
 //                AggregationBuilders.dateHistogram("agg_taskCompletedTime").field("taskCompletedTime")
 ////        DateHistogramInterval.MONTH(1)
-//                .calendarInterval(DateHistogramInterval.days(1)).format("yyyy-MM-dd");
+//                        .calendarInterval(DateHistogramInterval.days(1)).format("yyyy-MM-dd");
+//.format("yyyy-MM-dd HH:mm").minDocCount(0)
+//                .extendedBounds(new LongBounds(startTime, endTime)).timeZone(ZoneId.of("Asia/Shanghai"));
 
         applyShipOrderCodeAgg.subAggregation(avgAggregationBuilder);
         applyShipOrderCodeAgg.subAggregation(sumAggregationBuilder);
         applyShipOrderCodeAgg.subAggregation(maxAggregationBuilder);
         applyShipOrderCodeAgg.subAggregation(minAggregationBuilder);
-       // applyShipOrderCodeAgg.subAggregation(dateHistogramAggregationBuilder);
+//        applyShipOrderCodeAgg.subAggregation(dateHistogramAggregationBuilder);
 
         int n = 0;
 
@@ -825,12 +823,52 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
 
                 Aggregations bucketAggregations = bucket.getAggregations();
                 //要和子聚合保持一致
-                double sum = ((ParsedSum) bucketAggregations.asList().get(0)).getValue();
-                double avg = ((ParsedAvg) bucketAggregations.asList().get(1)).getValue();
-                double max = ((ParsedMax) bucketAggregations.asList().get(2)).getValue();
-                double min = ((ParsedMin) bucketAggregations.asList().get(3)).getValue();
-                sumHashMap.put(key, sum);
-                avgHashMap.put(key, avg);
+                List<Aggregation> bucketAggregationsList = bucketAggregations.asList();
+                for (int i = 0; i < bucketAggregationsList.size(); i++) {
+                    Aggregation abucketAggregation = bucketAggregationsList.get(i);
+                    String aggregationName = abucketAggregation.getName();
+
+
+                    switch (aggregationName) {
+                        case "avgAggregationBuilder":
+                            double avg = ((ParsedAvg) abucketAggregation).getValue();
+                            avgHashMap.put(key, avg);
+                            break;
+                        case "sumAggregationBuilder":
+                            double sum = ((ParsedSum) abucketAggregation).getValue();
+                            sumHashMap.put(key, sum);
+                            break;
+                        case "maxAggregationBuilder":
+                            double max = ((ParsedMax) abucketAggregation).getValue();
+                            break;
+                        case "minAggregationBuilder":
+                            double min = ((ParsedMin) abucketAggregation).getValue();
+                            break;
+                        case "agg_taskCompletedTime":
+                            ParsedDateHistogram dateHistogram = (ParsedDateHistogram) abucketAggregation;
+                            List<?> dateHistogramBuckets = dateHistogram.getBuckets();
+                            for (int t = 0; t < dateHistogramBuckets.size(); t++) {
+                                Object parsedBucketObj = dateHistogramBuckets.get(t);
+                                ParsedDateHistogram.ParsedBucket parsedBucket = (ParsedDateHistogram.ParsedBucket) parsedBucketObj;
+                                parsedBucket.getKey();
+                                String parsedBucketKey = parsedBucket.getKeyAsString();
+                                int mm = 0;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+//               String aggregationName=    bucketAggregations.asList().get(0).getName();
+
+
+                //       //直方图  根据天统计
+//                double sum = ((ParsedSum) bucketAggregations.asList().get(0)).getValue();
+//                double avg = ((ParsedAvg) bucketAggregations.asList().get(1)).getValue();
+//                double max = ((ParsedMax) bucketAggregations.asList().get(2)).getValue();
+//                double min = ((ParsedMin) bucketAggregations.asList().get(3)).getValue();
+//                sumHashMap.put(key, sum);
+//                avgHashMap.put(key, avg);
 
             }
         }
@@ -839,5 +877,173 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
         int m = 0;
     }
 
+
+    /**
+     * 直方图
+     * @param request
+     * @throws JsonProcessingException
+     */
+    public  LinkedHashMap<Object, Double>  dateHistogramStatisticsQuery(ShipOrderInfoRequest request) throws JsonProcessingException {
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        if (request.getId() != null && request.getId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("id", request.getId()));
+        }
+        if (request.getApplyShipOrderId() != null && request.getApplyShipOrderId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("applyShipOrderId", request.getApplyShipOrderId()));
+        }
+
+        if (StringUtils.isNotEmpty(request.getApplyShipOrderCode())) {
+            //guid 设置keyword  不成功 ES8
+//            boolQueryBuilder.must(QueryBuilders.termQuery("guid.keyword", request.getGuid()));
+            //es7
+            boolQueryBuilder.must(QueryBuilders.termQuery("applyShipOrderCode", request.getApplyShipOrderCode()));
+        }
+
+        if (request.getApplyShipOrderItemId() != null && request.getApplyShipOrderItemId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("applyShipOrderItemId", request.getApplyShipOrderItemId()));
+        }
+
+
+        if (StringUtils.isNotEmpty(request.getShipOrderCode())) {
+
+            boolQueryBuilder.must(QueryBuilders.termQuery("shipOrderCode", request.getShipOrderCode()));
+        }
+
+        if (request.getShipOrderItemId() != null && request.getShipOrderItemId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("shipOrderItemId", request.getShipOrderItemId()));
+        }
+        if (request.getShipPickOrderId() != null && request.getShipPickOrderId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("shipPickOrderId", request.getShipPickOrderId()));
+        }
+        if (request.getShipPickOrderItemId() != null && request.getShipPickOrderItemId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("shipPickOrderItemId", request.getShipPickOrderItemId()));
+        }
+        if (request.getWmsTaskId() != null && request.getWmsTaskId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("wmsTaskId", request.getWmsTaskId()));
+        }
+        if (StringUtils.isNotEmpty(request.getTaskNo())) {
+
+            boolQueryBuilder.must(QueryBuilders.termQuery("taskNo", request.getTaskNo()));
+        }
+        if (request.getInventoryId() != null && request.getInventoryId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("inventoryId", request.getInventoryId()));
+        }
+        if (request.getInventoryItemId() != null && request.getInventoryItemId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("inventoryItemId", request.getInventoryItemId()));
+        }
+        if (request.getInventoryItemDetailId() != null && request.getInventoryItemDetailId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("inventoryItemDetailId", request.getInventoryItemDetailId()));
+        }
+        if (StringUtils.isNotEmpty(request.getPallet())) {
+
+            boolQueryBuilder.must(QueryBuilders.termQuery("pallet", request.getPallet()));
+        }
+        if (request.getMaterialId() != null && request.getMaterialId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("materialId", request.getMaterialId()));
+        }
+        if (StringUtils.isNotEmpty(request.getMaterialName())) {
+            boolQueryBuilder.must(QueryBuilders.matchQuery("materialName", request.getMaterialName()));
+        }
+        if (StringUtils.isNotEmpty(request.getMaterialCode())) {
+
+            boolQueryBuilder.must(QueryBuilders.termQuery("materialCode", request.getMaterialCode()));
+        }
+        if (StringUtils.isNotEmpty(request.getSerialNo())) {
+
+            boolQueryBuilder.must(QueryBuilders.termQuery("serialNo", request.getSerialNo()));
+        }
+        if (request.getWorkOrderId() != null && request.getWorkOrderId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("workOrderId", request.getWorkOrderId()));
+        }
+        if (request.getLocationId() != null && request.getLocationId() > 0) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("locationId", request.getLocationId()));
+        }
+
+        //聚合查询
+        //根据productGroupId进行分桶
+
+
+        //        //直方图  根据天统计  单独写一个
+//        DateHistogramAggregationBuilder dateHistogramAggregationBuilder =
+//                AggregationBuilders.dateHistogram("agg_taskCompletedTime").field("taskCompletedTime")
+////        DateHistogramInterval.MONTH(1)
+//                        .calendarInterval(DateHistogramInterval.days(1)).format("yyyy-MM-dd");
+//.format("yyyy-MM-dd HH:mm").minDocCount(0)
+//                .extendedBounds(new LongBounds(startTime, endTime)).timeZone(ZoneId.of("Asia/Shanghai"));
+
+
+        //根据productGroupId进行分桶
+        DateHistogramAggregationBuilder dateHistogramAggregationBuilder =
+                AggregationBuilders.dateHistogram("agg_taskCompletedTime").field("taskCompletedTime")
+//        DateHistogramInterval.MONTH(1)
+                        .calendarInterval(DateHistogramInterval.days(1)).offset("-8h").format("yyyy-MM-dd").minDocCount(0);
+        ;
+//.format("yyyy-MM-dd HH:mm").minDocCount(0)
+//                .extendedBounds(new LongBounds(startTime, endTime)).timeZone(ZoneId.of("Asia/Shanghai"));
+
+        dateHistogramAggregationBuilder.subAggregation(AggregationBuilders.sum("sum_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity"));
+
+        //        //创建一个 top_hits 聚合 排序
+//        TopHitsAggregationBuilder topHitsAggregation =
+//                AggregationBuilders.topHits("top_docs")
+//                        .sort("taskCompletedTime", SortOrder.ASC);
+//
+//
+//        //可将 scriptAggregationBuilder 的值复制到postman 中格式化查看，就是对应的dsl 语句
+//        //将 top_hits 聚合添加到桶聚合中。
+//        dateHistogramAggregationBuilder.subAggregation(topHitsAggregation);
+
+
+        NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
+                //查询条件:es支持分词查询，最小是一个词，要精确匹配分词
+                //在指定字段中查找值
+//                .withQuery(QueryBuilders.queryStringQuery("合肥").field("product_name").field("produce_address"))
+                // .withQuery(QueryBuilders.multiMatchQuery("安徽合肥", "product_name", "produce_address"))
+
+                .withQuery(boolQueryBuilder)//必须要加keyword，否则查不出来
+                //SEARCH_AFTER 不用指定 from size
+//                .withQuery(QueryBuilders.rangeQuery("price").from("5").to("9"))//多个条件and 的关系
+                //分页：page 从0开始
+                //  .withPageable(PageRequest.of(request.getPageIndex(), request.getPageSize()))
+                //排序
+                //  .withSort(SortBuilders.fieldSort("id").order(SortOrder.DESC))
+                //高亮字段显示
+//                .withHighlightFields(new HighlightBuilder.Field("product_name"))
+                .withTrackTotalHits(true)//解除最大1W条限制
+                //  .addAggregation(AggregationBuilders.max("maxAge").field("age"))
+//                .addAggregation(multiTermsAggregationBuilder)
+                .addAggregation(dateHistogramAggregationBuilder)
+                .build();
+//        nativeSearchQuery.setTrackTotalHitsUpTo(10000000);
+        SearchHits<ShipOrderInfo> searchHits = elasticsearchRestTemplate.search(nativeSearchQuery, ShipOrderInfo.class);
+        //返回所有命中的 有不在bucket中的
+        // List<ShipOrderInfo> shipOrderInfoList = searchHits.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
+
+
+        AggregationsContainer<?> aggregationsContainer = searchHits.getAggregations();
+        Object obj = aggregationsContainer.aggregations();
+        Aggregations aggregations = (Aggregations) aggregationsContainer.aggregations();
+
+
+        Map<String, Aggregation> map = aggregations.getAsMap();
+
+
+        ParsedDateHistogram terms = (ParsedDateHistogram) map.get("agg_taskCompletedTime");
+        //HashMap key  会乱序  key 会乱
+        LinkedHashMap<Object, Double> dateHashMap = new LinkedHashMap<>();
+        for (Histogram.Bucket bucket : terms.getBuckets()) {
+
+            String key = bucket.getKeyAsString();
+            if (bucket.getAggregations().get("sum_AllocatedPkgQuantity") != null) {
+                ParsedSum sum = bucket.getAggregations().get("sum_AllocatedPkgQuantity");
+                dateHashMap.put(key, sum.getValue());
+            }
+
+        }
+
+
+        return dateHashMap;
+    }
 
 }

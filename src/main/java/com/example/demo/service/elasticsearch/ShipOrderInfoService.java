@@ -7,6 +7,8 @@ import com.example.demo.model.request.ShipOrderInfoRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
+
 @Service
 public interface ShipOrderInfoService {
 
@@ -19,6 +21,9 @@ public interface ShipOrderInfoService {
     void aggregationTopBucketQuery(ShipOrderInfoRequest request) throws JsonProcessingException;
 
     void aggregationStatisticsQuery(ShipOrderInfoRequest request) throws JsonProcessingException;
+    LinkedHashMap<Object, Double> dateHistogramStatisticsQuery(ShipOrderInfoRequest request) throws JsonProcessingException;
+
+
 
 
 }
