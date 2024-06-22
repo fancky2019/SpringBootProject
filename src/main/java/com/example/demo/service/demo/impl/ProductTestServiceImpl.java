@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -14,6 +15,7 @@ import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.demo.IProductTestService;
+import com.example.demo.service.wms.ProductService;
 import com.example.demo.utility.ConfigConst;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +58,8 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private ProductService productService;
 
     public ProductTestServiceImpl(ProductTestMapper productTestMapper) {
         this.productTestMapper = productTestMapper;
@@ -70,9 +74,9 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        this.saveEntity();
 //        saveOrUpdateBatch();
 //        queryById();
-//        queryTest();
+        queryTest();
 //        updateTest();
-        page();
+//        page();
 //        queryParam();
 //        truncateTest();
 //        deleteTableDataTest();
@@ -188,10 +192,48 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         );
          */
 
+//        QueryWrapper 使用字符串来表示数据库表中的列名，
+//        而 LambdaQueryWrapper 使用 Java 8 的 Lambda 表达式来更直接地指定字段名。
+
+        /*
+        getGuid的方法引用，实际传的类是SFunction 会识别到是哪个数据库字段  方法名-->字段名
+       lambda的方法引用在序列化的时候，会序列化为SerializedLambda类，。
+
+       SerializedLambda 类
+         private Class<?> capturingClass;
+    private String functionalInterfaceClass;
+    private String functionalInterfaceMethodName;
+    private String functionalInterfaceMethodSignature;
+    private String implClass;
+    private String implMethodName;
+    private String implMethodSignature;
+    private int implMethodKind;
+    private String instantiatedMethodType;
+    private Object[] capturedArgs;
+
+
+    //序列化Lambda   方法名-->字段名
+    SerializedLambda serializedLambda =LambdaUtils.resolve(Son::getSons);
+    String name = serializedLambda.getImplMethodName();
+    String fieldName = PropertyNamer.methodToProperty(name);
+
+         */
+
+
+        LambdaQueryWrapper<ProductTest> squeryWrapper = new LambdaQueryWrapper<ProductTest>();
+        squeryWrapper.select(ProductTest::getGuid, ProductTest::getProductName);
+        squeryWrapper.eq(ProductTest::getStatus, 1);
+//        squeryWrapper.last("limit " + startIndex + ", " + pageSize);
+        squeryWrapper.last("limit 0,10");
+//        queryWrapper.ne();
+        String productName1 = "";
+        //有条件拼接条件
+        squeryWrapper.eq(StringUtils.isNotEmpty(productName1), ProductTest::getProductName, productName1);
+        List<ProductTest> list11 = this.list(squeryWrapper);
 
         QueryWrapper<ProductTest> queryWrapper = new QueryWrapper<ProductTest>();
-//        queryWrapper.select("","");
-//        queryWrapper.eq("",1);
+        queryWrapper.select("guid", "product_name");
+        queryWrapper.eq("", 1);
 //        queryWrapper.ne();
         String productName = "";
         //有条件拼接条件

@@ -7,6 +7,7 @@ import com.example.demo.model.request.ShipOrderInfoRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 
 @Service
@@ -16,14 +17,13 @@ public interface ShipOrderInfoService {
 
     void addBatch() throws Exception;
 
-    boolean deleteShipOrderInfo() ;
+    boolean deleteShipOrderInfo();
 
     void aggregationTopBucketQuery(ShipOrderInfoRequest request) throws JsonProcessingException;
 
-    void aggregationStatisticsQuery(ShipOrderInfoRequest request) throws JsonProcessingException;
+    LinkedHashMap<String, BigDecimal> aggregationStatisticsQuery(ShipOrderInfoRequest request) throws Exception;
+
     LinkedHashMap<Object, Double> dateHistogramStatisticsQuery(ShipOrderInfoRequest request) throws JsonProcessingException;
-
-
 
 
 }

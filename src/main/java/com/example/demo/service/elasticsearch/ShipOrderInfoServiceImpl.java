@@ -1,7 +1,5 @@
 package com.example.demo.service.elasticsearch;
 
-import co.elastic.clients.elasticsearch._types.aggregations.DateHistogramAggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.MultiTermsAggregate;
 import com.example.demo.elasticsearch.ShipOrderInfoRepository;
 import com.example.demo.model.elasticsearch.ShipOrderInfo;
 import com.example.demo.model.pojo.PageData;
@@ -21,10 +19,10 @@ import org.elasticsearch.search.aggregations.bucket.histogram.*;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.*;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.redisson.misc.Hash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.*;
@@ -34,12 +32,8 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SourceFilter;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -312,9 +306,9 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
 
 
         List<SortBuilder<?>> sortBuilderList = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(request.getSortList())) {
+        if (CollectionUtils.isNotEmpty(request.getSortFieldList())) {
             SortOrder sortOrder = null;
-            for (Sort sort : request.getSortList()) {
+            for (Sort sort : request.getSortFieldList()) {
                 switch (sort.getSortOrder().toLowerCase()) {
                     case "asc":
                         sortOrder = SortOrder.ASC;
@@ -360,8 +354,8 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
                     public String[] getIncludes() {
 //                        return includeList.toArray(new String[0]);
 //
-                        if (request.getSourceField() != null) {
-                            return request.getSourceField().toArray(new String[0]);
+                        if (request.getSourceFieldList() != null) {
+                            return request.getSourceFieldList().toArray(new String[0]);
                         } else {
                             return new String[0];
                         }
@@ -526,6 +520,11 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
         String scriptStr = "doc['" + field1 + "'].value +'|'+ doc['" + field2 + "'].value";
         // 新建一个script对象
         Script script = new Script(scriptContent);
+
+        List<BucketOrder> orders = new ArrayList<>();
+
+//        BucketOrder.aggregation("applyShipOrderItemAllocatedPkgQuantity", false );//根据count数量排序
+
         // 创建一个聚合查询对象
         TermsAggregationBuilder scriptAggregationBuilder =
                 AggregationBuilders
@@ -676,7 +675,7 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
      * @param request
      * @throws JsonProcessingException
      */
-    public void aggregationStatisticsQuery(ShipOrderInfoRequest request) throws JsonProcessingException {
+    public LinkedHashMap<String, BigDecimal> aggregationStatisticsQuery(ShipOrderInfoRequest request) throws Exception {
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         if (request.getId() != null && request.getId() > 0) {
@@ -753,12 +752,53 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
             boolQueryBuilder.must(QueryBuilders.termQuery("locationId", request.getLocationId()));
         }
 
-        //聚合查询
-        //根据productGroupId进行分桶
-        TermsAggregationBuilder applyShipOrderCodeAgg = AggregationBuilders.terms("agg_applyShipOrderCode").field("applyShipOrderCode").size(Integer.MAX_VALUE);
+        if (CollectionUtils.isEmpty(request.getBucketFieldList())) {
+            throw new Exception("BucketField is empty");
+        }
+
+        if (CollectionUtils.isEmpty(request.getAggregationFieldList())) {
+            throw new Exception("AggregationFieldList is empty");
+        }
+
+
+        List<SumAggregationBuilder> sumAggregationBuilders = new ArrayList<>();
+        List<BucketOrder> bucketOrderList = new ArrayList<>();
+
+        for (String field : request.getAggregationFieldList()) {
+            String agg_name = "sum_" + field;
+            SumAggregationBuilder sumAggregationBuilder = AggregationBuilders.sum(agg_name).field(field);
+            sumAggregationBuilders.add(sumAggregationBuilder);
+
+//            BucketOrder.aggregation("applyShipOrderItemAllocatedPkgQuantity", false );//根据count数量排序
+            //不指定聚合名称就是按照_count 统计
+            BucketOrder bucketOrder = BucketOrder.aggregation(agg_name, false);
+            bucketOrderList.add(bucketOrder);
+
+        }
+
+        //region script
+        //多个字段进行分桶
+        String scriptContent = request.getBucketFieldList().stream().map(one -> String.format("doc['%s'].value", one))
+                .collect(Collectors.joining("+'" + SEPARATOR + "'+"));
+        // 新建一个script对象
+        Script script = new Script(scriptContent);
+        // 创建一个聚合查询对象
+        TermsAggregationBuilder scriptAggregationBuilder =
+                AggregationBuilders
+                        .terms("aggregation_name")
+                        .script(script)
+                        .order(bucketOrderList)
+                        // 返回桶数
+                        .size(Integer.MAX_VALUE);
+
+
+        //可将 scriptAggregationBuilder 的值复制到postman 中格式化查看，就是对应的dsl 语句
+        //将 top_hits 聚合添加到桶聚合中。
+
+
         //对桶进行统计
         AvgAggregationBuilder avgAggregationBuilder = AggregationBuilders.avg("avg_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity");
-        SumAggregationBuilder sumAggregationBuilder = AggregationBuilders.sum("sum_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity");
+        // SumAggregationBuilder sumAggregationBuilder = AggregationBuilders.sum("sum_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity");
         MaxAggregationBuilder maxAggregationBuilder = AggregationBuilders.max("max_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity");
         MinAggregationBuilder minAggregationBuilder = AggregationBuilders.min("min_AllocatedPkgQuantity").field("applyShipOrderItemAllocatedPkgQuantity");
 //        //直方图  根据天统计  单独写一个
@@ -769,10 +809,13 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
 //.format("yyyy-MM-dd HH:mm").minDocCount(0)
 //                .extendedBounds(new LongBounds(startTime, endTime)).timeZone(ZoneId.of("Asia/Shanghai"));
 
-        applyShipOrderCodeAgg.subAggregation(avgAggregationBuilder);
-        applyShipOrderCodeAgg.subAggregation(sumAggregationBuilder);
-        applyShipOrderCodeAgg.subAggregation(maxAggregationBuilder);
-        applyShipOrderCodeAgg.subAggregation(minAggregationBuilder);
+        for (SumAggregationBuilder builder : sumAggregationBuilders) {
+            scriptAggregationBuilder.subAggregation(builder);
+        }
+        scriptAggregationBuilder.subAggregation(avgAggregationBuilder);
+
+        scriptAggregationBuilder.subAggregation(maxAggregationBuilder);
+        scriptAggregationBuilder.subAggregation(minAggregationBuilder);
 //        applyShipOrderCodeAgg.subAggregation(dateHistogramAggregationBuilder);
 
         int n = 0;
@@ -796,7 +839,7 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
                 .withTrackTotalHits(true)//解除最大1W条限制
                 //  .addAggregation(AggregationBuilders.max("maxAge").field("age"))
 //                .addAggregation(multiTermsAggregationBuilder)
-                .addAggregation(applyShipOrderCodeAgg)
+                .addAggregation(scriptAggregationBuilder)
                 .build();
 //        nativeSearchQuery.setTrackTotalHitsUpTo(10000000);
         SearchHits<ShipOrderInfo> searchHits = elasticsearchRestTemplate.search(nativeSearchQuery, ShipOrderInfo.class);
@@ -814,6 +857,7 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
         HashMap<Object, Long> countHashMap = new HashMap<>();
         HashMap<Object, Double> sumHashMap = new HashMap<>();
         HashMap<Object, Double> avgHashMap = new HashMap<>();
+        LinkedHashMap<String, BigDecimal> resultMap = new LinkedHashMap<>();
         for (Aggregation aggregation : map.values()) {
             Terms terms1 = aggregations.get(aggregation.getName());
             for (Terms.Bucket bucket : terms1.getBuckets()) {
@@ -822,13 +866,20 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
                 countHashMap.put(key, count);
 
                 Aggregations bucketAggregations = bucket.getAggregations();
-                //要和子聚合保持一致
                 List<Aggregation> bucketAggregationsList = bucketAggregations.asList();
+//                //要和子聚合保持一致
+//                List<Avg> bucketAggregationsList =
+//                        bucketAggregations.asList().stream().map(p->(Avg)p).collect(Collectors.toList());
+//
+
+
                 for (int i = 0; i < bucketAggregationsList.size(); i++) {
                     Aggregation abucketAggregation = bucketAggregationsList.get(i);
                     String aggregationName = abucketAggregation.getName();
 
-
+                    ParsedSingleValueNumericMetricsAggregation parsed = (ParsedSingleValueNumericMetricsAggregation) bucketAggregationsList.get(i);
+                    BigDecimal bigDecimal = new BigDecimal(parsed.getValueAsString());
+                    resultMap.put(parsed.getName().replace("sum_",""), bigDecimal);
                     switch (aggregationName) {
                         case "avgAggregationBuilder":
                             double avg = ((ParsedAvg) abucketAggregation).getValue();
@@ -875,6 +926,7 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
 
 
         int m = 0;
+        return resultMap;
     }
 
 
@@ -883,7 +935,7 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
      * @param request
      * @throws JsonProcessingException
      */
-    public  LinkedHashMap<Object, Double>  dateHistogramStatisticsQuery(ShipOrderInfoRequest request) throws JsonProcessingException {
+    public LinkedHashMap<Object, Double> dateHistogramStatisticsQuery(ShipOrderInfoRequest request) throws JsonProcessingException {
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         if (request.getId() != null && request.getId() > 0) {

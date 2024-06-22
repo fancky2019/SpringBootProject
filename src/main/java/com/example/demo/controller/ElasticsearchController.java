@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 
 /**
@@ -111,10 +112,10 @@ public class ElasticsearchController {
         return MessageResult.success();
     }
 
-    @GetMapping("/aggregationStatisticsQuery")
-    public MessageResult<Void> aggregationStatisticsQuery(ShipOrderInfoRequest request) throws Exception {
-        shipOrderInfoService.aggregationStatisticsQuery(request);
-        return MessageResult.success();
+    @PostMapping("/aggregationStatisticsQuery")
+    public MessageResult<LinkedHashMap<String, BigDecimal>> aggregationStatisticsQuery(@RequestBody ShipOrderInfoRequest request) throws Exception {
+        LinkedHashMap<String, BigDecimal> map = shipOrderInfoService.aggregationStatisticsQuery(request);
+        return MessageResult.success(map);
     }
 
     @GetMapping("/dateHistogramStatisticsQuery")
