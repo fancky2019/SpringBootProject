@@ -9,7 +9,20 @@ import org.springframework.stereotype.Component;
 /*
 共享消息队列模式和发布-订阅模型
 
-kafka 没有提供同步刷盘机制，由操作系统刷盘，消息发到broker 没刷盘就可能丢失
+kafka 没有提供同步刷盘机制，由操作系统刷盘，消息发到broker 没刷盘就可能丢失。可配置刷盘策略或者副本同步机制
+
+//log.flush.interval.messages //多少条消息刷盘1次
+//log.flush.interval.ms //隔多长时间刷盘1次
+//log.flush.scheduler.interval.ms //周期性的刷盘。
+//
+//# 设置至少有2个副本 同步了数据
+//replication.factor=2
+
+
+
+
+
+参见java-demo 项目
  */
 //@Component
 public class KafkaTest {

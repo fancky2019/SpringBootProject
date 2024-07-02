@@ -74,9 +74,9 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        this.saveEntity();
 //        saveOrUpdateBatch();
 //        queryById();
-        queryTest();
+//        queryTest();
 //        updateTest();
-//        page();
+        page();
 //        queryParam();
 //        truncateTest();
 //        deleteTableDataTest();
@@ -157,20 +157,41 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         int m = 0;
     }
 
-    /**
-     * 内存分页
-     *
-     * SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp  FROM demo_product
-     *
-     *  WHERE (id = 1)
-     */
+
     private void page() {
+        /**
+         * 未配置拦截器 内存分页
+         *
+         * SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp  FROM demo_product
+         *
+         *  WHERE (id = 1)
+         *
+         *  配置mybatis-pls 拦截器之后
+         *   SELECT COUNT(*) AS total FROM demo_product WHERE (id = 1)
+         *  SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp  FROM demo_product
+         *
+         *  WHERE (id = 1) LIMIT 10
+         */
         Page<ProductTest> page = new Page<>(1, 10);
         LambdaQueryWrapper<ProductTest> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ProductTest::getId, 1L);
-        IPage<ProductTest> orderPage = this.page(page, wrapper);
-        List<ProductTest> orders = orderPage.getRecords();
-        long total = orderPage.getTotal();
+        IPage<ProductTest> productTestPage = this.page(page, wrapper);
+        List<ProductTest> productTestList = productTestPage.getRecords();
+        long total = productTestPage.getTotal();
+
+
+
+        /*
+        需要配置 MybatisPlusPageInterceptor 拦截器，否则是查询所有
+
+    SELECT COUNT(*) AS total FROM demo_product WHERE (id = 1 AND product_name = 'update1')
+SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp  FROM demo_product
+
+ WHERE (id = 1 AND product_name = 'update1') LIMIT 10
+         */
+        wrapper.eq(ProductTest::getProductName, "update1");
+        IPage<ProductTest> pageData =     this.getBaseMapper().selectPage(page,wrapper);
+
         int m = 0;
     }
 

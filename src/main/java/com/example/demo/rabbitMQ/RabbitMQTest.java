@@ -46,10 +46,11 @@ import org.springframework.stereotype.Component;
  * 消息积压：将一个大队列分成几个小队列，根据messageId生产到相应队列，这样再配置单活队列，提高了消费能力，降低消息积压。
  *
  *
- *  * rabbitmq默认消息、队列、交换机都是持久化：
- *  * 发送时候指定消息持久化（deliveryMode=2）、
- *  * 声明队列时持久化（durable字段设置为true）、
- *  * 声明交换机时持久化（durable字段设置为true）
+ * 可用性：rabbitmq 生产者默认异步发送，暂时没找到同步发送。不像rocketmq和kafka 支生产者持同步发送异步发送
+ *  rabbitmq默认消息、队列、交换机都是持久化：
+ *  发送时候指定消息持久化（deliveryMode=2）、
+ *  声明队列时持久化（durable字段设置为true）、
+ *  声明交换机时持久化（durable字段设置为true）
  *
  * 消息默认持久化（deliveryMode=2：MessageProperties 默认 DEFAULT_DELIVERY_MODE = MessageDeliveryMode.PERSISTENT;）、
  * 队列默认持久化true、交换机默认持久化true
