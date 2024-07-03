@@ -1349,9 +1349,9 @@ public class UtilityController {
     }
     //endregion
 
-    @GetMapping(value = "/rocketMq")
-    public void sendMsg() {
-        rocketmqTest.test();
+    @GetMapping(value = "/rocketmqTest/{topic}")
+    public void rocketmqTest(@PathVariable("topic") String topic) {
+        rocketmqTest.test(topic);
         //automapper
 //        BeanUtils.copyProperties();
     }

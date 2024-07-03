@@ -57,6 +57,20 @@ public class RocketMQProducer {
 
     }
 
+    public SendResult sendMsg(String msgBody,String topic) {
+        try {
+            RabbitMqMessage msg = new RabbitMqMessage(msgBody);
+            //同步发送  timeout 时间值调大，单位ms 3000
+            SendResult sendResult = rocketMQTemplate.syncSend(topic, MessageBuilder.withPayload(msg).build());
+            //  log.info("【sendMsg】sendResult={}", JSON.toJSONString(sendResult));
+            return sendResult;
+        } catch (Exception e) {
+            int m = 0;
+            return null;
+        }
+
+    }
+
     /**
      * 发送异步消息（通过线程池执行发送到broker的消息任务，执行完后回调：在SendCallback中可处理相关成功失败时的逻辑）
      * （适合对响应时间敏感的业务场景）

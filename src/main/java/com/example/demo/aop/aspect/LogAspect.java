@@ -418,10 +418,12 @@ public class LogAspect {
                 try {
                     //tryLock(long waitTime, long leaseTime, TimeUnit unit)
                     //获取锁等待时间
-                    long waitTime = 1;
+                    long waitTime = 10;
                     //持有所超时释放锁时间  24 * 60 * 60;
                     // 注意：锁超时自动释放，另外一个线程就会获取锁继续执行，代码版本号处理
                     long leaseTime = 30;
+                    //不指定leaseTime看门狗自动续期
+//                    lock.lock();
                     boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
                     if (lockSuccessfully) {
                         //获取锁之后判断过期时间是否被之前线程设置过，设置过就处理过业务

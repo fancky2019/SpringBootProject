@@ -1,6 +1,7 @@
 package com.example.demo.rocketmq;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,9 @@ public class RocketmqTest {
 
     参见项目rocketmq demo
 
+     //操作界面
+     nameSrvAddr=127.0.0.1:7080
+
      消息可靠性：
      一、生成消息：1、同步发送，2、异步发送，回调确认机制
      二、broker 1、同步刷盘，将操作系统pageCache中的数据刷新到磁盘，2、主从模式，过半从同步
@@ -33,7 +37,7 @@ public class RocketmqTest {
 
     @Autowired
     RocketMQProducer rocketMQProducer;
-    public void test() {
+    public void test(String topic) {
 //        CompletableFuture.runAsync(()->
 //        {
         //不要开启线程调用否则子线程内的异常抛不出来
@@ -42,6 +46,12 @@ public class RocketmqTest {
 ////            rocketMQProducer.sendAsyncMsg("rocketMqTest");
 //        });
 
-        rocketMQProducer.sendMsg("rocketMqTest");
+
+        if(StringUtils.isEmpty(topic))
+        {
+            rocketMQProducer.sendMsg("rocketMqTest");
+        }else {
+            rocketMQProducer.sendMsg("rocketMqTest",topic);
+        }
     }
 }
