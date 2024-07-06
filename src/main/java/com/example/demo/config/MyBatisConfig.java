@@ -8,13 +8,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MyBatisConfig {
     @Bean
-    public SqlExecuteInterceptor sqlExecuteTimeInterceptor() {
+    public SqlExecuteInterceptor sqlExecuteInterceptor() {
         return new SqlExecuteInterceptor();
     }
 
     @Bean
     public ConfigurationCustomizer configurationCustomizer() {
-        return configuration -> configuration.addInterceptor(sqlExecuteTimeInterceptor());
+        return configuration -> configuration.addInterceptor(sqlExecuteInterceptor());
     }
 
 }

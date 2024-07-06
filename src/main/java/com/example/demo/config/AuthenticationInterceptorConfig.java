@@ -6,12 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+/**
+ * extends WebMvcConfigurationSupport
+ *
+ * 添加拦截器
+ */
 @Slf4j
 @Configuration
-public class AuthenticationInterceptorConfig   implements WebMvcConfigurer {
+public class AuthenticationInterceptorConfig  implements WebMvcConfigurer {
     //extends WebMvcConfigurerAdapter 废弃了
 
 //    @Autowired

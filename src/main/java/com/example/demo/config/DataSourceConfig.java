@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * Mybatis多数据源配置类
- *
+ *dynamic-datasource-spring-boot3-starter
  * @Primary 当一个类或接口有多个实例时候， @Autowired采用@Primary注解的默认注入
  * @ Qualifier 注解里的别名要和类的别名一直。@Autowired()@Qualifier("baseDao")
  */
