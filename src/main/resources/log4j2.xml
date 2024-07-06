@@ -8,6 +8,19 @@
         <Property name="logFileName">test.log</Property>
 <!--        "[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%p] - %m%n"-->
         <property name="log_pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%X{traceId}] %-5level %c{36} - %m%n</property>
+
+        <!--        按照springBoot 默认格式 + 添加颜色-->
+        <!--        1、添加虚拟机配置 -Dlog4j.skipJansi=false-->
+        <!--        2、yml 添加配置 -->
+        <!--        spring:-->
+        <!--        output:-->
+        <!--        ansi:-->
+        <!--        enabled: always-->
+        <!--        3、控制台appender添加配置 CONSOLE_LOG_PATTERN-->
+        <property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%6p} %style{%5pid}{bright,magenta} --- [%15.15t] %style{%-40.40logger{39}}{bright,cyan}: %m%n"/>
+
+
+
     </Properties>
 
     <appenders>

@@ -49,6 +49,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,6 +85,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /*
 在service类上加注解@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -178,6 +181,8 @@ public class UtilityController {
     @Autowired
     private HttpServletRequest httpServletRequest;
 
+    @Autowired
+    private RedissonClient redissonClient;
 
     //bean  生命周期 参见 model--pojo--BeanLife SpringLifeCycleBean
     //初始化操作：1、实现 InitializingBean 接口
@@ -692,7 +697,7 @@ public class UtilityController {
 //        personService.insert(person);
 
 
-        personService. proTest();
+        personService.proTest();
     }
     //endregion
 
@@ -1597,5 +1602,52 @@ public class UtilityController {
         log.info("before trace_shutdownGracefulTest1");
         Thread.sleep(50 * 1000);
         log.info("after trace_shutdownGracefulTest1");
+    }
+
+    @GetMapping(value = "/redissonTest")
+    public void redissonTest() throws Exception {
+        String operationLockKey = "redissonTest";
+        RLock lock = redissonClient.getLock(operationLockKey);
+        //不释放锁，锁会一直占用
+//        lock.lock();
+//        throw new Exception("dssdsd");
+
+        try {
+            lock.lock();
+            throw new Exception("dssdsd");
+        }  finally {
+            //先释放锁，然后在统一异常处理的时候 ，捕获异常
+            lock.unlock();;
+        }
+
+
+//        try {
+//            lock.lock();
+//            throw new Exception("dssdsd");
+//        } catch (Exception ex) {
+//            int m = 0;
+//            throw ex;
+//        } finally {
+//            //先释放锁，然后在统一异常处理的时候 ，捕获异常
+//            lock.unlock();
+//            ;
+//        }
+
+
+//        try {
+//
+//            //会打印堆栈信息
+//            //	at com.example.demo.controller.UtilityController.redissonTest(UtilityController.java:1639) ~[classes/:?]
+//           int m=Integer.parseInt("ds");
+//        } catch (NumberFormatException ex) {
+//            //会打印原始堆栈信息
+////            throw ex;
+//
+//            throw ex;
+//        } finally {
+//
+//        }
+
+
     }
 }

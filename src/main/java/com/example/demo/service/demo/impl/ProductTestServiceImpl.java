@@ -73,10 +73,10 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        this.baseMapper.deleteBatchIds();
 //        this.saveEntity();
 //        saveOrUpdateBatch();
-//        queryById();
+        queryById();
 //        queryTest();
 //        updateTest();
-        page();
+//        page();
 //        queryParam();
 //        truncateTest();
 //        deleteTableDataTest();
