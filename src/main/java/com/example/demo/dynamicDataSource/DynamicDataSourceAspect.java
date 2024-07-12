@@ -25,13 +25,15 @@ Aspect:springboot 默认采用动态代理实现，获取不到request请求的�
  *  通过加注解 @DataSourceAnnotation(DataSourceStrings.READER)
  *  反射动态切换数据源（读、写Server）
  * <p>
- * #1、启动类设置
+ * 1、启动类设置
  * #//由于采用多数据源，禁用springboot默认的数据源配置，多数据源不适合微服务设计理念废弃。采用分布式事务。
  * 多数据源：用作读写分离，主写，从读，会涉及主从不一致，强制主读情况
  * sharding-jdbc 强制主读（之后查询语句）
- * HintManager.getInstance().setMasterRouteOnly();
+ * HintManager.getInstance().setWriteRouteOnly(); //参见项目shardingreadwrite
+ *
  * #@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
- * #2、DataSourceConfig 配置类启用。
+ *
+ * 2、DataSourceConfig 配置类启用。
  * 3、默认数据库url配置注释，启用write、reader。
  * 4、测试类ValvulasService
  */
@@ -49,6 +51,13 @@ public class DynamicDataSourceAspect {
 //    public void before(JoinPoint joinPoint, DataSourceAnnotation dataSource) {
 //
 //    }
+
+
+
+
+    // service  添加注解 @DataSourceAnnotation(DataSourceStrings.WRITER)
+//    测试代码： com.example.demo.service.valvulas.ValvulasService;
+
 
     //设置注解类型并获取注解的值
     //设置注解类型并获取注解的值

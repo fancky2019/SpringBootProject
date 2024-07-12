@@ -7,10 +7,18 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * Kafka的消费者是采用pull（拉）模式来获取消息的。
+ *
+ *
+ *
+ *
+ *
+ */
 //@Component
 public class KafkaConsumerClient {
 
-    /*
+    /**
     消息被广播到所有订阅的消费者组。
      kafka目前只提供单个分区内的消息顺序，而不会维护全局消息顺序
      要指定消费者组，不指定会被其他微服务重复消费

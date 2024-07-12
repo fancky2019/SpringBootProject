@@ -1532,7 +1532,7 @@ public class UtilityController {
     @GetMapping(value = "/transactionalTest")
     public void transactionalTest() {
         Person person = new Person();
-        person.setName("fancky");
+        person.setName("fancky8888");
         person.setAge(27);
         person.setBirthday(LocalDateTime.now());
         personService.insert(person);

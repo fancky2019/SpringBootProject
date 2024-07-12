@@ -91,7 +91,10 @@ public class PersonService implements IPersonService {
         int i = personMapper.insert(person);
         demoProductService.insertTransactional();
 
-
+        Person person77 = personMapper.selectByPrimaryKey(77L);
+        person77.setName("person77");
+        personMapper.updateByPrimaryKey(person77);
+        proTest();
         //没有走动态代理，相当于和当前事务在同一个事务内
 //        this.insertB();
 
@@ -147,6 +150,12 @@ public class PersonService implements IPersonService {
         //非事务方法直接调用事务方法，非事务方法异常，事务不会回滚
         this.insertUnCommit(person);
         List<Person> p = personMapper.selectByName(name);
+
+        //查询其他事务方法插入的：可以查询到
+        List<Person> list = personMapper.selectByName("fancky8888");
+
+        //查询其他事务方法修改的：可以查询到其他事务修改的数据
+        Person person77 = personMapper.selectByPrimaryKey(77L);
         int n = 0;
         int m = Integer.parseInt("m");
 

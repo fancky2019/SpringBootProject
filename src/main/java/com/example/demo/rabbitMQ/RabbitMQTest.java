@@ -55,6 +55,14 @@ import org.springframework.stereotype.Component;
  * 消息默认持久化（deliveryMode=2：MessageProperties 默认 DEFAULT_DELIVERY_MODE = MessageDeliveryMode.PERSISTENT;）、
  * 队列默认持久化true、交换机默认持久化true
  *
+ *
+ *
+ *
+ * RabbitMQ 的消费模式分为两种：推模式和拉模式。
+ *
+ * 推模式（Push）：消息中间件主动将消息推送给消费者，推模式采用 Basic.Consume 进行消费。
+ * 拉模式（Pull）：消费者主动从消息中间件拉取消息，拉模式则是调用 Basic.Get 进行消费。
+ *
  */
 @Component
 public class RabbitMQTest {
