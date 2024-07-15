@@ -2,9 +2,8 @@ package com.example.demo.config;
 
 import com.example.demo.model.viewModel.Person;
 import lombok.Data;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -30,9 +29,9 @@ Prefix must be in canonical form :配置文件不要用駝峰写法 单词全小
 
 
 /*
-*
-* name + havingValue = "true" 不相等，不加载，bean注入会报异常
-* */
+ *
+ * name + havingValue = "true" 不相等，不加载，bean注入会报异常
+ * */
 
 /*
 public @interface ConditionalOnProperty {
@@ -57,10 +56,11 @@ public @interface ConditionalOnProperty {
  */
 
 
-
-
 @Data
+//EnableConfigurationProperties 或 Component 或 Configuration
 @Component
+//不能在配置在加EnableConfigurationProperties，需要其他配置类上加启用注解一般和 Import 搭配使用，将配置类加入IOC
+//@EnableConfigurationProperties(ConfigModelProperty.class)
 //如果不配置，不报错，对象没有值
 @ConfigurationProperties(prefix = "config.config-model") //prefix= "配置项"   读取并与 bean 绑定。
 
@@ -70,13 +70,17 @@ public @interface ConditionalOnProperty {
 //// 或者可以省略prefix前缀，如果没有配置会报错
 //@ConditionalOnProperty(value = "config.config-model.conditional-on-property", havingValue = "false")//配置项的值是否匹配控制是否加载bean
 //@ConditionalOnClass(ConfigModel.class)
-public class ConfigModel {
+
+public class ConfigModelProperty {
     private String fistName;
-    private  String address;
+    private Integer age = 27;
+    //可设计一个default_field 字段设置字段的默认值
+    private Integer DEFAULT_AGE = 27;
+    private String address;
     private BigDecimal salary;
     private String[] array;
     private List<String> pets;
-    private HashMap<String,String> maps;
+    private HashMap<String, String> maps;
     private List<Person> persons;
     private String conditionalOnProperty;
 

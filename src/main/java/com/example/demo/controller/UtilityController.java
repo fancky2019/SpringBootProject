@@ -8,6 +8,7 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.util.ListUtils;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.example.demo.config.ConfigModelProperty;
 import com.example.demo.easyexcel.DropDownSetField;
 import com.example.demo.easyexcel.ExcelStyleConfig;
 import com.example.demo.easyexcel.GXDetailListVO;
@@ -167,6 +168,8 @@ public class UtilityController {
     @Autowired
     Cache<String, Object> caffeineCache;
 
+    @Autowired
+    private ConfigModelProperty configModelProperty;
 
     // @Resource 指定bean 名称,@Autowired 通过 @Qualifier指定具体别名
     @Resource(name = "studentF")
@@ -1649,5 +1652,11 @@ public class UtilityController {
 //        }
 
 
+    }
+
+    @GetMapping(value = "/configurationTest")
+    public String configurationTest() {
+        int m = 0;
+        return configModelProperty.getAddress();
     }
 }
