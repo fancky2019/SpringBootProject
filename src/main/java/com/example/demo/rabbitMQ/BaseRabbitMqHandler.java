@@ -40,7 +40,10 @@ public class BaseRabbitMqHandler {
 
     @Autowired
     IMqFailLogService mqFailLogService;
-    ObjectMapper objectMapper = new ObjectMapper();
+    //    ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     public <T> void onMessage(Class<T> tClass, Message message, Channel channel, Consumer<T> consumer) {
 

@@ -296,7 +296,8 @@ public class LogAspect {
     @Around(value = "pointCut()")
     public Object aroundMethod(ProceedingJoinPoint jp) throws Throwable {
 
-
+        StopWatch stopWatch = new StopWatch("");
+        stopWatch.start("");
         String httpMethod = httpServletRequest.getMethod();
         ///sbp/demo/demoProductTest
         String uri = httpServletRequest.getRequestURI();
@@ -460,8 +461,12 @@ public class LogAspect {
         } else {
             result = monitor(jp, servletPath);
         }
+        stopWatch.stop();
+        long costTime = stopWatch.getTotalTimeMillis();
 //        如果是列别插叙数据量大，会影响性能
-        log.debug("{} : {} - {} 处理完成,返回结果 - {}", uri, className, methodName, objectMapper.writeValueAsString(result));
+       // log.debug("{} : {} - {} 处理完成,返回结果 - {}", uri, className, methodName, objectMapper.writeValueAsString(result));
+        log.debug("aroundMethod cost_time {} ms {} : {} - {} 处理完成,返回结果 - {}", costTime,uri, className, methodName, objectMapper.writeValueAsString(result));
+
         return result;
 
     }

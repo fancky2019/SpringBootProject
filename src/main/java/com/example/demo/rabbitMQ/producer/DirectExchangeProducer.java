@@ -193,7 +193,7 @@ public class DirectExchangeProducer {
         rabbitTemplate.send(exchange, routingKey, message, correlationData);
 
         //同步调用
-        Message responseMessage = rabbitTemplate.sendAndReceive(exchange, routingKey, message, correlationData);
+//        Message responseMessage = rabbitTemplate.sendAndReceive(exchange, routingKey, message, correlationData);
 //        rabbitTemplate.convertSendAndReceive(exchange, routingKey, message, correlationData);
         //内部调用的还是send
 //        rabbitTemplate.convertAndSend(exchange, routingKey, message, correlationData);

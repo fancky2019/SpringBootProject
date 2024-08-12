@@ -172,6 +172,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
          *
          *  WHERE (id = 1) LIMIT 10
          */
+        //current :pageIndex  ,size:pageSize
         Page<ProductTest> page = new Page<>(1, 10);
         LambdaQueryWrapper<ProductTest> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ProductTest::getId, 1L);

@@ -1361,6 +1361,7 @@ public class UtilityController {
     public void rocketmqTest(@PathVariable("topic") String topic) {
         rocketmqTest.test(topic);
         //automapper
+        //浅拷贝   MapStruct
 //        BeanUtils.copyProperties();
     }
 
@@ -1659,4 +1660,15 @@ public class UtilityController {
         int m = 0;
         return configModelProperty.getAddress();
     }
+
+    @GetMapping(value = "/mapStructTest")
+    public String mapStructTest() {
+        //BeanUtils 浅拷贝
+//        BeanUtils.copyProperties();
+//        MapStruct 默认浅拷贝 要手动写配置的东西，比较麻烦。简单的就是用spring 的 BeanUtils
+        return  "";
+    }
+
+
+
 }
