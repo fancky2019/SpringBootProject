@@ -81,8 +81,8 @@ public class ElasticsearchController {
         return message;
 
     }
-
-    @GetMapping("/getShipOrderInfoList")
+    //get 可以在body 内设置参数，但是通常用post 方法
+    @PostMapping("/getShipOrderInfoList")
     public MessageResult<PageData<ShipOrderInfo>> getShipOrderInfoList(@RequestBody ShipOrderInfoRequest request) throws Exception {
         return MessageResult.success(shipOrderInfoService.search(request));
     }

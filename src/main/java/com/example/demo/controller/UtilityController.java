@@ -16,6 +16,7 @@ import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
 import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
 import com.example.demo.listener.UserRegisterService;
 import com.example.demo.model.dto.JacksonDto;
+import com.example.demo.model.elasticsearch.ShipOrderInfo;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
@@ -33,6 +34,7 @@ import com.example.demo.rocketmq.RocketmqTest;
 import com.example.demo.service.RetryService;
 import com.example.demo.service.TokenService;
 import com.example.demo.service.demo.*;
+import com.example.demo.service.elasticsearch.ShipOrderInfoService;
 import com.example.demo.shiro.ShiroRedisProperties;
 import com.example.demo.sse.ISseEmitterService;
 import com.example.demo.utility.RSAUtil;
@@ -186,6 +188,9 @@ public class UtilityController {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private ShipOrderInfoService shipOrderInfoService;
 
     //bean  生命周期 参见 model--pojo--BeanLife SpringLifeCycleBean
     //初始化操作：1、实现 InitializingBean 接口
@@ -1283,6 +1288,22 @@ public class UtilityController {
 
     @GetMapping("/stopWatch")
     public MessageResult<String> stopWatch() throws Exception {
+
+
+        StopWatch stopWatch1 = new StopWatch();
+
+
+        stopWatch1.start("task1");
+
+        //stop 之后就无法获取当前任务名称
+        String taskName = stopWatch1.currentTaskName();
+        stopWatch1.stop();
+
+//            System.out.println(stopWatch.prettyPrint());
+//            System.out.println(stopWatch.currentTaskName()+" "+stopWatch.getLastTaskTimeMillis()  +" toatal " +stopWatch.getTotalTimeMillis() );
+        System.out.println(taskName + " " + stopWatch1.getLastTaskTimeMillis() + " toatal " + stopWatch1.getTotalTimeMillis());
+
+
         StopWatch stopWatch = new StopWatch("stopWatch1");
         stopWatch.start("work1");
         Thread.sleep(1000);
@@ -1619,9 +1640,10 @@ public class UtilityController {
         try {
             lock.lock();
             throw new Exception("dssdsd");
-        }  finally {
+        } finally {
             //先释放锁，然后在统一异常处理的时候 ，捕获异常
-            lock.unlock();;
+            lock.unlock();
+            ;
         }
 
 
@@ -1666,9 +1688,13 @@ public class UtilityController {
         //BeanUtils 浅拷贝
 //        BeanUtils.copyProperties();
 //        MapStruct 默认浅拷贝 要手动写配置的东西，比较麻烦。简单的就是用spring 的 BeanUtils
-        return  "";
+        return "";
     }
 
+    @GetMapping(value = "/newObjectCostTime")
+    public void newObjectCostTime() throws Exception {
+        shipOrderInfoService.newObjectCostTime();
+    }
 
 
 }

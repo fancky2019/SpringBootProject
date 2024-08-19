@@ -16,7 +16,7 @@ public interface ShipOrderInfoService {
     PageData<ShipOrderInfo> search(ShipOrderInfoRequest request) throws Exception;
 
     void addBatch() throws Exception;
-
+    void newObjectCostTime() throws Exception;
     boolean deleteShipOrderInfo();
 
     void aggregationTopBucketQuery(ShipOrderInfoRequest request) throws JsonProcessingException;

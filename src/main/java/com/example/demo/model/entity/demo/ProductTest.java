@@ -31,6 +31,8 @@ public class ProductTest implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
+    //雪花id js number 精度丢失要转成string
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private BigInteger id;
 
     private String guid;
