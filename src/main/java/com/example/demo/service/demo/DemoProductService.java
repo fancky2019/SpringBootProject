@@ -296,26 +296,25 @@ public class DemoProductService {
     }
 
     public int batchUpdate() {
-        List<DemoProduct> list = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
-            DemoProduct demoProduct = new DemoProduct();
-            demoProduct.setId(new BigInteger((i + 1) + ""));
-            demoProduct.setGuid(UUID.randomUUID().toString());
-            demoProduct.setProductName("productName" + (i + 1));
-            demoProduct.setProductStyle("productStyle" + (i + 1));
-            demoProduct.setImagePath("D:\\fancky\\git\\Doc");
-            demoProduct.setCreateTime(LocalDateTime.now());
-            demoProduct.setModifyTime(LocalDateTime.now());
-            demoProduct.setStatus(Short.valueOf("1"));
-            demoProduct.setDescription("setDescription_sdsdddddddddddddddd");
-            demoProduct.setTimestamp(LocalDateTime.now());
-            list.add(demoProduct);
+
+        List<BigInteger> ids = new ArrayList<>();
+
+        for (int i = 1; i < 11; i++) {
+            ids.add(BigInteger.valueOf(i));
         }
+        List<ProductTest> list = this.demoProductMapper.getByIds(ids);
 
         StopWatch stopWatch = new StopWatch("BatchInsert");
         stopWatch.start("BatchInsert_Trace1");
 
-        this.demoProductMapper.batchUpdate(list);
+        for (ProductTest productTest : list) {
+            productTest.setProductName("productName");
+        }
+//        因为mybatis返回的默认是匹配的行数，而不是受影响的行数，如何设置返回的是受影响的行数，useAffectedRows=true
+        //mysql 连接字段穿添加  &useAffectedRows=true 返回0 ，不加返回1。
+        //for循环多个update 语句以分号结束，update 执行会返回1.因为执行update id 就一条
+        //批量更新还是要加锁，避免并发访问
+        int result = this.demoProductMapper.batchUpdateProductTest(list);
 
         stopWatch.stop();
 //        stopWatch.start("BatchInsert_Trace2");

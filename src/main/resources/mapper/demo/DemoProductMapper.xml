@@ -255,6 +255,25 @@ useCache="true"
     </foreach>
   </update>
 
+  <update id="batchUpdateProductTest" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+      update demo_product
+      <set>
+        <if test="item.productName != null and item.productName != ''">
+          product_name = #{item.productName,jdbcType=VARCHAR},
+        </if>
+        <if test="item.productStyle != null and item.productStyle != ''">
+          product_style = #{item.productStyle,jdbcType=VARCHAR},
+        </if>
+      </set>
+      where 1=1
+      and id = #{item.id,jdbcType=INTEGER}
+      <if test="item.productName != null and item.productName != ''">
+        and product_name LIKE CONCAT('%',#{item.productName,jdbcType=VARCHAR},'%')
+      </if>
+    </foreach>
+  </update>
+
   <delete id="batchDelete">
     delete from demo_product where id in
     <foreach collection="list" item="id" separator="," open="(" close=")">

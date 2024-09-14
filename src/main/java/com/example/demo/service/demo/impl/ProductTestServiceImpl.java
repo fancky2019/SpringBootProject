@@ -73,7 +73,8 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        this.baseMapper.deleteBatchIds();
 //        this.saveEntity();
 //        saveOrUpdateBatch();
-        queryById();
+        updateBatchTest();
+//        queryById();
 //        queryTest();
 //        updateTest();
 //        page();
@@ -109,7 +110,21 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 
     }
 
-    private void saveOrUpdateBatch() {
+    private void updateBatchTest() {
+
+        List<BigInteger> ids = new ArrayList<>();
+
+        for (int i = 1; i < 11; i++) {
+            ids.add(BigInteger.valueOf(i));
+        }
+        List<ProductTest> list = this.listByIds(ids);
+        //mybatis 只找到根据id 批量更品，如果批量条件更新还是要写 xml for 循环
+        //updateBatchById 内部还是一条一条update 语句，只不过一次提交batchSize默认1000次
+        //jdbc 的batch  操作update 和insert 都是   preparedStatement.addBatch();  preparedStatement.executeBatch();
+        this.updateBatchById(list);
+    }
+
+    private void saveOrUpdateBatchTest() {
         List<ProductTest> productTests = new ArrayList<ProductTest>();
         ProductTest productTest = new ProductTest();
         productTest.setId(new BigInteger("100001"));
@@ -125,7 +140,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         //更新
         this.updateBatchById(productTests);
         //保存
-//        this.saveBatch()；
+//        this.saveBatch(productTests);
         this.save(productTest);
         this.removeById(productTest);
         this.updateById(productTest);
@@ -353,7 +368,6 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         updateWrapper3.eq(ProductTest::getStatus, productTest3.getStatus());
         //更新指定条件的 为productTest 对象的值，ID 字段除外。
         boolean re3 = this.update(updateWrapper3);
-
 
     }
 

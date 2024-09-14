@@ -39,4 +39,5 @@ public interface DemoProductMapper {
 
     List<ProductTest> getByIds(List<BigInteger> ids);
 
+    int batchUpdateProductTest(List<ProductTest> list);
 }
