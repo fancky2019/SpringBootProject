@@ -2,6 +2,7 @@ package com.example.demo.dao.demo;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.demo.model.entity.demo.ProductTest;
+import com.example.demo.model.request.DemoProductRequest;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.math.BigInteger;
@@ -22,4 +23,7 @@ public interface ProductTestMapper extends BaseMapper<ProductTest> {
     ProductTest getById(BigInteger id);
 
     List<ProductTest> getByIds(List<BigInteger> ids);
+    List<ProductTest> getPageData(DemoProductRequest request);
+    List<ProductTest> getPageDataOptimization(DemoProductRequest request);
+
 }

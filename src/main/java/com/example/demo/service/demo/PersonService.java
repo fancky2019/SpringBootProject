@@ -1,32 +1,59 @@
 package com.example.demo.service.demo;
 
 
+import com.example.demo.dao.demo.DemoProductMapper;
 import com.example.demo.dao.demo.PersonMapper;
+import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.Person;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 //@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
+@Slf4j
 @Service
 public class PersonService implements IPersonService {
 
     private static Logger logger = LogManager.getLogger(PersonService.class);
 
-    PersonMapper personMapper;
 
-    DemoProductService demoProductService;
+    // JdbcTransactionManager 继承DataSourceTransactionManager 实现接口 PlatformTransactionManager
+//    @Autowired
+//    private DataSourceTransactionManager transactionManager;
 
-    List<String> list = null;
+    /**
+     *注意配置DataSourceConfig 需要配置PlatformTransactionManager的实现类，之前配置过多数据源的PlatformTransactionManager
+     */
+    @Autowired
+    private PlatformTransactionManager platformTransactionManager;
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private DemoProductMapper demoProductMapper;
+
+    private PersonMapper personMapper;
+
+    private DemoProductService demoProductService;
+
+    private  List<String> list = null;
 
     @Autowired
     public PersonService(PersonMapper personMapper,
@@ -231,8 +258,10 @@ public class PersonService implements IPersonService {
 //
 //        问题核心原因：事务传播，长事务，造成事务未能提交，事务之间数据不可见，二类更新丢失
 ////            解决办法：1、更新时候添加版本号，判断更新成功失败
-////                      2、让事务尽快提交，避免和其他事务在一起由于事务传播而未提交
-//
+////                    2、让事务尽快提交，避免和其他事务在一起由于事务传播而未提交
+//                       3、TransactionAspectSupport可控制事务的回滚
+// //                       参见com.example.demo.service.wms.OrderManagerServicePlatformTransactionManager
+//                      4、手动控制事务的提交，不使用Transactional注解，使用编程性事务PlatformTransactionManager接口
 //            update();
 //            if (i == 0) {
 //
@@ -247,6 +276,56 @@ public class PersonService implements IPersonService {
 
 
         updateWrapper(i);
+    }
+
+    /**
+     * jdbc  con.setAutoCommit(false);   con.commit();   con.rollback();
+     *
+     *
+     */
+    @Override
+    public void manualCommitTransaction() {
+        //TransactionStatus transaction = transactionManager.getTransaction(TransactionDefinition.withDefaults());
+//        DataSourceTransactionManager 实现接口 PlatformTransactionManager.定义了事务的提交，回滚
+       //DefaultTransactionDefinition实现接口TransactionDefinition。设置隔离、传播、超时、只读
+        DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+//        definition.setPropagationBehaviorName("PROPAGATION_REQUIRED");
+        // 设置事务传播行为
+        definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+        //事务状态，还原点
+        TransactionStatus transaction = transactionManager.getTransaction(definition);
+
+        try {
+            List<DemoProduct> list = new ArrayList<>();
+            for (int i = 0; i < 1; i++) {
+                DemoProduct demoProduct = new DemoProduct();
+                String uuid = UUID.randomUUID().toString();
+//            uuid = "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+//                    + "dssssssssssssssssssssssssssssssssssssssssss";
+                demoProduct.setGuid(uuid);
+                demoProduct.setProductName("productNameshish事务" + i);
+                demoProduct.setProductStyle("productStyle" + i);
+                demoProduct.setImagePath("D:\\fancky\\git\\Doc");
+                demoProduct.setCreateTime(LocalDateTime.now());
+                demoProduct.setModifyTime(LocalDateTime.now());
+                demoProduct.setStatus(Short.valueOf("1"));
+                demoProduct.setDescription("setDescription_sdsdddddddddddddddd");
+                demoProduct.setTimestamp(LocalDateTime.now());
+                list.add(demoProduct);
+            }
+//执行dml 同步操作，失败不会继续往下执行
+            int i = demoProductMapper.batchInsert(list);
+
+            //模拟异常
+//            int sum = 1 / 0;
+
+            transactionManager.commit(transaction);
+        }catch (Exception e){
+            log.info(e.getMessage());
+            //手动控制回滚异常
+            transactionManager.rollback(transaction);
+           throw  e;
+        }
     }
 
 

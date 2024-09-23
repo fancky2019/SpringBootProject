@@ -10,5 +10,6 @@ public interface IPersonService {
      int insertUnCommit(Person record);
     void transactionalSynchronizedTest(Integer i) throws InterruptedException;
 
+    void manualCommitTransaction();
     void  proTest();
 }

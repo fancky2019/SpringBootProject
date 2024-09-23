@@ -23,8 +23,28 @@
     </select>
 
 
+    <!--    useCache="true" 使用二级缓存-->
+    <!--分页查询-->
+    <select id="getPageData" useCache="true" parameterType="com.example.demo.model.request.DemoProductRequest"
+            resultType="com.example.demo.model.entity.demo.ProductTest">
+        select * from demo_product
+        where 1=1
+        <if test="productName != null and productName != ''">
+            and product_name LIKE CONCAT('%',#{productName,jdbcType=VARCHAR},'%')
+        </if>
+        limit #{offset} ,#{pageSize,jdbcType=INTEGER}
+    </select>
 
-
-
+    <!--分页查询-->
+    <select id="getPageDataOptimization" useCache="true" parameterType="com.example.demo.model.request.DemoProductRequest"
+            resultType="com.example.demo.model.entity.demo.ProductTest">
+        select * from demo_product
+        where 1=1
+        <if test="productName != null and productName != ''">
+            and product_name LIKE CONCAT('%',#{productName,jdbcType=VARCHAR},'%')
+        </if>
+        and id >#{maxId,jdbcType=INTEGER}
+        limit #{pageSize,jdbcType=INTEGER}
+    </select>
 
 </mapper>

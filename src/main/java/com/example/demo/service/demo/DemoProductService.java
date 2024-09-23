@@ -35,6 +35,9 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.*;
 
+/**
+ * 新demo  参见 demo-->  com.example.demo.service.demo.impl;
+ */
 @Service
 @Slf4j
 public class DemoProductService {

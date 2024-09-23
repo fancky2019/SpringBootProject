@@ -2,8 +2,12 @@ package com.example.demo.service.demo;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.demo.model.entity.demo.ProductTest;
+import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.MessageResult;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * <p>
@@ -18,5 +22,8 @@ public interface IProductTestService extends IService<ProductTest> {
     void mybatisPlusTest() throws InterruptedException;
 
      String getStringKey( int id) throws Exception ;
+
+     void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException;
+
 
     }

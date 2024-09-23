@@ -1,23 +1,39 @@
 package com.example.demo.service.demo.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.support.ExcelTypeEnum;
+import com.alibaba.excel.write.builder.ExcelWriterBuilder;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.demo.dao.demo.DemoProductMapper;
 import com.example.demo.dao.demo.ProductTestMapper;
+import com.example.demo.easyexcel.DropDownSetField;
+import com.example.demo.easyexcel.ExcelStyleConfig;
+import com.example.demo.easyexcel.GXDetailListVO;
+import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
+import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
+import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.model.vo.DownloadData;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.service.wms.ProductService;
 import com.example.demo.utility.ConfigConst;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -30,11 +46,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -157,8 +176,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         LambdaQueryWrapper<ProductTest> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(ProductTest::getProductName, "productName_xiugai55555");
         //不为空查询
-        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(productTest.getProductName()),
-                ProductTest::getProductName, productTest.getProductName());
+        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(productTest.getProductName()), ProductTest::getProductName, productTest.getProductName());
         lambdaQueryWrapper.last("limit 3");
         //分页
         List<ProductTest> list1 = this.list(lambdaQueryWrapper);
@@ -191,6 +209,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         Page<ProductTest> page = new Page<>(1, 10);
         LambdaQueryWrapper<ProductTest> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ProductTest::getId, 1L);
+//        page 内部调用 this.getBaseMapper().selectPage
         IPage<ProductTest> productTestPage = this.page(page, wrapper);
         List<ProductTest> productTestList = productTestPage.getRecords();
         long total = productTestPage.getTotal();
@@ -206,7 +225,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
  WHERE (id = 1 AND product_name = 'update1') LIMIT 10
          */
         wrapper.eq(ProductTest::getProductName, "update1");
-        IPage<ProductTest> pageData =     this.getBaseMapper().selectPage(page,wrapper);
+        IPage<ProductTest> pageData = this.getBaseMapper().selectPage(page, wrapper);
 
         int m = 0;
     }
@@ -286,9 +305,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
         ProductTestMapper productTestMapper = this.getBaseMapper();
         //链式查询方式
-        List<ProductTest> list2 = new LambdaQueryChainWrapper<ProductTest>(this.getBaseMapper())
-                .eq(ProductTest::getProductName, "productName_xiugai55555")
-                .list();
+        List<ProductTest> list2 = new LambdaQueryChainWrapper<ProductTest>(this.getBaseMapper()).eq(ProductTest::getProductName, "productName_xiugai55555").list();
 
 
         int m = 0;
@@ -361,8 +378,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         //修改了实体的值，如果指定实体更新，会在update 语句内。
         productTest3.setProductName("");
         LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
-        updateWrapper3.set(StringUtils.isNotEmpty(productTest3.getProductName()),
-                ProductTest::getProductName, "ProductName3");
+        updateWrapper3.set(StringUtils.isNotEmpty(productTest3.getProductName()), ProductTest::getProductName, "ProductName3");
         updateWrapper3.set(ProductTest::getProductStyle, "getProductStyle111");
         updateWrapper3.eq(ProductTest::getId, productTest3.getId());
         updateWrapper3.eq(ProductTest::getStatus, productTest3.getStatus());
@@ -492,4 +508,235 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
     }
     //endregion
 
+    //region easyexcel 导出  分页导出
+
+    /**
+     *
+     *-- 性能最好
+     * select * from demo_product
+     *         where 1=1
+     * 				and id >1810000
+     *         limit 5000
+     *
+     * -- 性能其次
+     * select  d.* from (
+     * select id from demo_product
+     *         where 1=1
+     * 				and id >1710000
+     *         limit 5000
+     * 				) t
+     * join demo_product d on t.id=d.id
+     *
+     *
+     * -- 性能最差
+     * select * from demo_product  where 1=1 limit 2180000  ,5000
+     */
+    public void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException {
+
+        String fileName = "DemoProduct_" + System.currentTimeMillis() + ".xlsx";
+//        prepareResponds(fileName, response);
+        // 这里 需要指定写用哪个class去写
+        int stepCount = 5000;
+
+
+//        request.setPageIndex(1);
+//        request.setPageSize(stepCount);
+//        List<ProductTest> list = getPageData(request);
+//        EasyExcel.write(response.getOutputStream(), ProductTest.class).sheet("表名称").doWrite(list);
+
+
+//细化设置
+        ServletOutputStream outputStream = response.getOutputStream();
+//        // 获取改类声明的所有字段
+//        Field[] fields = GXDetailListVO.class.getDeclaredFields();
+//        // 响应字段对应的下拉集合
+//        Map<Integer, String[]> map = new HashMap<>();
+//        Field field = null;
+//        // 循环判断哪些字段有下拉数据集，并获取
+//        for (int i = 0; i < fields.length; i++) {
+//            field = fields[i];
+//            // 解析注解信息
+//            DropDownSetField dropDownSetField = field.getAnnotation(DropDownSetField.class);
+//            if (null != dropDownSetField) {
+//                String[] sources = ResoveDropAnnotationUtil.resove(dropDownSetField);
+//                if (null != sources && sources.length > 0) {
+//                    map.put(i, sources);
+//                }
+//            }
+//        }
+        //多个sheet页写入
+        ExcelWriterBuilder builder = new ExcelWriterBuilder();
+        builder.autoCloseStream(true);
+////        if (flag == 0 || flag == 2) {
+//        builder.registerWriteHandler(new ExcelStyleConfig(Lists.newArrayList(20), null, null));
+//        builder.head(GXDetailListVO.class);
+////        } else {
+////            builder.registerWriteHandler(new ExcelStyleConfig(null,null,null));
+////            builder.head(GXDetailListLogVO.class);
+////        }
+
+        //  builder.registerWriteHandler(new DropDownCellWriteHandler(map));
+        builder.file(outputStream);
+
+        //不能重命名，重命名就没有XLSX格式后缀
+        builder.excelType(ExcelTypeEnum.XLSX);
+        ExcelWriter writer = builder.build();
+
+
+        long count = this.baseMapper.selectCount(Wrappers.emptyWrapper());
+        long loopCount = count / stepCount;
+        long remainder = count % stepCount;
+        if (remainder > 1) {
+            loopCount++;
+        }
+
+        long sheetSize = 1000000;
+        long sheetLoopCount = count / sheetSize;
+        long sheetRemainder = count % sheetSize;
+        if (sheetRemainder > 1) {
+            sheetRemainder++;
+        }
+        int sheetIndex = 0;
+        int maxId=0;
+        WriteSheet sheet = EasyExcel.writerSheet(0, "DemoProduct" + sheetIndex).build();
+        for (int i = 1; i <= loopCount; i++) {
+            request.setMaxId(maxId);
+            request.setPageIndex(i);
+            request.setPageSize(stepCount);
+            //getPage 会执行获取count脚本
+//            List<ProductTest> list = getPageData(request);
+            //超过200W 查询要5s
+//            List<ProductTest> list =  this.productTestMapper.getPageData(request);
+            //采用最大ID，可0.5s查询到结果
+            List<ProductTest> list =  this.productTestMapper.getPageDataOptimization(request);
+            int total=i*stepCount;
+
+            writer.write(list, sheet);
+            if(total%sheetSize==0)
+            {
+                sheetIndex += 1;
+                sheet = EasyExcel.writerSheet(sheetIndex, "DemoProduct" + sheetIndex).build();
+//                WriteSheet writeSheet = EasyExcel.writerSheet(i, "模板" + i).build();
+            }
+            maxId=list.stream().map(p->p.getId().intValue()).max(Comparator.comparing(Integer::intValue)).orElse(0);
+
+        }
+
+
+        writer.finish();
+
+
+    }
+
+    private List<ProductTest> getPageData(DemoProductRequest request) {
+        /**
+         * 未配置拦截器 内存分页
+         *
+         * SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp  FROM demo_product
+         *
+         *  WHERE (id = 1)
+         *
+         *  配置mybatis-pls 拦截器之后
+         *   SELECT COUNT(*) AS total FROM demo_product WHERE (id = 1)
+         *  SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp  FROM demo_product
+         *
+         *  WHERE (id = 1) LIMIT 10
+         */
+        //current :pageIndex  ,size:pageSize
+        Page<ProductTest> page = new Page<>(request.getPageIndex(), request.getPageSize());
+        LambdaQueryWrapper<ProductTest> wrapper = new LambdaQueryWrapper<>();
+        //   page 内部调用 this.getBaseMapper().selectPage
+        IPage<ProductTest> productTestPage = this.page(page);
+        //会执行查询count 和查询条数两个脚本
+        List<ProductTest> productTestList = productTestPage.getRecords();
+//        long total = productTestPage.getTotal();
+
+        return productTestList;
+
+        /*
+        需要配置 MybatisPlusPageInterceptor 拦截器，否则是查询所有
+
+    SELECT COUNT(*) AS total FROM demo_product WHERE (id = 1 AND product_name = 'update1')
+SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp  FROM demo_product
+
+ WHERE (id = 1 AND product_name = 'update1') LIMIT 10
+         */
+//        wrapper.eq(ProductTest::getProductName, "update1");
+//        IPage<ProductTest> pageData = this.getBaseMapper().selectPage(page, wrapper);
+//
+//        int m = 0;
+    }
+
+    /**
+     * 导出excel
+     *
+     * @param fileName
+     * @param response
+     * @param data     导出模板，1 导出错误信息，2 导出数据
+     * @throws IOException
+     */
+    private void exportExcel(String fileName, HttpServletResponse response, List<GXDetailListVO> data) throws IOException {
+        prepareResponds(fileName, response);
+        ServletOutputStream outputStream = response.getOutputStream();
+        // 获取改类声明的所有字段
+        Field[] fields = GXDetailListVO.class.getDeclaredFields();
+        // 响应字段对应的下拉集合
+        Map<Integer, String[]> map = new HashMap<>();
+        Field field = null;
+        // 循环判断哪些字段有下拉数据集，并获取
+        for (int i = 0; i < fields.length; i++) {
+            field = fields[i];
+            // 解析注解信息
+            DropDownSetField dropDownSetField = field.getAnnotation(DropDownSetField.class);
+            if (null != dropDownSetField) {
+                String[] sources = ResoveDropAnnotationUtil.resove(dropDownSetField);
+                if (null != sources && sources.length > 0) {
+                    map.put(i, sources);
+                }
+            }
+        }
+        //多个sheet页写入
+        ExcelWriterBuilder builder = new ExcelWriterBuilder();
+        builder.autoCloseStream(true);
+//        if (flag == 0 || flag == 2) {
+        builder.registerWriteHandler(new ExcelStyleConfig(Lists.newArrayList(20), null, null));
+        builder.head(GXDetailListVO.class);
+//        } else {
+//            builder.registerWriteHandler(new ExcelStyleConfig(null,null,null));
+//            builder.head(GXDetailListLogVO.class);
+//        }
+        WriteSheet sheet1 = EasyExcel.writerSheet(0, "共享明细清单").build();
+        builder.registerWriteHandler(new DropDownCellWriteHandler(map));
+        builder.file(outputStream);
+
+        //不能重命名，重命名就没有XLSX格式后缀
+        builder.excelType(ExcelTypeEnum.XLSX);
+        ExcelWriter writer = builder.build();
+        writer.write(data, sheet1);
+        writer.finish();
+
+        //ExcelWriter实现Closeable 接口，内部close 调用finish, finish 内会执行关闭操作
+//        outputStream.flush();
+//        outputStream.close();
+    }
+
+    /**
+     * 将文件输出到浏览器(导出)
+     */
+    private void prepareResponds(String fileName, HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        fileName = URLEncoder.encode(fileName, "UTF-8");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8'zh_cn'" + fileName + ExcelTypeEnum.XLSX.getValue());
+
+//        fileName = URLEncoder.encode(fileName, "UTF-8");
+//        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+//        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+//        response.setCharacterEncoding("utf-8");
+//        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+//        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+
+
+    }
+    //endregion
 }

@@ -115,16 +115,16 @@ spring:
     username: root
     password: 123456
 
-    #    writer:
-    #      jdbcUrl: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-    #      driver-class-name: com.mysql.cj.jdbc.Driver
-    #      username: root
-    #      password: 123456
-    #    reader:
-    #      jdbcUrl: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-    #      driver-class-name: com.mysql.cj.jdbc.Driver
-    #      username: root
-    #      password: 123456
+#    writer:
+#      dbcUrl: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+#      driver-class-name: com.mysql.cj.jdbc.Driver
+#      username: root
+#      password: 123456
+#    reader:
+#      jdbcUrl: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+#      driver-class-name: com.mysql.cj.jdbc.Driver
+#      username: root
+#      password: 123456
 
 
     #mysql 连接池8h自动断开配置

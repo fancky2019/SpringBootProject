@@ -185,7 +185,8 @@ public class UtilityController {
 
     @Autowired
     private HttpServletRequest httpServletRequest;
-
+    @Autowired
+    private HttpServletResponse httpServletResponse;
     @Autowired
     private RedissonClient redissonClient;
 
@@ -896,7 +897,7 @@ public class UtilityController {
 
     //endregion
 
-    //region EasyExcel
+    //region EasyExcel导出excel
 //    EasyExcel 不能设置数字格式、日期格式。貌似excel 中设置了数字格式 也能输入中文
     //注意：easyExcel 和easyPoi 不兼容，两个不能同时引用，否则easyExcel 下载的excel 打不开
     //     easyexcel 的性能不easypoi性能好点。
@@ -913,6 +914,9 @@ public class UtilityController {
      * 2. 设置返回的 参数
      * <p>
      * 3. 直接写，这里注意，finish的时候会自动关闭OutputStream,当然你外面再关闭流问题不大
+     *
+     *
+     * 優化：excel 单个sheet 最大100W，如果数据量过大可分页查询，批量写入sheet,每次写5000条查询的数据
      */
     @GetMapping("excelDownload")
     public void download(HttpServletResponse response, DownloadData query) throws IOException {
@@ -954,6 +958,16 @@ public class UtilityController {
         data.add(GXDetailListVO);
         exportExcel("exportExcelTest", response, data);
 
+    }
+
+    /**
+     *
+     *
+     */
+    @ApiOperation(value = "exportByPage")
+    @GetMapping(value = "/exportByPage")
+    public void exportByPage(DemoProductRequest request) throws IOException {
+        this.productTestService.exportByPage(httpServletResponse, request);
     }
 
     @ApiOperation(value = "importExcel")
@@ -1044,6 +1058,10 @@ public class UtilityController {
         ExcelWriter writer = builder.build();
         writer.write(data, sheet1);
         writer.finish();
+
+        //ExcelWriter实现Closeable 接口，内部close 调用finish, finish 内会执行关闭操作
+//        outputStream.flush();
+//        outputStream.close();
     }
 
     /**
@@ -1563,10 +1581,26 @@ public class UtilityController {
         personService.insert(person);
     }
 
+    /**
+     * 实物同步
+     * @param i
+     * @throws InterruptedException
+     */
     @GetMapping(value = "/transactionalSynchronizedTest")
     public void transactionalSynchronizedTest(Integer i) throws InterruptedException {
 
         personService.transactionalSynchronizedTest(i);
+    }
+
+    /**
+     * 实物同步
+     * @param i
+     * @throws InterruptedException
+     */
+    @GetMapping(value = "/manualCommitTransaction")
+    public void manualCommitTransaction(Integer i) throws InterruptedException {
+
+        personService.manualCommitTransaction();
     }
 
 
