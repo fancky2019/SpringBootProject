@@ -21,9 +21,10 @@ public interface IProductTestService extends IService<ProductTest> {
 
     void mybatisPlusTest() throws InterruptedException;
 
-     String getStringKey( int id) throws Exception ;
+    String getStringKey(int id) throws Exception;
 
-     void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException;
+    void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException;
+    void exportDemoProductTemplate(HttpServletResponse response) throws IOException;
 
-
-    }
+    void updateBatchByIdTest();
+}

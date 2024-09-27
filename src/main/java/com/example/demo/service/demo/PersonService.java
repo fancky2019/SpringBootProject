@@ -19,6 +19,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -45,7 +48,8 @@ public class PersonService implements IPersonService {
     private PlatformTransactionManager platformTransactionManager;
     @Autowired
     private PlatformTransactionManager transactionManager;
-
+    @Autowired
+    private TransactionTemplate transactionTemplate;
     @Autowired
     private DemoProductMapper demoProductMapper;
 
@@ -53,7 +57,7 @@ public class PersonService implements IPersonService {
 
     private DemoProductService demoProductService;
 
-    private  List<String> list = null;
+    private List<String> list = null;
 
     @Autowired
     public PersonService(PersonMapper personMapper,
@@ -287,7 +291,7 @@ public class PersonService implements IPersonService {
     public void manualCommitTransaction() {
         //TransactionStatus transaction = transactionManager.getTransaction(TransactionDefinition.withDefaults());
 //        DataSourceTransactionManager 实现接口 PlatformTransactionManager.定义了事务的提交，回滚
-       //DefaultTransactionDefinition实现接口TransactionDefinition。设置隔离、传播、超时、只读
+        //DefaultTransactionDefinition实现接口TransactionDefinition。设置隔离、传播、超时、只读
         DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 //        definition.setPropagationBehaviorName("PROPAGATION_REQUIRED");
         // 设置事务传播行为
@@ -320,12 +324,60 @@ public class PersonService implements IPersonService {
 //            int sum = 1 / 0;
 
             transactionManager.commit(transaction);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.info(e.getMessage());
             //手动控制回滚异常
             transactionManager.rollback(transaction);
-           throw  e;
+            throw e;
         }
+    }
+
+    @Override
+    public void transactionTemplateTest(boolean executeException) {
+        // 在这里执行事务性操作
+        // 操作成功则事务提交，否则事务回滚
+        Boolean re = transactionTemplate.execute(transactionStatus -> {
+
+            // 事务性操作
+            // 如果操作成功，不抛出异常，事务将提交
+
+            try {
+                List<DemoProduct> list = new ArrayList<>();
+                for (int i = 0; i < 1; i++) {
+                    DemoProduct demoProduct = new DemoProduct();
+                    String uuid = UUID.randomUUID().toString();
+//            uuid = "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+//                    + "dssssssssssssssssssssssssssssssssssssssssss";
+                    demoProduct.setGuid(uuid);
+                    demoProduct.setProductName("productNameshish事务" + i);
+                    demoProduct.setProductStyle("productStyle" + i);
+                    demoProduct.setImagePath("D:\\fancky\\git\\Doc");
+                    demoProduct.setCreateTime(LocalDateTime.now());
+                    demoProduct.setModifyTime(LocalDateTime.now());
+                    demoProduct.setStatus(Short.valueOf("1"));
+                    demoProduct.setDescription("setDescription_sdsdddddddddddddddd");
+                    demoProduct.setTimestamp(LocalDateTime.now());
+                    list.add(demoProduct);
+                }
+                //执行dml 同步操作，失败不会继续往下执行
+                int i = demoProductMapper.batchInsert(list);
+
+                //模拟异常
+                if (executeException) {
+                    int sum = 1 / 0;
+                }
+//
+
+            } catch (Exception e) {
+                // 如果操作失败，抛出异常，事务将回滚
+                transactionStatus.setRollbackOnly();
+            }
+            return true;
+
+
+//        TransactionCallbackWithoutResult
+
+        });
     }
 
 

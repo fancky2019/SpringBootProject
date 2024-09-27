@@ -11,5 +11,6 @@ public interface IPersonService {
     void transactionalSynchronizedTest(Integer i) throws InterruptedException;
 
     void manualCommitTransaction();
+    void transactionTemplateTest(boolean executeException);
     void  proTest();
 }

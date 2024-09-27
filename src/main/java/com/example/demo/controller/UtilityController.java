@@ -48,6 +48,7 @@ import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -648,7 +649,10 @@ public class UtilityController {
      */
     @GetMapping(value = "/batchUpdate")
     public void batchUpdate() {
-        this.demoProductService.batchUpdate();
+        //mybatis
+//        this.demoProductService.batchUpdate();
+//mybatis plus
+        productTestService.updateBatchByIdTest();
     }
     //endregion
 
@@ -916,7 +920,7 @@ public class UtilityController {
      * 3. 直接写，这里注意，finish的时候会自动关闭OutputStream,当然你外面再关闭流问题不大
      *
      *
-     * 優化：excel 单个sheet 最大100W，如果数据量过大可分页查询，批量写入sheet,每次写5000条查询的数据
+     * excel 单个sheet 最大100W，如果数据量过大可分页查询，批量写入sheet,每次写5000条查询的数据
      */
     @GetMapping("excelDownload")
     public void download(HttpServletResponse response, DownloadData query) throws IOException {
@@ -965,10 +969,68 @@ public class UtilityController {
      *
      */
     @ApiOperation(value = "exportByPage")
-    @GetMapping(value = "/exportByPage")
-    public void exportByPage(DemoProductRequest request) throws IOException {
+    @PostMapping(value = "/exportByPage")
+    public void exportByPage(@RequestBody DemoProductRequest request) throws IOException {
         this.productTestService.exportByPage(httpServletResponse, request);
     }
+
+    /**
+     * 导出模板就是导出的时候设置data 为null
+     * @throws IOException
+     */
+    @ApiOperation(value = "exportDemoProductTemplate")
+    @GetMapping(value = "/exportDemoProductTemplate")
+    public void exportDemoProductTemplate() throws IOException {
+        this.productTestService.exportDemoProductTemplate(httpServletResponse);
+    }
+
+    @ApiOperation(value = "importExcelProductTest")
+    @PostMapping(value = "/importExcelProductTest")
+    public void importExcelProductTest(MultipartFile file) throws IOException {
+
+        List<ProductTest> list = new ArrayList<ProductTest>();
+        EasyExcel.read(file.getInputStream(), ProductTest.class, new ReadListener<ProductTest>() {
+
+                    /**
+                     * 这个每一条数据解析都会来调用
+                     * @param o
+                     * @param analysisContext
+                     */
+                    @Override
+                    public void invoke(ProductTest o, AnalysisContext analysisContext) {
+//                       注意://实体对象设置 lombok 设置    @Accessors(chain = false) 禁用链式调用，否则easyexcel读取时候无法生成实体对象的值
+
+                        int m = 0;
+                        //跳过空白行
+                        if (o.getId() != null) {
+                            list.add(o);
+                        }
+
+
+                    }
+
+                    /**
+                     *所有的都读取完 回调 ，
+                     * @param analysisContext
+                     */
+                    @Override
+                    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
+
+                    }
+
+                    @Override
+                    public void onException(Exception exception, AnalysisContext context) throws Exception {
+                        int m = 0;
+//                        CellDataTypeEnum
+                        throw exception;
+                    }
+                }
+        ).sheet().doRead();
+
+        int size = list.size();
+
+    }
+
 
     @ApiOperation(value = "importExcel")
     @PostMapping(value = "/importExcel")
@@ -1599,8 +1661,17 @@ public class UtilityController {
      */
     @GetMapping(value = "/manualCommitTransaction")
     public void manualCommitTransaction(Integer i) throws InterruptedException {
-
         personService.manualCommitTransaction();
+    }
+
+    /**
+     * 实物同步
+     * @param executeException
+     * @throws InterruptedException
+     */
+    @GetMapping(value = "/transactionTemplateTest")
+    public void transactionTemplateTest(boolean executeException) throws InterruptedException {
+        personService.transactionTemplateTest(executeException);
     }
 
 
@@ -1730,5 +1801,11 @@ public class UtilityController {
         shipOrderInfoService.newObjectCostTime();
     }
 
+
+    @GetMapping(value = "/assertTest")
+    public void assertTest(String text) {
+        //不存在就扔异常，简化if 判断
+        Assert.hasText(text, "text is empty");
+    }
 
 }

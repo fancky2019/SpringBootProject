@@ -33,8 +33,8 @@ public class DropDownCellWriteHandler implements SheetWriteHandler {
         map.forEach((k, v) -> {
             // 下拉列表约束数据
             DataValidationConstraint constraint = helper.createExplicitListConstraint(v);
-            // 设置下拉单元格的首行 末行 首列 末列
-            CellRangeAddressList rangeList = new CellRangeAddressList(1, 65536, k, k);
+            // 设置下拉单元格的首行 末行 首列 末列.K:索引从0开始
+            CellRangeAddressList rangeList = new CellRangeAddressList(1, 1048575, k, k);
             // 设置约束
             DataValidation validation = helper.createValidation(constraint, rangeList);
             // 阻止输入非下拉选项的值

@@ -21,6 +21,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.lang.reflect.UndeclaredThrowableException;
 
 /**
+ *
+ * 在Spring中，Advice都是通过Interceptor来实现的
+ *
+ *
  * 该类放在单独一个文件夹
  * 只能捕捉进入controller里异常的代码。
  * <p>

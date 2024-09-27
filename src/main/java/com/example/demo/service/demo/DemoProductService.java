@@ -298,21 +298,28 @@ public class DemoProductService {
         return 0;
     }
 
+    /**
+     * 更新18ms。整个方法执行500ms.
+     * 内部执行多个 update demo_product SET product_name = '1batchUpdate948', product_style = 'productStyle1200002'  where 1=1  and id = 949
+     * @return
+     */
     public int batchUpdate() {
 
         List<BigInteger> ids = new ArrayList<>();
 
-        for (int i = 1; i < 11; i++) {
+        for (int i = 1; i < 1000; i++) {
             ids.add(BigInteger.valueOf(i));
         }
         List<ProductTest> list = this.demoProductMapper.getByIds(ids);
-
-        StopWatch stopWatch = new StopWatch("BatchInsert");
-        stopWatch.start("BatchInsert_Trace1");
-
-        for (ProductTest productTest : list) {
-            productTest.setProductName("productName");
+        for (int i = 0; i < list.size(); i++) {
+            ProductTest productTest = list.get(i);
+            productTest.setProductName("1batchUpdate" + i);
         }
+
+
+        StopWatch stopWatch = new StopWatch("batchUpdateCostTime");
+        stopWatch.start("batchUpdateCostTime_Trace1");
+
 //        因为mybatis返回的默认是匹配的行数，而不是受影响的行数，如何设置返回的是受影响的行数，useAffectedRows=true
         //mysql 连接字段穿添加  &useAffectedRows=true 返回0 ，不加返回1。
         //for循环多个update 语句以分号结束，update 执行会返回1.因为执行update id 就一条
@@ -322,7 +329,7 @@ public class DemoProductService {
         stopWatch.stop();
 //        stopWatch.start("BatchInsert_Trace2");
         long miils = stopWatch.getTotalTimeMillis();
-        log.info(stopWatch.shortSummary());
+        log.info("batchUpdateCostTime - {}", stopWatch.shortSummary());
 
         return 0;
     }

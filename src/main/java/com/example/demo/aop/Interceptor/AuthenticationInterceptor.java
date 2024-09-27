@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +21,14 @@ import java.lang.reflect.Method;
 import java.util.Date;
 
 /**
+ * HandlerInterceptor是springMVC项目中的拦截器，它拦截的目标是请求的地址，比MethodInterceptor先执行。其工作原理是当请求
+ * MethodInterceptordr动态代理CGLIB
+ *
+ *
+ *
+ * 拦截器实现HandlerInterceptor接口，也可以继承HandlerInterceptorAdapter类
+ *
+ *
  * 执行顺序：Filter -> Interceptor -> ControllerAdvice -> Aspect -> Controller
  *
  *  通知（Advice）是一种拦截器，用于在请求处理的不同阶段或响应进行全局的处理和定制化操作，
@@ -29,6 +38,13 @@ import java.util.Date;
  * Interceptor:采用反射动态代理实现，可以获取request信息，可以获取到请求的方法名称，获取不到方法的参数信息。
  * Aspect:springboot 默认采用动态代理实现，获取不到request请求的信息，可以获取方法的参数
  * <p>
+ *
+ *
+ * preHandle方法将在Controller处理之前调用的
+ * postHandle 会在Controller方法调用之后
+ * afterCompletion在当前interceptor的preHandle方法返回true时才执行
+ *
+ *
  * preHandle-->postHandle-->afterCompletion
  * preHandle return false 就不进入postHandle
  * 可以多个Interceptor
@@ -39,7 +55,7 @@ import java.util.Date;
  */
 //@Component
 public class AuthenticationInterceptor implements HandlerInterceptor {
-
+//    HandlerInterceptorAdapter
     @Autowired
     private JWTUtility jwtUtility;
 

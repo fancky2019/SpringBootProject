@@ -268,9 +268,9 @@ useCache="true"
       </set>
       where 1=1
       and id = #{item.id,jdbcType=INTEGER}
-      <if test="item.productName != null and item.productName != ''">
-        and product_name LIKE CONCAT('%',#{item.productName,jdbcType=VARCHAR},'%')
-      </if>
+<!--      <if test="item.productName != null and item.productName != ''">-->
+<!--        and product_name LIKE CONCAT('%',#{item.productName,jdbcType=VARCHAR},'%')-->
+<!--      </if>-->
     </foreach>
   </update>
 

@@ -96,12 +96,40 @@ spring.lifecycle.timeout-per-shutdown-phase=60s
             会生成bean
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 
+	三级缓存不是二级缓存：
+如果没有AOP的话确实可以两级缓存就可以解决循环依赖的问题，如果加上AOP，两级缓存是无法解决的，不可能每次执行s
+ingleFactory.getObject()方法都给我产生一个新的代理对象，所以还要借助另外一个缓存来保存产生的代理对象
+
+
+
 			//bean 生成 执行步骤
 			run 方法
 			refreshContext(context);
 			refresh
-				registerBeanPostProcessors(beanFactory);
-			PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors
+			registerBeanPostProcessors(beanFactory);
+			PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors 里 调用beanFactory.getBean
+			AbstractBeanFactory.getBean
+			doGetBean:
+                    1、doGetBean 里调用lambda表达式.注册工厂 ObjectFactory
+                        sharedInstance = this.getSingleton(beanName, () -> {
+                                try {
+                                //创建bean
+                                    return this.createBean(beanName, mbd, args);
+                                } catch (BeansException var5) {
+                                    BeansException ex = var5;
+                                    this.destroySingleton(beanName);
+                                    throw ex;
+                                }
+                            });
+                    2、DefaultSingletonBeanRegistry.getSingleton
+           AbstractAutowireCapableBeanFactory.createBean
+          this.doCreateBean(beanName, mbdToUse, args);
+             1、 instanceWrapper = this.createBeanInstance(beanName, mbd, args);  实例化
+             2、 this.populateBean(beanName, mbd, instanceWrapper); //属性赋值
+             //调用初始化方法，比如init-method、注入Aware对象、应用后处理器
+		     3、exposedObject = initializeBean(beanName, exposedObject, mbd);
+
+
          */
         //RabbitMQConfig commandLineImp
 //        Object cm= applicationContext.getBean("");
@@ -120,25 +148,35 @@ spring.lifecycle.timeout-per-shutdown-phase=60s
         // ConfigurableApplicationContext 实现beanFactory 接口，
         //beanFactory getBean 的内部实现还是通过 FactoryBean 的getObject 方法
 
-        //region 循环依赖
+        //region 循环依赖 三级缓存
         /*
         只能解决单例模式字段注入的循环依赖 ，无法解决构造函数和原型模式的Field依赖
           applicationContext.getBean("") 最终调用  DefaultSingletonBeanRegistry 的方法 getSingleton
 
-          三个map 缓存:
+  bean 实例化--》初始化。
 
+
+          三个map 缓存:第三季缓存解决动态代理问题
+
+     1、
          Cache of singleton objects: bean name to bean instance.
         private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
-
+3、
          Cache of singleton factories: bean name to ObjectFactory.
         private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
-
+2、
          Cache of early singleton objects: bean name to bean instance.
         private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(16);
 
-
+一级缓存：singletonObject  存放已经经历了完整周期的Bean对象
+二级缓存：earlySingletonObjects 存放早期暴露出来的Bean对象，Bean的生命周期未结束
+三级缓存：singletonFactories 存放可以生成Bean的工厂
+  private final Map<String, Object> singletonObjects = new ConcurrentHashMap(256);
+    private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap(16);
+    private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap(16);
          */
-//CommandLineImp.class.getName() 不能用这种全路径名
+
+        //CommandLineImp.class.getName() 不能用这种全路径名
         //CommandLineImp
         String name = CommandLineImp.class.getSimpleName();
         Object obj = applicationContext.getBean("demoProductService");

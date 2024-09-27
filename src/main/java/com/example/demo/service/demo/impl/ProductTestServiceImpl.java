@@ -2,6 +2,7 @@ package com.example.demo.service.demo.impl;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.metadata.WriteSheet;
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -44,12 +46,14 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
@@ -143,7 +147,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         this.updateBatchById(list);
     }
 
-    private void saveOrUpdateBatchTest() {
+    public void saveOrUpdateBatchTest1() {
         List<ProductTest> productTests = new ArrayList<ProductTest>();
         ProductTest productTest = new ProductTest();
         productTest.setId(new BigInteger("100001"));
@@ -169,6 +173,57 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        queryWrapper.eq("",1);
 //        queryWrapper.ne();
         this.list(queryWrapper);
+    }
+
+    /**
+     * 耗时108ms
+     * 会更新所有字段  ,更新部分字段可以大大减少耗时
+     */
+    public void updateBatchByIdTest() {
+        List<BigInteger> ids = new ArrayList<>();
+
+        for (int i = 1; i < 1000; i++) {
+            ids.add(BigInteger.valueOf(i));
+        }
+        List<ProductTest> list = this.listByIds(ids);
+        for (int i = 0; i < list.size(); i++) {
+            ProductTest productTest = list.get(i);
+            productTest.setProductName("22batchUpdate" + i);
+        }
+
+
+        StopWatch stopWatch = new StopWatch("saveOrUpdateBatchTest");
+        stopWatch.start("BatchInsert_Trace1");
+
+//        因为mybatis返回的默认是匹配的行数，而不是受影响的行数，如何设置返回的是受影响的行数，useAffectedRows=true
+        //mysql 连接字段穿添加  &useAffectedRows=true 返回0 ，不加返回1。
+        //for循环多个update 语句以分号结束，update 执行会返回1.因为执行update id 就一条
+        //批量更新还是要加锁，避免并发访问
+
+        /*
+        UPDATE demo_product  SET guid='a02a0ed4-c685-4d9a-949e-bcba60f17c97',
+product_name='22batchUpdate702',
+product_style='productStyle1200002',
+image_path='D:\\fancky\\git\\Doc',
+create_time='2023-11-03 22:29:11.394',
+modify_time='2023-11-03 22:29:11.394',
+status=1,
+description='setDescription_sdsdddddddddddddddd',
+timestamp='2023-11-03 22:29:11.0'  WHERE id=703
+
+
+SELECT id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp FROM demo_product WHERE id=703
+         */
+        //先 select,判断有没有，然后执行insert ot update
+//        boolean result = this.saveOrUpdateBatch(list);
+
+
+        boolean result = this.updateBatchById(list);
+        stopWatch.stop();
+        //        stopWatch.start("BatchInsert_Trace2");
+        long miils = stopWatch.getTotalTimeMillis();
+        log.info(stopWatch.shortSummary());
+
     }
 
     private void queryParam() {
@@ -323,12 +378,15 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
          *  WHERE (id = 1 AND status = 1)
          */
         LambdaUpdateWrapper<ProductTest> updateWrapper = new LambdaUpdateWrapper<>();
+        //更新为空
+        updateWrapper.set(ProductTest::getProductStyle, null);
         updateWrapper.set(ProductTest::getProductName, "update1");
         updateWrapper.eq(ProductTest::getId, 1);
         updateWrapper.eq(ProductTest::getStatus, 1);
         boolean re = this.update(updateWrapper);
 //        this.update(productTest,updateWrapper);
-
+        //  实体要指定null ，默认null，不然默认更新非空字段
+//        baseMapper.update(null, updateWrapper);
         /*
       UPDATE demo_product  SET guid='380de07a-58e4-4bf6-88d8-97ed9d6b8275',
         product_name='产品名称1200001',
@@ -386,6 +444,11 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         boolean re3 = this.update(updateWrapper3);
 
     }
+
+
+
+
+
 
     /*
     1.truncate先使用create命令创建表，然后drop源表，最后rename新表。
@@ -533,10 +596,10 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      */
     public void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException {
 
-        String fileName = "DemoProduct_" + System.currentTimeMillis() + ".xlsx";
-//        prepareResponds(fileName, response);
+        String fileName = "DemoProduct_" + System.currentTimeMillis();
+        prepareResponds(fileName, response);
         // 这里 需要指定写用哪个class去写
-        int stepCount = 5000;
+        int stepCount = 10000;
 
 
 //        request.setPageIndex(1);
@@ -545,37 +608,64 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 //        EasyExcel.write(response.getOutputStream(), ProductTest.class).sheet("表名称").doWrite(list);
 
 
-//细化设置
+        //细化设置
         ServletOutputStream outputStream = response.getOutputStream();
-//        // 获取改类声明的所有字段
-//        Field[] fields = GXDetailListVO.class.getDeclaredFields();
-//        // 响应字段对应的下拉集合
-//        Map<Integer, String[]> map = new HashMap<>();
-//        Field field = null;
-//        // 循环判断哪些字段有下拉数据集，并获取
-//        for (int i = 0; i < fields.length; i++) {
-//            field = fields[i];
-//            // 解析注解信息
-//            DropDownSetField dropDownSetField = field.getAnnotation(DropDownSetField.class);
-//            if (null != dropDownSetField) {
-//                String[] sources = ResoveDropAnnotationUtil.resove(dropDownSetField);
-//                if (null != sources && sources.length > 0) {
-//                    map.put(i, sources);
-//                }
-//            }
-//        }
+        // 获取改类声明的所有字段
+        Field[] fields = ProductTest.class.getDeclaredFields();
+
+        // 响应字段对应的下拉集合
+        Map<Integer, String[]> map = new HashMap<>();
+        Field field = null;
+        List<Field> fieldList = new ArrayList<>();
+        // 过滤掉ExcelIgnore的列
+        for (int i = 0; i < fields.length; i++) {
+            field = fields[i];
+            int modifiers = field.getModifiers();
+            if (!Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers)) {
+                // 解析注解信息
+                ExcelIgnore excelIgnore = field.getAnnotation(ExcelIgnore.class);
+                if (null == excelIgnore) {
+                    fieldList.add(field);
+                }
+            }
+
+        }
+
+        // 循环判断哪些字段有下拉数据集，并获取
+        for (int i = 0; i < fieldList.size(); i++) {
+            field = fieldList.get(i);
+            // 解析注解信息
+            DropDownSetField dropDownSetField = field.getAnnotation(DropDownSetField.class);
+            if (null != dropDownSetField) {
+                String[] sources = ResoveDropAnnotationUtil.resove(dropDownSetField);
+                if (null != sources && sources.length > 0) {
+                    map.put(i, sources);
+                }
+            }
+        }
+
+
         //多个sheet页写入
         ExcelWriterBuilder builder = new ExcelWriterBuilder();
         builder.autoCloseStream(true);
+//        builder.head()
+        builder.head(ProductTest.class);
+        if (CollectionUtils.isNotEmpty(request.getExportFieldList())) {
+            builder.includeColumnFieldNames(request.getExportFieldList());
+            //        builder.excludeColumnFieldNames()
+        }
+
+
+//        builder.registerWriteHandler(new ExcelStyleConfig(Lists.newArrayList(7), null, null));
 ////        if (flag == 0 || flag == 2) {
 //        builder.registerWriteHandler(new ExcelStyleConfig(Lists.newArrayList(20), null, null));
-//        builder.head(GXDetailListVO.class);
+//        builder.head(ProductTest.class);
 ////        } else {
 ////            builder.registerWriteHandler(new ExcelStyleConfig(null,null,null));
 ////            builder.head(GXDetailListLogVO.class);
 ////        }
-
-        //  builder.registerWriteHandler(new DropDownCellWriteHandler(map));
+        //下拉框
+        builder.registerWriteHandler(new DropDownCellWriteHandler(map));
         builder.file(outputStream);
 
         //不能重命名，重命名就没有XLSX格式后缀
@@ -584,6 +674,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
 
         long count = this.baseMapper.selectCount(Wrappers.emptyWrapper());
+        count = 999;
         long loopCount = count / stepCount;
         long remainder = count % stepCount;
         if (remainder > 1) {
@@ -597,7 +688,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
             sheetRemainder++;
         }
         int sheetIndex = 0;
-        int maxId=0;
+        int maxId = 0;
         WriteSheet sheet = EasyExcel.writerSheet(0, "DemoProduct" + sheetIndex).build();
         for (int i = 1; i <= loopCount; i++) {
             request.setMaxId(maxId);
@@ -608,17 +699,16 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
             //超过200W 查询要5s
 //            List<ProductTest> list =  this.productTestMapper.getPageData(request);
             //采用最大ID，可0.5s查询到结果
-            List<ProductTest> list =  this.productTestMapper.getPageDataOptimization(request);
-            int total=i*stepCount;
+            List<ProductTest> list = this.productTestMapper.getPageDataOptimization(request);
+            int total = i * stepCount;
 
             writer.write(list, sheet);
-            if(total%sheetSize==0)
-            {
+            if (total % sheetSize == 0) {
                 sheetIndex += 1;
                 sheet = EasyExcel.writerSheet(sheetIndex, "DemoProduct" + sheetIndex).build();
 //                WriteSheet writeSheet = EasyExcel.writerSheet(i, "模板" + i).build();
             }
-            maxId=list.stream().map(p->p.getId().intValue()).max(Comparator.comparing(Integer::intValue)).orElse(0);
+            maxId = list.stream().map(p -> p.getId().intValue()).max(Comparator.comparing(Integer::intValue)).orElse(0);
 
         }
 
@@ -626,6 +716,77 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         writer.finish();
 
 
+    }
+
+    @Override
+    public void exportDemoProductTemplate(HttpServletResponse response) throws IOException {
+        String fileName = "DemoProduct_" + System.currentTimeMillis();
+        prepareResponds(fileName, response);
+        // EasyExcel.write(response.getOutputStream(), ProductTest.class).sheet("表名称").doWrite(new ArrayList<ProductTest>());
+
+        //细化设置
+        ServletOutputStream outputStream = response.getOutputStream();
+        // 获取改类声明的所有字段
+        Field[] fields = ProductTest.class.getDeclaredFields();
+        // 响应字段对应的下拉集合
+        Map<Integer, String[]> map = new HashMap<>();
+        Field field = null;
+        List<Field> fieldList = new ArrayList<>();
+        // 过滤掉ExcelIgnore的列
+        for (int i = 0; i < fields.length; i++) {
+            field = fields[i];
+            int modifiers = field.getModifiers();
+            if (!Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers)) {
+                // 解析注解信息
+                ExcelIgnore excelIgnore = field.getAnnotation(ExcelIgnore.class);
+                if (null == excelIgnore) {
+                    fieldList.add(field);
+                }
+            }
+
+        }
+
+        // 循环判断哪些字段有下拉数据集，并获取
+        for (int i = 0; i < fieldList.size(); i++) {
+            field = fieldList.get(i);
+            // 解析注解信息
+            DropDownSetField dropDownSetField = field.getAnnotation(DropDownSetField.class);
+            if (null != dropDownSetField) {
+                String[] sources = ResoveDropAnnotationUtil.resove(dropDownSetField);
+                if (null != sources && sources.length > 0) {
+                    map.put(i, sources);
+                }
+            }
+        }
+
+
+        //多个sheet页写入
+        ExcelWriterBuilder builder = new ExcelWriterBuilder();
+        builder.autoCloseStream(true);
+//        builder.head()
+        builder.head(ProductTest.class);
+
+
+//        builder.excludeColumnFieldNames()
+
+////        if (flag == 0 || flag == 2) {
+//        builder.registerWriteHandler(new ExcelStyleConfig(Lists.newArrayList(20), null, null));
+//        builder.head(ProductTest.class);
+////        } else {
+////            builder.registerWriteHandler(new ExcelStyleConfig(null,null,null));
+////            builder.head(GXDetailListLogVO.class);
+////        }
+        //下拉框
+        builder.registerWriteHandler(new DropDownCellWriteHandler(map));
+        builder.file(outputStream);
+
+        //不能重命名，重命名就没有XLSX格式后缀
+        builder.excelType(ExcelTypeEnum.XLSX);
+        ExcelWriter writer = builder.build();
+        WriteSheet sheet = EasyExcel.writerSheet(0, "DemoProduct").build();
+        List<ProductTest> list = new ArrayList<>();
+        writer.write(list, sheet);
+        writer.finish();
     }
 
     private List<ProductTest> getPageData(DemoProductRequest request) {

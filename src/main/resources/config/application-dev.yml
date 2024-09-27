@@ -5,7 +5,7 @@ server:
   servlet:
     #设置项目名称，注意配置文件 dev、tes、prod的配置
     context-path: /sbp
-      #multipart:
+    #multipart:
     #max-file-size: 1024MB
     #max-request-size: 1024MB
   shutdown: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
@@ -23,7 +23,7 @@ eureka:
 #否则项目中同时存在的myabtis 和mybatis0plus因引用的mybatis版本不一致无法共存。
 #mybatis:
 mybatis-plus:
-##  mybatis全局配置文件
+  ##  mybatis全局配置文件
   config-location: classpath:mybatis-config.xml
   #  Mapper文件存放的位置，多了层文件夹，默认不用配置
   mapper-locations: classpath:mapper/**/*.xml
@@ -59,9 +59,14 @@ mybatis-plus:
 logging:
   config: classpath:log4j2.xml
   #mybatis-plus 日志级别配置，不用配置
-#  level:
+  level:
 #    com.baomidou.mybatisplus: DEBUG
-
+    com:
+      baomidou:
+        mybatisplus: DEBUG
+      example:
+        demo:
+          dao: DEBUG
 
 
 #开发配
@@ -71,20 +76,20 @@ spring:
     timeout-per-shutdown-phase: 60s
 
   #默认cglib 代理，设置jdk 动态代理
-#  aop:
-#    proxy-target-class: false
+  #  aop:
+  #    proxy-target-class: false
   #swagger 3配置 建议使用springdoc 代替swagger
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-#  main:
-#    allow-bean-definition-overriding: true #当遇到相同名字的时候，是否允许覆盖注册 bean
+  #  main:
+  #    allow-bean-definition-overriding: true #当遇到相同名字的时候，是否允许覆盖注册 bean
   application:
     name: springBootProject
-#  jackson: # 无法处理LocalDateTime格式化问题，使用代码配置类
-#    date-format: yyyy-MM-dd HH:mm:ss
-#    time-zone: GMT+8
-#    default-property-inclusion: non_null
+  #  jackson: # 无法处理LocalDateTime格式化问题，使用代码配置类
+  #    date-format: yyyy-MM-dd HH:mm:ss
+  #    time-zone: GMT+8
+  #    default-property-inclusion: non_null
   thymeleaf:
   #    view:
   #      prefix: /
@@ -96,9 +101,9 @@ spring:
   #    static-locations: classpath:/
 
   #默认redis 缓存，ehcache本地缓存
-#  cache:
-#    redis:
-#      cache-null-values: true  #默认缓存null值解决缓存穿透
+  #  cache:
+  #    redis:
+  #      cache-null-values: true  #默认缓存null值解决缓存穿透
   datasource:
     #    # sqlserver
     #    url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS
@@ -115,16 +120,16 @@ spring:
     username: root
     password: 123456
 
-#    writer:
-#      dbcUrl: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-#      driver-class-name: com.mysql.cj.jdbc.Driver
-#      username: root
-#      password: 123456
-#    reader:
-#      jdbcUrl: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-#      driver-class-name: com.mysql.cj.jdbc.Driver
-#      username: root
-#      password: 123456
+    #    writer:
+    #      dbcUrl: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    #      driver-class-name: com.mysql.cj.jdbc.Driver
+    #      username: root
+    #      password: 123456
+    #    reader:
+    #      jdbcUrl: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    #      driver-class-name: com.mysql.cj.jdbc.Driver
+    #      username: root
+    #      password: 123456
 
 
     #mysql 连接池8h自动断开配置
@@ -169,24 +174,24 @@ spring:
     #  数据库索引
     database: 0
 
-#    单机
+    #    单机
     # 远程服务器地址
     host: 127.0.0.1
     # 远程服务器端口
     port: 6379
 
 
-#    #配置集群，自动写入集群
-#    ##集群 注意：密码用上面密码配置 127.0.0.1:7001,127.0.0.1:7002,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005,127.0.0.1:7006 #集群节点
-#    cluster:
-#      nodes:
-#        - 127.0.0.1:7000
-#        - 127.0.0.1:7001
-#        - 127.0.0.1:7002
-#        - 127.0.0.1:7003
-#        - 127.0.0.1:7004
-#        - 127.0.0.1:7005
-#      max-redirects: 3
+    #    #配置集群，自动写入集群
+    #    ##集群 注意：密码用上面密码配置 127.0.0.1:7001,127.0.0.1:7002,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005,127.0.0.1:7006 #集群节点
+    #    cluster:
+    #      nodes:
+    #        - 127.0.0.1:7000
+    #        - 127.0.0.1:7001
+    #        - 127.0.0.1:7002
+    #        - 127.0.0.1:7003
+    #        - 127.0.0.1:7004
+    #        - 127.0.0.1:7005
+    #      max-redirects: 3
 
 
     # 集群配置也用此处写正确的密码
@@ -195,7 +200,7 @@ spring:
     timeout: 30000
 
     #redis连接池 lettuce、jedis。连接池 单机配置。默认集成lettuce
-#    jedis:
+    #    jedis:
     lettuce:
       pool:
         # 最大空闲连接
@@ -208,23 +213,23 @@ spring:
         max-wait: 0
 
 
-  #    ##集群 注意：密码用上面密码配置
-  #    cluster:
-  #      nodes:
-  #        - 127.0.0.1:7000
-  #        - 127.0.0.1:7001
-  #        - 127.0.0.1:7002
-  #        - 127.0.0.1:7003
-  #        - 127.0.0.1:7004
-  #      max-redirects: 3
+    #    ##集群 注意：密码用上面密码配置
+    #    cluster:
+    #      nodes:
+    #        - 127.0.0.1:7000
+    #        - 127.0.0.1:7001
+    #        - 127.0.0.1:7002
+    #        - 127.0.0.1:7003
+    #        - 127.0.0.1:7004
+    #      max-redirects: 3
 
-  #    ##哨兵 密码用上面密码配置
-  #    sentinel:
-  #      master: mymaster
-  #      nodes:
-  #        - 127.0.0.1:60001
-  #        - 127.0.0.1:60002
-  #        - 127.0.0.1:60003
+    #    ##哨兵 密码用上面密码配置
+    #    sentinel:
+    #      master: mymaster
+    #      nodes:
+    #        - 127.0.0.1:60001
+    #        - 127.0.0.1:60002
+    #        - 127.0.0.1:60003
 
 
     #springboot 配置未成功，参见代码的配置
@@ -235,7 +240,7 @@ spring:
 
   rabbitmq:
     ##集群配置 ip:port,ip:port 。多个配置之间用逗号隔开
-   # addresses: 127.0.0.1:5673,127.0.0.1:5674,127.0.0.1:5675 #指定client连接到的server的地址，多个以逗号分隔(优先取addresses，然后再取host)
+    # addresses: 127.0.0.1:5673,127.0.0.1:5674,127.0.0.1:5675 #指定client连接到的server的地址，多个以逗号分隔(优先取addresses，然后再取host)
 
     host: 127.0.0.1
     port: 5672
@@ -254,7 +259,7 @@ spring:
     #设置成默认的自动Ack,springboot会加入死信队列，一定设置死信队列。
     #    listener.simple.acknowledge-mode: manual
     listener:
-    #全局SimpleRabbitListenerContainerFactory 配置
+      #全局SimpleRabbitListenerContainerFactory 配置
       simple:
         retry:
           #是否开启消费者重试（为false时关闭消费者重试，这时消费端代码异常会一直重复收到消息）
@@ -270,7 +275,7 @@ spring:
         #默认 auto，不然消费异常业务ack掉。尽管配置重新入队auto还是会重试入队之后ack掉
         acknowledge-mode: manual
         #消费异常的数据重新入队。
-#        default-requeue-rejected: true
+    #        default-requeue-rejected: true
 
     #    listener:
     #      direct:
@@ -329,7 +334,7 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
         #max-poll-records: 10
         #fetch-max-wait:
-        #listener:
+      #listener:
       #手动提交模式
       #ack-mode: manual
 
@@ -340,30 +345,30 @@ spring:
 #camunda 官网配置
 #https://docs.camunda.org/manual/7.9/user-guide/spring-boot-integration/configuration/#camunda-engine-properties
 camunda.bpm:
-    # 配置账户密码来访问Camunda自带的管理界面
+  # 配置账户密码来访问Camunda自带的管理界面
   admin-user:
     id: demo
     password: demo
-#    firstName: Demo
+  #    firstName: Demo
   filter:
-     create: All tasks
+    create: All tasks
     #禁止自动部署resources下面的bpmn文件
   auto-deployment-enabled: false
     #禁止index跳转到Camunda自带的管理界面，默认true
     #    webapp:
-    #      index-redirect-enabled: false
+  #      index-redirect-enabled: false
 
 #Feign  开启熔断。参见项目spring-cloud-nacos
 #注意：节点不在spring内
 #如果页面显示异常信息，说明熔断没有开启成功
 feign:
 
-#  #携带token,未验证
-#  oauth2:
-#    # 开启Oauth支持，这样就会在请求头中携带Token了
-#    enabled: true
-#    # 同时开启负载均衡支持
-#    load-balanced: true
+  #  #携带token,未验证
+  #  oauth2:
+  #    # 开启Oauth支持，这样就会在请求头中携带Token了
+  #    enabled: true
+  #    # 同时开启负载均衡支持
+  #    load-balanced: true
 
   # 设置 feign 超时时间:超时异常
   client:
@@ -422,7 +427,7 @@ elasticjob:
   jobs:
     simpleJob: #job名称不能重复
       elasticJobClass: com.example.demo.jobs.SpringBootSimpleJob
-#      cron: 0/20 * * * * ?   #秒分钟小时
+      #      cron: 0/20 * * * * ?   #秒分钟小时
       cron: 0 0 * * * ?   #秒分钟小时:每小时触发一次
       shardingTotalCount: 3 #3个分片，三台机器执行次任务
       shardingItemParameters: 0=Beijing,1=Shanghai,2=Guangzhou
@@ -474,7 +479,7 @@ xxl:
   job:
     accessToken: default_token
     admin:
-#      addresses: http://xxljob.com:8182/xxl-job-admin
+      #      addresses: http://xxljob.com:8182/xxl-job-admin
       addresses: http://127.0.0.1:8182/xxl-job-admin
     executor:
       address:
