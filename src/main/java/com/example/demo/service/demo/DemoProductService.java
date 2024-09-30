@@ -110,6 +110,8 @@ public class DemoProductService {
     public int batchInsert() {
         List<DemoProduct> list = new ArrayList<>();
         String productName = "productName";
+        // Packet for query is too large (80,087,984 > 67,108,864).
+        //max_allowed_packet默認64M
         for (int i = 0; i < 100000; i++) {
 
             DemoProduct demoProduct = new DemoProduct();
@@ -137,7 +139,10 @@ public class DemoProductService {
         return 0;
     }
 
+
     public int batchInsertSession() {
+        StopWatch stopWatch = new StopWatch("BatchInsert1");
+        stopWatch.start("BatchInsert_builder");
         List<DemoProduct> list = new ArrayList<>();
 //        300000
         for (int i = 0; i < 300000; i++) {
@@ -153,6 +158,7 @@ public class DemoProductService {
             demoProduct.setTimestamp(LocalDateTime.now());
             list.add(demoProduct);
         }
+        stopWatch.stop();
 //        while (true) {
 //            try {
 //                Thread.sleep(60 * 1000);
@@ -160,8 +166,9 @@ public class DemoProductService {
 //                throw new RuntimeException(e);
 //            }
 //        }
-        StopWatch stopWatch = new StopWatch("BatchInsert");
-        stopWatch.start("BatchInsert_Trace1");
+        log.info("BatchInsert_builder cost " +  stopWatch.getTotalTimeMillis() + "ms - " + stopWatch.shortSummary());
+        stopWatch = new StopWatch("BatchInsert2");
+        stopWatch.start("BatchInsert_insert");
 
         try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);) {
             //不能用spring 注入的mapper,必须从session 里取，否则是一条一条插入
@@ -178,7 +185,7 @@ public class DemoProductService {
         stopWatch.stop();
 //        stopWatch.start("BatchInsert_Trace2");
         long miils = stopWatch.getTotalTimeMillis();
-        log.info(stopWatch.shortSummary());
+        log.info("BatchInsert_insert cost " + miils + "ms - " + stopWatch.shortSummary());
 
         return 0;
     }

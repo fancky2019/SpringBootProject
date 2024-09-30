@@ -5,6 +5,7 @@ import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.MessageResult;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -25,6 +26,6 @@ public interface IProductTestService extends IService<ProductTest> {
 
     void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException;
     void exportDemoProductTemplate(HttpServletResponse response) throws IOException;
-
+     void importExcelProductTest(HttpServletResponse response,MultipartFile file) throws IOException ;
     void updateBatchByIdTest();
 }

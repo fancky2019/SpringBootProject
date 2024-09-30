@@ -901,7 +901,7 @@ public class UtilityController {
 
     //endregion
 
-    //region EasyExcel导出excel
+    //region EasyExcel 导入导出excel
 //    EasyExcel 不能设置数字格式、日期格式。貌似excel 中设置了数字格式 也能输入中文
     //注意：easyExcel 和easyPoi 不兼容，两个不能同时引用，否则easyExcel 下载的excel 打不开
     //     easyexcel 的性能不easypoi性能好点。
@@ -987,47 +987,47 @@ public class UtilityController {
     @ApiOperation(value = "importExcelProductTest")
     @PostMapping(value = "/importExcelProductTest")
     public void importExcelProductTest(MultipartFile file) throws IOException {
-
-        List<ProductTest> list = new ArrayList<ProductTest>();
-        EasyExcel.read(file.getInputStream(), ProductTest.class, new ReadListener<ProductTest>() {
-
-                    /**
-                     * 这个每一条数据解析都会来调用
-                     * @param o
-                     * @param analysisContext
-                     */
-                    @Override
-                    public void invoke(ProductTest o, AnalysisContext analysisContext) {
-//                       注意://实体对象设置 lombok 设置    @Accessors(chain = false) 禁用链式调用，否则easyexcel读取时候无法生成实体对象的值
-
-                        int m = 0;
-                        //跳过空白行
-                        if (o.getId() != null) {
-                            list.add(o);
-                        }
-
-
-                    }
-
-                    /**
-                     *所有的都读取完 回调 ，
-                     * @param analysisContext
-                     */
-                    @Override
-                    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
-
-                    }
-
-                    @Override
-                    public void onException(Exception exception, AnalysisContext context) throws Exception {
-                        int m = 0;
-//                        CellDataTypeEnum
-                        throw exception;
-                    }
-                }
-        ).sheet().doRead();
-
-        int size = list.size();
+        this.productTestService.importExcelProductTest(httpServletResponse,file);
+//        List<ProductTest> list = new ArrayList<ProductTest>();
+//        EasyExcel.read(file.getInputStream(), ProductTest.class, new ReadListener<ProductTest>() {
+//
+//                    /**
+//                     * 这个每一条数据解析都会来调用
+//                     * @param o
+//                     * @param analysisContext
+//                     */
+//                    @Override
+//                    public void invoke(ProductTest o, AnalysisContext analysisContext) {
+////                       注意://实体对象设置 lombok 设置    @Accessors(chain = false) 禁用链式调用，否则easyexcel读取时候无法生成实体对象的值
+//
+//                        int m = 0;
+//                        //跳过空白行
+//                        if (o.getId() != null) {
+//                            list.add(o);
+//                        }
+//
+//
+//                    }
+//
+//                    /**
+//                     *所有的都读取完 回调 ，
+//                     * @param analysisContext
+//                     */
+//                    @Override
+//                    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onException(Exception exception, AnalysisContext context) throws Exception {
+//                        int m = 0;
+////                        CellDataTypeEnum
+//                        throw exception;
+//                    }
+//                }
+//        ).sheet().doRead();
+//
+//        int size = list.size();
 
     }
 
@@ -1037,6 +1037,8 @@ public class UtilityController {
     public void importExcel(MultipartFile file) throws IOException {
 
         List<GXDetailListVO> list = new ArrayList<GXDetailListVO>();
+        //保存到数据库的阈值
+        final int SAVE_DB_SIZE=5000;
         EasyExcel.read(file.getInputStream(), GXDetailListVO.class, new ReadListener<GXDetailListVO>() {
 
                     /**
@@ -1048,6 +1050,12 @@ public class UtilityController {
                     public void invoke(GXDetailListVO o, AnalysisContext analysisContext) {
                         int m = 0;
                         list.add(o);
+                        if(SAVE_DB_SIZE==list.size())
+                        {
+                            //保存到数据库
+                            //save()
+//                            list.clear();
+                        }
 
                     }
 

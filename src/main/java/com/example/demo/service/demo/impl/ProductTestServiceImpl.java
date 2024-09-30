@@ -3,6 +3,8 @@ package com.example.demo.service.demo.impl;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.annotation.ExcelIgnore;
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.metadata.WriteSheet;
@@ -38,6 +40,9 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +53,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -83,6 +89,9 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
     private ObjectMapper objectMapper;
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private SqlSessionFactory sqlSessionFactory;
 
     public ProductTestServiceImpl(ProductTestMapper productTestMapper) {
         this.productTestMapper = productTestMapper;
@@ -593,6 +602,8 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      *
      * -- 性能最差
      * select * from demo_product  where 1=1 limit 2180000  ,5000
+     *
+     * 250 W不到3分钟
      */
     public void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException {
 
@@ -674,7 +685,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
 
         long count = this.baseMapper.selectCount(Wrappers.emptyWrapper());
-        count = 999;
+//        count = 999;
         long loopCount = count / stepCount;
         long remainder = count % stepCount;
         if (remainder > 1) {
@@ -787,6 +798,103 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         List<ProductTest> list = new ArrayList<>();
         writer.write(list, sheet);
         writer.finish();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void importExcelProductTest(HttpServletResponse response, MultipartFile file) throws IOException {
+        List<ProductTest> dataList = new ArrayList<ProductTest>();
+        List<ProductTest> errorDatalist = new ArrayList<ProductTest>();
+        final int SAVE_DB_SIZE = 20;
+        EasyExcel.read(file.getInputStream(), ProductTest.class, new ReadListener<ProductTest>() {
+
+                    /**
+                     * 这个每一条数据解析都会来调用
+                     * @param o
+                     * @param analysisContext
+                     */
+                    @Override
+                    public void invoke(ProductTest o, AnalysisContext analysisContext) {
+//                       注意://实体对象设置 lombok 设置    @Accessors(chain = false) 禁用链式调用，否则easyexcel读取时候无法生成实体对象的值
+
+                        int m = 0;
+                        //跳过空白行,
+                        if (StringUtils.isNotEmpty(o.getProductName())) {
+                            dataList.add(o);
+                        }
+
+                        if (SAVE_DB_SIZE == dataList.size()) {
+                            //保存到数据库
+                            batchInsertSession(dataList, errorDatalist);
+                            dataList.clear();
+                        }
+
+
+                    }
+
+                    /**
+                     *所有的都读取完 回调 ，
+                     * @param analysisContext
+                     */
+                    @Override
+                    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
+
+                    }
+
+                    @Override
+                    public void onException(Exception exception, AnalysisContext context) throws Exception {
+                        int m = 0;
+//                        CellDataTypeEnum
+                        throw exception;
+                    }
+                }
+        ).sheet().doRead();
+
+        if (dataList.size() > 0) {
+            //保存到数据库
+            batchInsertSession(dataList, errorDatalist);
+        }
+        String fileName = "DemoProduct_error" + System.currentTimeMillis();
+        prepareResponds(fileName, response);
+
+        EasyExcel.write(response.getOutputStream(), ProductTest.class).sheet("表名称").doWrite(errorDatalist);
+
+    }
+
+    public int batchInsertSession(List<ProductTest> dataList, List<ProductTest> errorDatalist) {
+
+        //
+        for (ProductTest item : dataList) {
+            //校验数据
+            if (item.getStatus() != 1) {
+                errorDatalist.add(item);
+            }
+        }
+
+        dataList.removeAll(errorDatalist);
+
+        StopWatch stopWatch = new StopWatch("BatchInsert");
+        stopWatch.start("BatchInsert_Trace1");
+
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);) {
+            //不能用spring 注入的mapper,必须从session 里取，否则是一条一条插入
+            ProductTestMapper mapper = sqlSession.getMapper(ProductTestMapper.class);
+            //调用的是myabtis-plus的insert .可以自己写xml 的mapper insert 方法
+            dataList.forEach(mapper::insert);
+//        sqlSession.clearCache();
+            sqlSession.commit();
+        }
+//        catch (Exception ex)
+//        {
+//            throw ex;
+//        }
+
+        stopWatch.stop();
+//        stopWatch.start("BatchInsert_Trace2");
+        long miils = stopWatch.getTotalTimeMillis();
+        log.info(stopWatch.shortSummary());
+
+        return 0;
     }
 
     private List<ProductTest> getPageData(DemoProductRequest request) {
