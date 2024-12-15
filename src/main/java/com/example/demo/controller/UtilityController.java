@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import brave.internal.Platform;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
@@ -18,6 +19,7 @@ import com.example.demo.listener.UserRegisterService;
 import com.example.demo.model.dto.JacksonDto;
 import com.example.demo.model.elasticsearch.ShipOrderInfo;
 import com.example.demo.model.entity.demo.DemoProduct;
+import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.entity.rabc.Users;
@@ -29,6 +31,7 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
+import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.mqtt.MqttProduce;
 import com.example.demo.rocketmq.RocketmqTest;
 import com.example.demo.service.RetryService;
@@ -40,6 +43,7 @@ import com.example.demo.sse.ISseEmitterService;
 import com.example.demo.utility.RSAUtil;
 import com.example.demo.utility.RepeatPermission;
 //import com.example.demo.utility.ApplicationContextAwareImpl;
+import com.example.demo.utility.TraceIdCreater;
 import com.example.fanckyspringbootstarter.service.ToolService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,10 +59,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.slf4j.MDC;
+import org.slf4j.spi.MDCAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.cloud.sleuth.TraceContext;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
@@ -89,6 +98,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /*
@@ -122,7 +132,7 @@ global session作用域类似于标准的HTTP Session作用域，不过它仅仅
 @Slf4j
 @RestController
 @RequestMapping("/utility")
-//@Scope("prototype")
+//@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class UtilityController {
 
 
@@ -682,6 +692,8 @@ public class UtilityController {
     //region 事务传播
 
     /**
+     * 事务隔离：全局搜索事务隔离  OrderManagerService
+     *
      * @Transactional： Propagation propagation() default Propagation.REQUIRED;
      * <p>
      * Isolation isolation() default Isolation.DEFAULT;
@@ -987,7 +999,7 @@ public class UtilityController {
     @ApiOperation(value = "importExcelProductTest")
     @PostMapping(value = "/importExcelProductTest")
     public void importExcelProductTest(MultipartFile file) throws IOException {
-        this.productTestService.importExcelProductTest(httpServletResponse,file);
+        this.productTestService.importExcelProductTest(httpServletResponse, file);
 //        List<ProductTest> list = new ArrayList<ProductTest>();
 //        EasyExcel.read(file.getInputStream(), ProductTest.class, new ReadListener<ProductTest>() {
 //
@@ -1038,7 +1050,7 @@ public class UtilityController {
 
         List<GXDetailListVO> list = new ArrayList<GXDetailListVO>();
         //保存到数据库的阈值
-        final int SAVE_DB_SIZE=5000;
+        final int SAVE_DB_SIZE = 5000;
         EasyExcel.read(file.getInputStream(), GXDetailListVO.class, new ReadListener<GXDetailListVO>() {
 
                     /**
@@ -1050,8 +1062,7 @@ public class UtilityController {
                     public void invoke(GXDetailListVO o, AnalysisContext analysisContext) {
                         int m = 0;
                         list.add(o);
-                        if(SAVE_DB_SIZE==list.size())
-                        {
+                        if (SAVE_DB_SIZE == list.size()) {
                             //保存到数据库
                             //save()
 //                            list.clear();
@@ -1361,9 +1372,9 @@ public class UtilityController {
     }
 
     @GetMapping("/mybatisPlusTest")
-    public String mybatisPlusTest(DemoProductRequest request) throws InterruptedException {
+    public MessageResult<String> mybatisPlusTest(DemoProductRequest request) throws InterruptedException {
         productTestService.mybatisPlusTest();
-        return "completed";
+        return MessageResult.success();
 
     }
 
@@ -1814,6 +1825,64 @@ public class UtilityController {
     public void assertTest(String text) {
         //不存在就扔异常，简化if 判断
         Assert.hasText(text, "text is empty");
+    }
+
+    @PostMapping(value = "/hashMapParam")
+    public MessageResult<Void> hashMapParam(@RequestBody TestRequest request) {
+        //不存在就扔异常，简化if 判断
+        HashMap<String, String> map = request.getHashMap();
+        return MessageResult.success();
+    }
+
+    /***
+     * sleuthTraceId 链路参见spring-cloud-nacos module serviceproviderone
+     * MDC TraceIdFilter
+     *  sleuth 会把traceId 写入MDC ,可通过MDC获取traceId: MDC.get("traceId"),
+     *
+     * sleuth 实现了traceId spanId,nacos 、consumer、provider 内部的
+     * 每个服务 traceId 一样 。服务间spanId 不一样。
+     *
+     * Trace ID是调用链的全局唯一标识符.每个服务一个spanId
+     * 发生熔断之后，调用方不会收到服务方的返回消息
+     *
+     *
+     *sleuth 不会在xxl-job中生成traceId 和spanId
+     *
+     * @param httpServletRequest
+     * @return
+     */
+    @GetMapping("/sleuthTraceId")
+    public MessageResult<Void> sleuthTraceId(HttpServletRequest httpServletRequest, TestRequest request) {
+        // MDC TraceIdFilter
+        //  sleuth 会把traceId 写入MDC ,可通过MDC获取traceId: MDC.get("traceId"),
+        TraceContext traceContext = (TraceContext) httpServletRequest.getAttribute(TraceContext.class.getName());
+        String traceId = traceContext.traceId();
+        String spanId = traceContext.spanId();
+        log.info("1链路跟踪测试{}", traceId);
+//        MqMessage mqMessage = new MqMessage
+//                (RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME,
+//                        RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY,
+//                        RabbitMQConfig.BATCH_DIRECT_QUEUE_NAME,
+//                        traceId);
+//        directExchangeProducer.produceNotConvertSent(mqMessage);
+        String mdcTraceId = MDC.get("traceId");
+        log.info("2链路跟踪测试{}", traceId);
+//        return MessageResult.success();
+
+
+        MDCAdapter mdc = MDC.getMDCAdapter();
+//        Map<String, String> map=((LogbackMDCAdapter)mdc).getPropertyMap();
+//        String traceId=map.get("traceId");
+
+        String t = TraceIdCreater.getTraceId();
+
+        ThreadLocalRandom tr = ThreadLocalRandom.current();
+        long nextLong = tr.nextLong();
+
+        String ttt = TraceIdCreater.toLowerHex(nextLong);
+        return MessageResult.success();
+
+
     }
 
 }

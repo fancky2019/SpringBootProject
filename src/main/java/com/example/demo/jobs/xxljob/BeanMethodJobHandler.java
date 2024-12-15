@@ -12,6 +12,14 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * 将@XxlJob里的注解填入后台的JobHandler*
+ *
+ * http://localhost:8182/xxl-job-admin/toLogin
+ * admin,123456
+ * 建议采用方法注册:方法上加注解的方式 @XxlJob("beanMethodJobHandler")
+ *
+ *1、添加执行器
+ * 2、添加任务
+ *
  */
 @Slf4j
 @Component

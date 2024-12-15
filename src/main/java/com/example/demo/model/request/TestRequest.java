@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 import java.util.List;
 
 @Data
@@ -20,7 +21,8 @@ public class TestRequest {
     private String password;
     @NotNull(message = "年龄不能为空")
     private Integer age;
-
+    private List<String> jobList;
+    private HashMap<String,String> hashMap;
 //    @NotNull(message ="共保生效时间不能为空")
 //    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

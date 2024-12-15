@@ -239,7 +239,7 @@ spring:
 
 
   rabbitmq:
-    ##集群配置 ip:port,ip:port 。多个配置之间用逗号隔开
+    ##HA镜像集群。集群配置 ip:port,ip:port 。多个配置之间用逗号隔开
     # addresses: 127.0.0.1:5673,127.0.0.1:5674,127.0.0.1:5675 #指定client连接到的server的地址，多个以逗号分隔(优先取addresses，然后再取host)
 
     host: 127.0.0.1
@@ -328,6 +328,8 @@ spring:
     consumer:
       group-id: springbootKafkaConsumer
       enable-auto-commit: false
+#      Latest （默认）
+      auto-offset-reset: earliest
       # 禁用自动提交下面也注释。springboot会自动管理提交
       # auto-commit-interval: 1000
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer

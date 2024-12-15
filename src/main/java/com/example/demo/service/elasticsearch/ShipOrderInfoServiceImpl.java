@@ -74,6 +74,13 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
         return indexOperations.delete();
     }
 
+    /**
+     * es 添加索引之后默认1s 之后可以查询到。
+     * 1、刷新索引 curl -X POST "localhost:9200/your_index/_refresh"，
+     * 2、设置刷新间隔index.refresh_interval
+     * 、wait_for_refresh=true
+     * @throws Exception
+     */
     @Override
     public void addBatch() throws Exception {
         String[] names = {"上海市", "徐汇区", "漕河泾", "闵行区", "中国", "鞋子", "帽子", "太阳", "月亮",
@@ -218,6 +225,12 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
 //            }
 //        }
 //        objectPool.clear();
+
+
+        // 获取索引操作对象
+        IndexOperations indexOperations = elasticsearchRestTemplate.indexOps(ShipOrderInfo.class);
+        // 刷新索引
+        indexOperations.refresh();
     }
 
 

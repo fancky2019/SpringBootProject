@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
  * <p>
  * <p>
  * 事务执行成功之后，启动一个线程异步执行发送到mq,这样避免等待一个cron 周期
- * volatile cnsumerCount=0;
+ * volatile consumerCount=0;
  * concurrentHashMap<uuid,list> mapMsgs;
  * sysc send(concurrentHashMap msgs)
  * msgList中包含 msgs 的信息如果msgs中的状态为已发送,就从msgs中移除。

@@ -64,6 +64,7 @@ import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -105,7 +106,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        this.baseMapper.deleteBatchIds();
 //        this.saveEntity();
 //        saveOrUpdateBatch();
-        updateBatchTest();
+//        updateBatchTest();
 //        queryById();
 //        queryTest();
 //        updateTest();
@@ -114,7 +115,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        truncateTest();
 //        deleteTableDataTest();
 //        selectMaxId();
-
+        updateField();
         /*
         mybatis  缓存默认 一级缓存 sqlSession 级别 ，二级缓存 mapper 级别
         spring mybatis 缓存需要在事务内开启，否则无效。
@@ -501,13 +502,22 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      * 更新表的指定字段
      */
     private void updateField() {
-        UpdateWrapper<ProductTest> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("ID", 0);//条件
-        updateWrapper.set("SESSION_KEY", "abc");//要更新的列
-        //  实体要指定null ，不然默认更新非空字段
-        baseMapper.update(null, updateWrapper);
 
 
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(ProductTest::getProductStyle, "getProductStyle111");
+        updateWrapper3.eq(ProductTest::getId, 1);
+
+        //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        boolean re3 = this.update(updateWrapper3);
+
+//        UpdateWrapper<ProductTest> updateWrapper = new UpdateWrapper<>();
+//        updateWrapper.eq("ID", 1);//条件
+//        updateWrapper.set("product_Name", "abc");//要更新的列
+//        //  实体要指定null ，不然默认更新非空字段
+//        int ref = baseMapper.update(null, updateWrapper);
+
+        int m = 0;
         //根据条件删除
 //        QueryWrapper<User> wrapper = new QueryWrapper<>();
 //        wrapper.eq("user","zyh3"); //通过wrapper设置条件
@@ -824,9 +834,22 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
                         }
 
                         if (SAVE_DB_SIZE == dataList.size()) {
+                            //可以设置多线程插入优化
                             //保存到数据库
                             batchInsertSession(dataList, errorDatalist);
                             dataList.clear();
+
+                            CompletableFuture<Integer> completableFuture = CompletableFuture.supplyAsync(() ->
+                            {
+                                try {
+                                    Thread.sleep(10 * 1000);
+
+                                    return 1;
+                                } catch (Exception ex) {
+                                    return 0;
+                                }
+
+                            });
                         }
 
 
@@ -854,6 +877,8 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
             //保存到数据库
             batchInsertSession(dataList, errorDatalist);
         }
+
+//        CompletableFuture<Void> allFutures = CompletableFuture.allOf(future1, future2, future3);
         String fileName = "DemoProduct_error" + System.currentTimeMillis();
         prepareResponds(fileName, response);
 

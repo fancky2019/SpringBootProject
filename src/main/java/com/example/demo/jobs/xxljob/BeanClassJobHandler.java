@@ -13,6 +13,8 @@ import java.time.format.DateTimeFormatter;
 /**
 此种要到 XxlJobConfig
 注册： XxlJobSpringExecutor.registJobHandler("beanClassJobHandler", new BeanClassJobHandler());
+
+ http://localhost:8182/xxl-job-admin/toLogin
 admin,123456
 建议采用方法注册
 

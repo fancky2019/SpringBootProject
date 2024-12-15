@@ -1,9 +1,11 @@
 package com.example.demo.filters;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.cloud.sleuth.TraceContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
@@ -14,6 +16,7 @@ import java.util.UUID;
 /**
  * 通过url 访问添加traceId
  */
+@Slf4j
 @Configuration
 @Order(1)
 public class TraceIdFilter implements Filter {
@@ -27,11 +30,22 @@ public class TraceIdFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        String traceId = UUID.randomUUID().toString().replace("-", "");
-     //   TRACEID.set(traceId);
-        //MDC 线程安全，各个线程的traceId安全
-        MDC.put("traceId", traceId);
-        traceId = MDC.get("traceId");
+//        String traceId = UUID.randomUUID().toString().replace("-", "");
+//     //   TRACEID.set(traceId);
+//        //MDC 线程安全，各个线程的traceId安全
+//        MDC.put("traceId", traceId);
+//        traceId = MDC.get("traceId");
+
+
+//       //  sleuth 会把traceId 写入MDC ,可通过MDC获取traceId: MDC.get("traceId"),
+//        TraceContext traceContext = (TraceContext) servletRequest.getAttribute(TraceContext.class.getName());
+//        String traceId =  traceContext.traceId();
+//        log.info("1链路跟踪测试{}",traceId);
+
+
+
+
+
         filterChain.doFilter(servletRequest, servletResponse);
 
 

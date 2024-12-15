@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * clone 官网项目  启动admin 项目 ，注意配置mysql
  * 增删改查 JobInfoController
- * 登录再 admin,123456
+ * http://localhost:8182/xxl-job-admin/toLogin 登录再 admin,123456
  *
  *
  * 调度中心（xxl-job-admin）与执行器 xxl-job-executor

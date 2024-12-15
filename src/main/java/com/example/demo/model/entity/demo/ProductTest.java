@@ -61,7 +61,7 @@ public class ProductTest implements Serializable {
 //    @ColumnWidth(25)
     @ExcelIgnore
     @TableId(value = "id", type = IdType.AUTO)
-    //雪花id js number 精度丢失要转成string
+    //雪花id js number 精度丢失要转成string.前段js long 精度丢失
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private BigInteger id;
 

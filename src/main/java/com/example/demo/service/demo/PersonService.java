@@ -167,6 +167,7 @@ public class PersonService implements IPersonService {
 //            personService.insertUnCommit(person);
 //            personService.insertUnCommit(person);
 //            //可以查询到事务插入的事务（尽管传播是REQUIRES_NEW 和default）
+        //可以查到事务内插入的数据
 //            List<Person> p = personMapper.selectByName(name);
 //            int n = 0;
 //            int m = Integer.parseInt("m");
@@ -182,10 +183,10 @@ public class PersonService implements IPersonService {
         this.insertUnCommit(person);
         List<Person> p = personMapper.selectByName(name);
 
-        //查询其他事务方法插入的：可以查询到
+        //可以查询事务内其他方法插入的：可以查询到
         List<Person> list = personMapper.selectByName("fancky8888");
 
-        //查询其他事务方法修改的：可以查询到其他事务修改的数据
+        //可以查询事务内其他方法修改的：可以查询到其他事务修改的数据
         Person person77 = personMapper.selectByPrimaryKey(77L);
         int n = 0;
         int m = Integer.parseInt("m");
