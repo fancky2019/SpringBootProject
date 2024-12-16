@@ -3,9 +3,7 @@ package com.example.demo.model.entity.demo;
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -25,9 +23,9 @@ import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * <p>
  *
- * </p>
+ *
+ *
  *
  * @author author
  * @since 2022-11-17
@@ -39,7 +37,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 //设置chain=true，生成setter方法返回this（也就是返回的是对象），代替了默认的返回void。
 //@Accessors(chain = true)
 @TableName("demo_product")
-public class ProductTest implements Serializable {
+public class ProductTest extends EntityBase implements Serializable {
     /*
     @ExcelProperty
     @ColumnWith 列宽
@@ -56,14 +54,14 @@ public class ProductTest implements Serializable {
 
      */
 //    @ExcelIgnore
-    private static final long serialVersionUID = 1L;
-    @ExcelProperty(value = "id")
-//    @ColumnWidth(25)
-    @ExcelIgnore
-    @TableId(value = "id", type = IdType.AUTO)
-    //雪花id js number 精度丢失要转成string.前段js long 精度丢失
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private BigInteger id;
+//    private static final long serialVersionUID = 1L;
+//    @ExcelProperty(value = "id")
+////    @ColumnWidth(25)
+//    @ExcelIgnore
+//    @TableId(value = "id", type = IdType.AUTO)
+//    //雪花id js number 精度丢失要转成string.前段js long 精度丢失
+//    @JsonFormat(shape = JsonFormat.Shape.STRING)
+//    private BigInteger id;
 
     @ExcelProperty(value = "guid")
     private String guid;
@@ -77,15 +75,17 @@ public class ProductTest implements Serializable {
     @ExcelProperty(value = "图片路径")
     private String imagePath;
 
-    @ExcelProperty(value = "创建时间")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime createTime;
-
-    @ExcelProperty(value = "修改时间")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime modifyTime;
+//    @ExcelProperty(value = "创建时间")
+//    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+//    @TableField(fill = FieldFill.INSERT)
+//    private LocalDateTime createTime;
+//
+//    @ExcelProperty(value = "修改时间")
+//    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+//    @TableField(fill = FieldFill.INSERT_UPDATE)
+//    private LocalDateTime modifyTime;
 
 
     @DropDownSetField(sourceClass = ProductTestStatusDropDown.class)
@@ -104,5 +104,10 @@ public class ProductTest implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime timestamp;
 
-
+//    @ExcelProperty(value = "版本号")
+//    private Integer version;
+//
+//    @ExcelProperty(value = "traceId")
+//    @TableField(fill = FieldFill.INSERT_UPDATE)
+//    private String traceId;
 }

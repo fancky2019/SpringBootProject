@@ -67,6 +67,9 @@ public class MqSendUtil {
     }
 
     private void sentAsync(MqMessage mqMessage) {
+        if (mqMessage == null) {
+            return;
+        }
         CompletableFuture.runAsync(() -> {
             //主线程无法捕捉子线程抛出的异常，除非设置捕捉 Thread.setDefaultUncaughtExceptionHandler
             try {
