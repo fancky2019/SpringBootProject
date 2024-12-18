@@ -977,12 +977,13 @@ public class UtilityController {
     }
 
     /**
-     *
+     *easyexcel 分页导出
      *
      */
     @ApiOperation(value = "exportByPage")
     @PostMapping(value = "/exportByPage")
-    public void exportByPage(@RequestBody DemoProductRequest request) throws IOException {
+    public void exportByPage(@RequestBody DemoProductRequest request) throws IOException, NoSuchFieldException, IllegalAccessException {
+        
         this.productTestService.exportByPage(httpServletResponse, request);
     }
 

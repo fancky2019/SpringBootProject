@@ -65,11 +65,12 @@ public class ProductTest extends EntityBase implements Serializable {
 
     @ExcelProperty(value = "guid")
     private String guid;
-
-    @ExcelProperty(value = "产品名称")
+    @ExcelProperty({"${productName}"})
+//    @ExcelProperty(value = "产品名称")
     private String productName;
 
-    @ExcelProperty(value = "产品型号")
+    @ExcelProperty({"${productStyle}"})
+//    @ExcelProperty(value = "产品型号")
     private String productStyle;
 
     @ExcelProperty(value = "图片路径")

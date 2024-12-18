@@ -4,6 +4,7 @@ import com.example.demo.model.pojo.Page;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 @Data
 public class DemoProductRequest extends Page {
@@ -22,4 +23,7 @@ public class DemoProductRequest extends Page {
     //searchAfter 排序字段值，前段要传过来
     private Integer searchAfterId;
     private Integer searchAfterCreateTime;
+
+
+
 }

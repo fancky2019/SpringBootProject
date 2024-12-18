@@ -11,31 +11,25 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.core.toolkit.support.SerializedLambda;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.demo.dao.demo.DemoProductMapper;
 import com.example.demo.dao.demo.ProductTestMapper;
 import com.example.demo.easyexcel.DropDownSetField;
 import com.example.demo.easyexcel.ExcelStyleConfig;
 import com.example.demo.easyexcel.GXDetailListVO;
 import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
 import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
-import com.example.demo.model.entity.demo.DemoProduct;
-import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
+import com.example.demo.model.pojo.Student;
 import com.example.demo.model.request.DemoProductRequest;
-import com.example.demo.model.viewModel.MessageResult;
-import com.example.demo.model.vo.DownloadData;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.service.wms.ProductService;
 import com.example.demo.utility.ConfigConst;
+import com.example.demo.utility.ExcelUtils;
 import com.example.demo.utility.MqSendUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +41,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -98,7 +91,6 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 
     @Autowired
     private MqSendUtil mqSendUtil;
-
 
 
     public ProductTestServiceImpl(ProductTestMapper productTestMapper) {
@@ -509,8 +501,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
     @Transactional(rollbackFor = Exception.class)
     public void updateEntity() {
-        String longStr="TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
-               + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+        String longStr = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
                 + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
                 + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
                 + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
@@ -567,7 +558,8 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
                 + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
                 + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
                 + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
-        + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT";
+                + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+                + "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT";
         ProductTest productTest = this.getById(2);
         LambdaUpdateWrapper<ProductTest> updateWrapper2 = new LambdaUpdateWrapper<>();
         //设置空
@@ -580,14 +572,14 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 //        boolean re1 = this.update(productTest, updateWrapper2);
 
 
-
         productTest.setProductStyle(longStr);
-        List list=new ArrayList();
+        List list = new ArrayList();
         list.add(productTest);
         this.updateBatchById(list);
         mqSendUtil.send(null);
         int m = 0;
     }
+
     /**
      * 更新表的指定字段
      */
@@ -706,7 +698,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      *
      * 250 W不到3分钟
      */
-    public void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException {
+    public void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException, NoSuchFieldException, IllegalAccessException {
 
         String fileName = "DemoProduct_" + System.currentTimeMillis();
         prepareResponds(fileName, response);
@@ -760,13 +752,36 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         //多个sheet页写入
         ExcelWriterBuilder builder = new ExcelWriterBuilder();
         builder.autoCloseStream(true);
+        //实体的表头
+//        builder.head(ProductTest.class);
 //        builder.head()
-        builder.head(ProductTest.class);
-        if (CollectionUtils.isNotEmpty(request.getExportFieldList())) {
-            builder.includeColumnFieldNames(request.getExportFieldList());
-            //        builder.excludeColumnFieldNames()
-        }
 
+//        //动态列
+//        if (CollectionUtils.isNotEmpty(request.getExportFieldList())) {
+//            builder.includeColumnFieldNames(request.getExportFieldList());
+//            //        builder.excludeColumnFieldNames()
+//        }
+
+        //动态列和列名
+        LinkedList<String> includeColumnFieldList = new LinkedList();
+        LinkedList<List<String>> includeColumnPropertyList = new LinkedList();
+        if (request.getFieldMap() != null && request.getFieldMap().size() > 0) {
+            for (String key : request.getFieldMap().keySet()) {
+                includeColumnFieldList.add(key);
+                List<String> list = new ArrayList<>();
+                list.add(request.getFieldMap().get(key));
+                includeColumnPropertyList.add(list);
+
+            }
+            builder.includeColumnFieldNames(includeColumnFieldList);
+            //序号和实体对象导出的序号不同
+//            builder.head(includeColumnPropertyList);
+            builder.head(ExcelUtils.getClassNew(new ProductTest(), request.getFieldMap()));
+
+        }
+        else {
+            builder.head(ProductTest.class);
+        }
 
 //        builder.registerWriteHandler(new ExcelStyleConfig(Lists.newArrayList(7), null, null));
 ////        if (flag == 0 || flag == 2) {
@@ -776,8 +791,11 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 ////            builder.registerWriteHandler(new ExcelStyleConfig(null,null,null));
 ////            builder.head(GXDetailListLogVO.class);
 ////        }
+
+        ArrayList<String> includeColumnFieldNames = new ArrayList<>();
         //下拉框
         builder.registerWriteHandler(new DropDownCellWriteHandler(map));
+//        builder.includeColumnFieldNames(includeColumnFieldNames)
         builder.file(outputStream);
 
         //不能重命名，重命名就没有XLSX格式后缀
@@ -813,7 +831,6 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
             //采用最大ID，可0.5s查询到结果
             List<ProductTest> list = this.productTestMapper.getPageDataOptimization(request);
             int total = i * stepCount;
-
             writer.write(list, sheet);
             if (total % sheetSize == 0) {
                 sheetIndex += 1;

@@ -78,7 +78,7 @@
         <logger name="org.apache" level="INFO"/>
         <logger name="io.netty.channel.nio" level="INFO"/>
         <logger name="org.camunda.bpm.engine" level="INFO"/>
-        <logger name="springfox.documentation" level="INFO"/>
+        <logger name="springfox" level="INFO"/>
 
         <!--        异步-->
         <AsyncRoot level="all">
