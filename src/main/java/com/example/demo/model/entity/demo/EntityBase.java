@@ -46,6 +46,9 @@ public class EntityBase {
     @ExcelProperty(value = "版本号")
     private Integer version;
 
+    @ExcelProperty(value = "删除")
+    private boolean deleted;
+
     @ExcelProperty(value = "traceId")
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private String traceId;

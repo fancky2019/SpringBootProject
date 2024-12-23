@@ -106,7 +106,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        this.saveEntity();
 //        saveOrUpdateBatch();
 //        updateBatchTest();
-//        queryById();
+        queryById();
 //        queryTest();
 //        updateTest();
 //        page();
@@ -115,7 +115,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        deleteTableDataTest();
 //        selectMaxId();
 //        updateField();
-        updateEntity();
+//        updateEntity();
         /*
         mybatis  缓存默认 一级缓存 sqlSession 级别 ，二级缓存 mapper 级别
         spring mybatis 缓存需要在事务内开启，否则无效。
