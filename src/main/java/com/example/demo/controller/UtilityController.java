@@ -54,6 +54,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -79,6 +80,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -983,7 +986,7 @@ public class UtilityController {
     @ApiOperation(value = "exportByPage")
     @PostMapping(value = "/exportByPage")
     public void exportByPage(@RequestBody DemoProductRequest request) throws IOException, NoSuchFieldException, IllegalAccessException {
-        
+
         this.productTestService.exportByPage(httpServletResponse, request);
     }
 
@@ -1884,6 +1887,70 @@ public class UtilityController {
         return MessageResult.success();
 
 
+    }
+
+    /**
+     * 默认情况下，Spring MVC中的Controller方法是同步执行的。如果要进行异步处理，可以使用@Async注解或者通过自定义的TaskExecutor。
+     *异步请求：在service 方法内部使用线程池，或在service方法上加@Async（要配置线程池 ：ThreadPoolExecutorConfig和配置类上添加@EnableAsync来启用异步支持）
+     *
+     *
+     * 如果客户端发起 HTTP 请求，并在服务器处理过程中连接断开，Spring Boot 默认会继续执行该请求的逻辑。
+     *
+     * 普通 HTTP 请求通常会继续执行，即使客户端断开连接。
+     * 异步任务或定时任务与客户端状态无关，仍会继续运行。
+     * 在需要中止任务的场景中，建议通过客户端连接状态检测、中断标志位或 Future 的取消机制进行控制。
+     * @return
+     * @throws InterruptedException
+     */
+
+    @GetMapping(value = "/clientDisconnect")
+    public MessageResult<Void> clientDisconnect() throws InterruptedException {
+
+
+        boolean isAsyncStarted = this.httpServletRequest.isAsyncStarted();
+        if (isAsyncStarted) {
+            httpServletRequest.getAsyncContext().addListener(new AsyncListener() {
+                @Override
+                public void onTimeout(AsyncEvent event) throws IOException {
+                    // 处理超时
+                    log.info("onTimeout");
+                }
+
+                @Override
+                public void onStartAsync(AsyncEvent event) throws IOException {
+                    // 处理开始
+                    log.info("onStartAsync");
+                }
+
+                @Override
+                public void onError(AsyncEvent event) throws IOException {
+                    // 处理错误
+                    log.info("onStartAsync");
+                }
+
+                @Override
+                public void onComplete(AsyncEvent event) throws IOException {
+                    log.info("onComplete");
+                    // 请求处理完成，可以在这里检查是否是因为客户端断开连接而完成的
+                    Throwable throwable = event.getThrowable();
+                    if (throwable instanceof ClientAbortException) {
+                        // 客户端断开连接
+//                    deferredResult.setResult("Client aborted connection");
+                        log.info("ClientAbortException");
+                    }
+                }
+            });
+        }
+        // 注册一个请求监听器，用于处理请求结束事件
+
+
+//    连接状态  false:  HttpServletRequest 对象中的 isAsyncStarted()
+        boolean started = this.httpServletRequest.isAsyncStarted();
+        //模拟耗时任务
+        Thread.sleep(60 * 1000);
+        boolean started1 = this.httpServletRequest.isAsyncStarted();
+        int n = 0;
+        return MessageResult.success();
     }
 
 }
