@@ -1667,7 +1667,7 @@ public class UtilityController {
     }
 
     /**
-     * 实物同步
+     * 事务同步  更新覆盖 、事务传播 版本号
      * @param i
      * @throws InterruptedException
      */
@@ -1678,7 +1678,7 @@ public class UtilityController {
     }
 
     /**
-     * 实物同步
+     * 事务同步 更新覆盖 、事务传播 版本号
      * @param i
      * @throws InterruptedException
      */
@@ -1688,13 +1688,53 @@ public class UtilityController {
     }
 
     /**
-     * 实物同步
+     * 事务同步 更新覆盖 、事务传播 版本号
      * @param executeException
      * @throws InterruptedException
      */
     @GetMapping(value = "/transactionTemplateTest")
     public void transactionTemplateTest(boolean executeException) throws InterruptedException {
         personService.transactionTemplateTest(executeException);
+    }
+
+    /**
+     * 更新覆盖：两个事务对数据库写，要加悲观锁（redisson，for update 容易死锁）使得事务串化。更新的时候加上版本号条件
+     * 如果返回受影响行为0，更新失败。抛异常，否则继续执行。
+     *
+     * add、delete、update 、lock in share mode 当前读加锁
+     * 在多事务同时修改同一条记录的情况下，MySQL 会自动对涉及的数据行加上写锁（排他锁）。for update
+     * @return
+     */
+    @GetMapping(value = "/coverUpdateTestOne")
+    public MessageResult<Void> coverUpdateTestOne(String productName) {
+        MessageResult<Void> message = new MessageResult<>();
+        try {
+            productTestService.coverUpdateTestOne(productName);
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        }
+        return message;
+    }
+
+    /**
+     * 更新覆盖：两个事务对数据库写，要加悲观锁（redisson，for update 容易死锁）使得事务串化。更新的时候加上版本号条件
+     * 如果返回受影响行为0，更新失败。抛异常，否则继续执行。
+     *
+     * add、delete、update 、lock in share mode 当前读加锁
+     * 在多事务同时修改同一条记录的情况下，MySQL 会自动对涉及的数据行加上写锁（排他锁）。for update
+     * @return
+     */
+    @GetMapping(value = "/coverUpdateTestTwo")
+    public MessageResult<Void> coverUpdateTestTwo(String productName) {
+        MessageResult<Void> message = new MessageResult<>();
+        try {
+            productTestService.coverUpdateTestTwo(productName);
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        }
+        return message;
     }
 
 

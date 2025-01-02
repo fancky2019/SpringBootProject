@@ -25,7 +25,14 @@ public interface IProductTestService extends IService<ProductTest> {
     String getStringKey(int id) throws Exception;
 
     void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException, NoSuchFieldException, IllegalAccessException;
+
     void exportDemoProductTemplate(HttpServletResponse response) throws IOException;
-     void importExcelProductTest(HttpServletResponse response,MultipartFile file) throws IOException ;
+
+    void importExcelProductTest(HttpServletResponse response, MultipartFile file) throws IOException;
+
     void updateBatchByIdTest();
+
+    void coverUpdateTestOne(String name) throws InterruptedException;
+
+    void coverUpdateTestTwo(String name);
 }

@@ -10,11 +10,11 @@
         from demo_product
     </select>
 
-    <select id="getById" parameterType="java.math.BigInteger" resultType="com.example.demo.model.entity.demo.ProductTest">
-        select *
-        from demo_product
-        where id = #{id,jdbcType=BIGINT}
-    </select>
+<!--    <select id="getById" parameterType="java.math.BigInteger" resultType="com.example.demo.model.entity.demo.ProductTest">-->
+<!--        select *-->
+<!--        from demo_product-->
+<!--        where id = #{id,jdbcType=BIGINT}-->
+<!--    </select>-->
 
     <select id="getByIds" parameterType="java.lang.Integer" resultType="com.example.demo.model.entity.demo.ProductTest">
         select *
@@ -46,5 +46,40 @@
         and id >#{maxId,jdbcType=INTEGER}
         limit #{pageSize,jdbcType=INTEGER}
     </select>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.model.entity.demo.ProductTest">
+        update demo_product
+        <set>
+            <if test="guid != null">
+                guid = #{guid,jdbcType=VARCHAR},
+            </if>
+            <if test="productName != null">
+                product_name = #{productName,jdbcType=VARCHAR},
+            </if>
+            <if test="productStyle != null">
+                product_style = #{productStyle,jdbcType=VARCHAR},
+            </if>
+            <if test="imagePath != null">
+                image_path = #{imagePath,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                `status` = #{status,jdbcType=TINYINT},
+            </if>
+            <if test="description != null">
+                description = #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="timestamp != null">
+                `timestamp` = #{timestamp,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+            and version= #{version,jdbcType=INTEGER}
+    </update>
 
 </mapper>

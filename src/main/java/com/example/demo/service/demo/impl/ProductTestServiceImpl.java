@@ -25,6 +25,7 @@ import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.Student;
 import com.example.demo.model.request.DemoProductRequest;
+import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.service.wms.ProductService;
 import com.example.demo.utility.ConfigConst;
@@ -46,6 +47,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -382,6 +384,10 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
     private void updateTest() {
         //条件更新
+//        因为mybatis返回的默认是匹配的行数，而不是受影响的行数，如何设置返回的是受影响的行数，useAffectedRows=true
+        //mysql 连接字段穿添加  &useAffectedRows=true 返回0 ，不加返回1。
+        //for循环多个update 语句以分号结束，update 执行会返回1.因为执行update id 就一条
+        //批量更新还是要加锁，避免并发访问
 
         /*
          * UPDATE demo_product  SET product_name='update'
@@ -455,8 +461,62 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
     }
 
+    /**
+     * 在多事务同时修改同一条记录的情况下，MySQL 会自动对涉及的数据行加上写锁（排他锁）。
+     * @param productName
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void coverUpdateTestOne(String productName) throws InterruptedException {
+        coverUpdateTest(productName);
+        Thread.sleep(30 * 1000);
+    }
+
+    /**
+     * 在多事务同时修改同一条记录的情况下，MySQL 会自动对涉及的数据行加上写锁（排他锁）。for update
+     * @param productName
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void coverUpdateTestTwo(String productName) {
+        //coverUpdateTest 里等到coverUpdateTestOne 执行完才执行 update 方法
+        // 在多事务同时修改同一条记录的情况下，MySQL 会自动对涉及的数据行加上写锁（排他锁）。for update
+        coverUpdateTest(productName);
+    }
+
+    /**
+     * 在多事务同时修改同一条记录的情况下，MySQL 会自动对涉及的数据行加上写锁（排他锁）。for update
+     * @param productName
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void coverUpdateTest(String productName) {
+
+        //因为mybatis返回的默认是匹配的行数，而不是受影响的行数，如何设置返回的是受影响的行数，useAffectedRows=true
+        //mysql 连接字段穿添加  &useAffectedRows=true 返回0 ，不加返回1。
+        //for循环多个update 语句以分号结束，update 执行会返回1.因为执行update id 就一条
+        //批量更新还是要加锁，避免并发访问
 
 
+        ProductTest productTest3 = this.getById(new BigInteger("3"));
+        Integer version = productTest3.getVersion();
+        int oldVersion = version;
+//        productTest3.setVersion(++version);
+        //修改了实体的值，如果指定实体更新，会在update 语句内。
+        productTest3.setProductName(productName);
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(StringUtils.isNotEmpty(productTest3.getProductName()), ProductTest::getProductName, productTest3.getProductName());
+        updateWrapper3.set(ProductTest::getVersion, productTest3.getVersion());
+        updateWrapper3.eq(ProductTest::getId, productTest3.getId());
+        updateWrapper3.eq(ProductTest::getVersion, oldVersion);
+        //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        //返回更新成功失败
+        // 在多事务同时修改同一条记录的情况下，MySQL 会自动对涉及的数据行加上写锁（排他锁）。
+        boolean re3 = this.update(updateWrapper3);
+//        在多事务同时修改同一条记录的情况下，MySQL 会自动对涉及的数据行加上写锁（排他锁）。
+        //成功返回1，失败返回0
+//        int re = this.getBaseMapper().updateByPrimaryKeySelective(productTest3);
+
+
+        int n = 0;
+    }
 
 
 
@@ -643,7 +703,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
                     return null;
                 }
                 BigInteger idB = BigInteger.valueOf(id);
-                ProductTest productTest = this.baseMapper.getById(idB);
+                ProductTest productTest = this.getById(idB);
                 //穿透：设置个空值
                 if (productTest == null) {
                     valueOperations.set(key, ConfigConst.EMPTY_VALUE);
@@ -778,8 +838,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 //            builder.head(includeColumnPropertyList);
             builder.head(ExcelUtils.getClassNew(new ProductTest(), request.getFieldMap()));
 
-        }
-        else {
+        } else {
             builder.head(ProductTest.class);
         }
 

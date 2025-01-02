@@ -5,6 +5,7 @@ import com.example.demo.dao.demo.DemoProductMapper;
 import com.example.demo.dao.demo.PersonMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.Person;
+import com.example.demo.model.viewModel.MessageResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -213,7 +214,7 @@ public class PersonService implements IPersonService {
         return 0;
     }
 
-    //如果不模拟此事务传播，可设置 Propagation.REQUIRES_NEW
+    //更新覆盖 、事务传播 版本号 如果不模拟此事务传播，可设置 Propagation.REQUIRES_NEW
 //    @Transactional(rollbackFor = Exception.class)
     public void transactionalSynchronizedTest(Integer i) throws InterruptedException {
 
@@ -401,5 +402,25 @@ public class PersonService implements IPersonService {
 //        Thread.sleep(10);
 
     }
+
+
+    public MessageResult<Void> coverUpdateMethod1() {
+        MessageResult<Void> message = new MessageResult<>();
+
+        try {
+            demoProductService.insertTransactional();
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        }
+        return message;
+    }
+
+
+
+
+
+
+
 
 }

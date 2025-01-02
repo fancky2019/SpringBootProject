@@ -20,10 +20,13 @@ public interface ProductTestMapper extends BaseMapper<ProductTest> {
 
     BigInteger getMaxId();
 
-    ProductTest getById(BigInteger id);
+    //    ProductTest getById(BigInteger id);
+    int updateByPrimaryKeySelective(ProductTest productTest);
 
     List<ProductTest> getByIds(List<BigInteger> ids);
+
     List<ProductTest> getPageData(DemoProductRequest request);
+
     List<ProductTest> getPageDataOptimization(DemoProductRequest request);
 
 }
