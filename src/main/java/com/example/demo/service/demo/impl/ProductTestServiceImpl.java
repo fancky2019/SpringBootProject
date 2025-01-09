@@ -16,12 +16,14 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.demo.dao.demo.PersonMapper;
 import com.example.demo.dao.demo.ProductTestMapper;
 import com.example.demo.easyexcel.DropDownSetField;
 import com.example.demo.easyexcel.ExcelStyleConfig;
 import com.example.demo.easyexcel.GXDetailListVO;
 import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
 import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
+import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.Student;
 import com.example.demo.model.request.DemoProductRequest;
@@ -93,6 +95,9 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 
     @Autowired
     private MqSendUtil mqSendUtil;
+
+    @Autowired
+    private PersonMapper personMapper;
 
 
     public ProductTestServiceImpl(ProductTestMapper productTestMapper) {
@@ -1200,4 +1205,44 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
     }
     //endregion
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deadLockOne() throws InterruptedException {
+        Person person = personMapper.selectByPrimaryKey(1L);
+        person.setName("fancky1");
+        personMapper.updateByPrimaryKey(person);
+
+        Thread.sleep(60 * 1000);
+
+        ProductTest productTest = this.getById(1);
+        LambdaUpdateWrapper<ProductTest> updateWrapper2 = new LambdaUpdateWrapper<>();
+        productTest.setProductName("ProductName1");
+        updateWrapper2.eq(ProductTest::getId, 1);
+        //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        boolean re1 = this.update(productTest, updateWrapper2);
+    }
+
+    /**
+     * 临间锁：降级行锁（update 当前读）,两个方法修改顺序不一致。导致两个事务内互相争取资源死锁
+     * deadLockOne 先执行，成功。deadLockTwo 后执行，失败回滚。
+     * mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction",
+     * @throws InterruptedException
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deadLockTwo() throws InterruptedException {
+        ProductTest productTest = this.getById(1);
+        LambdaUpdateWrapper<ProductTest> updateWrapper2 = new LambdaUpdateWrapper<>();
+        productTest.setProductName("ProductName1");
+        updateWrapper2.eq(ProductTest::getId, 1);
+        //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        boolean re1 = this.update(productTest, updateWrapper2);
+
+        Thread.sleep(60 * 1000);
+
+        Person person = personMapper.selectByPrimaryKey(1L);
+        person.setName("fancky1");
+        personMapper.updateByPrimaryKey(person);
+
+    }
 }

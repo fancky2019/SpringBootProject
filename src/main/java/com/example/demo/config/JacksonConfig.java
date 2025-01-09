@@ -1,13 +1,10 @@
 package com.example.demo.config;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -18,13 +15,14 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 @Configuration
-public class ObjectMapperConfig {
+public class JacksonConfig {
 
     @Bean
     public ObjectMapper ObjectMapper() {
@@ -37,6 +35,24 @@ public class ObjectMapperConfig {
         javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
         javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern("HH:mm:ss")));
+
+
+//        SimpleModule module = new SimpleModule();
+        // "" 不序列化成null
+        javaTimeModule.addSerializer(String.class, new JsonSerializer<String>() {
+            @Override
+            public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+//                if (value == null || value.isEmpty()) {
+                if (value == null) {
+                    gen.writeNull(); // 序列化为 null
+                } else {
+                    gen.writeString(value); // 正常序列化
+                }
+            }
+        });
+//        objectMapper.registerModule(module);
+
+
         objectMapper.registerModule(javaTimeModule);
 //        //空处理成“”
 //        objectMapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer<Object>() {
@@ -72,8 +88,8 @@ public class ObjectMapperConfig {
 
          */
 
-        //json 序列化null值。默认序列化：  "serialNo": null,
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        //json 序列化null值。字符串“” 序列化成null, 默认序列化：  "serialNo": null,
+//        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 //
 //       //忽略未知字段 ,不然字段不匹配会报错
 //        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

@@ -704,10 +704,8 @@ public class UtilityController {
      * NESTED是为被嵌套的方法开启了一个子事务，这个事务与父类使用的是同一个连接。
      * REQUIRES_NEW是使用一个全新的事务，这个事务属于另外一条全新的连接。
      * 两者最重要的体现，就是在多数据源中，REQUIRES_NEW会再次触发一下数据源的获取，而NESTED则不会
-     * <p>
-     * <p>
-     * <p>
-     * <p>
+     *
+     *
      * REQUIRED： 没有事务就开启，有事务就加入，不指定的话默认为该类型
      * SUPPORTS： 有事务就加入，没有就无事务运行
      * MANDATORY： 加入当前事务，如果不存在则抛出异常
@@ -1991,6 +1989,30 @@ public class UtilityController {
         boolean started1 = this.httpServletRequest.isAsyncStarted();
         int n = 0;
         return MessageResult.success();
+    }
+
+    @GetMapping(value = "/deadLockOne")
+    public MessageResult<Void> deadLockOne() throws InterruptedException {
+        productTestService.deadLockOne();
+        return MessageResult.success();
+    }
+
+    /**
+     * 临间锁：降级行锁（update 当前读）,两个方法修改顺序不一致。导致两个事务内互相争取资源死锁
+     * deadLockOne 先执行，成功。deadLockTwo 后执行，失败回滚。
+     * mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException: Deadlock found when trying to get lock; try restarting transaction",
+     * @throws InterruptedException
+     */
+    @GetMapping(value = "/deadLockTwo")
+    public MessageResult<Void> deadLockTwo() throws InterruptedException {
+        productTestService.deadLockTwo();
+        return MessageResult.success();
+    }
+
+    @GetMapping(value = "/jacksonEmptyTest")
+    public MessageResult<Void> jacksonEmptyTest() throws Exception {
+       throw  new Exception("");
+//        return MessageResult.success();
     }
 
 }

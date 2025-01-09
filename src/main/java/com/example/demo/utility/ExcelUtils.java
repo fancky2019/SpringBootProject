@@ -2,10 +2,12 @@ package com.example.demo.utility;
 
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -18,11 +20,12 @@ public class ExcelUtils {
      * @param keys key为修改的字段和value为它对应表头值
      * @return
      */
-    public static <T> Class<T> getClassNew(T t, Map<String, String> keys) throws NoSuchFieldException, IllegalAccessException {
+    public static <T> Class<T> getClassNew(T t, LinkedHashMap<String, String> keys) throws NoSuchFieldException, IllegalAccessException {
         if(t == null){
             return null;
         }
         try{
+            int i=0;
             for(String key: keys.keySet()) {
                 Field value = t.getClass().getDeclaredField(key);
                 value.setAccessible(true);
@@ -32,6 +35,7 @@ public class ExcelUtils {
                 memberValues.setAccessible(true);
                 Map<String, Object> values = (Map<String, Object>) memberValues.get(invocationHandler);
                 values.put("value", new String[]{keys.get(key)});
+                values.put("index", i++);
             }
         }catch (Exception e){
            throw  e;

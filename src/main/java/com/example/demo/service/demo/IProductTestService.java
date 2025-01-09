@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.MessageResult;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,4 +36,8 @@ public interface IProductTestService extends IService<ProductTest> {
     void coverUpdateTestOne(String name) throws InterruptedException;
 
     void coverUpdateTestTwo(String name);
+
+    void deadLockOne() throws InterruptedException;
+
+    void deadLockTwo() throws InterruptedException;
 }
