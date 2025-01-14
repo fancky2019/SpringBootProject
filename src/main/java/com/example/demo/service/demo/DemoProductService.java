@@ -508,7 +508,7 @@ public class DemoProductService {
     public MessageResult<ProductTest> getById() {
         Random random = ThreadLocalRandom.current();
         //ID 要切换 ，spring 有缓存机制
-        int id = random.nextInt(99);
+        int id =77;// random.nextInt(99);
         StopWatch stopWatch = new StopWatch("");
         stopWatch.start("");
         ProductTest result = this.demoProductMapper.getById(new BigInteger(id + ""));

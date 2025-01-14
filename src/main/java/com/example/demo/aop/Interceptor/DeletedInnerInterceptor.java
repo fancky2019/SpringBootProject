@@ -50,11 +50,11 @@ public class DeletedInnerInterceptor implements InnerInterceptor {
 
             if(sql.contains( "limit") )
             {
-                sql.replace("limit","AND deleted = 0 limit");
+                sql.replace("limit","AND ( deleted = 0 or deleted is null ) limit");
             }
             else{
                 //有limit  报错
-                sql += " AND deleted = 0"; // 示例条件：只查询未删除的数据
+                sql += " AND ( deleted = 0 or deleted is null ) "; // 示例条件：只查询未删除的数据
 
             }
             // 更新 BoundSql 中的 SQL

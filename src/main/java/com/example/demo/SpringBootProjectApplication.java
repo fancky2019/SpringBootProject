@@ -156,7 +156,10 @@ ingleFactory.getObject()方法都给我产生一个新的代理对象，所以�
   bean 实例化--》初始化。
 
 
-          三个map 缓存:第三季缓存解决动态代理问题
+          三个map 缓存:第三季缓存解决动态代理问题：返回代理对象
+           判断该Bean是否需要被动态代理，两种返回结果：
+                不需要代理，返回未属性注入、未初始化的半成品Bean
+                 需要代理，返回未属性注入、未初始化的半成品Bean的代理对象
 
      1、
          Cache of singleton objects: bean name to bean instance.

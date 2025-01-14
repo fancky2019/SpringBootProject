@@ -68,7 +68,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.cloud.sleuth.TraceContext;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
@@ -206,6 +208,10 @@ public class UtilityController {
 
     @Autowired
     private ShipOrderInfoService shipOrderInfoService;
+
+    @Autowired
+    private MessageSource messageSource;
+
 
     //bean  生命周期 参见 model--pojo--BeanLife SpringLifeCycleBean
     //初始化操作：1、实现 InitializingBean 接口
@@ -2011,8 +2017,23 @@ public class UtilityController {
 
     @GetMapping(value = "/jacksonEmptyTest")
     public MessageResult<Void> jacksonEmptyTest() throws Exception {
-       throw  new Exception("");
+        throw new Exception("");
 //        return MessageResult.success();
+    }
+
+    @GetMapping(value = "/globalTest")
+    public MessageResult<String> globalTest() {
+
+//        根据code从环境中自动获取对应国际化内容
+//        String msg = messageSource.getMessage("100001", null, LocaleContextHolder.getLocale());
+
+        String msg = messageSource.getMessage("100001", new Object[]{1, 2}, LocaleContextHolder.getLocale());
+        // logTest 1 2
+        log.info("logTest {} {}", 1, 2);
+        //SL4FJ中占位符不像MessageFormat需要指定index，而是直接使用{}即可。
+        // 指定index 也不会输出参数 ：logTest1 {0} {1}
+        log.info("logTest1 {0} {1}", 1, 2);
+        return MessageResult.success(msg);
     }
 
 }
