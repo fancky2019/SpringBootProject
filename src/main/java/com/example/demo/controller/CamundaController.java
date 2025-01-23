@@ -39,6 +39,15 @@ public class CamundaController {
         this.camundaService = camundaService;
     }
 
+    /**
+     * act_re_deployment 、act_re_procdef 表会生成一条数据
+     *
+     *
+     *
+     * @param deploymentName
+     * @param bpmnFileName
+     * @return
+     */
     @GetMapping("/deploy")
     public String deploy(String deploymentName, String bpmnFileName) {
 
@@ -47,6 +56,8 @@ public class CamundaController {
     }
 
     /**
+     *
+     * act_re_procdef :启动此表数据
      *
      * @param processId process id
      * @param businessKey
@@ -83,7 +94,13 @@ public class CamundaController {
     }
 
 
-
+    /**
+     * act_ru_task 此表 id
+     * @param taskId
+     * @param approve
+     * @return
+     * @throws Exception
+     */
     @GetMapping("/completedTask")
     public String completedTask(String taskId,Boolean approve) throws Exception {
 

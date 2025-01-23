@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0k0p861" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.6.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:process id="process_id_rest_test" name="restTest" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="开始">
+      <bpmn:outgoing>Flow_0jm8shw</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_01uyzeg" name="Task1">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:inputParameter name="url">http://127.0.0.1:8081/sbp/utility/camundaRestTestOne</camunda:inputParameter>
+            <camunda:outputParameter name="response">
+                  ${response}
+            </camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0jm8shw</bpmn:incoming>
+      <bpmn:outgoing>Flow_057g7fd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateThrowEvent id="Event_1ayepw2" name="结束">
+      <bpmn:incoming>Flow_005rdux</bpmn:incoming>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:exclusiveGateway id="Gateway_1ntehw0">
+      <bpmn:incoming>Flow_016993k</bpmn:incoming>
+      <bpmn:outgoing>Flow_005rdux</bpmn:outgoing>
+      <bpmn:outgoing>Flow_09x534j</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_005rdux" sourceRef="Gateway_1ntehw0" targetRef="Event_1ayepw2">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${S(response).prop('success').boolValue()}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_152a2ww" name="rest_get_param_task2">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:inputParameter name="url">http://127.0.0.1:8081/sbp/utility/camundaRestTestTwo?name=${S(response).prop('data').prop('name').stringValue()}&amp;age=${S(response).prop('data').prop('age').numberValue()}</camunda:inputParameter>
+            <camunda:outputParameter name="response">
+                  ${response}
+            </camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_057g7fd</bpmn:incoming>
+      <bpmn:outgoing>Flow_03l9n36</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_057g7fd" sourceRef="Activity_01uyzeg" targetRef="Activity_152a2ww">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${S(response).prop('success').boolValue() == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_016993k" sourceRef="Activity_18qx3n4" targetRef="Gateway_1ntehw0" />
+    <bpmn:sequenceFlow id="Flow_03l9n36" sourceRef="Activity_152a2ww" targetRef="Activity_18qx3n4">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!S(response).prop('success').boolValue()}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0jm8shw" sourceRef="StartEvent_1" targetRef="Activity_01uyzeg" />
+    <bpmn:serviceTask id="Activity_18qx3n4" name="rest_post_param_task2">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="url">http://127.0.0.1:8081/sbp/utility/camundaRestTestThree</camunda:inputParameter>
+            <camunda:inputParameter name="payload">
+            {
+              "name": "${S(response).prop('data').prop('name').stringValue()}",
+              "age": "${S(response).prop('data').prop('age').numberValue()}"
+            }
+          </camunda:inputParameter>
+            <camunda:outputParameter name="response">
+                  ${response}
+            </camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_03l9n36</bpmn:incoming>
+      <bpmn:incoming>Flow_05y14jt</bpmn:incoming>
+      <bpmn:outgoing>Flow_016993k</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_09x534j" sourceRef="Gateway_1ntehw0" targetRef="Event_1v65f75">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!S(response).prop('success').boolValue()}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:intermediateCatchEvent id="Event_1v65f75">
+      <bpmn:incoming>Flow_09x534j</bpmn:incoming>
+      <bpmn:outgoing>Flow_05y14jt</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_03hw7x4">
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R1/PT15S</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_05y14jt" sourceRef="Event_1v65f75" targetRef="Activity_18qx3n4" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_id_rest_test">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="186" y="142" width="23" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0lpa6ch_di" bpmnElement="Activity_01uyzeg">
+        <dc:Bounds x="270" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ayepw2_di" bpmnElement="Event_1ayepw2">
+        <dc:Bounds x="892" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="899" y="142" width="22" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1ntehw0_di" bpmnElement="Gateway_1ntehw0" isMarkerVisible="true">
+        <dc:Bounds x="775" y="92" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1rvjpjb_di" bpmnElement="Activity_152a2ww">
+        <dc:Bounds x="430" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0dvd9cn_di" bpmnElement="Activity_18qx3n4">
+        <dc:Bounds x="620" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0nmiwxq_di" bpmnElement="Event_1v65f75">
+        <dc:Bounds x="782" y="172" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0jm8shw_di" bpmnElement="Flow_0jm8shw">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="270" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_057g7fd_di" bpmnElement="Flow_057g7fd">
+        <di:waypoint x="370" y="117" />
+        <di:waypoint x="430" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_005rdux_di" bpmnElement="Flow_005rdux">
+        <di:waypoint x="825" y="117" />
+        <di:waypoint x="892" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_016993k_di" bpmnElement="Flow_016993k">
+        <di:waypoint x="720" y="117" />
+        <di:waypoint x="775" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09x534j_di" bpmnElement="Flow_09x534j">
+        <di:waypoint x="800" y="142" />
+        <di:waypoint x="800" y="172" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03l9n36_di" bpmnElement="Flow_03l9n36">
+        <di:waypoint x="530" y="117" />
+        <di:waypoint x="620" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05y14jt_di" bpmnElement="Flow_05y14jt">
+        <di:waypoint x="782" y="190" />
+        <di:waypoint x="670" y="190" />
+        <di:waypoint x="670" y="157" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -39,7 +39,7 @@ execution(modifiers-pattern? ret-type-pattern declaring-type-pattern?name-patter
 modifiers-pattern：方法的可见性，如public，protected；
 ret-type-pattern：方法的返回值类型，如int，void等；
 declaring-type-pattern：方法所在类的全路径名，如com.spring.Aspect；
-name-pattern：方法名类型，如buisinessService()；
+name-pattern：方法名类型，如businessService()；
 param-pattern：方法的参数类型，如java.lang.String；
 throws-pattern：方法抛出的异常类型，如java.lang.Exception；
 

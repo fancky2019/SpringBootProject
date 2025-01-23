@@ -597,12 +597,46 @@
         </dependency>
 
 
+<!--        在  dependencyManagement 指定了camunda 版本，但是和myabtis 依赖冲突，可使用加载依赖，再注释dependencyManagement-->
         <!-- https://mvnrepository.com/artifact/org.camunda.bpm.springboot/camunda-bpm-spring-boot-starter -->
         <dependency>
             <groupId>org.camunda.bpm.springboot</groupId>
             <artifactId>camunda-bpm-spring-boot-starter</artifactId>
             <version>7.18.0</version>
         </dependency>
+
+<!--        service task http rest 服务需要次引用-->
+        <!-- https://mvnrepository.com/artifact/org.camunda.bpm/camunda-engine-plugin-connect -->
+        <dependency>
+            <groupId>org.camunda.bpm</groupId>
+            <artifactId>camunda-engine-plugin-connect</artifactId>
+            <version>7.18.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.camunda.bpm</groupId>
+            <artifactId>camunda-engine-plugin-spin</artifactId>
+            <version>7.18.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.camunda.spin</groupId>
+            <artifactId>camunda-spin-dataformat-all</artifactId>
+            <version>1.18.0</version>
+        </dependency>
+
+<!--   json:     Could not resolve function 'S'-->
+        <!-- https://mvnrepository.com/artifact/org.camunda.spin/camunda-spin-dataformat-json-jackson -->
+<!--        <dependency>-->
+<!--            <groupId>org.camunda.spin</groupId>-->
+<!--            <artifactId>camunda-spin-dataformat-json-jackson</artifactId>-->
+<!--            <version>7.22.0</version>-->
+<!--        </dependency>-->
+
+        <!--Spin和Json  Rest Http中解析； parse http response variable with camunda-spin-->
+
+
+
 
 
         <!-- https://mvnrepository.com/artifact/org.apache.rocketmq/rocketmq-spring-boot-starter -->
@@ -703,6 +737,15 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+<!--            <dependency>-->
+<!--                <groupId>org.camunda.bpm</groupId>-->
+<!--                <artifactId>camunda-bom</artifactId>-->
+<!--                <version>7.18.0</version>-->
+<!--                <scope>import</scope>-->
+<!--                <type>pom</type>-->
+<!--            </dependency>-->
+
         </dependencies>
     </dependencyManagement>
 

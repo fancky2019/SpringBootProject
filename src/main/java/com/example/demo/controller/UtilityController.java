@@ -49,6 +49,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.Lists;
+import com.thoughtworks.xstream.core.JVM;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -985,7 +986,8 @@ public class UtilityController {
 
     /**
      *easyexcel 分页导出
-     *
+     * exportByPage 批量导出
+     *importExcel 批量导出
      */
     @ApiOperation(value = "exportByPage")
     @PostMapping(value = "/exportByPage")
@@ -1052,6 +1054,13 @@ public class UtilityController {
     }
 
 
+    /**
+     * easyexcel 批量导入
+     * exportByPage 批量导出
+     *importExcel 批量导出
+     * @param file
+     * @throws IOException
+     */
     @ApiOperation(value = "importExcel")
     @PostMapping(value = "/importExcel")
     public void importExcel(MultipartFile file) throws IOException {
@@ -1071,7 +1080,7 @@ public class UtilityController {
                         int m = 0;
                         list.add(o);
                         if (SAVE_DB_SIZE == list.size()) {
-                            //保存到数据库
+                            //保存到数据库，可开启一个线程执行保存。里面进行校验，记录未能成功插入的数据
                             //save()
 //                            list.clear();
                         }
@@ -2034,6 +2043,42 @@ public class UtilityController {
         // 指定index 也不会输出参数 ：logTest1 {0} {1}
         log.info("logTest1 {0} {1}", 1, 2);
         return MessageResult.success(msg);
+    }
+
+    @GetMapping(value = "/exceptionTest")
+    public MessageResult<String> exceptionTest() {
+//        Throwable 类有两个重要的子类:
+//        Exception :程序本身可以处理的异常，可以通过 catch 来进行捕获。Exception 又可以分为 Checked Exception (受检查异常，必须处理) 和 Unchecked Exception (不受检查异常，可以不处理)。
+//        Error：Error 属于程序无法处理的错误 ，我们没办法通过 catch 来进行捕获不建议通过catch捕获 。例如 Java 虚拟机运行错误（Virtual MachineError）、虚拟机内存不够错误(OutOfMemoryError)、类定义错误（NoClassDefFoundError）等 。这些异常发生时，Java 虚拟机（
+//        JVM）一般会选择线程终止。
+
+
+//      RuntimeException （运行时异常）继承Exception，RuntimeException 及其子类都统称为非受检查异常
+        return MessageResult.success();
+    }
+
+    @GetMapping(value = "/camundaRestTestOne")
+    public MessageResult<Person> camundaRestTestOne() {
+        Person person = new Person();
+        person.setAge(15);
+        person.setName("fancky");
+        return MessageResult.success(person);
+    }
+
+    @GetMapping(value = "/camundaRestTestTwo")
+    public MessageResult<Person> camundaRestTestTwo(Person dto) {
+        Person person = new Person();
+        person.setAge(16);
+        person.setName("li");
+        return MessageResult.faile(person);
+    }
+
+    @PostMapping(value = "/camundaRestTestThree")
+    public MessageResult<Person> camundaRestTestThree(@RequestBody Person dto) {
+        Person person = new Person();
+        person.setAge(17);
+        person.setName("ming");
+        return MessageResult.faile(person);
     }
 
 }
