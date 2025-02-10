@@ -141,6 +141,14 @@ public class PersonService implements IPersonService {
         //spring 不会处理异常，会把异常继续抛出
 
 
+        /*REQUIRES_NEW： a,b事务相互独立互不影响，除非抛出未捕捉的异常都回滚
+        如果我们上面的bMethod()使用PROPAGATION_REQUIRES_NEW事务传播行为修饰，
+        aMethod还是用PROPAGATION_REQUIRED修饰的话。如果aMethod()发生异常回滚，
+        bMethod()不会跟着回滚，因为 bMethod()开启了独立的事务。但是，
+        如果 bMethod()抛出了未被捕获的异常并且这个异常满足事务回滚规则的话,
+        aMethod()同样也会回滚，因为这个异常被 aMethod()的事务管理机制检测到了。
+         */
+
 //        int n = Integer.parseInt("ds");
         return 0;
     }

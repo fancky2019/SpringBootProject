@@ -1,6 +1,5 @@
 package com.example.demo.controller;
 
-import brave.internal.Platform;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
@@ -15,11 +14,10 @@ import com.example.demo.easyexcel.ExcelStyleConfig;
 import com.example.demo.easyexcel.GXDetailListVO;
 import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
 import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
+import com.example.demo.eventbus.MyCustomEvent;
 import com.example.demo.listener.UserRegisterService;
 import com.example.demo.model.dto.JacksonDto;
-import com.example.demo.model.elasticsearch.ShipOrderInfo;
 import com.example.demo.model.entity.demo.DemoProduct;
-import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.entity.rabc.Users;
@@ -31,7 +29,6 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
-import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.mqtt.MqttProduce;
 import com.example.demo.rocketmq.RocketmqTest;
 import com.example.demo.service.RetryService;
@@ -49,11 +46,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.Lists;
-import com.thoughtworks.xstream.core.JVM;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.io.IOUtils;
@@ -66,11 +61,11 @@ import org.slf4j.spi.MDCAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.cloud.sleuth.TraceContext;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Scope;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.*;
@@ -105,7 +100,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 
 /*
 在service类上加注解@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -705,20 +699,25 @@ public class UtilityController {
      * 事务隔离：全局搜索事务隔离  OrderManagerService
      *
      * @Transactional： Propagation propagation() default Propagation.REQUIRED;
-     * <p>
+     *
      * Isolation isolation() default Isolation.DEFAULT;
-     * ESTED：嵌套事务回滚到回滚点。
+     * NESTED：嵌套事务回滚到回滚点。
      * NESTED是为被嵌套的方法开启了一个子事务，这个事务与父类使用的是同一个连接。
      * REQUIRES_NEW是使用一个全新的事务，这个事务属于另外一条全新的连接。
      * 两者最重要的体现，就是在多数据源中，REQUIRES_NEW会再次触发一下数据源的获取，而NESTED则不会
      *
      *
+     * 事务传播：同一个事务要回滚都回滚，
+     *         不同事物，未捕捉异常都回滚
+     *                捕捉异常： REQUIRES_NEW  互不影响：外部异常内部不回滚，内部异常外部不回滚
+     *                         NESTED        外部异常回滚整个事务，内部异常还原到还原点
+     *
      * REQUIRED： 没有事务就开启，有事务就加入，不指定的话默认为该类型
      * SUPPORTS： 有事务就加入，没有就无事务运行
      * MANDATORY： 加入当前事务，如果不存在则抛出异常
-     * REQUIRES_NEW： 没有就开启，有了挂起原来的，开启新的事务：调用者在老事务，新事物不影响外层食物，外层事务回滚整个事务。
+     * REQUIRES_NEW： 没有就开启，有了挂起原来的，开启新的事务：调用者在老事务，新事物不影响外部事务3%%23%%-1。
      * NOT_SUPPORTED： 有了挂起，没有就无事务运行
-     * NEVER： 以非事务方式执行，如果存在事务则抛出异常
+     * NEVER： 以非事务方式执行，如果存在事务则抛出异常3
      * Propagation.NESTED: 调用者事务存在调用者事务和被调用者事务分别在两个事务中执行，嵌套事务回滚到回滚点。外层事务回滚整个事务。
      */
     @GetMapping(value = "/propagation")
@@ -2054,6 +2053,12 @@ public class UtilityController {
 
 
 //      RuntimeException （运行时异常）继承Exception，RuntimeException 及其子类都统称为非受检查异常
+        return MessageResult.success();
+    }
+
+    @GetMapping(value = "/eventBusTest")
+    public MessageResult<String> eventBusTest() {
+        productTestService.eventBusTest();
         return MessageResult.success();
     }
 

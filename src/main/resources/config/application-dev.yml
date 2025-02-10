@@ -68,7 +68,6 @@ logging:
         demo:
           dao: DEBUG
 
-
 #开发配
 spring:
   lifecycle:
@@ -236,7 +235,10 @@ spring:
     redisson:
       file: classpath:redisson-config.yml
 
-
+#  cloud:
+#    bus:
+#      enabled: true   # # 默认启用 Spring Cloud Bus
+#      destination: springCloudBus  # 默认 Exchange 名称
 
   rabbitmq:
     ##HA镜像集群。集群配置 ip:port,ip:port 。多个配置之间用逗号隔开
@@ -343,6 +345,15 @@ spring:
 #  fanckytest:
 #    host: 127.0.0.1
 #    port: 8082
+
+  
+## rabbitmq相关配置，暴露bus刷新点
+#management:
+#  endpoints: #暴露bus刷新配置的端点
+#    web:
+#      exposure:
+#        include: 'bus-refresh'
+
 
 #camunda 官网配置
 #https://docs.camunda.org/manual/7.9/user-guide/spring-boot-integration/configuration/#camunda-engine-properties

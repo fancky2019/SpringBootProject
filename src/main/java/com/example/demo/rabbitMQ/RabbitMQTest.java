@@ -11,16 +11,17 @@ import org.springframework.stereotype.Component;
 
 /**
  * 源码参见github:https://github.com/spring-projects/spring-amqp
- * <p>
+ *
  * spring cloud 消息总线默认集成了rabbitmq和kafka，使用上面和springboot没有区别
- * <p>
- * 分布式事务设计：1、将没钱消息插入本息系统中和业务数据放在一个事务中提交从而保证原子性。
+ *
+ * 分布式事务设计：本地消息表
+ * 1、将mq消息插入本息系统中和业务数据放在一个事务中提交从而保证原子性。
  * 2、启动一个定时任务扫描消息表获取为发送到mq的消息
  * 3、将本地消息表获取的数据循环发送到mq并更新本地数据库，发送状态为已发送
  * 4、mq 根据消息id 判断时候重复消费。
- * <p>
- * <p>
- * <p>
+ *
+ *
+ *
  * 事务执行成功之后，启动一个线程异步执行发送到mq,这样避免等待一个cron 周期
  * volatile consumerCount=0;
  * concurrentHashMap<uuid,list> mapMsgs;
@@ -32,13 +33,13 @@ import org.springframework.stereotype.Component;
  * if(consumerCount==msgs.cout) break;
  * consumerCount=0;
  * this.mapMsgs=msgs;
- * <p>
+ * <
  * 这样会造成已经发送到mq 更新db 失败，重复投递的情况，所以mq要判断重复消费。
- * <p>
- * <p>
- * <p>
+ *
+ *
+ *
  * 重复消费的msgId在redis中的过期时间设置1month
- * <p>
+ *
  * 单活模式队列：
  * 单活模式队列：微服务分布式集群，多个生产者写一个队列，多个消费者只有一个消费者消费队列
  * x-single-active-consumer：默认false,单活模式，表示是否最多只允许一个消费者消费，如果有多个消费者同时绑定，

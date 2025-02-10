@@ -23,11 +23,13 @@ import com.example.demo.easyexcel.ExcelStyleConfig;
 import com.example.demo.easyexcel.GXDetailListVO;
 import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
 import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
+import com.example.demo.eventbus.MyCustomEvent;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.Student;
 import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.service.demo.IPersonService;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.service.wms.ProductService;
 import com.example.demo.utility.ConfigConst;
@@ -43,7 +45,10 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.BusProperties;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -99,6 +104,11 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
     @Autowired
     private PersonMapper personMapper;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private BusProperties busProperties;
 
     public ProductTestServiceImpl(ProductTestMapper productTestMapper) {
         this.productTestMapper = productTestMapper;
@@ -1244,5 +1254,34 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         person.setName("fancky1");
         personMapper.updateByPrimaryKey(person);
 
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void eventBusTest() {
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(ProductTest::getProductStyle, "getProductStyle1");
+        updateWrapper3.eq(ProductTest::getId, 1);
+
+        //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        boolean re3 = this.update(updateWrapper3);
+        MyCustomEvent event = new MyCustomEvent(this, busProperties.getId());
+
+//        MyCustomEvent event = new MyCustomEvent(busProperties.getId());
+        eventPublisher.publishEvent(event);
+
+        Object proxyObj = AopContext.currentProxy();
+        IProductTestService productTestService = null;
+        if (proxyObj instanceof IProductTestService) {
+            productTestService = (IProductTestService) proxyObj;
+        }
+        productTestService.eventBusTest1();
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void eventBusTest1() {
+//        int n = Integer.parseInt("m");
     }
 }

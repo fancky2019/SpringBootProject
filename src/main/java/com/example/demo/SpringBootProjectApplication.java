@@ -55,7 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @EnableAsync     //启用异步
 
 //@EnableSelector
-//@EnableFanckyStarter
+@EnableFanckyStarter
 
 //SpringCloud ：组件
 @EnableEurekaClient//注册中心

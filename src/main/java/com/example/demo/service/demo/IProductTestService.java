@@ -1,6 +1,7 @@
 package com.example.demo.service.demo;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.demo.eventbus.MyCustomEvent;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.MessageResult;
@@ -40,4 +41,8 @@ public interface IProductTestService extends IService<ProductTest> {
     void deadLockOne() throws InterruptedException;
 
     void deadLockTwo() throws InterruptedException;
+
+    void eventBusTest() ;
+
+    void eventBusTest1();
 }
