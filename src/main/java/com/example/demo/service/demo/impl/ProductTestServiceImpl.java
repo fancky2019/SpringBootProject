@@ -52,6 +52,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -1283,5 +1284,118 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
     @Transactional(rollbackFor = Exception.class)
     public void eventBusTest1() {
 //        int n = Integer.parseInt("m");
+    }
+
+    /**
+     * 同一个事务内：可以查询到修改的数据。修改后的数据。当前行事务id就是当前事务的id  可见  mvcc
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void repeatReadTest() {
+        Object proxyObj = AopContext.currentProxy();
+        IProductTestService productTestService = null;
+        if (proxyObj instanceof IProductTestService) {
+            productTestService = (IProductTestService) proxyObj;
+        }
+        for (int i = 0; i < 3; i++) {
+            productTestService.repeatReadFun();
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void repeatReadFun() {
+        ProductTest productTest = this.getById(1);
+        int version = productTest.getVersion() == null ? 0 : productTest.getVersion();
+        version++;
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(ProductTest::getVersion, version);
+        updateWrapper3.eq(ProductTest::getId, 1);
+
+        //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        boolean re3 = this.update(updateWrapper3);
+    }
+
+
+    /**
+     * 非事务方法，直接调用事务方法，事务方法会失效不走事务aop
+     * 务方法，直接调用事务方法，两个事务都在调用方的事务内执行。被调用方法没有走aop事务
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void transactionalFunTest() {
+        ProductTest productTest = this.getById(1);
+
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(ProductTest::getVersion, 98);
+        updateWrapper3.eq(ProductTest::getId, 1);
+        boolean re3 = this.update(updateWrapper3);
+
+        //被调用方不走aop事务 ：不会触发事务管理的AOP切面。这意味着methodB的事务配置不会生效，因为它被视为methodA的一部分。
+        //transactionalFunTest 不加@Transactional 注解， transactionalFun 可以保存成功，因为是独立的新事务
+        //transactionalFunTest加注解，transactionalFun不加注解，两个方法都在调用方的事务内执行
+        transactionalFun();
+        int m = Integer.parseInt("m");
+
+        //被调用方不走aop事务 ：不会触发事务管理的AOP切面。这意味着methodB的事务配置不会生效，因为它被视为methodA的一部分。
+//        transactionalFun();
+//        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+//        updateWrapper3.set(ProductTest::getVersion, 98);
+//        updateWrapper3.eq(ProductTest::getId, 1);
+//        boolean re3 = this.update(updateWrapper3);
+//        //不会触发事务管理的AOP切面。这意味着methodB的事务配置不会生效，因为它被视为methodA的一部分。
+//
+//        int m = Integer.parseInt("m");
+
+        //被调用方不走aop事务 ：不会触发事务管理的AOP切面。这意味着methodB的事务配置不会生效，因为它被视为methodA的一部分。
+        //   不会触发事务管理的AOP切面。这意味着methodB的事务配置不会生效，因为它被视为methodA的一部分。
+//        transactionalFunRequiresNew();
+//        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+//        updateWrapper3.set(ProductTest::getVersion, 98);
+//        updateWrapper3.eq(ProductTest::getId, 1);
+//        boolean re3 = this.update(updateWrapper3);
+//        //不会触发事务管理的AOP切面。这意味着methodB的事务配置不会生效，因为它被视为methodA的一部分。
+//
+//        int m = Integer.parseInt("m");
+
+
+//        //被调用方会触发事务aop, 两个方法在不同事务内
+//        Object proxyObj = AopContext.currentProxy();
+//        IProductTestService productTestService = null;
+//        if (proxyObj instanceof IProductTestService) {
+//            productTestService = (IProductTestService) proxyObj;
+//        }
+//        productTestService.transactionalFunRequiresNew();
+//        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+//        updateWrapper3.set(ProductTest::getVersion, 98);
+//        updateWrapper3.eq(ProductTest::getId, 1);
+//        boolean re3 = this.update(updateWrapper3);
+//        //不会触发事务管理的AOP切面。这意味着methodB的事务配置不会生效，因为它被视为methodA的一部分。
+//
+//        int m = Integer.parseInt("m");
+    }
+
+//    @Override
+//    @Transactional(rollbackFor = Exception.class)
+    public void transactionalFun() {
+        ProductTest productTest = this.getById(1);
+
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(ProductTest::getVersion, 99);
+        updateWrapper3.eq(ProductTest::getId, 1);
+        boolean re3 = this.update(updateWrapper3);
+    }
+
+    /**
+     * REQUIRES_NEW:开启新的事物，调用方和被调用方在不同的事务内，互不影响
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
+    public void transactionalFunRequiresNew() {
+        ProductTest productTest = this.getById(1);
+
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(ProductTest::getVersion, 99);
+        updateWrapper3.eq(ProductTest::getId, 1);
+        boolean re3 = this.update(updateWrapper3);
     }
 }

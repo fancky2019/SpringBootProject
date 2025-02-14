@@ -64,6 +64,18 @@ import org.springframework.stereotype.Component;
  * 推模式（Push）：消息中间件主动将消息推送给消费者，推模式采用 Basic.Consume 进行消费。
  * 拉模式（Pull）：消费者主动从消息中间件拉取消息，拉模式则是调用 Basic.Get 进行消费。
  *
+ *RabbitMQ 3.8+ 推荐使用 仲裁队列（Quorum Queue） 替代镜像队列（Mirrored Queue），它基于 Raft 算法，减少存储和同步开销。
+ *channel.queue_declare(queue='my_quorum_queue', arguments={'x-queue-type': 'quorum'})
+ * 但是还是解决不了水平扩容问题
+ *
+ *分片队列： 不支持 HA，某个分片丢失后不可恢复。RabbitMQ 3.8+ 推荐使用 Quorum Queue 替代镜像队列
+ * RabbitMQ Sharding Plugin 是最简单的方式，推荐使用。
+ * 手动分片 适用于不支持插件的 RabbitMQ 版本。
+ * 分片队列 vs. 镜像队列：
+ * 分片队列 提高吞吐量，但不保证高可用。
+ * 镜像队列 适合高可用场景，但吞吐量较低
+ *
+ *
  */
 @Component
 public class RabbitMQTest {

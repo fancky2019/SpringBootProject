@@ -45,4 +45,14 @@ public interface IProductTestService extends IService<ProductTest> {
     void eventBusTest() ;
 
     void eventBusTest1();
+
+    void repeatReadTest();
+
+    void repeatReadFun();
+
+    void transactionalFunTest();
+
+    void transactionalFun();
+    void transactionalFunRequiresNew();
+
 }

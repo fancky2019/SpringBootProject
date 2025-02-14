@@ -58,6 +58,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,6 +69,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -2086,4 +2088,13 @@ public class UtilityController {
         return MessageResult.faile(person);
     }
 
+    @GetMapping(value = "/repeatReadTest")
+    public void repeatReadTest() {
+        productTestService.repeatReadTest();
+    }
+
+    @GetMapping(value = "/transactionalFunTest")
+    public void transactionalFunTest() {
+        productTestService.transactionalFunTest();
+    }
 }

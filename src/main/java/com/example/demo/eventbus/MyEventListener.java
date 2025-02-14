@@ -6,6 +6,9 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * 监听事件
+ *默认使用 fanout 交换机，默认情况下，所有服务实例都会监听同一个 topic（springCloudBus），并且消息会广播给所有实例
+ *
+ *spring-cloud-starter-stream-rabbit:Spring Cloud Stream 默认使用 direct 交换机
  *
  * 如果mq 服务停止了，消息不会写入mq，可以监听到，分布式就监听不到了
  * 如果没有订阅：消息好像会自动ack 掉。在rabbitmq 管理页面没有看到消息
