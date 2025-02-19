@@ -20,7 +20,21 @@
 					<foreach collection="deptDataPermissionIds" index="index" item="deptDataPermissionId" open="(" separator="," close=")">
 						#{deptDataPermissionId}
 					</foreach>
-				</if>
+		</if>
+
+    <trim> 标签属性说明：
+    prefix：在trim标签内的内容之前添加一个前缀。在上述例子中，当没有任何条件满足时，WHERE会被添加到SQL语句中。
+    prefixOverrides：指定要覆盖的前缀。在这个例子中，如果第一个条件就是AND或OR，它会被覆盖掉。这对于避免在第一个条件前就添加了AND或OR关键字非常有用。
+    suffix：在trim标签内的内容之后添加一个后缀。
+    suffixOverrides：指定要覆盖的后缀。这在某些情况下很有用，比如你想要在所有条件后面自动添加一个逗号，但又不想在最后一个条件后面添加逗号。
+
+
+
+
+
+
+
+
    4、 if  else
    <choose>
        <when test="tableCStatisticsStartDate!=null">

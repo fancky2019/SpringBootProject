@@ -82,4 +82,35 @@
             and version= #{version,jdbcType=INTEGER}
     </update>
 
+
+    <update id="batchUpdateBySelective" parameterType="java.util.List">
+        update demo_product
+        <set>
+            <trim  suffixOverrides=",">
+                <trim prefix=" product_name = case " suffix=" end,">
+                    <foreach collection="list" item="item"  index="index">
+                        when id=#{item.id}  then #{item.productName}
+                    </foreach>
+                </trim>
+
+                <trim prefix=" product_style = case " suffix=" end ,">
+                    <foreach collection="list" item="item"  index="index">
+                        when id=#{item.id}  then #{item.productStyle}
+                    </foreach>
+                </trim>
+--       如果添加修改时间，就会始终修改记录
+                modify_time=now(), version = version + 1
+            </trim>
+        </set>
+
+        where 1=1 and
+
+        <if test="list != null and list.size() > 0 ">
+        <foreach collection="list" separator="or" item="item"  index="index" >
+            (id=#{item.id,jdbcType=INTEGER} and version= #{item.version,jdbcType=INTEGER})
+        </foreach>
+        </if>
+    </update>
+
+
 </mapper>

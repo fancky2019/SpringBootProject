@@ -2089,12 +2089,27 @@ public class UtilityController {
     }
 
     @GetMapping(value = "/repeatReadTest")
-    public void repeatReadTest() {
+    public MessageResult<Void> repeatReadTest() {
         productTestService.repeatReadTest();
+        return MessageResult.success();
     }
 
     @GetMapping(value = "/transactionalFunTest")
-    public void transactionalFunTest() {
+    public MessageResult<Void> transactionalFunTest() {
         productTestService.transactionalFunTest();
+        return MessageResult.success();
+    }
+
+    @GetMapping(value = "/batchUpdateByCondition")
+    public MessageResult<Void> batchUpdateByCondition() {
+        productTestService.batchUpdateByCondition();
+        return MessageResult.success();
+    }
+
+
+    @GetMapping(value = "/batchUpdateBySelective")
+    public MessageResult<Void> batchUpdateBySelective() throws Exception {
+        productTestService.batchUpdateBySelective();
+        return MessageResult.success();
     }
 }

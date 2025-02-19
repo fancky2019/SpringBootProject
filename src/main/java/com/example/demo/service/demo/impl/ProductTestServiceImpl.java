@@ -11,6 +11,7 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
@@ -54,6 +55,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -124,9 +126,9 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        this.saveEntity();
 //        saveOrUpdateBatch();
 //        updateBatchTest();
-        queryById();
+//        queryById();
 //        queryTest();
-//        updateTest();
+        updateTest();
 //        page();
 //        queryParam();
 //        truncateTest();
@@ -226,8 +228,8 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        因为mybatis返回的默认是匹配的行数，而不是受影响的行数，如何设置返回的是受影响的行数，useAffectedRows=true
         //mysql 连接字段穿添加  &useAffectedRows=true 返回0 ，不加返回1。
         //for循环多个update 语句以分号结束，update 执行会返回1.因为执行update id 就一条
-        //批量更新还是要加锁，避免并发访问
-
+        //批量更新还是要加锁，避免并发访问，或者for 循环每条更新判断
+        //批量更新、批量条件更新。加锁，避免并发访问，或者for 循环每条更新判断。使用sqlSession 一次提交
         /*
         UPDATE demo_product  SET guid='a02a0ed4-c685-4d9a-949e-bcba60f17c97',
 product_name='22batchUpdate702',
@@ -399,11 +401,29 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      */
 
     private void updateTest() {
+
         //条件更新
 //        因为mybatis返回的默认是匹配的行数，而不是受影响的行数，如何设置返回的是受影响的行数，useAffectedRows=true
         //mysql 连接字段穿添加  &useAffectedRows=true 返回0 ，不加返回1。
         //for循环多个update 语句以分号结束，update 执行会返回1.因为执行update id 就一条
         //批量更新还是要加锁，避免并发访问
+
+
+//        Mapper 的 update 方法的返回值是一个 int 类型，表示受影响的行数。具体来说：
+//        如果返回值大于 0，表示更新成功，且返回值是实际更新的记录数。
+//        如果返回值等于 0，表示没有记录被更新（可能是没有匹配的条件）。
+//        如果返回值小于 0，通常表示更新失败（可能是 SQL 执行错误）。
+
+        ProductTest productTest9 = this.getById(9);
+        LambdaUpdateWrapper<ProductTest> updateWrapper22 = new LambdaUpdateWrapper<>();
+        //更新为空
+        updateWrapper22.set(ProductTest::getProductStyle, productTest9.getProductStyle());
+        updateWrapper22.set(ProductTest::getProductName, productTest9.getProductName());
+        updateWrapper22.eq(ProductTest::getId, 9);
+
+        //数据没有做修改，影响的行数是0，不然返回1
+        int affectRows = baseMapper.update(null, updateWrapper22);
+
 
         /*
          * UPDATE demo_product  SET product_name='update'
@@ -1374,7 +1394,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 //        int m = Integer.parseInt("m");
     }
 
-//    @Override
+    //    @Override
 //    @Transactional(rollbackFor = Exception.class)
     public void transactionalFun() {
         ProductTest productTest = this.getById(1);
@@ -1389,7 +1409,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      * REQUIRES_NEW:开启新的事物，调用方和被调用方在不同的事务内，互不影响
      */
     @Override
-    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public void transactionalFunRequiresNew() {
         ProductTest productTest = this.getById(1);
 
@@ -1398,4 +1418,89 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         updateWrapper3.eq(ProductTest::getId, 1);
         boolean re3 = this.update(updateWrapper3);
     }
+
+    @Override
+    public boolean batchUpdateByCondition() {
+        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+        try {
+            LambdaQueryWrapper<ProductTest> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.le(ProductTest::getId, 1);
+            List<ProductTest> productTestList = this.list(queryWrapper);
+
+
+            ProductTestMapper mapper = sqlSession.getMapper(ProductTestMapper.class);
+            int i = 0;
+            for (ProductTest entity : productTestList) {
+                LambdaUpdateWrapper<ProductTest> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(ProductTest::getId, entity.getId())
+                        .set(ProductTest::getProductName, entity.getProductName() + 1)
+                        .set(ProductTest::getDescription, entity.getDescription());
+                //
+//                Mapper 的 update 方法的返回值是一个 int 类型，表示受影响的行数。具体来说：
+//                如果返回值大于 0，表示更新成功，且返回值是实际更新的记录数。
+//                如果返回值等于 0，表示没有记录被更新（可能是没有匹配的条件）。
+//                如果返回值小于 0，通常表示更新失败（可能是 SQL 执行错误）。
+                //事务未提交 返回-2147482646
+                int affectRows = mapper.update(null, updateWrapper);
+
+
+                i++;
+            }
+            sqlSession.commit(); // 提交事务
+            return true;
+        } catch (Exception e) {
+            sqlSession.rollback(); // 回滚事务
+            return false;
+        } finally {
+            sqlSession.close();
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer batchUpdateBySelective() throws Exception {
+        //在LogAspect 已加锁
+        String lockKey = ConfigConst.DEMO_PRODUCT_PREFIX + "batchUpdateBySelective";
+        RLock lock = redissonClient.getLock(lockKey);
+        try {
+
+            boolean lockSuccessfully = lock.tryLock(30, 60, TimeUnit.SECONDS);
+            if (!lockSuccessfully) {
+                log.info("Thread - {} 获得锁 {}失败！锁被占用！", Thread.currentThread().getId(), lockKey);
+                return null;
+            }
+            LambdaQueryWrapper<ProductTest> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.le(ProductTest::getId, 100);
+            List<ProductTest> productTestList = this.list(queryWrapper);
+
+
+            for (ProductTest productTest : productTestList) {
+                productTest.setProductName(productTest.getProductName() + 1);
+                productTest.setProductStyle(productTest.getProductStyle() + 1);
+            }
+
+//        modify_time=now() 脚本添加了修改时间 ，始终会有影响行数
+            //去掉 modify_time=now() ，数据不做任何修改返回0
+            int affectRows = this.baseMapper.batchUpdateBySelective(productTestList);
+            if (affectRows != productTestList.size()) {
+                //事务回滚 手动回滚事务
+                //事务回滚 手动回滚
+                //TransactionAspectSupport
+                //PlatformTransactionManager 参见  com.example.demo.service.demo.PersonService
+                //TransactionTemplate提供了更简洁的API来管理事务。它隐藏了底层的PlatformTransactionManager的使用
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
+//            throw  new Exception("更新失败");
+            }
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
+            //unlock 删除key
+            //如果锁因超时（leaseTime）会抛异常
+            lock.unlock();
+        }
+        return 0;
+    }
+
 }

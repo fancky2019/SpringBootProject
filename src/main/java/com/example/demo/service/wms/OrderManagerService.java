@@ -243,6 +243,8 @@ public class OrderManagerService {
     }
 
     /*
+    回滚事务、手动回滚事务
+
     自动回滚
     @Transactional默认只回滚RunTimeException级别，
     如果需要回滚到Exception级别才需要指定@Transactional(rollbackFor=Exception.class) ，Exception还要抛出。
@@ -273,6 +275,9 @@ public class OrderManagerService {
             messageResult.setMessage(ex.getMessage());
             messageResult.setSuccess(false);
             //事务回滚 手动回滚
+            //TransactionAspectSupport
+            //PlatformTransactionManager
+            //TransactionTemplate提供了更简洁的API来管理事务。它隐藏了底层的PlatformTransactionManager的使用
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 
             //或者

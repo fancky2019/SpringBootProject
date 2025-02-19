@@ -173,6 +173,10 @@ public class DemoProductService {
         try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);) {
             //不能用spring 注入的mapper,必须从session 里取，否则是一条一条插入
             DemoProductMapper mapper = sqlSession.getMapper(DemoProductMapper.class);
+
+
+
+
             list.forEach(mapper::insert);
 //        sqlSession.clearCache();
             sqlSession.commit();

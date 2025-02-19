@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * <p>
@@ -42,7 +43,7 @@ public interface IProductTestService extends IService<ProductTest> {
 
     void deadLockTwo() throws InterruptedException;
 
-    void eventBusTest() ;
+    void eventBusTest();
 
     void eventBusTest1();
 
@@ -53,6 +54,10 @@ public interface IProductTestService extends IService<ProductTest> {
     void transactionalFunTest();
 
     void transactionalFun();
+
     void transactionalFunRequiresNew();
 
+    boolean batchUpdateByCondition();
+
+    Integer batchUpdateBySelective() throws Exception;
 }

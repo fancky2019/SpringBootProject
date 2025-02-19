@@ -23,6 +23,9 @@ public interface ProductTestMapper extends BaseMapper<ProductTest> {
     //    ProductTest getById(BigInteger id);
     int updateByPrimaryKeySelective(ProductTest productTest);
 
+    int batchUpdateBySelective(List<ProductTest> productTests);
+
+
     List<ProductTest> getByIds(List<BigInteger> ids);
 
     List<ProductTest> getPageData(DemoProductRequest request);
