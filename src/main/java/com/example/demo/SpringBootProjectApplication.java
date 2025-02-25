@@ -85,6 +85,16 @@ server.shutdown=graceful
 spring.lifecycle.timeout-per-shutdown-phase=60s
      */
 
+    //region 配置的动态刷新 参见 com.example.demo.config
+    /*
+    使用@RefreshScope注解
+    对于使用Spring Boot但不依赖于Spring Cloud Config的应用，你可以通过@RefreshScope注解来使bean支持配置的动态刷新
+
+    curl -X PosT http://localhost:8080/actuator/refresh
+    */
+    //endregion
+
+
 
     //    RedisAutoConfiguration re=new RedisAutoConfiguration();
     public static void main(String[] args) {

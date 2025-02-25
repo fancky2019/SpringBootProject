@@ -77,6 +77,10 @@ import org.springframework.stereotype.Component;
  *
  *
  */
+
+
+
+
 @Component
 public class RabbitMQTest {
     private static Logger logger = LogManager.getLogger(RabbitMQTest.class);

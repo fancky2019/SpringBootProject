@@ -43,6 +43,16 @@ import java.util.List;
 public class UserController {
 
     /*
+    自动装配（Autowiring）通常指的是在Spring框架（或者其他依赖注入框架）中，
+    自动将某个类所需要的依赖（即其他对象）注入到类中的一种机制，而无需显式地在配置文件或代码中手动指定依赖。
+
+       自动装配（Autowiring）:自动装配是指Spring容器根据一定规则自动为bean注入依赖项的过程(类中的属性依赖)
+
+
+    扫描 Bean
+    Spring Boot 通过 @ComponentScan 注解扫描指定包下的类。
+    被 @Component、@Service、@Repository、@Controller 等注解标记的类会被注册为 Bean。
+
      springboot 的Bean 来源： 1）@Repository @Component @Service @Controller,spring自动扫描这些类并注册成Bean。
                               2）@Configuration 配置文件类里的Bean。
      */
@@ -57,6 +67,18 @@ public class UserController {
 
 
     /*
+
+    3. @Autowired 和 @Resource 的区别
+特性	@Autowired                                  	@Resource
+来源	Spring 框架	                                    Java 标准（JSR-250）
+默认行为	按类型（byType）注入	                        按名称（byName）注入
+支持注入方式	字段、构造函数、Setter 方法	                字段、Setter 方法（不支持构造函数）
+支持 @Qualifier	是	                                否（通过 name 属性指定名称）
+可选依赖	支持（required = false）	                    不支持
+推荐使用场景	Spring 项目，推荐使用构造函数注入	          需要按名称注入的场景
+
+
+
     @Resource:默认按照ByName自动注入，由J2EE提供，需要导入包javax.annotation.Resource。@Resource有两个重要的属性：name和type，
     而Spring将@Resource注解的name属性解析为bean的名字，而type属性则解析为bean的类型。所以，如果使用name属性，则使用byName的自动注入策略，
     而使用type属性时则使用byType自动注入策略。如果既不制定name也不制定type属性，这时将通过反射机制使用byName自动注入策略。
@@ -84,6 +106,7 @@ public class UserController {
      * 如果用@Service注解，多个类实现接口时候就要指定别名：声明@Service("InterfaceTestImpB")，调用 @Autowired、 @Qualifier("InterfaceTestImpA")
      */
 
+    //如果同一个类型有多个 Bean，可以通过 @Primary 注解指定一个默认的 Bean。
     @Autowired
     @Qualifier("InterfaceTestImpA")
     private InterfaceTest interfaceTestImpA;

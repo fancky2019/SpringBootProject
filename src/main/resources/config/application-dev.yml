@@ -74,9 +74,9 @@ spring:
     #默认30s #  shutdown: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
     timeout-per-shutdown-phase: 60s
 
-  #默认cglib 代理，设置jdk 动态代理
-  #  aop:
-  #    proxy-target-class: false
+#  #默认cglib 代理，设置jdk 动态代理 false
+#  aop:
+#    proxy-target-class: true
   #swagger 3配置 建议使用springdoc 代替swagger
   mvc:
     pathmatch:
@@ -113,7 +113,7 @@ spring:
 
     #mysql
     #具体参见类DynamicDataSourceAspect 说明
-    #不用此默认，默认就是写库,多数据源用jdbcUrl，不是url,spring 默认用的是url，用多数据源用url会报错。
+    #不用此默认，默认就是写库,多数据源用jdbcUrl，不是url,spring 默认用的是url，用多数据源用url会报错。 &failOverReadOnly=false
     url: jdbc:mysql://127.0.0.1:3306/demo?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&allowMultiQueries=true&rewriteBatchedStatements=true&useAffectedRows=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
@@ -198,6 +198,7 @@ spring:
     # 链接超时时间（毫秒）
     timeout: 30000
 
+   #Spring Boot 项目中，默认的 Redis 客户端是 Lettuce。Lettuce 是一个高性能的、基于 Netty 的 Redis 客户端，支持同步、异步和响应式编程模型。
     #redis连接池 lettuce、jedis。连接池 单机配置。默认集成lettuce
     #    jedis:
     lettuce:
@@ -353,6 +354,16 @@ spring:
 #    web:
 #      exposure:
 #        include: 'bus-refresh'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # 暴露所有 Actuator 端点
+  endpoint:
+    health:
+      show-details: always  # 允许查看健康检查的详细信息
+
 
 
 #camunda 官网配置

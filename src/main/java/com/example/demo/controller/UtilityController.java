@@ -66,6 +66,7 @@ import org.springframework.cloud.bus.BusProperties;
 import org.springframework.cloud.sleuth.TraceContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -129,7 +130,50 @@ global session作用域类似于标准的HTTP Session作用域，不过它仅仅
         <session-timeout>30</session-timeout>
     </session-config>
 <!--tomcat默认30分钟 -->
+
+
+
+
+//region mysql
+
+
+failOverReadOnly=false
+控制故障转移行为：
+当 failOverReadOnly=false 时，如果主数据库（可读写）发生故障，连接 不会 切换到只读模式的备用数据库。这意味着应用程序不会尝试连接到只读副本，而是会直接报错或等待主数据库恢复。
+当 failOverReadOnly=true 时，如果主数据库故障，连接可以切换到只读模式的备用数据库，但应用程序需要确保只执行读操作（不能执行写操作
+
+
+当设置为 false 时，应用程序不会切换到只读的从数据库，而是直接报错或等待主数据库恢复。
+当设置为 true 时，应用程序可以切换到只读的从数据库，但只能执行读操作。
+
  */
+
+//MySQL 自动故障转移（Automatic Failover）是指在主数据库（Master）发生故障时，系统能够自动检测到故障并将从数据库（Slave）
+// 提升为新的主数据库， 同时更新应用程序的连接配置，以确保系统的高可用性。
+
+
+/*
+mysql  如何自动检测到故障并将从数据库（Slave）提升为新的主数据库，同时更新应用程序的连接配置
+
+方法 2：Orchestrator（官方推荐）
+Orchestrator 是一个开源的 MySQL 高可用工具，支持 主从复制（Replication） 和 Group Replication，可以自动提升新的 Master。
+
+工作流程
+监控主库（Master）。
+发现主库故障后，选择合适的 Slave 作为新 Master，并自动切换主从关系。
+支持 自动 DNS 更新 或 VIP 变更，让应用程序透明地连接到新 Master。
+优点
+
+轻量级，MySQL 官方推荐。
+Web 界面可视化管理数据库拓扑结构。
+适用于大规模 MySQL 集群。
+缺点
+
+需要额外部署 Orchestrator 服务器。
+ */
+//endregion
+
+
 @Api  //方法上  @ApiOperation()
 @Slf4j
 @RestController
@@ -176,6 +220,8 @@ public class UtilityController {
 
     @Autowired
     private IProductTestService productTestService;
+    @Autowired
+    private IProductTestService productTestServiceB;
 
     @Autowired
     private CacheService cacheService;
@@ -2112,4 +2158,12 @@ public class UtilityController {
         productTestService.batchUpdateBySelective();
         return MessageResult.success();
     }
+
+
+    @GetMapping(value = "/refreshScopeTest")
+    public MessageResult<String> refreshScopeTest() throws Exception {
+        return MessageResult.success(configModelProperty.getFistName());
+    }
+
+
 }

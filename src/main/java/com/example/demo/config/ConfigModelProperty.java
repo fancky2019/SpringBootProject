@@ -4,6 +4,7 @@ import com.example.demo.model.viewModel.Person;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -70,8 +71,40 @@ public @interface ConditionalOnProperty {
 //// 或者可以省略prefix前缀，如果没有配置会报错
 //@ConditionalOnProperty(value = "config.config-model.conditional-on-property", havingValue = "false")//配置项的值是否匹配控制是否加载bean
 //@ConditionalOnClass(ConfigModel.class)
-
+@RefreshScope
 public class ConfigModelProperty {
+    /*
+    注意：要修改target 目录下的配置文件
+    @RefreshScope 依赖，因为要手动调用   curl -X PosT http://localhost:8080/actuator/refresh 刷新配置
+    返回值
+    [
+    "config.configmodel.fist-Name"
+    ]
+
+   1、
+    <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+2、
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "refresh"
+
+
+
+3、不需要手动刷新，添加此依赖
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-context</artifactId>
+</dependency>
+     */
+
+
+
     private String fistName;
     private Integer age = 27;
     //可设计一个default_field 字段设置字段的默认值

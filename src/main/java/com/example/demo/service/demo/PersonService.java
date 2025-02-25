@@ -299,7 +299,7 @@ public class PersonService implements IPersonService {
      */
     @Override
     public void manualCommitTransaction() {
-        //TransactionStatus transaction = transactionManager.getTransaction(TransactionDefinition.withDefaults());
+        //TransactionStatus TransactionStatus = transactionManager.getTransaction(TransactionDefinition.withDefaults());
 //        DataSourceTransactionManager 实现接口 PlatformTransactionManager.定义了事务的提交，回滚
         //DefaultTransactionDefinition实现接口TransactionDefinition。设置隔离、传播、超时、只读
         DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
@@ -307,7 +307,7 @@ public class PersonService implements IPersonService {
         // 设置事务传播行为
         definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
         //事务状态，还原点
-        TransactionStatus transaction = transactionManager.getTransaction(definition);
+        TransactionStatus transactionStatus = transactionManager.getTransaction(definition);
 
         try {
             List<DemoProduct> list = new ArrayList<>();
@@ -333,11 +333,11 @@ public class PersonService implements IPersonService {
             //模拟异常
 //            int sum = 1 / 0;
 
-            transactionManager.commit(transaction);
+            transactionManager.commit(transactionStatus);
         } catch (Exception e) {
             log.info(e.getMessage());
             //手动控制回滚异常
-            transactionManager.rollback(transaction);
+            transactionManager.rollback(transactionStatus);
             throw e;
         }
     }

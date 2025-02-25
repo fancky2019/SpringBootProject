@@ -71,6 +71,7 @@ import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -715,7 +716,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
     /**
      * * 雪崩：随机过期时间
-     * * 击穿：分布式锁（表名），没有取到锁，sleep(50)+重试
+     * * 击穿：分布式锁（表名），没有取到锁，sleep(50)+重试 .获取不到锁，抛异常处理 服务器繁忙，稍后重试
      * * 穿透：分布式锁（表名）+设置一段时间的null值，没有取到锁，sleep(50)+重试
      *
      * @param id
@@ -736,6 +737,9 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
                 boolean lockSuccessfully = lock.tryLock(30, 60, TimeUnit.SECONDS);
                 if (!lockSuccessfully) {
                     log.info("Thread - {} 获得锁 {}失败！锁被占用！", Thread.currentThread().getId(), lockKey);
+
+                  //获取不到锁，抛异常处理 服务器繁忙，稍后重试
+//                    throw new Exception("服务器繁忙，稍后重试");
                     return null;
                 }
                 BigInteger idB = BigInteger.valueOf(id);
@@ -746,7 +750,11 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
                     redisTemplate.expire(key, 60, TimeUnit.SECONDS);
                 } else {
                     String json = objectMapper.writeValueAsString(productTest);
+                    //要设置个过期时间
                     valueOperations.set(key, json);
+                    //[100,2000)
+                    long expireTime = ThreadLocalRandom.current().nextInt(3600,24*3600);
+                    redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
                 }
             } catch (Exception e) {
                 throw e;
@@ -1481,9 +1489,15 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
 //        modify_time=now() 脚本添加了修改时间 ，始终会有影响行数
             //去掉 modify_time=now() ，数据不做任何修改返回0
-            int affectRows = this.baseMapper.batchUpdateBySelective(productTestList);
+            int affectRows = 0;
+            if (productTestList.size() > 0) {
+                affectRows = this.baseMapper.batchUpdateBySelective(productTestList);
+            } else {
+                return 0;
+            }
+
             if (affectRows != productTestList.size()) {
-                //事务回滚 手动回滚事务
+                //事务回滚 手动回滚事务 手动提交事务
                 //事务回滚 手动回滚
                 //TransactionAspectSupport
                 //PlatformTransactionManager 参见  com.example.demo.service.demo.PersonService
