@@ -423,7 +423,14 @@ public class RedisTestController {
             ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
             valueOperations.set("stringKey1", "stringKeyValue1");
             valueOperations.set("stringKey2", "stringKeyValue2");
-            valueOperations.set("stringKey3", "stringKeyValue3");
+            try {
+
+                valueOperations.set("stringKey3", "stringKeyValue3");
+                //一次写入多个命令lua
+            } catch (Exception ex) {
+                //写入失败报异常
+            }
+
             //取值
             String strVal = valueOperations.get("stringKey1");
             String strVal3 = valueOperations.get("stringKey3", 0, -1);
@@ -860,7 +867,7 @@ end
         */
 
         //没有启动副本，numReplicas =1，返回0.key 写入redis 成功
-      //  String scriptText = "redis.call('SET', KEYS[1], ARGV[1]); return redis.call('WAIT', tonumber(ARGV[2]), tonumber(ARGV[3]));";
+        //  String scriptText = "redis.call('SET', KEYS[1], ARGV[1]); return redis.call('WAIT', tonumber(ARGV[2]), tonumber(ARGV[3]));";
 
         String scriptText = ""
                 + "redis.call('SET', KEYS[1], ARGV[1]); "
@@ -878,12 +885,50 @@ end
         script.setResultType(Long.class);
 
 
-        Long result =redisTemplateType.<Long>execute(script, Collections.singletonList(key), value, String.valueOf(numReplicas), String.valueOf(timeoutMillisecond));
-       // Long result1 =redisTemplateType.execute(script, Collections.singletonList(key), value, String.valueOf(numReplicas), String.valueOf(timeoutMillisecond));
+        Long result = redisTemplateType.<Long>execute(script, Collections.singletonList(key), value, String.valueOf(numReplicas), String.valueOf(timeoutMillisecond));
+        // Long result1 =redisTemplateType.execute(script, Collections.singletonList(key), value, String.valueOf(numReplicas), String.valueOf(timeoutMillisecond));
 
         redisTemplate.opsForValue().set("stringKey", "value");
 
         return MessageResult.success();
 
+    }
+
+    /**
+     * 一次写入多个key,并设置过期时间
+     * @return
+     */
+    public String setMultipleKeysWithExpire() {
+        String luaScript = "for i = 1, #KEYS do " +
+                "redis.call('SET', KEYS[i], ARGV[i]); " +
+                "redis.call('EXPIRE', KEYS[i], 60); " +  // 设置 60 秒过期
+                "end return 'OK'";
+
+        List<String> keys = Arrays.asList("keyA", "keyB", "keyC");
+        List<String> values = Arrays.asList("valA", "valB", "valC");
+
+        DefaultRedisScript<String> script = new DefaultRedisScript<>(luaScript, String.class);
+        return redisTemplateType.execute(script, keys, values.toArray());
+    }
+
+
+    /**
+     * 秒杀扣库存
+     * @param productKey
+     * @return
+     */
+    public String seckill(String productKey) {
+        String luaScript =
+                "local stock = redis.call('GET', KEYS[1]); " +
+                        "if stock and tonumber(stock) > 0 then " +
+                        "   redis.call('DECR', KEYS[1]); " +
+                        "   return '秒杀成功'; " +
+                        "else " +
+                        "   return '库存不足'; " +
+                        "end";
+
+        DefaultRedisScript<String> script = new DefaultRedisScript<>(luaScript, String.class);
+        List<String> keys = Arrays.asList(productKey);
+        return redisTemplateType.execute(script, keys);
     }
 }

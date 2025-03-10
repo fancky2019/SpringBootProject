@@ -71,7 +71,7 @@ logging:
 #开发配
 spring:
   lifecycle:
-    #默认30s #  shutdown: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
+    #默认30s #  server.shutdown=graceful: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
     timeout-per-shutdown-phase: 60s
 
 #  #默认cglib 代理，设置jdk 动态代理 false

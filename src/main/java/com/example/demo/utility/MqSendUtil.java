@@ -36,7 +36,7 @@ public class MqSendUtil {
             return;
         }
 
-        //事务回调：事务同步，此处待处理，
+        //事务回调：事务同步，此处待处理， 所有事务提交了才会执行 事务回调
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 //            @Override
 //            public void afterCompletion(int status) {

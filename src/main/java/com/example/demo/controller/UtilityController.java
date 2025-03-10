@@ -1728,6 +1728,7 @@ public class UtilityController {
 
     /**
      * 事务同步  更新覆盖 、事务传播 版本号
+     * 事务aop,代码执行完长事务未提交
      * @param i
      * @throws InterruptedException
      */
@@ -1799,11 +1800,20 @@ public class UtilityController {
 
 
     /**
+     *
+     * 在关闭 Spring Boot 服务时，通常应该使用 kill -15，而不是 kill -2
+     *
+     *
      * # 开启优雅停机，默认值：immediate 为立即关闭
      * server.shutdown=graceful
      *
      * # 设置缓冲期，最大等待时间，默认：30秒
      * spring.lifecycle.timeout-per-shutdown-phase=60s
+     *
+     * timeout-per-shutdown-phase:
+     *当 Spring Boot 接收到关闭信号（如 SIGTERM 或通过 Actuator 的 /shutdown 端点）时，会进入优雅关闭流程。
+     * 在此期间，Spring Boot 会等待未完成的任务（如正在处理的 HTTP 请求、异步任务等）继续执行，直到任务完成或超时。
+     * timeout-per-shutdown-phase 用于设置这个等待的最大时间。
      *
      *
      * 优雅停机设置：
@@ -1824,7 +1834,7 @@ public class UtilityController {
      * win taskkill /pid /f 直接杀掉进程。不会优雅停机
      *
      *
-     * 关闭服务，执行kill -2或者Ctrl + C。
+     *关闭服务，执行kill -2或者Ctrl + C。
      * 此处执行kill -2 而不是kill -9。kill -2 相当于快捷键Ctrl + C会触发 Java 的 ShutdownHook 事件处理。
      *
      *
@@ -1839,12 +1849,33 @@ public class UtilityController {
      * kill pid 或  kill -2 pid 关闭服务，请求的任务会继续执行直到返回，此时jps今晨还在，请他新的请求
      * 不会请求成功，之前请求结束之后，进程会结束
      *
+     *
+     * kill -15 发送的是 SIGTERM 信号，这是一个终止信号，用于请求进程正常退出。
+     * Spring Boot 默认会捕获 SIGTERM 信号，并触发关闭流程，包括调用 @PreDestroy 注解的方法、执行 DisposableBean 接口的 destroy 方法，以及运行注册的 ShutdownHook41015。
+     *
+     *
+     *
+     *
+     * windows:
+     * 在 Windows 系统中，关闭文档窗口（如 Word、Excel 等）时，操作系统并不会发送类似于
+     * Linux 的 kill 信号（如 SIGTERM 或 SIGKILL）应用程序可以捕获 WM_CLOSE 消息并决定如何处理：
+     * 如果应用程序选择处理 WM_CLOSE，它可以执行清理操作（如保存文档、释放资源等），然后关闭窗口。
+     * 如果应用程序未处理 WM_CLOSE，窗口会直接关闭。
+     *
+     *任务管理器会直接终止进程，类似于 Linux 的 kill -9，不会发送 WM_CLOSE 消息。
+     *
+     *
+     *
+     *
+     *
      * @throws InterruptedException
      */
     @GetMapping(value = "/shutdownGracefulTest")
     public void shutdownGracefulTest() throws InterruptedException {
         log.info("before trace_shutdownGracefulTest");
-        Thread.sleep(50 * 1000);
+        this.productTestService.updateField();
+        // timeout-per-shutdown-phase: 60s
+//        Thread.sleep(90 * 1000);
         log.info("after trace_shutdownGracefulTest");
 
     }
@@ -2165,5 +2196,10 @@ public class UtilityController {
         return MessageResult.success(configModelProperty.getFistName());
     }
 
+    @GetMapping(value = "/transactionalCallBack")
+    public MessageResult<String> transactionalCallBack() throws Exception {
 
+        productTestService.transactionalCallBack();
+        return MessageResult.success();
+    }
 }

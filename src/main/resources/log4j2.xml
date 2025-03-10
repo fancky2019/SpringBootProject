@@ -56,10 +56,13 @@
             <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${log_pattern}"/>
             <Policies>
+                <!-- 基于时间的滚动策略，interval="4" 表示每 6 小时滚动一次，modulate="true" 表示从 0 点开始计算。 每 6 小时滚动一次 -->
                 <TimeBasedTriggeringPolicy interval="6" modulate="true"/>
+                <!-- 基于文件大小的滚动策略，当文件大小超过 100MB 时也会滚动。文件大小超过 100MB 时也滚动 -->
                 <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
-            <DefaultRolloverStrategy max="20"/>
+            <!--定义文件保留策略， 最多保留 30 个文件 -->
+            <DefaultRolloverStrategy max="30"/>
         </RollingFile>
 
         <Async name="AsyncMail">

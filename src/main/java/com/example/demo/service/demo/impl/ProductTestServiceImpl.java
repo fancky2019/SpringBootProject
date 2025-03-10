@@ -25,6 +25,7 @@ import com.example.demo.easyexcel.GXDetailListVO;
 import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
 import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
 import com.example.demo.eventbus.MyCustomEvent;
+import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.Student;
@@ -436,6 +437,8 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         updateWrapper.set(ProductTest::getProductName, "update1");
         updateWrapper.eq(ProductTest::getId, 1);
         updateWrapper.eq(ProductTest::getStatus, 1);
+        //如果值不改变，update 返回false.其内部根据mapper 执行的结果判断： result >= 1
+        //内部调用 update(null,updateWrapperOne);
         boolean re = this.update(updateWrapper);
 //        this.update(productTest,updateWrapper);
         //  实体要指定null ，默认null，不然默认更新非空字段
@@ -463,6 +466,8 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         updateWrapper2.eq(ProductTest::getId, 2);
         updateWrapper2.eq(ProductTest::getStatus, 1);
         //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        //如果值不改变，update 返回false.其内部根据mapper 执行的结果判断： result >= 1
+        //内部调用 update(null,updateWrapperOne);
         boolean re1 = this.update(productTest, updateWrapper2);
 
         int m = 0;
@@ -494,8 +499,21 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         updateWrapper3.eq(ProductTest::getId, productTest3.getId());
         updateWrapper3.eq(ProductTest::getStatus, productTest3.getStatus());
         //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        //如果值不改变，update 返回false.其内部根据mapper 执行的结果判断： result >= 1
+        //内部调用 update(null,updateWrapperOne);
         boolean re3 = this.update(updateWrapper3);
 
+
+        ProductTest productTestOne = this.getById(1);
+        if (productTestOne.getId().compareTo(BigInteger.valueOf(2)) == 0) {
+//            productTest.setId(BigInteger.valueOf(0));
+        }
+        LambdaUpdateWrapper<ProductTest> updateWrapperOne = new LambdaUpdateWrapper<>();
+        updateWrapperOne.set(ProductTest::getProductName, productTest.getProductName() + 1);
+        updateWrapperOne.eq(ProductTest::getId, productTest.getId());
+        //如果值不改变，update 返回false.其内部根据mapper 执行的结果判断： result >= 1
+        //内部调用 update(null,updateWrapperOne);
+        boolean reOne = this.update(null, updateWrapperOne);
     }
 
     /**
@@ -681,16 +699,16 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      * 更新表的指定字段
      */
     @Transactional(rollbackFor = Exception.class)
-    public void updateField() {
+    public void updateField() throws InterruptedException {
 
 
         LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
-        updateWrapper3.set(ProductTest::getProductStyle, "getProductStyle111");
+        updateWrapper3.set(ProductTest::getProductStyle, "1");
         updateWrapper3.eq(ProductTest::getId, 1);
 
         //更新指定条件的 为productTest 对象的值，ID 字段除外。
         boolean re3 = this.update(updateWrapper3);
-
+        Thread.sleep(90 * 1000);
 //        UpdateWrapper<ProductTest> updateWrapper = new UpdateWrapper<>();
 //        updateWrapper.eq("ID", 1);//条件
 //        updateWrapper.set("product_Name", "abc");//要更新的列
@@ -738,7 +756,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
                 if (!lockSuccessfully) {
                     log.info("Thread - {} 获得锁 {}失败！锁被占用！", Thread.currentThread().getId(), lockKey);
 
-                  //获取不到锁，抛异常处理 服务器繁忙，稍后重试
+                    //获取不到锁，抛异常处理 服务器繁忙，稍后重试
 //                    throw new Exception("服务器繁忙，稍后重试");
                     return null;
                 }
@@ -753,7 +771,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
                     //要设置个过期时间
                     valueOperations.set(key, json);
                     //[100,2000)
-                    long expireTime = ThreadLocalRandom.current().nextInt(3600,24*3600);
+                    long expireTime = ThreadLocalRandom.current().nextInt(3600, 24 * 3600);
                     redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
                 }
             } catch (Exception e) {
@@ -1516,5 +1534,39 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         }
         return 0;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void transactionalCallBack() throws Exception {
+        for (int i = 1; i < 3; i++) {
+            transactionalCallBack2(BigInteger.valueOf(i));
+        }
+    }
+
+    /**
+     * 所有事务提交了才会执行 事务回调
+     * @param productId
+     * @throws Exception
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void transactionalCallBack2(BigInteger productId) throws Exception {
+        ProductTest productTest = this.getById(productId);
+        if (productId.compareTo(BigInteger.valueOf(2)) == 0) {
+//            productTest.setId(BigInteger.valueOf(0));
+        }
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(ProductTest::getProductName, productTest.getProductName() + productId);
+        updateWrapper3.eq(ProductTest::getId, productTest.getId());
+        //如果值不改变，update 返回false.其内部根据mapper 执行的结果判断： result >= 1
+        // this.update(updateWrapper3);内部调用 update(null,updateWrapperOne);
+        boolean re3 = this.update(null, updateWrapper3);
+        if (!re3) {
+            throw new Exception("error");
+        }
+        MqMessage message = new MqMessage();
+        message.setId(productTest.getId().intValue());
+        mqSendUtil.send(message);
+    }
+
 
 }

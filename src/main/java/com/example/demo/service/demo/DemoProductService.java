@@ -253,6 +253,11 @@ public class DemoProductService {
 //            futures.toArray(completableFutures);
 //            CompletableFuture.allOf(completableFutures);
 
+            /*
+             * execute 适用于简单的 Runnable 任务，没有返回值，异常由线程池处理。
+             *
+             * submit 适用于需要返回值或需要捕获异常的任务，返回 Future 对象。submit 最终调用execute
+             */
 
             final CountDownLatch latch = new CountDownLatch(batchCount);
             ThreadPoolExecutor executor = new ThreadPoolExecutor(

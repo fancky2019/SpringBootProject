@@ -60,4 +60,8 @@ public interface IProductTestService extends IService<ProductTest> {
     boolean batchUpdateByCondition();
 
     Integer batchUpdateBySelective() throws Exception;
+
+    void updateField() throws InterruptedException;
+
+    void transactionalCallBack() throws Exception;
 }
