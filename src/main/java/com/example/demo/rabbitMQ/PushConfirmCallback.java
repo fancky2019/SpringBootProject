@@ -1,9 +1,11 @@
 package com.example.demo.rabbitMQ;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.service.demo.IMqMessageService;
 //import com.example.demo.utility.ApplicationContextAwareImpl;
+import com.example.demo.utility.ApplicationContextAwareImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -25,8 +27,12 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
-    @Autowired
-    ApplicationContext applicationContext;
+
+
+
+    //null
+//    @Autowired
+//    ApplicationContext applicationContext;
     //无法注入 通过容器获取
 //    @Autowired
 //    IMqMessageService mqMessageService;
@@ -39,18 +45,22 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
                 //发送消息时候指定的消息的id，根据此id设置消息表的消息状态为已发送
 
 //                从容器中获取bean
-//                ApplicationContext applicationContext = ApplicationContextAwareImpl.getApplicationContext();
+                ApplicationContext applicationContext = ApplicationContextAwareImpl.getApplicationContext();
                 IMqMessageService mqMessageService = applicationContext.getBean(IMqMessageService.class);
 
 
-//                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-//                lambdaQueryWrapper.eq(MqMessage::getMsgId, msgId);
-//                mqMessageService.getOne(lambdaQueryWrapper);
+                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                lambdaQueryWrapper.eq(MqMessage::getMsgId, msgId);
+                MqMessage mqMessage=   mqMessageService.getOne(lambdaQueryWrapper);
+                mqMessage.setStatus(1);
+                mqMessageService.updateById(mqMessage);
 
-                LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();
-                updateWrapper.set(MqMessage::getPublishAck, true);
-                updateWrapper.eq(MqMessage::getMsgId, msgId);//条件
-                mqMessageService.update(updateWrapper);
+
+
+//                LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();
+//                updateWrapper.set(MqMessage::getStatus, 1);
+//                updateWrapper.eq(MqMessage::getMsgId, msgId);//条件
+//                mqMessageService.update(updateWrapper);
 
                 //更新本地消息表，消息已经发送到mq
                 log.info("消息 - {} 发送到交换机成功！", msgId);

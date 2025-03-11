@@ -48,11 +48,11 @@ public class MqMessage implements Serializable {
 
     private String queue;
 
-    private Boolean publishAck;
-
-    private Boolean consumeAck;
-
-    private Boolean consumeFail;
+//    private Boolean publishAck;
+//
+//    private Boolean consumeAck;
+//
+//    private Boolean consumeFail;
 
     private LocalDateTime createTime;
 
@@ -60,7 +60,12 @@ public class MqMessage implements Serializable {
 
     private String remark;
 
-
+    private Integer version;
+    private Integer status;
+    /**
+     * 取代 publishAck consumeAck
+     *    0:未生成 1：已生产 2：已消费
+     */
     public MqMessage() {
 
     }
@@ -71,9 +76,9 @@ public class MqMessage implements Serializable {
         this.exchange = exchange;
         this.routeKey = routeKey;
         this.queue = queue;
-        this.publishAck = false;
-        this.consumeAck = false;
-        this.consumeFail = false;
+        this.status=0;
+        this.version=0;
+        this.remark="";
         this.createTime = LocalDateTime.now();
         this.updateTime = LocalDateTime.now();
     }

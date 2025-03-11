@@ -43,8 +43,17 @@ public class EventListenerHandler {
     @EventListener
     @Order(1)
     public void sendCommon(UserRegisterEvent event) {
-        log.info("UserRegisterEvent listener thread id - {}",Thread.currentThread().getId());
-        int m = 0;
+        //Async 线程池内的异常无法被 GlobalExceptionHandler 异常捕捉，要在线程内单独处理
+        try
+        {
+            log.info("UserRegisterEvent listener thread id - {}",Thread.currentThread().getId());
+            int m = 0;
+        }
+        catch (Exception ex)
+        {
+
+        }
+
     }
 
     /**

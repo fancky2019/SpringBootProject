@@ -1,14 +1,22 @@
 package com.example.demo.jobs.xxljob;
 
+import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.demo.IMqMessageService;
+import com.example.demo.utility.RedisKeyConfigConst;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 将@XxlJob里的注解填入后台的JobHandler*
@@ -192,6 +200,7 @@ public class BeanMethodJobHandler {
 
     @XxlJob("mqFailHandler")
     public  void mqFailHandler() throws Exception {
+        log.info("start executing xxljob - mqFailHandler ");
         //param xxl admin 填写的任务参数
         String param = XxlJobHelper.getJobParam();
 
@@ -200,7 +209,7 @@ public class BeanMethodJobHandler {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String timeStr = formatter.format(LocalDateTime.now());
         XxlJobHelper.log("mqFailHandler");
-        log.info("xxljob - mqFailHandler  {} ", timeStr);
+        log.info("end executing  xxljob - mqFailHandler  {} ", timeStr);
     }
 
 

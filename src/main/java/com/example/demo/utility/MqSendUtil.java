@@ -70,13 +70,38 @@ public class MqSendUtil {
         if (mqMessage == null) {
             return;
         }
-        CompletableFuture.runAsync(() -> {
-            //主线程无法捕捉子线程抛出的异常，除非设置捕捉 Thread.setDefaultUncaughtExceptionHandler
-            try {
+
+//        try {
+
+            CompletableFuture.runAsync(() -> {
+                //主线程无法捕捉子线程抛出的异常，除非设置捕捉 Thread.setDefaultUncaughtExceptionHandler
+//            try {
+//                rabbitMQTest.produceTest(mqMessage);
+//            } catch (Exception e) {
+//                log.error("", e);
+//            }
                 rabbitMQTest.produceTest(mqMessage);
-            } catch (Exception e) {
-                log.error("", e);
-            }
-        });
+//                try {
+//                    Thread.sleep(60*1000);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+            }).exceptionally(ex -> {
+                //1、消息发送失败，写入消息表.但是，此处和DB操作不在一个事务里。可能此处保存db失败造成数据不一致
+                //2、消息发送失败，更新消息表消息的状态为未发送
+                // 处理异常
+                System.err.println("Exception caught: " + ex.getMessage());
+//                try {
+//                    throw ex;
+//                } catch (Throwable e) {
+//                    throw new RuntimeException(e);
+//                }
+                return null;
+//                return "默认值"; // 提供默认值
+            });
+//        //没有捕捉到CompletableFuture 抛出的异常
+//        } catch (Throwable ex) {
+//            throw ex;
+//        }
     }
 }

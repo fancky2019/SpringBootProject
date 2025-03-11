@@ -31,6 +31,8 @@ import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.Student;
 import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.rabbitMQ.RabbitMQConfig;
+import com.example.demo.service.demo.IMqMessageService;
 import com.example.demo.service.demo.IPersonService;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.service.wms.ProductService;
@@ -101,6 +103,10 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
+
+
+    @Autowired
+    private IMqMessageService mqMessageService;
 
 
     @Autowired
@@ -1563,9 +1569,14 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         if (!re3) {
             throw new Exception("error");
         }
-        MqMessage message = new MqMessage();
-        message.setId(productTest.getId().intValue());
-        mqSendUtil.send(message);
+
+        MqMessage mqMessage = new MqMessage
+                (RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME,
+                        RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY,
+                        RabbitMQConfig.BATCH_DIRECT_QUEUE_NAME,
+                        productTest.getId().toString());
+        mqMessageService.add(mqMessage);
+//        mqSendUtil.send(mqMessage);
     }
 
 

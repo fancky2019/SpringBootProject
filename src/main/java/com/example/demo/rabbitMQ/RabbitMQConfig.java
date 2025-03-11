@@ -1,6 +1,10 @@
 package com.example.demo.rabbitMQ;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.example.demo.model.entity.demo.MqMessage;
+import com.example.demo.service.demo.IMqMessageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +18,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -40,6 +45,9 @@ public class RabbitMQConfig {
 
     @Autowired
     ObjectMapper objectMapper;
+    @Autowired
+    ApplicationContext applicationContext;
+
     //    @Autowired
 //    private DemoProductService demoProductService;
     //region 常量参数
@@ -159,6 +167,21 @@ public class RabbitMQConfig {
                 String failedMessage = new String(returnedMessage.getMessage().getBody());
                 rabbitMqMessage = objectMapper.readValue(failedMessage, RabbitMqMessage.class);
                 messageId = rabbitMqMessage.getMessageId();
+
+                //没有路由到队列的设置未生产成功
+                IMqMessageService mqMessageService = applicationContext.getBean(IMqMessageService.class);
+//                LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();
+//                updateWrapper.set(MqMessage::getStatus, 0);
+//                updateWrapper.eq(MqMessage::getMsgId, messageId);//条件
+//                mqMessageService.update(updateWrapper);
+
+                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                lambdaQueryWrapper.eq(MqMessage::getMsgId, messageId);
+                MqMessage mqMessage=   mqMessageService.getOne(lambdaQueryWrapper);
+                mqMessage.setStatus(0);
+                mqMessageService.updateById(mqMessage);
+
+
             } catch (Exception e) {
                 log.info("", e);
             }

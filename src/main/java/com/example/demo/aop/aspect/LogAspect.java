@@ -481,6 +481,7 @@ public class LogAspect {
         StopWatch stopWatch = new StopWatch("");
         stopWatch.start("");
         Object obj = jp.proceed();
+        //proceed 执行完，包括事务回调执行完 才会执行到此
         stopWatch.stop();
         long costTime = stopWatch.getTotalTimeMillis();
         MessageResult<Object> messageResult = MessageResult.success(obj);

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
-
+<!--        Appenders 定义日志输出的目的地。-->
+<!--        PatternLayout 定义日志的输出格式。-->
+<!--        Policies 用于定义滚动文件的触发策略：-->
+<!--        Loggers 定义日志记录器的行为：  Root：根 Logger，所有日志记录器都会继承它的配置。-->
 <configuration status="WARN" monitorInterval="30">
     <Properties>
         <Property name="springAppName">spring-boot-project</Property>
@@ -51,15 +54,26 @@
         <!--        linux指定文件文职-->
         <!--        <RollingFile name="RollingFile" fileName="var/log/ordermigratedbtool/${date:yyyy-MM}/${date:yyyy-MM-dd}/log.log"-->
         <!--                     filePattern="var/log/ordermigratedbtool/$${date:yyyy-MM}/$${date:yyyy-MM-dd}/info-%d{yyyy-MM-dd}-%i.log">-->
+
+<!--        interval（时间间隔）-->
+<!--        指定日志滚动的时间间隔，单位与 filePattern 中的日期格式一致。例如：-->
+<!--        filePattern="logs/app-%d{yyyy-MM-dd-HH}.log.gz"（按小时滚动）-->
+<!--        interval="1" 表示每 1 小时滚动一次。-->
+<!--        如果 filePattern 使用的是 yyyy-MM-dd（按天滚动），interval="1" 则表示每天滚动一次。-->
+<!--        modulate（对齐时间）-->
+<!--        modulate="true" 使日志文件滚动时间点与自然时间对齐。例如：-->
+<!--        filePattern="logs/app-%d{yyyy-MM-dd-HH}.log.gz" 且 interval="1"，则日志会在每小时的整点（如 12:00, 13:00）进行滚动。-->
+<!--        如果 modulate="false"，则从应用启动时间开始计算，例如应用在 12:15 启动，每小时滚动一次，则下次滚动时间是 13:15。-->
         <RollingFile name="RollingFile" fileName="logs/${date:yyyy-MM}/${date:yyyy-MM-dd}/log.log"
                      filePattern="logs/$${date:yyyy-MM}/$${date:yyyy-MM-dd}/info-%d{yyyy-MM-dd}-%i.log">
             <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${log_pattern}"/>
             <Policies>
-                <!-- 基于时间的滚动策略，interval="4" 表示每 6 小时滚动一次，modulate="true" 表示从 0 点开始计算。 每 6 小时滚动一次 -->
-                <TimeBasedTriggeringPolicy interval="6" modulate="true"/>
-                <!-- 基于文件大小的滚动策略，当文件大小超过 100MB 时也会滚动。文件大小超过 100MB 时也滚动 -->
-                <SizeBasedTriggeringPolicy size="100 MB"/>
+<!--                filePattern %d{yyyy-MM-dd-HH} %d{yyyy-MM-dd-HH}  interval 分别标识 小时 和天 间隔-->
+                <!-- 基于时间的滚动策略，interval="1" 表示每 1 滚动一次，modulate="true" 表示从 0 点开始计算。  -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <!-- 基于文件大小的滚动策略，当文件大小超过 1024MB 时也会滚动。文件大小超过 100MB 时也滚动 -->
+                <SizeBasedTriggeringPolicy size="1024 MB"/>
             </Policies>
             <!--定义文件保留策略， 最多保留 30 个文件 -->
             <DefaultRolloverStrategy max="30"/>
