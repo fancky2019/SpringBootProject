@@ -257,5 +257,20 @@ public class UserController {
 
         return this.interfaceTestImpA.fun() + ":" + interfaceTestImpB.fun();
     }
+
+
+    /**
+     * 2.@RestController注解，相当于@Controller+@ResponseBody两个注解的结合，
+     * 返回json数据不需要在方法前面加@ResponseBody注解了，
+     * 但使用@RestController这个注解，就不能返回jsp,html页面，视图解析器无法解析jsp,html页面
+     *
+     * @param map
+     * @return
+     */
+    @RequestMapping("/responseBodyEmitter")
+    // @ResponseBody// 就是返回字符串了
+    public String responseBodyEmitter() {
+        return "user/responseBodyEmitter";
+    }
 }
 

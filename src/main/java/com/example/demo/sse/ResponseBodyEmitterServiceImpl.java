@@ -3,8 +3,8 @@ package com.example.demo.sse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -15,116 +15,102 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
- * SSE	                      WebScoket
- * http 协议	独立的             websocket 协议
- * 轻量，使用简单	              相对复杂
- * 默认支持断线重连	          需要自己实现断线重连
- * 文本传输	                  二进制传输
- * 支持自定义发送的消息类型
+ * 传统的 HTTP 请求 - 响应模式中，服务器通常需要等待整个响应数据生成完成后，才会将其一次性发送给客户端
  *
  *
- *
- * 简单易用：SSE使用简单的API，只需要创建EventSource对象并监听事件即可实现实时通信。
- * 单向通信：SSE是一种单向通信方式，只允许服务器向客户端推送数据，而不支持客户端向服务器发送请求。
- * 实时性：SSE建立了持久连接，服务器可以随时向客户端发送更新的数据，实现实时的数据推送。
- * 自动重连：如果连接中断，SSE会自动尝试重新建立连接，确保持久连接的稳定性。
- * 支持事件流：SSE使用事件流（event stream）的格式来传输数据，可以发送不同类型的事件，方便客户端进行处理
+ * 将数据分成多个独立的块，每个块都有自己的长度标识。
+ *当有部分数据准备好时，就可以立即调用 send()方法将这些数据推送给客户端,ai 就是这种模式
  *
  *
- * websocket 双工，sse 单工
+ * ResponseBodyEmitter采用了 HTTP 的分块编码（Chunked Encoding）方式来传输数据。
+ * 在传统的 HTTP 响应中，通常需要在响应头中明确指定Content-Length，表示整个响应数据的长度。
+ * 但在分块传输中，服务器不会提前设置Content-Length，而是将数据分成多个独立的块，每个块都有自己的长度标识。
  *
  *
  *
  *
- * ResponseBodyEmitter、SseEmitter、StreamingResponseBody
  *
- * ResponseBodyEmitter:支持分块发送数据。适用于需要逐步生成响应的场景。
- * SseEmitter：派生自ResponseBodyEmitter.实时通知或更新
- * StreamingResponseBody：直接发送stream 不需要消息转成byte.适用于需要流式传输大文件的场景。
+ * 需要调用complete()方法来明确告知客户端响应结束，关闭连接。结束响应并向客户端传递错误信息。
+ * 这样可以避免连接长时间保持开放，造成资源浪费。
+ * 如果在数据传输过程中出现异常，可以调用completeWithError()方法，
  *
- * ResponseBodyEmitter：适用于逐步发送数据的通用异步响应处理器。
- * SseEmitter：专门用于服务器推送事件（SSE），适合实时更新场景。
- * StreamingResponseBody：适用于流式传输二进制数据，如大文件下载。
  *
- * 访问 http://localhost:8081/sbp/user
+ *
+ *
+ * Streaming：直接通过OutputStream向客户端写入数据，灵活性较高，但需要手动处理流的关闭，增加了开发的复杂度。
+ * Server-Sent Events (SSE)：基于text/event-stream协议，适用于服务端事件推送场景，但要求客户端支持 SSE 协议。
+ * ResponseBodyEmitter：通用性更强，适用于任何支持 HTTP 的客户端，并且易于与 Spring 框架集成，
+ *                     是一种更为便捷的流式传输解决方案。
+ *
+ *测试：
+ * tabby 控制台执行  curl http://localhost:8081/sbp/utility/createResponseBodyEmitterConnect/1
+ *                  会收到后台发送的数据
+ *
+ *
+ * 前段获取后台推送的数据 访问 http://localhost:8081/sbp/utility/createResponseBodyEmitterConnect/2
+ * EventSource：适用于服务器推送（text/event-stream），简单易用。 sse
+ * Fetch API：适用于流式数据，灵活性高。ResponseBodyEmitter
+ *
+ *
+ * EventSource 仅适用于服务器推送事件（SSE），且要求服务器返回的响应格式符合 SSE 规范（如 Content-Type: text/event-stream）。
+ * 使用 fetch 的流式 API：
  */
 @Slf4j
 @Service
-public class SseEmitterServiceImpl implements ISseEmitterService {
-//    StreamingResponseBody
+public class ResponseBodyEmitterServiceImpl implements IResponseBodyEmitterService {
+
     /**
      * 容器，保存连接，用于输出返回
      */
-    private static Map<String, SseEmitter> sseCache = new ConcurrentHashMap<>();
+    private static Map<String, ResponseBodyEmitter> sseCache = new ConcurrentHashMap<>();
 
 
-    /**
-     * 当后台服务重启，http会和后台重连
-     */
     @Override
-    public SseEmitter createSseConnect(String userId) throws Exception {
+    public ResponseBodyEmitter createResponseBodyEmitterConnect(String userId) throws Exception {
         // 设置超时时间，0表示不过期。默认30秒，超过时间未完成会抛出异常：AsyncRequestTimeoutException
-        SseEmitter sseEmitter = new SseEmitter(0L);//建议和会话时长保持一致
+        ResponseBodyEmitter sseEmitter = new ResponseBodyEmitter(0L);//建议和会话时长保持一致
+        //-1不过期
+//        ResponseBodyEmitter sseEmitter = new ResponseBodyEmitter(-1L);
         // 是否需要给客户端推送ID
 
         // 注册回调
         sseEmitter.onCompletion(completionCallBack(userId));
         sseEmitter.onError(errorCallBack(userId));
         sseEmitter.onTimeout(timeoutCallBack(userId));
-        //        emitter.onTimeout(() -> emitter.complete());
-
+//        emitter.onTimeout(() -> emitter.complete());
         sseCache.put(userId, sseEmitter);
         log.info("创建新的sse连接，当前用户：{}", userId);
 
         try {
-            Object obj = SseEmitter.event().id("USER_ID").data(userId);
-            sseEmitter.send(SseEmitter.event().id("USER_ID").data(userId));
+            sseEmitter.send(userId);
         } catch (IOException e) {
             log.error("SseEmitterServiceImpl[createSseConnect]: 创建长链接异常，客户端ID:{}", userId, e);
             throw new Exception("创建连接异常！", e);
         }
 
 
+        //20s后推送数据给前段
         CompletableFuture.runAsync(() ->
         {
-            while (true) {
+            int i = 0;
+            while (i < 10) {
                 String msg = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
                 batchSendMessage(msg);
+                ++i;
             }
         });
 
         return sseEmitter;
     }
 
-    /**
-     * 群发所有人
-     *
-     * @param msg
-     */
     @Override
-    public void batchSendMessage(String msg) {
-        sseCache.forEach((k, v) -> {
-            SseEmitter sseEmitter = sseCache.get(k);
-            if (sseEmitter != null) {
-                sendMsgToClientByUserId(k, msg, sseEmitter);
-            }
-        });
-        // return null;
-    }
-
-    /**
-     * 根据客户端id关闭SseEmitter对象
-     *
-     * @param userId
-     */
-    @Override
-    public void closeSseConnect(String userId) {
-        SseEmitter sseEmitter = sseCache.get(userId);
+    public void closeResponseBodyEmitterConnect(String userId) {
+        ResponseBodyEmitter sseEmitter = sseCache.get(userId);
         if (sseEmitter != null) {
             //设置完成状态，触发completionCallBack。建立连接时候注册sseEmitter.onCompletion(completionCallBack(userId));
             sseEmitter.complete();
@@ -132,29 +118,24 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
         }
     }
 
-
-    /**
-     * 根据客户端id获取SseEmitter对象
-     *
-     * @param userId
-     * @return
-     */
     @Override
-    public SseEmitter getSseEmitterByUserId(String userId) {
+    public void batchSendMessage(String msg) {
+        sseCache.forEach((k, v) -> {
+            ResponseBodyEmitter sseEmitter = sseCache.get(k);
+            if (sseEmitter != null) {
+                sendMsgToClientByUserId(k, msg, sseEmitter);
+            }
+        });
+    }
+
+    @Override
+    public ResponseBodyEmitter getResponseBodyEmitterByUserId(String userId) {
         return sseCache.get(userId);
     }
 
-
-    /**
-     * 推送消息到客户端，此处结合业务代码，业务中需要推送消息处调用即可向客户端主动推送消息
-     *
-     * @param
-     * @param
-     * @return
-     */
     @Override
-    public SseEmitter sendMsgToClient(String userId, String msg) {
-        SseEmitter sseEmitter = sseCache.get(userId);
+    public ResponseBodyEmitter sendMsgToClient(String userId, String msg) {
+        ResponseBodyEmitter sseEmitter = sseCache.get(userId);
         if (sseEmitter != null) {
             sendMsgToClientByUserId(userId, msg, sseEmitter);
             return sseEmitter;
@@ -172,21 +153,19 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
      * @author re
      * @date 2022/3/30
      **/
-    private void sendMsgToClientByUserId(String userId, String msg, SseEmitter sseEmitter) {
+    private void sendMsgToClientByUserId(String userId, String msg, ResponseBodyEmitter sseEmitter) {
         if (sseEmitter == null) {
-            log.error("SseEmitterServiceImpl[sendMsgToClient]: 推送消息失败：客户端{}未创建长链接,失败消息:{}",
+            log.error("ResponseBodyEmitterServiceImpl[sendMsgToClient]: 推送消息失败：客户端{}未创建长链接,失败消息:{}",
                     userId, msg);
             return;
         }
 
-        SseEmitter.SseEventBuilder sendData = SseEmitter.event().id("TASK_RESULT").data(msg, MediaType.APPLICATION_JSON);
         try {
-            sseEmitter.send(sendData);
+            sseEmitter.send(msg);
         } catch (IOException e) {
             // 推送消息失败，记录错误日志，进行重推
             log.warn("SseEmitterServiceImpl[sendMsgToClient]: 推送消息失败：{},尝试进行重推", msg);
             removeUser(userId);
-
             // 出现异常时结束响应并传递错误信息
             sseEmitter.completeWithError(e);
         }
@@ -209,11 +188,6 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
 
     /**
      * 连接超时时调用
-     *
-     * 连接关闭：务必确保在任务结束时调用complete()或completeWithError()方法，
-     * 否则可能导致连接无法正常关闭，造成资源浪费。
-     *
-     *
      *
      * @param userId 客户端ID
      * @return java.lang.Runnable
@@ -251,12 +225,6 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
      * @date 2021/12/14
      **/
     private void removeUser(String userId) {
-        SseEmitter sseEmitter = sseCache.get(userId);
-        if (sseEmitter != null) {
-            //设置完成状态，触发completionCallBack。建立连接时候注册sseEmitter.onCompletion(completionCallBack(userId));
-            sseEmitter.complete();
-//            removeUser(userId);
-        }
         sseCache.remove(userId);
         log.info("SseEmitterServiceImpl[removeUser]:移除用户：{}", userId);
     }

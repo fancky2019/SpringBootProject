@@ -14,7 +14,7 @@ public class MessageResult<T> implements Serializable {
     private Boolean success;
     private String message;
     //MDC 是基于 ThreadLocal 实现的， TransmittableThreadLocal  类似 c# AsyncLocal
-    //  MDC.put("traceId", traceId);//traceId在过滤器的destroy()中生成、清除
+    //  MDC.put("traceId", traceId);//traceId在TraceIdFilter过滤器的destroy()中生成、清除
     private String traceId = MDC.get("traceId");
     private T data;
 

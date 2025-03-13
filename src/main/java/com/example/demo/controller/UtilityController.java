@@ -39,6 +39,7 @@ import com.example.demo.service.TokenService;
 import com.example.demo.service.demo.*;
 import com.example.demo.service.elasticsearch.ShipOrderInfoService;
 import com.example.demo.shiro.ShiroRedisProperties;
+import com.example.demo.sse.IResponseBodyEmitterService;
 import com.example.demo.sse.ISseEmitterService;
 import com.example.demo.utility.RSAUtil;
 import com.example.demo.utility.RepeatPermission;
@@ -73,6 +74,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
@@ -80,6 +82,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.PostConstruct;
@@ -1513,7 +1516,7 @@ public class UtilityController {
 
     /**
      * 前段页面 user /index.html
-     *
+     *http://127.0.0.1:8081/sbp/utility/sseConnect/1
      * @param userId
      * @return
      * @throws Exception
@@ -1542,6 +1545,26 @@ public class UtilityController {
         //automapper
         //浅拷贝   MapStruct
 //        BeanUtils.copyProperties();
+    }
+
+
+    @Autowired
+    private  IResponseBodyEmitterService responseBodyEmitterService;
+
+
+    /**
+     * 前段页面 user /index.html
+     *http://127.0.0.1:8081/sbp/utility/createResponseBodyEmitterConnect/1
+     * @param userId
+     * @return
+     * @throws Exception
+     */
+//    @GetMapping(value = "/createResponseBodyEmitterConnect/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+
+    @GetMapping(value = "/createResponseBodyEmitterConnect/{userId}")
+    @ApiOperation(value = "建立Sse链接", notes = "建立Sse链接", httpMethod = "GET")
+    public ResponseBodyEmitter createResponseBodyEmitterConnect(@PathVariable("userId") String userId) throws Exception {
+        return responseBodyEmitterService.createResponseBodyEmitterConnect(userId);
     }
 
     //RequestMapping  RequestMethod

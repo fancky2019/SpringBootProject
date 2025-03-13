@@ -14,7 +14,7 @@
 </head>
 <body>
 <!--访问-->
-<!--http://localhost:8080/user-->
+<!--http://localhost:8081/sbp/user-->
 <h1>静态页面</h1>
 <p th:text="${hello}"></p>
 <div>
@@ -39,12 +39,15 @@
 
         // 建立连接,132.230.50.130 传承实际ip
         source = new EventSource('http://localhost:8081/sbp/utility/sseConnect/' + userId);
+        // source = new EventSource('http://localhost:8081/sbp/utility/createResponseBodyEmitterConnect/' + userId);
         setMessageInnerHTML("连接用户=" + userId);
+        debugger;
         /**
          * 连接一旦建立，就会触发open事件
          * 另一种写法：source.onopen = function (event) {}
          */
-        source.addEventListener('open', function(e) {
+        source.addEventListener('open', function (e) {
+            debugger;
             setMessageInnerHTML("建立连接。。。");
         }, false);
 
@@ -52,7 +55,8 @@
          * 客户端收到服务器发来的数据
          * 另一种写法：source.onmessage = function (event) {}
          */
-        source.addEventListener('message', function(e) {
+        source.addEventListener('message', function (e) {
+            debugger;
             setMessageInnerHTML(e.data);
         });
 
@@ -62,12 +66,13 @@
          * 或者：
          * 另一种写法：source.onerror = function (event) {}
          */
-        source.addEventListener('error', function(e) {
+        source.addEventListener('error', function (e) {
+            debugger;
             if (e.readyState === EventSource.CLOSED) {
                 setMessageInnerHTML("连接关闭");
             } else if (e.target.readyState === EventSource.CONNECTING) {
                 console.log('Connecting...');
-            }else {
+            } else {
                 console.log(e);
             }
         }, false);
@@ -77,7 +82,7 @@
     }
 
     // 监听窗口关闭事件，主动去关闭sse连接，如果服务端设置永不过期，浏览器关闭后手动清理服务端数据
-    window.onbeforeunload = function() {
+    window.onbeforeunload = function () {
         closeSse();
     };
 
