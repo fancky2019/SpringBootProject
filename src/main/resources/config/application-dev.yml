@@ -85,10 +85,10 @@ spring:
   #    allow-bean-definition-overriding: true #当遇到相同名字的时候，是否允许覆盖注册 bean
   application:
     name: springBootProject
-  #  jackson: # 无法处理LocalDateTime格式化问题，使用代码配置类
-  #    date-format: yyyy-MM-dd HH:mm:ss
-  #    time-zone: GMT+8
-  #    default-property-inclusion: non_null
+    jackson: # 无法处理LocalDateTime格式化问题，使用代码配置类 time-zone: GMT+8
+      date-format: yyyy-MM-dd HH:mm:ss
+      time-zone: UTC
+#      default-property-inclusion: non_null
   thymeleaf:
   #    view:
   #      prefix: /
@@ -112,9 +112,9 @@ spring:
     #    password: 123456
 
     #mysql
-    #具体参见类DynamicDataSourceAspect 说明
+    #具体参见类DynamicDataSourceAspect 说明 加上时区不然保存到数据库少8h &serverTimezone=Asia/Shanghai
     #不用此默认，默认就是写库,多数据源用jdbcUrl，不是url,spring 默认用的是url，用多数据源用url会报错。 &failOverReadOnly=false
-    url: jdbc:mysql://127.0.0.1:3306/demo?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&allowMultiQueries=true&rewriteBatchedStatements=true&useAffectedRows=true
+    url: jdbc:mysql://127.0.0.1:3306/demo?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&allowMultiQueries=true&rewriteBatchedStatements=true&useAffectedRows=true&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456

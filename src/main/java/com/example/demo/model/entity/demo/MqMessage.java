@@ -31,12 +31,12 @@ import okhttp3.internal.ws.RealWebSocket;
 @Accessors(chain = true)
 @TableName("mq_message")
 @ApiModel(value = "MqMessage对象", description = "")
-public class MqMessage implements Serializable {
+public class MqMessage extends EntityBase implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+//    @TableId(value = "id", type = IdType.AUTO)
+//    private Integer id;
 
     private String msgId;
 
@@ -48,20 +48,17 @@ public class MqMessage implements Serializable {
 
     private String queue;
 
+    private Integer status;
+    private String remark;
 //    private Boolean publishAck;
 //
 //    private Boolean consumeAck;
 //
 //    private Boolean consumeFail;
-
-    private LocalDateTime createTime;
-
-    private LocalDateTime updateTime;
-
-    private String remark;
-
-    private Integer version;
-    private Integer status;
+//@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+//    private LocalDateTime createTime;
+//    private LocalDateTime updateTime;
+//    private Integer version;
     /**
      * 取代 publishAck consumeAck
      *    0:未生成 1：已生产 2：已消费
@@ -80,6 +77,6 @@ public class MqMessage implements Serializable {
         this.version=0;
         this.remark="";
         this.createTime = LocalDateTime.now();
-        this.updateTime = LocalDateTime.now();
+        this.modifyTime = LocalDateTime.now();
     }
 }

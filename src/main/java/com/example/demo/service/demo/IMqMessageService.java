@@ -2,6 +2,10 @@ package com.example.demo.service.demo;
 
 import com.example.demo.model.entity.demo.MqMessage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.demo.model.pojo.PageData;
+import com.example.demo.model.request.MqMessageRequest;
+import com.example.demo.model.response.MqMessageResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;
 
@@ -15,8 +19,17 @@ import java.util.List;
  */
 public interface IMqMessageService extends IService<MqMessage> {
     void add(MqMessage mqMessage);
+
     void delete(MqMessage mqMessage);
-    void update (MqMessage mqMessage);
+
+    void update(MqMessage mqMessage) throws Exception;
+
+    PageData<MqMessageResponse> list(MqMessageRequest mqMessage) throws JsonProcessingException;
+
+    void page(MqMessageRequest mqMessage);
+
+    void count(MqMessageRequest mqMessage);
+
     /**
      * 失败处理
      */

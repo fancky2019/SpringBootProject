@@ -18,13 +18,16 @@ import com.example.demo.eventbus.MyCustomEvent;
 import com.example.demo.listener.UserRegisterService;
 import com.example.demo.model.dto.JacksonDto;
 import com.example.demo.model.entity.demo.DemoProduct;
+import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.entity.rabc.Users;
 import com.example.demo.model.impot.ImportModelTest;
 import com.example.demo.model.pojo.*;
 import com.example.demo.model.request.DemoProductRequest;
+import com.example.demo.model.request.MqMessageRequest;
 import com.example.demo.model.request.TestRequest;
+import com.example.demo.model.response.MqMessageResponse;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.model.vo.DownloadData;
@@ -99,6 +102,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -220,6 +224,10 @@ public class UtilityController {
 
     @Autowired
     private IProductTestService productTestService;
+
+    @Autowired
+    private IMqMessageService mqMessageService;
+
     @Autowired
     private IProductTestService productTestServiceB;
 
@@ -327,10 +335,7 @@ public class UtilityController {
      * @return
      */
     @PostMapping("/postTest")
-    public MessageResult<Integer> postTest(@RequestParam Integer id,
-                                           @RequestParam String eosorder,
-                                           @RequestParam BigDecimal eosbalance,
-                                           @RequestParam Boolean relativestate) {
+    public MessageResult<Integer> postTest(@RequestParam Integer id, @RequestParam String eosorder, @RequestParam BigDecimal eosbalance, @RequestParam Boolean relativestate) {
 
         return null;
     }
@@ -443,8 +448,7 @@ public class UtilityController {
         //参数名称
         List<String> paramNames = Collections.list(request.getParameterNames());
         HashMap<String, String> paramAndValues = new HashMap<>();
-        paramNames.forEach(p ->
-        {
+        paramNames.forEach(p -> {
             paramAndValues.put(p, request.getParameter(p));
         });
 
@@ -838,8 +842,7 @@ public class UtilityController {
     private void threadPoolExceptionTest() {
 
         try {
-            CompletableFuture<Integer> completableFuture = CompletableFuture.supplyAsync(() ->
-            {
+            CompletableFuture<Integer> completableFuture = CompletableFuture.supplyAsync(() -> {
                 //必须在线程内部进行异常处理，无法抛出到外边的另外一个线程。和C#一样
 //                Integer m = Integer.parseInt("m");
                 try {
@@ -872,8 +875,7 @@ public class UtilityController {
     private void threadExceptionTestFun() {
 
         try {
-            Thread thread = new Thread(() ->
-            {
+            Thread thread = new Thread(() -> {
                 //必须在线程内部进行异常处理，无法抛出到外边的另外一个线程。和C#一样
                 Integer m = Integer.parseInt("m");
 //                try {
@@ -1117,40 +1119,39 @@ public class UtilityController {
         final int SAVE_DB_SIZE = 5000;
         EasyExcel.read(file.getInputStream(), GXDetailListVO.class, new ReadListener<GXDetailListVO>() {
 
-                    /**
-                     * 这个每一条数据解析都会来调用
-                     * @param o
-                     * @param analysisContext
-                     */
-                    @Override
-                    public void invoke(GXDetailListVO o, AnalysisContext analysisContext) {
-                        int m = 0;
-                        list.add(o);
-                        if (SAVE_DB_SIZE == list.size()) {
-                            //保存到数据库，可开启一个线程执行保存。里面进行校验，记录未能成功插入的数据
-                            //save()
+            /**
+             * 这个每一条数据解析都会来调用
+             * @param o
+             * @param analysisContext
+             */
+            @Override
+            public void invoke(GXDetailListVO o, AnalysisContext analysisContext) {
+                int m = 0;
+                list.add(o);
+                if (SAVE_DB_SIZE == list.size()) {
+                    //保存到数据库，可开启一个线程执行保存。里面进行校验，记录未能成功插入的数据
+                    //save()
 //                            list.clear();
-                        }
-
-                    }
-
-                    /**
-                     *所有的都读取完 回调 ，
-                     * @param analysisContext
-                     */
-                    @Override
-                    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
-
-                    }
-
-                    @Override
-                    public void onException(Exception exception, AnalysisContext context) throws Exception {
-                        int m = 0;
-//                        CellDataTypeEnum
-                        throw exception;
-                    }
                 }
-        ).sheet().doRead();
+
+            }
+
+            /**
+             *所有的都读取完 回调 ，
+             * @param analysisContext
+             */
+            @Override
+            public void doAfterAllAnalysed(AnalysisContext analysisContext) {
+
+            }
+
+            @Override
+            public void onException(Exception exception, AnalysisContext context) throws Exception {
+                int m = 0;
+//                        CellDataTypeEnum
+                throw exception;
+            }
+        }).sheet().doRead();
 
         int size = list.size();
 
@@ -1231,28 +1232,27 @@ public class UtilityController {
         List<UploadData> list = new ArrayList<UploadData>();
         EasyExcel.read(file.getInputStream(), UploadData.class, new ReadListener<UploadData>() {
 
-                    /**
-                     * 这个每一条数据解析都会来调用
-                     * @param o
-                     * @param analysisContext
-                     */
-                    @Override
-                    public void invoke(UploadData o, AnalysisContext analysisContext) {
+            /**
+             * 这个每一条数据解析都会来调用
+             * @param o
+             * @param analysisContext
+             */
+            @Override
+            public void invoke(UploadData o, AnalysisContext analysisContext) {
 
-                        list.add(o);
+                list.add(o);
 
-                    }
+            }
 
-                    /**
-                     *所有的都读取完 回调 ，
-                     * @param analysisContext
-                     */
-                    @Override
-                    public void doAfterAllAnalysed(AnalysisContext analysisContext) {
+            /**
+             *所有的都读取完 回调 ，
+             * @param analysisContext
+             */
+            @Override
+            public void doAfterAllAnalysed(AnalysisContext analysisContext) {
 
-                    }
-                }
-        ).sheet().doRead();
+            }
+        }).sheet().doRead();
 
         int size = list.size();
         return "success";
@@ -1271,12 +1271,7 @@ public class UtilityController {
         try {
 
 
-            String data = "ddddddddddddddddddddddddddddd54454554dddddddddddddd" +
-                    "ddddddddddddddddddddddddddddd544554ddddddddddddddd" +
-                    "ddddddddddddddddddddddddddd5454ddddddddddddddd" +
-                    "ddddddddddddddddddddd454554dddddddddddddddddddddd" +
-                    "dsrgregergredssssssssssssss333333333333333535355" +
-                    "dssssssssss44444444444444444444";
+            String data = "ddddddddddddddddddddddddddddd54454554dddddddddddddd" + "ddddddddddddddddddddddddddddd544554ddddddddddddddd" + "ddddddddddddddddddddddddddd5454ddddddddddddddd" + "ddddddddddddddddddddd454554dddddddddddddddddddddd" + "dsrgregergredssssssssssssss333333333333333535355" + "dssssssssss44444444444444444444";
             byte[] encryptData = RSAUtil.encrypt(data.getBytes());
             String decryptData = new String(RSAUtil.decrypt(encryptData));
 
@@ -2201,5 +2196,20 @@ public class UtilityController {
 
         productTestService.transactionalCallBack();
         return MessageResult.success();
+    }
+
+    @GetMapping(value = "/mqMessageTest")
+    public MessageResult<String> mqMessageTest() throws Exception {
+        MqMessage mqMessage = mqMessageService.getById(85);
+        mqMessageService.update(mqMessage);
+        return MessageResult.success();
+    }
+
+    @GetMapping(value = "/mqMessageList")
+    public MessageResult<PageData<MqMessageResponse>> mqMessageList(MqMessageRequest request) throws Exception {
+
+
+        PageData<MqMessageResponse> pageData = mqMessageService.list(request);
+        return MessageResult.success(pageData);
     }
 }

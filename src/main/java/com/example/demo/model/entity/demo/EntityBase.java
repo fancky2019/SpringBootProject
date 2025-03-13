@@ -29,27 +29,38 @@ public class EntityBase {
     @TableId(value = "id", type = IdType.AUTO)
     //雪花id js number 精度丢失要转成string.前段js long 精度丢失
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private BigInteger id;
+    public BigInteger id;
 
     @ExcelProperty(value = "创建时间")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
+    public LocalDateTime createTime;
 
+
+    /**
+     * 时间相差8小时。
+     * 原因：
+     * JASKSON在序列化时间时是按照国际标准时间GMT进行格式化的，而在国内默认时区使用的是CST时区，两者相差8小时，
+     * 因为我们是东八区(北京时间)，所以我们在格式化的时候要指定时区(timezone)。
+     * 中国时间(Asia/Shanghai) = 格林尼治时间(GMT) + 8
+     * 格林尼治时间(GMT)=世界协调时间(UTC）+0
+     */
     @ExcelProperty(value = "修改时间")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime modifyTime;
+    public LocalDateTime modifyTime;
 
     @ExcelProperty(value = "版本号")
-    private Integer version;
+    public Integer version;
 
     @ExcelProperty(value = "删除")
-    private boolean deleted;
+    public boolean deleted;
 
     @ExcelProperty(value = "traceId")
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private String traceId;
+    public String traceId;
 }

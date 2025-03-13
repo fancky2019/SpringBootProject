@@ -1,8 +1,11 @@
 package com.example.demo.config;
 
+import com.example.demo.config.ZonedDateTimeConfig.ZonedDateTimeDeserializer;
+import com.example.demo.config.ZonedDateTimeConfig.ZonedDateTimeSerializer;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -19,14 +22,29 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
 
 @Configuration
 public class JacksonConfig {
 
+    /**
+     * 时区在配置文件中配置
+     * @return
+     */
     @Bean
     public ObjectMapper ObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
+//        ZonedDateTime
+        // 设置时区为 GMT+8   UTC
+        //LocalDateTime 是一个不带时区的日期时间类型，它只表示一个本地时间。
+        //当你将 LocalDateTime 序列化为 JSON 时，Jackson 会直接将其值输出，而不会进行任何时区转换。
+        objectMapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+        // 关闭时间戳模式:jackson ZonedDateTime  默认序列化是时间戳
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+
         // 日期和时间格式化
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
@@ -36,6 +54,11 @@ public class JacksonConfig {
         javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern("HH:mm:ss")));
 
+        // 注册自定义的序列化和反序列化器
+        javaTimeModule.addSerializer(ZonedDateTime.class, new ZonedDateTimeSerializer());
+        javaTimeModule.addDeserializer(ZonedDateTime.class, new ZonedDateTimeDeserializer());
+//        javaTimeModule.addSerializer(ZonedDateTime.class, new ZonedDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
+//        javaTimeModule.addSerializer(ZonedDateTime.class, new ZonedDateTimeSerializer(DateTimeFormatter.ISO_ZONED_DATE_TIME));
 
 //        SimpleModule module = new SimpleModule();
         // "" 不序列化成null

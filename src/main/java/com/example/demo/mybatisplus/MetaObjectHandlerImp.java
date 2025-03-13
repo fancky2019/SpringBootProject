@@ -45,6 +45,7 @@ public class MetaObjectHandlerImp implements MetaObjectHandler {
         //create_time
         System.out.println("Insert operation detected.");
         this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, LocalDateTime.now());
+        this.strictInsertFill(metaObject, "modifyTime", LocalDateTime.class, LocalDateTime.now());
         this.strictInsertFill(metaObject, "traceId", String.class, MDC.get("traceId"));
 
 
