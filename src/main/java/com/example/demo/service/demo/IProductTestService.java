@@ -64,4 +64,8 @@ public interface IProductTestService extends IService<ProductTest> {
     void updateField() throws InterruptedException;
 
     void transactionalCallBack() throws Exception;
+
+    void transactionalRedission(int i) throws InterruptedException;
+
+    void pointcutExecuteOrder();
 }

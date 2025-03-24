@@ -393,14 +393,16 @@ feign:
   #    enabled: true
   #    # 同时开启负载均衡支持
   #    load-balanced: true
-
+#  默认超时值
+#  connectTimeout：10 秒（10,000 毫秒）
+#  readTimeout：60 秒（60,000 毫秒）
   # 设置 feign 超时时间:超时异常
   client:
     config:
       # default、service-provider-two，指定服务名称可以设置单个服务的超时时间
       default:
-        connectTimeout: 5000
-        readTimeout: 5000
+        connectTimeout: 60000
+        readTimeout: 60000
   hystrix:
     enabled: true
   httpclient:
@@ -441,7 +443,7 @@ cron: '0/8 * * * * ?'
 sbp:
   ordermigratedbtoolurl: http://localhost:8101
   ESCertPath: D:\work\dev\ES\elk\elasticsearch-8.8.2\config\certs\http_ca.crt
-
+  wmsurl: http://localhost:9000/api/app
 elasticjob:
   tracing:
     type: RDB  #日志跟踪，利用springboot的数据库配置，在数据库建两张表 job_execution_log和job_status_trace_log

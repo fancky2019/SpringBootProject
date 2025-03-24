@@ -22,6 +22,8 @@ import java.util.function.Consumer;
  * 文本传输	                  二进制传输
  * 支持自定义发送的消息类型
  *
+ * 1.连接数控制：通过Nginx限制最大并发连接数
+ * 2.内存泄漏防护：强制设置Emitter超时时间
  *
  *
  * 简单易用：SSE使用简单的API，只需要创建EventSource对象并监听事件即可实现实时通信。

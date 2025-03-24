@@ -246,6 +246,33 @@
             <version>3.17.3</version>
         </dependency>
 
+
+
+        <!-- 引入Lock4j依赖 -->
+        <!-- 若使用redisTemplate作为分布式锁底层，则需要引入 -->
+<!--        <dependency>-->
+<!--            <groupId>com.baomidou</groupId>-->
+<!--            <artifactId>lock4j-redis-template-spring-boot-starter</artifactId>-->
+<!--            <version>2.2.4</version>-->
+<!--        </dependency>-->
+        <!-- 若使用redisson作为分布式锁底层，则需要引入 -->
+        <!-- https://mvnrepository.com/artifact/com.baomidou/lock4j-redisson-spring-boot-starter -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>lock4j-redisson-spring-boot-starter</artifactId>
+            <version>2.2.7</version>
+        </dependency>
+
+
+
+
+
+
+
+
+
+
+
         <!--RabbitMQ依赖-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

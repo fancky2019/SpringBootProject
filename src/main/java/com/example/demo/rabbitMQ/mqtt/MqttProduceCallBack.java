@@ -1,9 +1,6 @@
 package com.example.demo.rabbitMQ.mqtt;
 
-import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 import org.springframework.beans.factory.annotation.Value;
 
 public class MqttProduceCallBack implements MqttCallback {
@@ -32,6 +29,11 @@ public class MqttProduceCallBack implements MqttCallback {
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
         IMqttAsyncClient client = token.getClient();
+        try {
+            token.getMessage();
+        } catch (MqttException e) {
+            throw new RuntimeException(e);
+        }
         System.out.println(client.getClientId()+"发布消息成功！");
     }
 }

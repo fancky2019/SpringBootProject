@@ -98,8 +98,10 @@ public class MqttProduce {
             //将指定消息发布到主题，但不等待消息传递完成，返回的token可用于跟踪消息的传递状态
             //一旦此方法干净地返回，消息就已被客户端接受发布，当连接可用，将在后台完成消息传递。
             token = mqttTopic.publish(mqttMessage);
+            // 等待消息发送完成
             token.waitForCompletion();
         } catch (MqttException e) {
+            //失败处理
             e.printStackTrace();
         }
     }

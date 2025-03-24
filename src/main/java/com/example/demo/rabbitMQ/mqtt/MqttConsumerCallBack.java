@@ -2,6 +2,7 @@ package com.example.demo.rabbitMQ.mqtt;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public class MqttConsumerCallBack implements MqttCallback {
@@ -42,6 +43,11 @@ public class MqttConsumerCallBack implements MqttCallback {
      */
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-
+        try {
+            iMqttDeliveryToken.getMessage();
+        } catch (MqttException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("deliveryComplete---------" + iMqttDeliveryToken.isComplete());
     }
 }

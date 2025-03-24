@@ -4,9 +4,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.aop.PointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -24,16 +27,57 @@ import javax.servlet.http.HttpServletRequest;
  *
  *
  * 新增、修改可以在跳转的时候从后端获取token
+ *
+ *
+ *
+ * Spring AOP 的执行顺序由切面的优先级决定，优先级可以通过 @Order 注解或实现 Ordered 接口来指定。数值越小，优先级越高。
+ *不指定Order,那么Order是默认值->Integer.MAX_VALUE. 如果Order相同,则是按照切面字母的顺序来执行切面.比如@Transactional和@Cacheable->
+ * 对应的切面是TransactionInterceptor和CacheInterceptor,则先执行@Cacheable的切面
+ * 默认情况下：
+ * @Transactional 的优先级较低（通常为 Ordered.LOWEST_PRECEDENCE，即 Integer.MAX_VALUE）。
+ * 自定义切面的优先级较高（如果没有显式指定 @Order，默认为 Ordered.LOWEST_PRECEDENCE）。
+ *
+ *
+ *
+ * 自定义的切面（默认的是Integer.MAX优先级最低）和事务切面（默认的是Integer.MAX优先级最低）优先级是一样的，
+ * 但是自定义的排在后面会先执行，因为spring扫描的时候会先扫描事务相关的。
+ *
+ * @Order 注解通常用于 AOP 切面、拦截器、过滤器 等组件，以控制它们的执行顺序。
+ *通过实现 Ordered 接口或使用 @Order 注解，可以明确指定组件的优先级，从而控制它们的执行顺序
+ *LockAnnotationAdvisor 实现了Ordered接口
+ *     Lock4j 内部配置类LockAutoConfiguration注册bean LockAnnotationAdvisor 时候设置order =Integer.MIN_VALUE
+ *      return new LockAnnotationAdvisor(lockInterceptor, Integer.MIN_VALUE);
+ *
+ *      从而保证@ Lock4j 优先@Transactional 切面先执行
+ *
+ *
+ *
+ *
+ *在普通 Bean 上使用 @Order 注解不会生效，因为 @Order 主要用于控制切面、拦截器、过滤器等组件的执行顺序。
+ *
+ * 如果需要控制普通 Bean 的初始化顺序，可以使用 @DependsOn、SmartLifecycle 或 @PostConstruct。
+ *
+ * @Order 的正确使用场景包括 AOP 切面、拦截器、过滤器等需要明确执行顺序的组件。
+ *
+ *  @Order / Ordered接口 不控制实例化顺序，只控制执行顺序
+ *  Ordered / @Order 只跟特定一些注解生效 如：@Compent @Service … 不生效的如： @WebFilter
+ *
  */
+
+
 @Aspect
 @Component
 @Order(100)//多个切面用order制定顺序，数值越小，越先执行
 public class RepeatSubmitAspect {
 
+    //bean执行顺序
+//    com.example.demo.model.pojo.SpringLifeCycleBean
+
+//    Ordered.LOWEST_PRECEDENCE
     @Autowired
     private HttpServletRequest httpServletRequest;
 
-
+//    @Transactional
     @Pointcut("@annotation(noRepeatSubmit)")
     public void pointCut(NoRepeatSubmit noRepeatSubmit) {
     }

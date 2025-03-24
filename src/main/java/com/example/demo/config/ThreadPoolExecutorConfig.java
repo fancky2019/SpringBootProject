@@ -11,6 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
@@ -82,6 +83,10 @@ public class ThreadPoolExecutorConfig {
     @Bean(name="threadPoolExecutor")
     @Primary
     public Executor threadPoolExecutor(){
+//        ExecutorService extends Executor
+        //内部使用 LinkedBlockingQueue
+        //内部使用 ThreadPoolExecutor
+        //内部使用 ThreadPoolTaskExecutor
         ThreadPoolTaskExecutor threadPoolExecutor = new ThreadPoolTaskExecutor();
         int processNum = Runtime.getRuntime().availableProcessors(); // 返回可用处理器的Java虚拟机的数量
         int corePoolSize = (int) (processNum / (1 - 0.2));

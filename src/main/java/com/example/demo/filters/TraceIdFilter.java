@@ -1,5 +1,6 @@
 package com.example.demo.filters;
 
+import com.example.demo.utility.TraceIdHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class TraceIdFilter implements Filter {
 
 
 
-
+        TraceIdHolder.setTraceId(UUID.randomUUID().toString().replace("-", ""));
         filterChain.doFilter(servletRequest, servletResponse);
 
 
@@ -64,5 +65,6 @@ public class TraceIdFilter implements Filter {
     public void destroy() {
       //  TRACEID.remove();
         MDC.clear();
+        TraceIdHolder.removeTraceId();
     }
 }

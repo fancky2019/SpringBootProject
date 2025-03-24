@@ -36,6 +36,8 @@ import com.example.demo.rabbitMQ.mqtt.MqttProduce;
 import com.example.demo.rocketmq.RocketmqTest;
 import com.example.demo.service.RetryService;
 import com.example.demo.service.TokenService;
+import com.example.demo.service.api.FeignClientTest;
+import com.example.demo.service.api.WmsService;
 import com.example.demo.service.demo.*;
 import com.example.demo.service.elasticsearch.ShipOrderInfoService;
 import com.example.demo.shiro.ShiroRedisProperties;
@@ -45,6 +47,7 @@ import com.example.demo.utility.RSAUtil;
 import com.example.demo.utility.RepeatPermission;
 //import com.example.demo.utility.ApplicationContextAwareImpl;
 import com.example.demo.utility.TraceIdCreater;
+import com.example.demo.utility.TraceIdHolder;
 import com.example.fanckyspringbootstarter.service.ToolService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -75,6 +78,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
@@ -109,7 +113,10 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /*
 在service类上加注解@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -266,7 +273,12 @@ public class UtilityController {
     @Autowired
     private MessageSource messageSource;
 
+    @Autowired
+    private WmsService wmsService;
 
+
+    @Autowired
+    private Executor threadPoolExecutor;
     //bean  生命周期 参见 model--pojo--BeanLife SpringLifeCycleBean
     //初始化操作：1、实现 InitializingBean 接口
 //    public class UserController implements InitializingBean {
@@ -1549,7 +1561,7 @@ public class UtilityController {
 
 
     @Autowired
-    private  IResponseBodyEmitterService responseBodyEmitterService;
+    private IResponseBodyEmitterService responseBodyEmitterService;
 
 
     /**
@@ -1560,7 +1572,6 @@ public class UtilityController {
      * @throws Exception
      */
 //    @GetMapping(value = "/createResponseBodyEmitterConnect/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-
     @GetMapping(value = "/createResponseBodyEmitterConnect/{userId}")
     @ApiOperation(value = "建立Sse链接", notes = "建立Sse链接", httpMethod = "GET")
     public ResponseBodyEmitter createResponseBodyEmitterConnect(@PathVariable("userId") String userId) throws Exception {
@@ -1757,6 +1768,37 @@ public class UtilityController {
     }
 
     /**
+     * 事务同步  更新覆盖 、事务传播 版本号
+     * 事务aop,代码执行完长事务未提交
+     * @param i
+     * @throws InterruptedException
+     */
+    @GetMapping(value = "/transactionalSynchronizedTest1")
+    public void transactionalSynchronizedTest1(Integer i) throws InterruptedException {
+//        ResponseEntity
+        personService.transactionalSynchronizedTest1(i);
+    }
+
+
+    @GetMapping(value = "/transactionalRedission")
+    public void transactionalRedission() throws InterruptedException {
+//        for (int i = 0; i < 10; i++) {
+//            int finalI = i;
+//            threadPoolExecutor.execute(() -> {
+//                try {
+//                    final  int j = finalI;
+//                    productTestService.transactionalRedission(j);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            });
+//        }
+
+        productTestService.transactionalRedission(1);
+
+    }
+
+    /**
      * 事务同步 更新覆盖 、事务传播 版本号
      * @param i
      * @throws InterruptedException
@@ -1863,7 +1905,7 @@ public class UtilityController {
      * Error: Request timed out
      *
      *在使用 kill -9 前，应该先使用 kill -15，
-     *kill pid  默认 kill -15 pid. kill15不会停止子进程，kill2会停止子进程
+     *kill pid  默认 kill -15 pid. kill15不会停止子进程，kill 2会停止子进程
      * kill pid 或  kill -2 pid 关闭服务，请求的任务会继续执行直到返回，此时jps今晨还在，请他新的请求
      * 不会请求成功，之前请求结束之后，进程会结束
      *
@@ -2231,8 +2273,55 @@ public class UtilityController {
     @GetMapping(value = "/mqMessageList")
     public MessageResult<PageData<MqMessageResponse>> mqMessageList(MqMessageRequest request) throws Exception {
 
-
+//        list转map   当尝试获取一个不存在的键时，会返回null
+//        Map<Integer, MqMessage> locationDOMap = list.stream().collect(Collectors.toMap(MqMessage::getId, item -> item));
         PageData<MqMessageResponse> pageData = mqMessageService.list(request);
         return MessageResult.success(pageData);
     }
+
+    /**
+     * postman 启动两个tab 请求这个url,模拟并发
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value = "/threadLocalTest")
+    public MessageResult<String> threadLocalTest() throws Exception {
+        String traceId = TraceIdHolder.getTraceId();
+        log.info("Before sleep traceId - {}", traceId);
+        Thread.sleep(30000);
+        log.info("TraceId - {}", TraceIdHolder.getTraceId());
+        return MessageResult.success();
+    }
+
+
+    @GetMapping(value = "/completeShipOrder")
+    public MessageResult<String> completeShipOrder(@RequestHeader("Authorization") String token) throws Exception {
+
+//        for (int i = 0; i < 10; i++) {
+//            BigInteger shipOrderId = new BigInteger("656835527819333");
+//            String token1 = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOWEyMTliOS1hMzU4LWY4NmYtYjAzYi0zYTBlZGE1Y2RhYjciLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImQ5YTIxOWI5LWEzNTgtZjg2Zi1iMDNiLTNhMGVkYTVjZGFiNyIsInByZWZlcnJlZF91c2VybmFtZSI6InRlc3QwMDIiLCJnaXZlbl9uYW1lIjoidGVzdDAwMiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImFkbWluaXN0cmF0b3IiLCJyb2xlIjoiYWRtaW5pc3RyYXRvciIsIm5iZiI6MTc0MjQ1OTk3NywiZXhwIjoxNzQyNTQ2Mzc3LCJpc3MiOiJBdXRob3JpemVTU08iLCJhdWQiOiJBdXRob3JpemVTU08ifQ.zNjpID4o_V4_RFmOhFMtNKV6iT2Cit8f6_iB4YWrnQM";
+//            String re = wmsService.completeShipOrder(shipOrderId, token);
+//            log.info(re);
+//        }
+
+        for (int i = 0; i < 10; i++) {
+
+            BigInteger shipOrderId = new BigInteger("656835527819333");
+            String token1 = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOWEyMTliOS1hMzU4LWY4NmYtYjAzYi0zYTBlZGE1Y2RhYjciLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImQ5YTIxOWI5LWEzNTgtZjg2Zi1iMDNiLTNhMGVkYTVjZGFiNyIsInByZWZlcnJlZF91c2VybmFtZSI6InRlc3QwMDIiLCJnaXZlbl9uYW1lIjoidGVzdDAwMiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImFkbWluaXN0cmF0b3IiLCJyb2xlIjoiYWRtaW5pc3RyYXRvciIsIm5iZiI6MTc0MjQ1OTk3NywiZXhwIjoxNzQyNTQ2Mzc3LCJpc3MiOiJBdXRob3JpemVTU08iLCJhdWQiOiJBdXRob3JpemVTU08ifQ.zNjpID4o_V4_RFmOhFMtNKV6iT2Cit8f6_iB4YWrnQM";
+            threadPoolExecutor.execute(() -> {
+                String re = wmsService.completeShipOrder(shipOrderId, token1);
+                log.info(re);
+            });
+
+        }
+        return MessageResult.success();
+    }
+
+
+    @GetMapping(value = "/pointcutExecuteOrder")
+    public MessageResult<String> pointcutExecuteOrder() {
+        productTestService.pointcutExecuteOrder();
+        return MessageResult.success();
+    }
+
 }

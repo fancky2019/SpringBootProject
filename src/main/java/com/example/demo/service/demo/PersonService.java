@@ -223,7 +223,7 @@ public class PersonService implements IPersonService {
     }
 
     //更新覆盖 、事务传播 版本号 如果不模拟此事务传播，可设置 Propagation.REQUIRES_NEW
-//    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public void transactionalSynchronizedTest(Integer i) throws InterruptedException {
 
 //        CompletableFuture.runAsync(() ->
@@ -267,15 +267,15 @@ public class PersonService implements IPersonService {
 
 //        //模拟两个线程并发造成事务不安全。前段postman 请求两次
 //        try {
-//事务aop,代码执行完长事务未提交
+////事务aop,代码执行完长事务未提交
 ////前段两次请求，一个线程的耗时事务调用update和另一个线程不耗时的任务分别调用update，出现并发问题，没有加2
 //
-//        问题核心原因：事务传播，长事务，造成事务未能提交，多线程之间事务之间数据不可见，二类更新丢失
+////        问题核心原因：事务传播，长事务，造成事务未能提交，多线程之间事务之间数据不可见，二类更新丢失
 ////            解决办法：1、更新时候添加版本号，判断更新成功失败
 ////                    2、让事务尽快提交，避免和其他事务在一起由于事务传播而未提交
-//                       3、TransactionAspectSupport可控制事务的回滚
-// //                       参见com.example.demo.service.wms.OrderManagerServicePlatformTransactionManager
-//                      4、手动控制事务的提交，不使用Transactional注解，使用编程性事务PlatformTransactionManager接口
+////                       3、TransactionAspectSupport可控制事务的回滚
+//            //                       参见com.example.demo.service.wms.OrderManagerServicePlatformTransactionManager
+////                      4、手动控制事务的提交，不使用Transactional注解，使用编程性事务PlatformTransactionManager接口
 //            update();
 //            if (i == 0) {
 //
@@ -289,6 +289,17 @@ public class PersonService implements IPersonService {
 //        }
 
 
+        updateWrapper(i);
+         //延迟了30s,更新的值被其他线程覆盖了
+        Thread.sleep(30000);
+
+    }
+
+
+    //更新覆盖 、事务传播 版本号 如果不模拟此事务传播，可设置 Propagation.REQUIRES_NEW
+    @Transactional(rollbackFor = Exception.class)
+    public void transactionalSynchronizedTest1(Integer i) throws InterruptedException {
+        //覆盖了其他线程更新的值。
         updateWrapper(i);
     }
 
@@ -390,22 +401,19 @@ public class PersonService implements IPersonService {
         });
     }
 
-
+    @Transactional(rollbackFor = Exception.class)
     public synchronized void updateWrapper(int i) throws InterruptedException {
-        update();
-        if (i == 0) {
-
-            Thread.sleep(5000);
-
-        }
+        //虽然开启同步，但是方法执行完事务未提交，因为事务还存在调用链，并未提交
+        //导致多个线程之间数据不可见，丢失更新
+        update(i);
     }
 
 
     @Transactional(rollbackFor = Exception.class)
-    public synchronized void update() throws InterruptedException {
+    public synchronized void update(int age) throws InterruptedException {
 
         Person person = personMapper.selectByPrimaryKey(2L);
-        person.setAge(person.getAge() + 1);
+        person.setAge(person.getAge() + age);
         int i = personMapper.updateByPrimaryKey(person);
 //        Thread.sleep(10);
 
@@ -423,12 +431,6 @@ public class PersonService implements IPersonService {
         }
         return message;
     }
-
-
-
-
-
-
 
 
 }

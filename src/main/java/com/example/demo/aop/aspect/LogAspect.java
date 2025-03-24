@@ -57,7 +57,7 @@ execution(public * com.spring.service.BusinessObject.businessService(java.lang.S
  */
 @Aspect
 @Component
-@Order(101)
+@Order(101)//数值越小，优先级越高
 //@Slf4j
 @Log4j2
 public class LogAspect {

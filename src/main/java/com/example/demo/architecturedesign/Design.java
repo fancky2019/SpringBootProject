@@ -496,4 +496,11 @@ ProxySQL / HAProxy：应用程序连接 ProxySQL，由 ProxySQL 负责路由到�
 
 
 
+    //region 耗时请求
+    /*
+     耗时请求：前段请求的直接执行，直接只执行直到执行完，其他的rpc  直接进入rabbitmq.返回一个状态
+             前段请求也可以进入mq，加一个数据状态 后台执行中，避免重复请求。sse 返回执行结果刷新前段。
+     */
+
+    //endregion
 }

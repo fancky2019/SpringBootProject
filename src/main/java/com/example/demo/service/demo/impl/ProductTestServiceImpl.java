@@ -8,6 +8,7 @@ import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.baomidou.lock.annotation.Lock4j;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -17,6 +18,8 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.demo.aop.aspect.executeorder.PointcutExecuteOrderOne;
+import com.example.demo.aop.aspect.executeorder.PointcutExecuteOrderTwo;
 import com.example.demo.dao.demo.PersonMapper;
 import com.example.demo.dao.demo.ProductTestMapper;
 import com.example.demo.easyexcel.DropDownSetField;
@@ -39,6 +42,7 @@ import com.example.demo.service.wms.ProductService;
 import com.example.demo.utility.ConfigConst;
 import com.example.demo.utility.ExcelUtils;
 import com.example.demo.utility.MqSendUtil;
+import com.example.demo.utility.RedisKeyConfigConst;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -72,10 +76,12 @@ import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -1549,6 +1555,8 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         }
     }
 
+
+
     /**
      * 所有事务提交了才会执行 事务回调
      * @param productId
@@ -1579,5 +1587,97 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 //        mqSendUtil.send(mqMessage);
     }
 
+
+    /*
+LockAnnotationAdvisor 实现了Ordered接口
+    Lock4j 内部配置类LockAutoConfiguration注册bean LockAnnotationAdvisor 时候设置order =Integer.MIN_VALUE
+     return new LockAnnotationAdvisor(lockInterceptor, Integer.MIN_VALUE);
+
+     从而保证@ Lock4j 优先@Transactional 切面先执行
+
+//    如果在service上有@Transactional和@lock4j，则执行顺序如下
+//
+//# 1. 上锁
+//# 2. 开启事务
+//# 3. 执行逻辑
+//# 4. 提交/回滚事务
+//# 5. 释放锁
+@Lock4j 的 key 是静态的，但可以通过 SpEL（Spring Expression Language） 或自定义逻辑实现动态 key。
+使用 SpEL 动态设置 key
+@Lock4j(key = "'lock:' + #userId + ':' + #orderId") // 组合多个参数
+    public void doSomething(String userId, String orderId)
+
+
+     @Lock4j  无法灵活的设置要锁的key，设置静态key 可以简化代码
+*/
+    @Lock4j(keys = {"#key"}, acquireTimeout = 1000, expire = 6000)
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void transactionalRedission(int i) throws InterruptedException {
+        //不加锁产生线程安全问题：0-->1,而不是10
+//        ProductTest productTest = this.getById(2);
+//        productTest.setVersion(productTest.getVersion() + 1);
+//        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+//        updateWrapper3.set(ProductTest::getVersion, productTest.getVersion());
+//        updateWrapper3.eq(ProductTest::getId, productTest.getId());
+//        this.update(updateWrapper3);
+//        Thread.sleep(3 * 1000);
+
+
+        //redisson 锁也会产生并发问题，因为Transactional 是aop,获取锁时候事务未提交，读取的还是修改前的值
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        String operationLockKey = RedisKeyConfigConst.MQ_FAIL_HANDLER;
+        //并发访问，加锁控制
+        RLock lock = redissonClient.getLock(operationLockKey);
+
+        try {
+            long waitTime = 200;
+            long leaseTime = 300;
+            boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+            if (lockSuccessfully) {
+
+
+                ProductTest productTest = this.getById(2);
+                log.info("BeforeVersion{} - {}", i, productTest.getVersion());
+                productTest.setVersion(productTest.getVersion() + 1);
+                LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+                updateWrapper3.set(ProductTest::getVersion, productTest.getVersion());
+                updateWrapper3.eq(ProductTest::getId, productTest.getId());
+                this.update(updateWrapper3);
+                log.info("AfterVersion{} - {}", i, productTest.getVersion());
+//                Thread.sleep(3 * 1000);
+                //代码处理异常不会进入事务完成的方法，要在catch 内释放锁
+//                int m = Integer.parseInt("d");
+                mqSendUtil.releaseLock(lock);
+
+
+            } else {
+                //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
+                //超过waitTime ，扔未获得锁
+                log.info("获取锁失败");
+            }
+        } catch (Exception e) {
+            //代码处理异常不会进入事务完成的方法，要在catch 内释放锁
+            lock.unlock();
+             throw  e;
+//            log.error("", e);
+        } finally {
+            //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
+            //unlock 删除key
+//            lock.unlock();
+        }
+
+
+    }
+
+
+
+    @Override
+    @PointcutExecuteOrderTwo
+    @PointcutExecuteOrderOne
+    public void pointcutExecuteOrder() {
+        log.info("pointcutExecuteOrder - service");
+    }
 
 }
