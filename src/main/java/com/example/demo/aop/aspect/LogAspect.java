@@ -430,8 +430,16 @@ public class LogAspect {
                     // 注意：锁超时自动释放，另外一个线程就会获取锁继续执行，代码版本号处理
                     long leaseTime = 30;
                     //不指定leaseTime看门狗自动续期
-//                    lock.lock();
-                    boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+                    lock.lock();
+                    //此处最好用lock.lock();避免业务执行期间释放了锁。配合限流使用。\
+//                    默认30秒leaseTime，但看门狗会每10秒检查并续期
+//                    只要线程存活且业务未完成，锁会一直持有
+//                    业务完成后必须手动unlock()
+                    //不设置 releaseTime（启用看门狗）
+//                    lock.lock(leaseTime, TimeUnit.SECONDS);
+                    boolean lockSuccessfully = lock.tryLock(waitTime, TimeUnit.SECONDS);
+
+//                    boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
                     if (lockSuccessfully) {
                         //获取锁之后判断过期时间是否被之前线程设置过，设置过就处理过业务
                         expireTime = redisTemplate.getExpire(key);
@@ -470,8 +478,8 @@ public class LogAspect {
         stopWatch.stop();
         long costTime = stopWatch.getTotalTimeMillis();
 //        如果是列别插叙数据量大，会影响性能
-       // log.debug("{} : {} - {} 处理完成,返回结果 - {}", uri, className, methodName, objectMapper.writeValueAsString(result));
-        log.debug("aroundMethod cost_time {} ms {} : {} - {} 处理完成,返回结果 - {}", costTime,uri, className, methodName, objectMapper.writeValueAsString(result));
+        // log.debug("{} : {} - {} 处理完成,返回结果 - {}", uri, className, methodName, objectMapper.writeValueAsString(result));
+        log.debug("aroundMethod cost_time {} ms {} : {} - {} 处理完成,返回结果 - {}", costTime, uri, className, methodName, objectMapper.writeValueAsString(result));
 
         return result;
 

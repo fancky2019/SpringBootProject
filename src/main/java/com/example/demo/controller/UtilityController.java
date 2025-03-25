@@ -1789,7 +1789,7 @@ public class UtilityController {
             int finalI = i;
             threadPoolExecutor.execute(() -> {
                 try {
-                    final  int j = finalI;
+                    final int j = finalI;
                     productTestService.transactionalRedission(j);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -2359,7 +2359,7 @@ public class UtilityController {
             int finalI = i;
             threadPoolExecutor.execute(() -> {
                 try {
-                    final  int j = finalI;
+                    final int j = finalI;
                     mqMessageService.redissonLockReleaseTransactionalUnCommit(j);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -2370,4 +2370,21 @@ public class UtilityController {
         return MessageResult.success();
     }
 
+    /**
+     *主线程可以打印出异常堆栈信息
+     *
+     * 主线程无法捕捉子线程的异常信息，子线程要处理异常信息
+     * @return
+     */
+    @GetMapping(value = "/tryThrowStackTrace")
+    public MessageResult<String> tryThrowStackTrace() {
+        try {
+            productTestService.tryThrowStackTrace();
+        } catch (Exception e) {
+            throw e;
+        }
+        return MessageResult.success();
+    }
+
 }
+

@@ -385,8 +385,43 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
         try {
             long waitTime = 10;
             long leaseTime = 30;
+
+
+//            // 推荐使用默认看门狗模式
+//            lock.lock();
+//            try {
+//                // 业务逻辑
+//            } finally {
+//                lock.unlock();
+//            }
+
+//            短期确定任务：
+//// 设置合理的自动释放时间
+            // waitTime=0 表示不等待， 只会进行一次尝试获取redis 锁，不会进行后续重试
+//            waitTime=0 表示 非阻塞尝试获取锁：
+//            如果锁可用，立即获取并返回 true
+//            如果锁被其他客户端持有，立即返回 false（不等待）
+            // leaseTime 设置锁自动释放时间
+//            boolean acquired = lock.tryLock(0, 30, TimeUnit.SECONDS);
+//            if (lock.tryLock(0, 30, TimeUnit.SECONDS)) {
+//                try {
+//                    // 业务逻辑
+//                } finally {
+//                    lock.unlock();
+//                }
+//            }
+
+
+
+//            默认30秒leaseTime，但看门狗会每10秒检查并续期
+//            只要线程存活且业务未完成，锁会一直持有
+//            业务完成后必须手动unlock()
             // lock.lock();
-            boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+            // 明确指定leaseTime会禁用看门狗
+//            lock.lock(leaseTime, TimeUnit.SECONDS);
+            boolean lockSuccessfully =     lock.tryLock(waitTime, TimeUnit.SECONDS);
+//            boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+
             if (lockSuccessfully) {
                 //do work
                 //进行事务操作
@@ -407,7 +442,11 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
                 log.info("redissonLockReentrantLock - {} get lock failed", RedisKeyConfigConst.MQ_FAIL_HANDLER);
             }
         } finally {
-            lock.unlock();
+//            Thread.currentThread().interrupt();
+//            lock.unlock();
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();  // 最终释放
+            }
         }
     }
 
@@ -431,5 +470,28 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 
     }
 
+    /**
+     *     //@Transactional 注解时遇到 "Methods annotated with '@Transactional' must be overridable" 错误，
+     *     // 这是因为 Spring 的代理机制要求被 @Transactional 注解的方法必须是可重写的。
+     *
+     *
+     * private（私有方法不可重写）
+     *final（final 方法禁止重写）
+     *static（静态方法不属于实例，不存在重写概念）
+     *
+     *
+     * protected访问修饰符报错：
+     * CGLIB 代理限制：
+     * 当使用 CGLIB 代理时（proxyTargetClass=true 或类没有实现接口）
+     * CGLIB 无法代理 protected 方法，导致事务注解不生效
+     *
+     * JDK 动态代理限制：
+     * 当使用基于接口的代理时
+     * protected 方法通常不会在接口中声明，因此不会被代理
+     */
 
+    @Transactional(rollbackFor = Exception.class)
+    public   void selfInvocationTransactional() {
+
+    }
 }

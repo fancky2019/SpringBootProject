@@ -68,4 +68,6 @@ public interface IProductTestService extends IService<ProductTest> {
     void transactionalRedission(int i) throws InterruptedException;
 
     void pointcutExecuteOrder();
+
+    void tryThrowStackTrace();
 }

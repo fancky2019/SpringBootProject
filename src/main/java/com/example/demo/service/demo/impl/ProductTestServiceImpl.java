@@ -1685,4 +1685,9 @@ LockAnnotationAdvisor 实现了Ordered接口
         log.info("pointcutExecuteOrder - service");
     }
 
+    @Override
+    public void tryThrowStackTrace() {
+        int m=Integer.parseInt("m");
+    }
+
 }
