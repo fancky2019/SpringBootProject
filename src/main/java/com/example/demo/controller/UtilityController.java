@@ -1779,22 +1779,25 @@ public class UtilityController {
         personService.transactionalSynchronizedTest1(i);
     }
 
-
+    /**
+     * 解决并发下 redissonLock 释放了 事务未提交
+     * @throws InterruptedException
+     */
     @GetMapping(value = "/transactionalRedission")
     public void transactionalRedission() throws InterruptedException {
-//        for (int i = 0; i < 10; i++) {
-//            int finalI = i;
-//            threadPoolExecutor.execute(() -> {
-//                try {
-//                    final  int j = finalI;
-//                    productTestService.transactionalRedission(j);
-//                } catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            });
-//        }
+        for (int i = 0; i < 10; i++) {
+            int finalI = i;
+            threadPoolExecutor.execute(() -> {
+                try {
+                    final  int j = finalI;
+                    productTestService.transactionalRedission(j);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
 
-        productTestService.transactionalRedission(1);
+//        productTestService.transactionalRedission(1);
 
     }
 
@@ -2294,6 +2297,12 @@ public class UtilityController {
     }
 
 
+    /**
+     * OpenFeign 调用
+     * @param token
+     * @return
+     * @throws Exception
+     */
     @GetMapping(value = "/completeShipOrder")
     public MessageResult<String> completeShipOrder(@RequestHeader("Authorization") String token) throws Exception {
 
@@ -2321,6 +2330,43 @@ public class UtilityController {
     @GetMapping(value = "/pointcutExecuteOrder")
     public MessageResult<String> pointcutExecuteOrder() {
         productTestService.pointcutExecuteOrder();
+        return MessageResult.success();
+    }
+
+
+    /**
+     *  redissonLock 可重入
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value = "/redissonLockReentrantLock")
+    public MessageResult<String> redissonLockReentrantLock() throws Exception {
+        mqMessageService.redissonLockReentrantLock();
+        return MessageResult.success();
+    }
+
+    /**
+     * redissonLock 锁释放事务未提交
+     *  解决并发下 redissonLock 释放了 事务未提交
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value = "/redissonLockReleaseTransactionalUnCommit")
+    public MessageResult<String> redissonLockReleaseTransactionalUnCommit() throws Exception {
+
+
+        for (int i = 0; i < 10; i++) {
+            int finalI = i;
+            threadPoolExecutor.execute(() -> {
+                try {
+                    final  int j = finalI;
+                    mqMessageService.redissonLockReleaseTransactionalUnCommit(j);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+
         return MessageResult.success();
     }
 

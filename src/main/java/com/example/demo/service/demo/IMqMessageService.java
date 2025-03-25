@@ -38,4 +38,11 @@ public interface IMqMessageService extends IService<MqMessage> {
     void rePublish(List<MqMessage> mqMessageList);
 
     void reConsume(List<MqMessage> mqMessageList) throws Exception;
+
+    void redissonLockReentrantLock() throws Exception;
+
+    void selfInvocationTransactionalBusinessLogic(int i);
+
+    void redissonLockReleaseTransactionalUnCommit(int i) throws InterruptedException;
+
 }

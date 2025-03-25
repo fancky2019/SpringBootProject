@@ -1610,8 +1610,13 @@ LockAnnotationAdvisor 实现了Ordered接口
 
      @Lock4j  无法灵活的设置要锁的key，设置静态key 可以简化代码
 */
-    @Lock4j(keys = {"#key"}, acquireTimeout = 1000, expire = 6000)
+//    @Lock4j(keys = {"#key"}, acquireTimeout = 1000, expire = 6000)
 
+    /**
+     * 解决并发下 redissonLock 释放了 事务未提交
+     * @param i
+     * @throws InterruptedException
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void transactionalRedission(int i) throws InterruptedException {

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.example.demo.dao.demo.MqMessageMapper;
 import com.example.demo.model.entity.demo.MqMessage;
+import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.MqMessageRequest;
 import com.example.demo.model.response.MqMessageResponse;
@@ -29,6 +30,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
@@ -328,4 +330,106 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
         }
 
     }
+
+
+    int i = 1;
+
+    /**
+     * redissonLock 可重入锁
+     * @throws Exception
+     */
+    @Override
+    public void redissonLockReentrantLock() throws Exception {
+
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        String operationLockKey = RedisKeyConfigConst.MQ_FAIL_HANDLER;
+        //并发访问，加锁控制
+        RLock lock = redissonClient.getLock(operationLockKey);
+
+        try {
+            long waitTime = 10;
+            long leaseTime = 30;
+            boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+            if (lockSuccessfully) {
+
+                if (i == 1) {
+                    i++;
+                    redissonLockReentrantLock();
+                }
+                //do work
+                mqSendUtil.releaseLock(lock);
+            } else {
+                log.info("redissonLockReentrantLock - {} get lock failed", RedisKeyConfigConst.MQ_FAIL_HANDLER);
+            }
+        } catch (Exception ex) {
+            log.error("", ex);
+            lock.unlock();
+            throw ex;
+        }
+    }
+
+
+    /**
+     * 解决并发下 redissonLock 释放了 事务未提交
+     * 包一层确保事务
+     *
+     * 如果调用的方法有 @Transactional 可以将调用方法设置 @Transactional(propagation = Propagation.REQUIRES_NEW)
+     */
+//    @Transactional(rollbackFor = Exception.class)
+    public void redissonLockReleaseTransactionalUnCommit(int i) throws InterruptedException {
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        String operationLockKey = RedisKeyConfigConst.MQ_FAIL_HANDLER;
+        //并发访问，加锁控制
+        RLock lock = redissonClient.getLock(operationLockKey);
+
+        try {
+            long waitTime = 10;
+            long leaseTime = 30;
+            // lock.lock();
+            boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+            if (lockSuccessfully) {
+                //do work
+                //进行事务操作
+
+                // 将业务逻辑封装到事务方法中
+                //self-invocation‌（自我调用）是指在一个类的方法内部直接调用同一个类中的其他方法。
+                //@Transactional self-invocation (in effect, a method within the target object calling another method of the target object) does not lead to an actual transaction at runtime
+//            transactionalBusinessLogic();
+
+                //被调用方会触发事务aop, 两个方法在不同事务内
+                Object proxyObj = AopContext.currentProxy();
+                IMqMessageService mqMessageService = null;
+                if (proxyObj instanceof IMqMessageService) {
+                    mqMessageService = (IMqMessageService) proxyObj;
+                    mqMessageService.selfInvocationTransactionalBusinessLogic(i);
+                }
+            } else {
+                log.info("redissonLockReentrantLock - {} get lock failed", RedisKeyConfigConst.MQ_FAIL_HANDLER);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * //    @Transactional(propagation = Propagation.REQUIRES_NEW)
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void selfInvocationTransactionalBusinessLogic(int i) {
+        // 业务逻辑操作数据库
+
+
+        MqMessage mqMessage = this.getById(2);
+        log.info("BeforeVersion{} - {}", i, mqMessage.getVersion());
+        mqMessage.setVersion(mqMessage.getVersion() + 1);
+        LambdaUpdateWrapper<MqMessage> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(MqMessage::getVersion, mqMessage.getVersion());
+        updateWrapper3.eq(MqMessage::getId, mqMessage.getId());
+        this.update(updateWrapper3);
+        log.info("AfterVersion{} - {}", i, mqMessage.getVersion());
+
+    }
+
+
 }
