@@ -32,6 +32,7 @@ import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
+import com.example.demo.model.wmsservicemodel.ShipOrderInventoryDetailDto;
 import com.example.demo.rabbitMQ.mqtt.MqttProduce;
 import com.example.demo.rocketmq.RocketmqTest;
 import com.example.demo.service.RetryService;
@@ -275,6 +276,9 @@ public class UtilityController {
 
     @Autowired
     private WmsService wmsService;
+
+    @Autowired
+    private FeignClientTest feignClientTest;
 
 
     @Autowired
@@ -2002,6 +2006,8 @@ public class UtilityController {
     @GetMapping(value = "/configurationTest")
     public String configurationTest() {
         int m = 0;
+        //配置文件没有配置，就使用默认值，配置了就是用配置的值
+        int age = configModelProperty.getAge();
         return configModelProperty.getAddress();
     }
 
@@ -2229,7 +2235,7 @@ public class UtilityController {
     }
 
     @GetMapping(value = "/repeatReadTest")
-    public MessageResult<Void> repeatReadTest() {
+    public MessageResult<Void> repeatReadTest() throws InterruptedException {
         productTestService.repeatReadTest();
         return MessageResult.success();
     }
@@ -2354,7 +2360,6 @@ public class UtilityController {
     @GetMapping(value = "/redissonLockReleaseTransactionalUnCommit")
     public MessageResult<String> redissonLockReleaseTransactionalUnCommit() throws Exception {
 
-
         for (int i = 0; i < 10; i++) {
             int finalI = i;
             threadPoolExecutor.execute(() -> {
@@ -2383,6 +2388,24 @@ public class UtilityController {
         } catch (Exception e) {
             throw e;
         }
+        return MessageResult.success();
+    }
+
+    @GetMapping(value = "/shipOrderTest")
+    public MessageResult<String> shipOrderTest() {
+        for (int i = 0; i < 10; i++) {
+            int finalI = i;
+            threadPoolExecutor.execute(() -> {
+                final int j = finalI;
+                wmsService.shipOrderTest(j + "");
+            });
+        }
+        return MessageResult.success();
+    }
+
+    @GetMapping(value = "/checkRelation")
+    public MessageResult<String> checkRelation(ShipOrderInventoryDetailDto dto, @RequestHeader("token") String token) {
+        wmsService.checkRelation(dto,token);
         return MessageResult.success();
     }
 

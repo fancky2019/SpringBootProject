@@ -1349,15 +1349,52 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void repeatReadTest() {
-        Object proxyObj = AopContext.currentProxy();
-        IProductTestService productTestService = null;
-        if (proxyObj instanceof IProductTestService) {
-            productTestService = (IProductTestService) proxyObj;
-        }
-        for (int i = 0; i < 3; i++) {
-            productTestService.repeatReadFun();
-        }
+    public void repeatReadTest() throws InterruptedException {
+
+
+        /**
+         * MyBatis 在 Spring 事务内多次读取的缓存行为解析
+         * MyBatis 缓存机制
+         * 在 Spring 事务中使用 MyBatis 时，多次读取同一条数据是否走缓存取决于 MyBatis 的缓存配置：
+         * 1. 一级缓存（Local Cache）
+         * 作用范围：同一个 SqlSession
+         * 生命周期：默认与事务绑定（Spring 中一个事务对应一个 SqlSession）
+         * 特性：
+         * 事务内多次查询相同 SQL 会走缓存
+         * 执行任何 INSERT/UPDATE/DELETE 操作会清空缓存
+         * 2. 二级缓存（Global Cache）
+         * 作用范围：跨 SqlSession
+         * 需要显式配置：在 mapper XML 中添加 <cache/> 标签
+         * 生命周期：应用级别（多个事务共享）
+         */
+        //没有加  @Transactional 注解可以读取到其他事务修改的值 ，不能重复读取
+        //加 @Transactional 注解不可以读取到其他事务修改的值，可以重复读取
+        ProductTest productTest = this.getById(1);
+        Thread.sleep(30*1000);
+
+        //修改该行数据，可以读取到最新的，如果修改其他行数据，读取的还是缓存。
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(ProductTest::getVersion, 3);
+        //如果修改id=2 ，读取的还是缓存
+        updateWrapper3.eq(ProductTest::getId, 1);
+
+        //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        boolean re3 = this.update(updateWrapper3);
+        //修改该行数据，可以读取到最新的
+        ProductTest productTest1 = this.getById(1);
+
+        int m=0;
+
+
+
+//        Object proxyObj = AopContext.currentProxy();
+//        IProductTestService productTestService = null;
+//        if (proxyObj instanceof IProductTestService) {
+//            productTestService = (IProductTestService) proxyObj;
+//        }
+//        for (int i = 0; i < 3; i++) {
+//            productTestService.repeatReadFun();
+//        }
     }
 
     @Transactional(rollbackFor = Exception.class)

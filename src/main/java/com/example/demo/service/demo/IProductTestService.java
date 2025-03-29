@@ -47,7 +47,7 @@ public interface IProductTestService extends IService<ProductTest> {
 
     void eventBusTest1();
 
-    void repeatReadTest();
+    void repeatReadTest() throws InterruptedException;
 
     void repeatReadFun();
 

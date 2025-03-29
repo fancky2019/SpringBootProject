@@ -106,6 +106,7 @@ management:
 
 
     private String fistName;
+    //配置文件没有配置，就使用默认值，配置了就是用配置的值
     private Integer age = 27;
     //可设计一个default_field 字段设置字段的默认值
     private Integer DEFAULT_AGE = 27;

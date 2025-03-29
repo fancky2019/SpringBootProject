@@ -2,10 +2,13 @@ package com.example.demo.handler;
 
 import com.example.demo.controller.UserController;
 import com.example.demo.model.viewModel.MessageResult;
+import feign.FeignException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.slf4j.MDC;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +41,7 @@ import java.lang.reflect.UndeclaredThrowableException;
  * @ExceptionHandler :注解声明异常处理方法
  */
 @ControllerAdvice
+//@Order(Ordered.LOWEST_PRECEDENCE)
 //@RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -50,9 +54,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public MessageResult<Void> exceptionHandler(Exception ex, WebRequest request) {
+    public MessageResult<Void> exceptionHandler(Exception ex, WebRequest request) throws Exception {
 
-
+//        if (ex instanceof FeignException) {
+//            throw ex; // 重新抛出，让Feign的Fallback处理
+//        }
         MessageResult<Void> messageResult = new MessageResult<>();
         messageResult.setCode(500);
         String msg = "";
