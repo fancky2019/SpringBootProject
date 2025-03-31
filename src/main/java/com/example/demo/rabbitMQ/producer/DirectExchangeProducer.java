@@ -190,7 +190,19 @@ public class DirectExchangeProducer {
 //        Spring Boot 集成 Elasticsearch 可以是同步的也可以是异步的。默认情况下，Spring Data Elasticsearch 的操作是同步的，意味着在执行索引、搜索等操作时，当前线程会阻塞直到操作完成。
         //Spring Boot 整合 RabbitMQ 默认是异步的。你可以使用 RabbitTemplate 来发送消息，并通过回调来确认消息是否成功发送
 //      //默认异步调用 ：事务机制和 confirm 机制，事务机制是同步的， confirm 机制是异步的
+        //// 显式开启确认模式（即使默认是同步）
         rabbitTemplate.send(exchange, routingKey, message, correlationData);
+
+
+        //同步发送： 同步发送并获取返回消息（RPC模式）。性能较低（受网络延迟影响）
+
+        //// 返回null（如果超时或没有响应）
+        // 阻塞当前线程等待响应
+        //
+        //默认超时时间为 5 秒（可通过 setReplyTimeout 修改）  rabbitTemplate.setReplyTimeout(10000); // 10秒超时
+//        rabbitTemplate.convertSendAndReceive(exchange, routingKey, message, correlationData);
+
+
 
         //同步调用
 //        Message responseMessage = rabbitTemplate.sendAndReceive(exchange, routingKey, message, correlationData);
@@ -202,7 +214,13 @@ public class DirectExchangeProducer {
 //        }
 
     }
+
     //region batch
+
+    //批量发送使用的 batchingRabbitTemplate。批量生成将多条消息合并成一条，消费的时候还是一条一条的消费，确认也是一条一条确认
+    //批量情形可考虑kafka rocketmq
+
+
 //    public static final String BATCH_DIRECT_EXCHANGE_NAME = "BatchSpringBoot";
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
 //    public static final String BATCH_DIRECT_ROUTING_KEY = "BatchRoutingKeySpringBoot";

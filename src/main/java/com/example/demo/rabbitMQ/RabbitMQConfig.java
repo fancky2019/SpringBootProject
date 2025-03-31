@@ -32,11 +32,11 @@ import java.util.Map;
  * rabbitMQ安装目录C:\Program Files\RabbitMQ Server\rabbitmq_server-3.10.5\sbin 下控制台执行命令
  * # 查看所有队列
  * rabbitmqctl list_queues
- * <p>
+ *
  * # 根据 queue_name 参数，删除对应的队列
  * rabbitmqctl delete_queue queue_name
- * <p>
- * <p>
+ *
+ *
  * 声明RabbitMQ的交换机、队列、并将相应的队列、交换机、RoutingKey绑定。
  */
 @Configuration
@@ -231,7 +231,7 @@ public class RabbitMQConfig {
     }
 
 
-    /*
+    /**
     多线程消费:涉及到消费顺序行要将一个大队列根据业务消息id分成多个小队列
     配置文件为默认的SimpleRabbitListenerContainerFactory 配置
     该配置为具体的listener 指定SimpleRabbitListenerContainerFactory

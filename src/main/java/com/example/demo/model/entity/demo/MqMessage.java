@@ -17,6 +17,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import okhttp3.internal.ws.RealWebSocket;
+import org.joda.time.DateTime;
 
 /**
  * <p>
@@ -40,6 +41,7 @@ public class MqMessage extends EntityBase implements Serializable {
 
     private String msgId;
 
+    private String businessKey;
     private String msgContent;
 
     private String exchange;
@@ -47,6 +49,9 @@ public class MqMessage extends EntityBase implements Serializable {
     private String routeKey;
 
     private String queue;
+
+    private Integer retryCount;
+    private DateTime nextRetryTime;
 
     private Integer status;
     private String remark;
