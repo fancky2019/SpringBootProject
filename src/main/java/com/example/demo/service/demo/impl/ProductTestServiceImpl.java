@@ -48,6 +48,7 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.jdbc.SQL;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -60,6 +61,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -70,11 +72,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+import javax.swing.*;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.net.URLEncoder;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -101,7 +107,8 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
     private RedissonClient redissonClient;
     @Autowired
     private ProductTestMapper productTestMapper;
-
+    @Autowired
+    private DataSource dataSource;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -1370,7 +1377,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         //没有加  @Transactional 注解可以读取到其他事务修改的值 ，不能重复读取
         //加 @Transactional 注解不可以读取到其他事务修改的值，可以重复读取
         ProductTest productTest = this.getById(1);
-        Thread.sleep(30*1000);
+        Thread.sleep(30 * 1000);
 
         //修改该行数据，可以读取到最新的，如果修改其他行数据，读取的还是缓存。
         LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
@@ -1383,8 +1390,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         //修改该行数据，可以读取到最新的
         ProductTest productTest1 = this.getById(1);
 
-        int m=0;
-
+        int m = 0;
 
 
 //        Object proxyObj = AopContext.currentProxy();
@@ -1395,6 +1401,93 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 //        for (int i = 0; i < 3; i++) {
 //            productTestService.repeatReadFun();
 //        }
+    }
+
+    /**
+     * MyBatis 缓存 vs 事务隔离：MyBatis 的一级缓存可能会影响你观察到的事务隔离行为，特别是在同一事务中多次执行相同查询时
+     * @throws InterruptedException
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
+    public void repeatReadMultiTransaction() throws InterruptedException {
+
+//        Spring 的 @Transactional 注解如果不显式指定隔离级别，默认使用：Isolation.DEFAULT
+
+//        MySQL/InnoDB：REPEATABLE READ（可重复读）
+//        Oracle：READ COMMITTED（读已提交）
+//        PostgreSQL：READ COMMITTED（读已提交）
+//        SQL Server：READ COMMITTED（读已提交）
+//        H2：READ COMMITTED（读已提交）
+
+        //查看mysql事务隔离级别
+//        SHOW GLOBAL VARIABLES LIKE 'transaction_isolation'  REPEATABLE-READ
+
+
+//
+//        MyBatis 一级缓存：MyBatis 默认开启一级缓存（SqlSession 级别），在同一 SqlSession 中，相同的查询会直接从缓存返回结果，而不会再次访问数据库。
+//        Spring 事务管理：在 Spring 管理的事务中，默认情况下整个事务方法使用同一个 SqlSession，这会导致在事务内部多次执行相同查询时，MyBatis 直接从缓存返回数据。
+//
+        try (Connection conn = dataSource.getConnection()) {
+//            DEFAULT(-1),
+//                    READ_UNCOMMITTED(1),
+//                    READ_COMMITTED(2),
+//                    REPEATABLE_READ(4),
+//                    SERIALIZABLE(8);
+            //4
+            int level = conn.getTransactionIsolation();
+            int n = 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        //两次读取的值一样，尽管期间其他线程的事务修改了值。 mybatis 缓存读取 一级缓存（Spring 中一个事务对应一个 SqlSession）
+        //
+        ProductTest productTest = this.getById(1);
+        int version = productTest.getVersion();
+        Thread.sleep(30 * 1000);
+        ProductTest productTest1 = this.getById(1);
+        int version1 = productTest1.getVersion();
+
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(ProductTest::getProductName, "ddd");
+        //如果修改id=2 ，读取的还是缓存。
+        // 修改该条数据导致缓存失效从数据库读取,可以读取到事务期间其他事务的更新
+        updateWrapper3.eq(ProductTest::getId, 1);
+        //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        boolean re3 = this.update(updateWrapper3);
+
+
+//        可以通过配置参数禁用此行为(需要重启MySQL):
+//[mysqld]
+//innodb_locks_unsafe_for_binlog = 0
+//        行为特征	标准REPEATABLE READ	半一致性读
+//        SELECT查询	使用事务开始时的读视图	不适用
+//        UPDATE/DELETE	应使用读视图	可能使用最新提交版本
+//        数据一致性	严格可重复读	可能看到更新后的数据
+//        并发性能	较低	更高
+
+//        半一致性读是MySQL InnoDB存储引擎在REPEATABLE READ隔离级别下对UPDATE语句的一种特殊优化机制。
+//        它允许UPDATE语句在某些条件下查看其他事务已提交的最新数据版本，
+//        而不是严格遵循事务开始时建立的读视图
+        //可以读取到其他事务更新的
+        ProductTest productTest2 = this.getById(1);
+        int version2 = productTest2.getVersion();
+
+        int m = 0;
+
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void repeatReadMultiTransactionUpdate() {
+        //修改该行数据，可以读取到最新的，如果修改其他行数据，读取的还是缓存。
+        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+        updateWrapper3.set(ProductTest::getVersion, 3);
+        //如果修改id=2 ，读取的还是缓存
+        updateWrapper3.eq(ProductTest::getId, 1);
+        //更新指定条件的 为productTest 对象的值，ID 字段除外。
+        boolean re3 = this.update(updateWrapper3);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -1469,7 +1562,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 //        int m = Integer.parseInt("m");
     }
 
-    //    @Override
+    @Override
 //    @Transactional(rollbackFor = Exception.class)
     public void transactionalFun() {
         ProductTest productTest = this.getById(1);
@@ -1478,6 +1571,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         updateWrapper3.set(ProductTest::getVersion, 99);
         updateWrapper3.eq(ProductTest::getId, 1);
         boolean re3 = this.update(updateWrapper3);
+//        int m= Integer.parseInt("m");
     }
 
     /**
@@ -1593,7 +1687,6 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
     }
 
 
-
     /**
      * 所有事务提交了才会执行 事务回调
      * @param productId
@@ -1702,7 +1795,7 @@ LockAnnotationAdvisor 实现了Ordered接口
         } catch (Exception e) {
             //代码处理异常不会进入事务完成的方法，要在catch 内释放锁
             lock.unlock();
-             throw  e;
+            throw e;
 //            log.error("", e);
         } finally {
             //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
@@ -1714,7 +1807,6 @@ LockAnnotationAdvisor 实现了Ordered接口
     }
 
 
-
     @Override
     @PointcutExecuteOrderTwo
     @PointcutExecuteOrderOne
@@ -1724,7 +1816,7 @@ LockAnnotationAdvisor 实现了Ordered接口
 
     @Override
     public void tryThrowStackTrace() {
-        int m=Integer.parseInt("m");
+        int m = Integer.parseInt("m");
     }
 
 }

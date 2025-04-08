@@ -2,6 +2,7 @@ package com.example.demo.jobs.xxljob;
 
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.demo.IMqMessageService;
+import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.utility.RedisKeyConfigConst;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xxl.job.core.context.XxlJobHelper;
@@ -9,6 +10,7 @@ import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -151,11 +153,20 @@ import java.util.concurrent.TimeUnit;
  *
  *
  *
+ *xxl-job-admin（调度中心） 、执行器
+ *
+ *1. 标准 HTTP 执行器模式（默认）
+ * 在标准 HTTP 模式下（使用内置的 Netty HTTP 服务器）：不会经过 Servlet Filter：因为 XXL-JOB
+ * 执行器默认使用 Netty 直接处理 HTTP 请求，不经过 Servlet 容器
+ *请求直接由 XxlJobExecutor 的 EmbedServer 处理
+ * 执行器的 /run 接口由 EmbedHttpServerHandler 直接处理
+ *默认不会经过 Filter：因为 XXL-JOB 默认使用自己的 Netty 服务器
  *
  *
+ *2. 如果执行器部署在 Servlet 容器中
+ * 当执行器以 WAR 包形式部署在 Tomcat/Jetty 等 Servlet 容器中：
  *
- *
- *
+ * 会经过 Filter：因为请求会经过 Servlet 容器完整的处理链
  *
  *
  *
@@ -169,6 +180,9 @@ public class BeanMethodJobHandler {
     @Autowired
     private IMqMessageService mqMessageService;
 
+    @Autowired
+    private IProductTestService productTestService;
+
     //region 模板
     @XxlJob("beanMethodJobHandler")
     public void beanMethodJobHandler() throws Exception {
@@ -179,7 +193,8 @@ public class BeanMethodJobHandler {
         String timeStr = formatter.format(LocalDateTime.now());
         XxlJobHelper.log("BeanMethodJobHandler");
         log.info("xxljob - BeanMethodJobHandler  {} ", timeStr);
-
+        String traceId = MDC.get("traceId");
+        productTestService.transactionalFun();
     }
 
     @XxlJob("dynamicJob")
@@ -199,7 +214,7 @@ public class BeanMethodJobHandler {
 
 
     @XxlJob("mqFailHandler")
-    public  void mqFailHandler() throws Exception {
+    public void mqFailHandler() throws Exception {
         log.info("start executing xxljob - mqFailHandler ");
         //param xxl admin 填写的任务参数
         String param = XxlJobHelper.getJobParam();

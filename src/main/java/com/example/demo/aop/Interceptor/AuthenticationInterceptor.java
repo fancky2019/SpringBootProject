@@ -59,6 +59,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     @Autowired
     private JWTUtility jwtUtility;
 
+    //开始执行任务
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object object) throws Exception {
         String token = httpServletRequest.getHeader("token");// 从 http 请求头中取出 token
@@ -128,6 +129,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    //任务执行完成
     @Override
     public void postHandle(HttpServletRequest httpServletRequest,
                            HttpServletResponse httpServletResponse,
@@ -135,6 +137,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     }
 
+    //任务执行结束(无论成功失败)
     @Override
     public void afterCompletion(HttpServletRequest httpServletRequest,
                                 HttpServletResponse httpServletResponse,

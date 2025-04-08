@@ -2234,11 +2234,37 @@ public class UtilityController {
         return MessageResult.faile(person);
     }
 
+    /**
+     * 事务重复读取:同一个事务内重复读取
+     * @return
+     * @throws InterruptedException
+     */
     @GetMapping(value = "/repeatReadTest")
     public MessageResult<Void> repeatReadTest() throws InterruptedException {
         productTestService.repeatReadTest();
         return MessageResult.success();
     }
+
+    /**
+     * 事务重复读取:一个事务两次读取另一个事务期间修改了数据
+     *
+     * MyBatis 缓存 vs 事务隔离：MyBatis 的一级缓存可能会影响你观察到的事务隔离行为，特别是在同一事务中多次执行相同查询时
+     * @return
+     * @throws InterruptedException
+     */
+    @GetMapping(value = "/repeatReadMultiTransaction")
+    public MessageResult<Void> repeatReadMultiTransaction() throws InterruptedException {
+        productTestService.repeatReadMultiTransaction();
+        return MessageResult.success();
+    }
+
+
+    @GetMapping(value = "/repeatReadMultiTransactionUpdate")
+    public MessageResult<Void> repeatReadMultiTransactionUpdate() throws InterruptedException {
+        productTestService.repeatReadMultiTransactionUpdate();
+        return MessageResult.success();
+    }
+
 
     @GetMapping(value = "/transactionalFunTest")
     public MessageResult<Void> transactionalFunTest() {

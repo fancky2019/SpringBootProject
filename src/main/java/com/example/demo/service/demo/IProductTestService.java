@@ -1,17 +1,12 @@
 package com.example.demo.service.demo;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.demo.eventbus.MyCustomEvent;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.request.DemoProductRequest;
-import com.example.demo.model.viewModel.MessageResult;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * <p>
@@ -48,6 +43,11 @@ public interface IProductTestService extends IService<ProductTest> {
     void eventBusTest1();
 
     void repeatReadTest() throws InterruptedException;
+
+    void repeatReadMultiTransaction() throws InterruptedException;
+
+    void repeatReadMultiTransactionUpdate() ;
+
 
     void repeatReadFun();
 

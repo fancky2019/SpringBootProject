@@ -15,6 +15,14 @@ eureka:
     registerWithEureka: false
     fetchRegistry: false
 
+#mybatis:
+#  configuration:
+#    local-cache-scope: session # 确保是 session(默认值)
+#    cache-enabled: false       # 临时关闭二级缓存测试
+
+
+
+
 #公共配置与profiles选择无关 mapperLocations指的路径是src/main/resources
 #mapper路径和实体对象路径
 #要配置mybatis不然mybatis有可能无法Invalid bound statement问题
@@ -166,6 +174,7 @@ spring:
       #pool-name: HikariCP-Demo
       max-lifetime: 1800000
       connection-timeout: 600000
+      connection-init-sql: SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ
       #connection-test-query: SELECT 1
 
   redis:

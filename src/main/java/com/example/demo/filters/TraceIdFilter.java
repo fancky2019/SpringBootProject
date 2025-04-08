@@ -16,6 +16,9 @@ import java.util.UUID;
 
 /**
  * 通过url 访问添加traceId
+ *
+ *
+ * xxljob默认不会经过 Filter：因为 XXL-JOB 默认使用自己的 Netty 服务器
  */
 @Slf4j
 @Configuration
@@ -23,6 +26,7 @@ import java.util.UUID;
 public class TraceIdFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(TraceIdFilter.class);
     private static final ThreadLocal<String> TRACEID = new ThreadLocal<>();
+
     // log4j内部 使用 ThreadContext 保证线程安全
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -44,11 +48,9 @@ public class TraceIdFilter implements Filter {
 //        log.info("1链路跟踪测试{}",traceId);
 
 
-
-
         TraceIdHolder.setTraceId(UUID.randomUUID().toString().replace("-", ""));
         filterChain.doFilter(servletRequest, servletResponse);
-
+        int n = 0;
 
 //        try
 //        {
@@ -63,7 +65,7 @@ public class TraceIdFilter implements Filter {
 
     @Override
     public void destroy() {
-      //  TRACEID.remove();
+        //  TRACEID.remove();
         MDC.clear();
         TraceIdHolder.removeTraceId();
     }

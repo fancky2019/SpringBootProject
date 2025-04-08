@@ -6,6 +6,7 @@ import com.example.demo.rabbitMQ.RabbitMqMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
@@ -15,6 +16,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 /**
+ *
+ * 消息发送方式
+ * RocketMQ 支持 3 种消息发送方式：同步（sync）、 异步（async）、单向（oneway）。
+ *
+ * 同步（Sync Send）： 发送者向MQ执行发送消息API时，同步等待， 直到消息服务器返回发送结果。
+ * 异步（Async Send）： 发送者向MQ执行发送消息API时，指定消息发送成功后的回掉函数，然后调 用消息发送API后，立即返回，消息发送者线程不阻塞，直到运行结束，消息发送成功或 失败的回调任务在一个新的线程中执行。
+ * 单向（Oneway Send）：消息发送者向MQ执行发送消息API时，直接返回，不等待消息服务器的结果， 也不注册回调函数，简单地说，就是只管发，不在乎消息是否成功存储在消息服务器上。
+ *
+ * 强一致性需求 → 同步发送 + 重试机制。
+ * 最终一致性 + 高吞吐 → 异步发送 + 回调补偿（如记录失败消息到DB）。
+ * 可容忍丢失 + 极致性能 → 单向发送。
  *
  */
 @Slf4j
@@ -28,8 +40,16 @@ public class RocketMQProducer {
         RabbitMqMessage msg = new RabbitMqMessage(msgContent);
         //  log.warn(JSON.toJSONString(msg));
         // rocketMQTemplate.send(RocketMQConfig.TOPIC, MessageBuilder.withPayload(msg).build());
-        rocketMQTemplate.convertAndSend(RocketMQConfig.TOPIC, msg);
+      // 内部最终 syncSend:  SendResult sendResult = this.syncSend(destination, message);
+        //返回值丢失
+//        rocketMQTemplate.convertAndSend(RocketMQConfig.TOPIC, msg);
+
+        // 自动序列化为JSON
+        SendResult sendResult=  rocketMQTemplate.syncSend(RocketMQConfig.TOPIC, msg);
+//        单项发送
+//        rocketMQTemplate.sendOneWay(RocketMQConfig.TOPIC, msg);
         return "SUCESS";
+
     }
 //    /**
 //     * 普通发送（这里的参数对象User可以随意定义，可以发送个对象，也可以是字符串等）
@@ -48,7 +68,8 @@ public class RocketMQProducer {
             RabbitMqMessage msg = new RabbitMqMessage(msgBody);
             //同步发送  timeout 时间值调大，单位ms 3000
             SendResult sendResult = rocketMQTemplate.syncSend(RocketMQConfig.TOPIC, MessageBuilder.withPayload(msg).build());
-            //  log.info("【sendMsg】sendResult={}", JSON.toJSONString(sendResult));
+            //  log.info("【sendMsg】sendResult={}", JSON.toJSONString(sendResult));rocketmq //            SendStatus
+//            sendResult.getSendStatus()
             return sendResult;
         } catch (Exception e) {
             int m = 0;
