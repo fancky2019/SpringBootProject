@@ -3,6 +3,7 @@ package com.example.demo.service.demo.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.example.demo.dao.demo.MqMessageMapper;
+import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.PageData;
@@ -26,12 +27,15 @@ import org.redisson.api.RedissonClient;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigInteger;
 import java.text.MessageFormat;
@@ -39,7 +43,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -63,13 +69,19 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
     private RedisTemplate<String, String> redisTemplate;
     @Autowired
     private RedissonClient redissonClient;
-
     @Autowired
     private ObjectMapper objectMapper;
-
-
     @Autowired
     private Executor executor;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+//    private final @Lazy IProductTestService productTestService;
+
+    //   @Lazy 解决循环依赖
+    @Autowired
+    @Lazy
+    private IProductTestService productTestService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -95,6 +107,39 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
             throw new Exception(message);
         }
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateByMsgId(String msgId, int status) throws Exception {
+//        this.updateById(mqMessage);
+//        this.update(mqMessage, new LambdaUpdateWrapper<MqMessage>().eq(MqMessage::getId, mqMessage.getId()));
+
+
+        LambdaQueryWrapper<MqMessage> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MqMessage::getMsgId, msgId);
+        List<MqMessage> mqMessageList = this.list(queryWrapper);
+        MqMessage mqMessage = null;
+        if (mqMessageList.size() > 0) {
+            mqMessage = mqMessageList.get(0);
+        }
+        if (mqMessage == null) {
+            throw new Exception("Can't get MqMessage by MsgId :" + mqMessage.getMsgId());
+        }
+
+        Integer oldVersion = mqMessage.getVersion();
+        mqMessage.setVersion(mqMessage.getVersion() + 1);
+        mqMessage.setStatus(status);
+        mqMessage.setModifyTime(LocalDateTime.now());
+        LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<MqMessage>();
+        updateWrapper.eq(MqMessage::getVersion, oldVersion);
+        updateWrapper.eq(MqMessage::getId, mqMessage.getId());
+        boolean re = this.update(mqMessage, updateWrapper);
+        if (!re) {
+            String message = MessageFormat.format("MqMessage update fail :id - {0} ,version - {1}", mqMessage.getId(), oldVersion);
+            throw new Exception(message);
+        }
+    }
+
 
     @Override
     public PageData<MqMessageResponse> list(MqMessageRequest mqMessage) throws JsonProcessingException {
@@ -160,6 +205,8 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 
     /**
      * 生产失败的重新发布到mq，消费失败的
+     *
+     * 测试：mqMessageOperation
      */
     @Override
     public void mqOperation() {
@@ -178,7 +225,7 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         String operationLockKey = RedisKeyConfigConst.MQ_FAIL_HANDLER;
-        //并发访问，加锁控制
+        //并发访问，加锁控制，此方法内没有事务操作。可以用try finally 释放资源 否则用 MqSendUtil releaseLock 方法
         RLock lock = redissonClient.getLock(operationLockKey);
 
         try {
@@ -219,13 +266,14 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
                 if (CollectionUtils.isEmpty(mqMessageList)) {
                     return;
                 }
-                if (true) {
-                    return;
-                }
+//                if (true) {
+//                    return;
+//                }
+                //0:未生成 1：已生产 2：已消费 3:消费失败
                 //未推送消息(未推送，推送失败
                 List<MqMessage> unPushList = mqMessageList.stream().filter(p -> p.getStatus() == null || p.getStatus().equals(0)).collect(Collectors.toList());
                 //可设计单独的job 处理消费失败
-                List<MqMessage> consumerFailList = mqMessageList.stream().filter(p -> p.getStatus() != null && p.getStatus().equals(1)).collect(Collectors.toList());
+                List<MqMessage> consumerFailList = mqMessageList.stream().filter(p -> p.getStatus() != null && p.getStatus().equals(3)).collect(Collectors.toList());
                 rePublish(unPushList);
 
                 Object proxyObj = AopContext.currentProxy();
@@ -291,42 +339,100 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
      */
     @Async("mqFailHandlerExecutor")
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void reConsume(List<MqMessage> mqMessageList) throws Exception {
 //        CompletableFuture.runAsync(() ->
 //        {
 //            consume(mqMessageList);
 //        });
+        for (MqMessage message : mqMessageList) {
+//            Object proxyObj = AopContext.currentProxy();
+//            IMqMessageService mqMessageService = null;
+//            if (proxyObj instanceof IMqMessageService) {
+//                mqMessageService = (IMqMessageService) proxyObj;
+//            }
+//            mqMessageService.consume(message);
+            if ((message.getMaxRetryCount() != null && message.getMaxRetryCount() > message.getRetryCount()) ||
+                    message.getMaxRetryCount() == 0) {
+                consume(message);
+            } else {
+                log.info("exceed  max retry count {}", message.id);
+            }
 
-        log.info("start executing reConsume");
-        consume(mqMessageList);
+        }
     }
 
+    //    @Transactional(rollbackFor = Exception.class)
+    public void consume(MqMessage message) throws Exception {
+        log.info("start executing consume message {}", message.id);
+        //事务回滚 手动回滚事务 手动提交事务
+        //事务回滚 手动回滚 手动控制事务，编程式事务
+        //TransactionAspectSupport
+        //PlatformTransactionManager 参见  com.example.demo.service.demo.PersonService
+        //TransactionTemplate提供了更简洁的API来管理事务。它隐藏了底层的PlatformTransactionManager的使用
+//        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 
-    private synchronized void consume(List<MqMessage> mqMessageList) throws Exception {
 
-        for (MqMessage message : mqMessageList) {
-            switch (message.getQueue()) {
-                case RabbitMQConfig.BATCH_DIRECT_QUEUE_NAME:
-                    //执行对应的service 消费代码
+        // 在这里执行事务性操作
+        // 操作成功则事务提交，否则事务回滚
+        Exception e = transactionTemplate.execute(transactionStatus -> {
 
-                    boolean consumeSuccess = true;
-                    if (consumeSuccess) {
+            // 事务性操作
+            // 如果操作成功，不抛出异常，事务将提交
+
+            try {
+
+//
+                switch (message.getQueue()) {
+                    case RabbitMQConfig.DIRECT_QUEUE_NAME:
+                        //根据对应的queue执行对应的service 消费代码
+//                            boolean consumeSuccess = true;
+//                            if (consumeSuccess) {
+//
+//                            }
+                        productTestService.mqMessageConsume(message);
                         //update message status
                         message.setStatus(2);
                         this.update(message);
-                    } else {
-                        //失败了就更新一下版本号和更新时间，根据更新时间的 索引 提高查询速度
-                        this.update(message);
-                    }
 
 //                    if (message.getId() % 2 != 0) {
 //                        throw new Exception("test");
 //                    }
-                    break;
-                default:
-                    break;
+                        break;
+                    default:
+                        break;
+                }
+                return null;
+            } catch (Exception ex) {
+                log.info("executing consume message {} fail", message.id);
+                log.error("", ex);
+                // 如果操作失败，抛出异常，事务将回滚
+                transactionStatus.setRollbackOnly();
+                return ex;
+                //此处是定时任务 ，处理异常不抛出
+//                    transactionStatus.setRollbackOnly();
+//                    throw  e;
             }
+
+
+//        TransactionCallbackWithoutResult
+
+        });
+
+        if (e != null) {
+            //将该条事务的异常保存
+            transactionTemplate.execute(transactionStatus -> {
+                try {
+                    //失败了就更新一下版本号和更新时间，根据更新时间的 索引 提高查询速度
+                    message.setRetryCount(message.getRetryCount() + 1);
+                    message.setFailureReason(e.getMessage());
+                    this.update(message);
+                    return true;
+                } catch (Exception ex) {
+                    log.error("", ex);
+                    transactionStatus.setRollbackOnly();
+                    return false;
+                }
+            });
         }
 
     }
@@ -412,14 +518,13 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 //            }
 
 
-
 //            默认30秒leaseTime，但看门狗会每10秒检查并续期
 //            只要线程存活且业务未完成，锁会一直持有
 //            业务完成后必须手动unlock()
             // lock.lock();
             // 明确指定leaseTime会禁用看门狗
 //            lock.lock(leaseTime, TimeUnit.SECONDS);
-            boolean lockSuccessfully =     lock.tryLock(waitTime, TimeUnit.SECONDS);
+            boolean lockSuccessfully = lock.tryLock(waitTime, TimeUnit.SECONDS);
 //            boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
 
             if (lockSuccessfully) {
@@ -491,7 +596,7 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
      */
 
     @Transactional(rollbackFor = Exception.class)
-    public   void selfInvocationTransactional() {
+    public void selfInvocationTransactional() {
 
     }
 }

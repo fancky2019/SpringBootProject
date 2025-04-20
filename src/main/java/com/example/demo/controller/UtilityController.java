@@ -1751,7 +1751,7 @@ public class UtilityController {
      */
 
     @GetMapping(value = "/transactionalTest")
-    public void transactionalTest() {
+    public void transactionalTest() throws JsonProcessingException {
         Person person = new Person();
         person.setName("fancky8888");
         person.setAge(27);
@@ -1817,11 +1817,20 @@ public class UtilityController {
 
     /**
      * 事务同步 更新覆盖 、事务传播 版本号
+     * 事务模板
      * @param executeException
      * @throws InterruptedException
      */
     @GetMapping(value = "/transactionTemplateTest")
     public void transactionTemplateTest(boolean executeException) throws InterruptedException {
+
+        //事务回滚 手动回滚事务 手动提交事务
+        //事务回滚 手动回滚 手动控制事务，编程式事务
+        //TransactionAspectSupport
+        //PlatformTransactionManager 参见  com.example.demo.service.demo.PersonService
+        //TransactionTemplate提供了更简洁的API来管理事务。它隐藏了底层的PlatformTransactionManager的使用
+//        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
         personService.transactionTemplateTest(executeException);
     }
 
@@ -2431,7 +2440,13 @@ public class UtilityController {
 
     @GetMapping(value = "/checkRelation")
     public MessageResult<String> checkRelation(ShipOrderInventoryDetailDto dto, @RequestHeader("token") String token) {
-        wmsService.checkRelation(dto,token);
+        wmsService.checkRelation(dto, token);
+        return MessageResult.success();
+    }
+
+    @GetMapping(value = "/mqMessageOperation")
+    public MessageResult<String> mqMessageOperation() throws JsonProcessingException {
+        productTestService.mqMessageOperation();
         return MessageResult.success();
     }
 

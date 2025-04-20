@@ -78,6 +78,10 @@ logging:
 
 #开发配
 spring:
+#  循环引用 :允许循环引用（Spring Boot 2.6+默认false） 没生效
+#  main:
+#    allow-circular-references: true
+
   lifecycle:
     #默认30s #  server.shutdown=graceful: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
     timeout-per-shutdown-phase: 60s

@@ -1,8 +1,10 @@
 package com.example.demo.service.demo;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.request.DemoProductRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -70,4 +72,7 @@ public interface IProductTestService extends IService<ProductTest> {
     void pointcutExecuteOrder();
 
     void tryThrowStackTrace();
+    void mqMessageConsume(MqMessage message);
+
+    Integer mqMessageOperation() throws JsonProcessingException;
 }

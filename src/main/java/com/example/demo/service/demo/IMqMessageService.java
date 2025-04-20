@@ -23,7 +23,7 @@ public interface IMqMessageService extends IService<MqMessage> {
     void delete(MqMessage mqMessage);
 
     void update(MqMessage mqMessage) throws Exception;
-
+    void updateByMsgId(String  msgId,int status) throws Exception;
     PageData<MqMessageResponse> list(MqMessageRequest mqMessage) throws JsonProcessingException;
 
     void page(MqMessageRequest mqMessage);

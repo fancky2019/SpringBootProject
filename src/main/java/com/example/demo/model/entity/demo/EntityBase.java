@@ -53,6 +53,7 @@ public class EntityBase {
 //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT_UPDATE)
     public LocalDateTime modifyTime;
+    //update_time
 
     @ExcelProperty(value = "版本号")
     public Integer version;

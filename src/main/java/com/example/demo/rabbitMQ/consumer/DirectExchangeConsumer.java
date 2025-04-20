@@ -66,9 +66,9 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
             String messageContentStr = new String(message.getBody());
             //  RabbitMqMessage rabbitMqMessage1 = objectMapper.readValue(messageContentStr, Person.class);
 
-            super.onMessage(Person.class, message, channel, (msg) -> {
+            super.onMessage(DemoProduct.class, message, channel, (msg) -> {
                 //业务处理
-                Person person1 = msg;
+                DemoProduct person1 = msg;
 //                int m = Integer.parseInt("d");
                 //    logger.info("MQ接收到消息jsonStr : " + msgContent);
 
@@ -107,7 +107,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
                             @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName) throws Exception {
         try {
-            Object msg = message;
+            Object msg1 = message;
             //  System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
             int m = 0;
 //            Person person = JSON.parseObject(receivedMessage, Person.class);
@@ -120,9 +120,19 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
 //                    }
 //            );
             //设置异常进入死信队列
-//            Integer m = Integer.parseInt("m");
+
             //手动Ack listener.simple.acknowledge-mode: manual
 //            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+
+
+            super.onMessage(DemoProduct.class, message, channel, (msg) -> {
+                //业务处理
+//                Person person1 = msg;
+//                int mm = Integer.parseInt("d");
+                //    logger.info("MQ接收到消息jsonStr : " + msgContent);
+
+            });
+
         } catch (Exception e) {
 
 

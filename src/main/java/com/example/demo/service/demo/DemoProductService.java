@@ -166,15 +166,13 @@ public class DemoProductService {
 //                throw new RuntimeException(e);
 //            }
 //        }
-        log.info("BatchInsert_builder cost " +  stopWatch.getTotalTimeMillis() + "ms - " + stopWatch.shortSummary());
+        log.info("BatchInsert_builder cost " + stopWatch.getTotalTimeMillis() + "ms - " + stopWatch.shortSummary());
         stopWatch = new StopWatch("BatchInsert2");
         stopWatch.start("BatchInsert_insert");
 
         try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);) {
             //不能用spring 注入的mapper,必须从session 里取，否则是一条一条插入
             DemoProductMapper mapper = sqlSession.getMapper(DemoProductMapper.class);
-
-
 
 
             list.forEach(mapper::insert);
@@ -356,43 +354,21 @@ public class DemoProductService {
      */
 //    @Transactional(rollbackFor = Exception.class)
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.NESTED)
-    public int insertTransactional() {
-        List<DemoProduct> list = new ArrayList<>();
-        for (int i = 0; i < 1; i++) {
-            DemoProduct demoProduct = new DemoProduct();
-            String uuid = UUID.randomUUID().toString();
-//            uuid = "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
-//                    + "dssssssssssssssssssssssssssssssssssssssssss";
-            demoProduct.setGuid(uuid);
-            demoProduct.setProductName("productNameshish事务" + i);
-            demoProduct.setProductStyle("productStyle" + i);
-            demoProduct.setImagePath("D:\\fancky\\git\\Doc");
-            demoProduct.setCreateTime(LocalDateTime.now());
-            demoProduct.setModifyTime(LocalDateTime.now());
-            demoProduct.setStatus(Short.valueOf("1"));
-            demoProduct.setDescription("setDescription_sdsdddddddddddddddd");
-            demoProduct.setTimestamp(LocalDateTime.now());
-            list.add(demoProduct);
-        }
-//执行dml 同步操作，失败不会继续往下执行
-        int i = demoProductMapper.batchInsert(list);
+    public int insertTransactional() throws JsonProcessingException {
 
+        DemoProduct demoProduct = this.demoProductMapper.selectByPrimaryKey(3800414);
 //        int n = Integer.parseInt("ds");
-
-
         String msgId = UUID.randomUUID().toString();
-        String msgContent = "setMsgContent";
+//        String msgContent = list.get(0).getId().toString();
+        String msgContent = objectMapper.writeValueAsString(demoProduct);
         //rabbitMq 发送消息线程和spring事务不在同一个线程内，mq 内部抛出异常无法被spring 事务捕获，spring 无法事务回滚
         MqMessage mqMessage = new MqMessage
-                (RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME,
-                        RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY,
-                        RabbitMQConfig.BATCH_DIRECT_QUEUE_NAME,
+                (RabbitMQConfig.DIRECT_EXCHANGE_NAME,
+                        RabbitMQConfig.DIRECT_ROUTING_KEY,
+                        RabbitMQConfig.DIRECT_QUEUE_NAME,
                         msgContent);
-
-
         mqMessageService.save(mqMessage);
 //        int m = Integer.parseInt("m");
-
 
         //处理事务回调发送信息到mq
 //        boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
@@ -456,7 +432,7 @@ public class DemoProductService {
 
 
         //mybatis 操作数据库异常会抛出异常，mybatis貌似单线程执行。代码不会执行到发送mq
-        mqSendUtil.send(mqMessage);
+//        mqSendUtil.send(mqMessage);
 
         //事务机制和 confirm 机制，事务机制是同步的， confirm 机制是异步的
         //建立连接是同步
@@ -517,7 +493,7 @@ public class DemoProductService {
     public MessageResult<ProductTest> getById() {
         Random random = ThreadLocalRandom.current();
         //ID 要切换 ，spring 有缓存机制
-        int id =77;// random.nextInt(99);
+        int id = 77;// random.nextInt(99);
         StopWatch stopWatch = new StopWatch("");
         stopWatch.start("");
         ProductTest result = this.demoProductMapper.getById(new BigInteger(id + ""));

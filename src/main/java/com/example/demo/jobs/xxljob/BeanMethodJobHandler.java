@@ -193,6 +193,7 @@ public class BeanMethodJobHandler {
         String timeStr = formatter.format(LocalDateTime.now());
         XxlJobHelper.log("BeanMethodJobHandler");
         log.info("xxljob - BeanMethodJobHandler  {} ", timeStr);
+        //        //sleuth 不会在xxl-job中生成traceId 和spanId， MDC.get("traceId")为null
         String traceId = MDC.get("traceId");
         productTestService.transactionalFun();
     }

@@ -3,7 +3,9 @@ package com.example.demo.controller;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.rabbitMQ.RabbitMQTest;
 import com.example.demo.rabbitMQ.RabbitMqManager;
+import com.example.demo.service.demo.DemoProductService;
 import com.example.demo.utility.MqSendUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -25,6 +27,9 @@ public class RabbitMQController {
 
     @Autowired
     private MqSendUtil mqSendUtil;
+
+    @Autowired
+    private DemoProductService demoProductService;
 
     @GetMapping("")
     public MessageResult<String> rabbitMQTest() {
@@ -77,12 +82,15 @@ public class RabbitMQController {
 
     @GetMapping("/getMessageCount")
     public MessageResult<Void> getMessageCount(String queueName) {
-        try {
-            rabbitMQTest.produceTest();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-        return null;
+        rabbitMQTest.produceTest();
+        return MessageResult.success();
     }
+
+    @GetMapping("/sendMsg")
+    public MessageResult<Void> sendMsg() throws JsonProcessingException {
+        demoProductService.insertTransactional();
+        return MessageResult.success();
+    }
+
 
 }

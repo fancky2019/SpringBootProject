@@ -6,6 +6,7 @@ import com.example.demo.dao.demo.PersonMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.viewModel.MessageResult;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -107,7 +108,7 @@ public class PersonService implements IPersonService {
      Propagation.REQUIRED  Propagation.NESTED :两者共同成功失败
      */
     @Transactional(rollbackFor = Exception.class)
-    public int insert(Person person) {
+    public int insert(Person person) throws JsonProcessingException {
 
         //获取当前代理的实例 @EnableAspectJAutoProxy(exposeProxy = true)来暴露AOP的Proxy对象才行，否则会报异常
         //PersonService personService = (PersonService) AopContext.currentProxy();
@@ -213,7 +214,7 @@ public class PersonService implements IPersonService {
 
 
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-    public int insertB() {
+    public int insertB() throws JsonProcessingException {
 
 
         demoProductService.insertTransactional();
@@ -355,6 +356,17 @@ public class PersonService implements IPersonService {
 
     @Override
     public void transactionTemplateTest(boolean executeException) {
+
+        //事务回滚 手动回滚事务 手动提交事务
+        //事务回滚 手动回滚 手动控制事务，编程式事务
+        //TransactionAspectSupport
+        //PlatformTransactionManager 参见  com.example.demo.service.demo.PersonService
+        //TransactionTemplate提供了更简洁的API来管理事务。它隐藏了底层的PlatformTransactionManager的使用
+//        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
+
+
+
         // 在这里执行事务性操作
         // 操作成功则事务提交，否则事务回滚
         Boolean re = transactionTemplate.execute(transactionStatus -> {
@@ -388,12 +400,19 @@ public class PersonService implements IPersonService {
                     int sum = 1 / 0;
                 }
 //
-
+                return true;
             } catch (Exception e) {
                 // 如果操作失败，抛出异常，事务将回滚
+                //标记回滚 :事务将回滚
+//                transactionStatus.setRollbackOnly();
+//                return false;
+
+                // 发生异常时标记回滚，标记回滚 :事务将回滚
+                //最好抛出异常让异常统一处理
                 transactionStatus.setRollbackOnly();
+                throw  e;
             }
-            return true;
+
 
 
 //        TransactionCallbackWithoutResult

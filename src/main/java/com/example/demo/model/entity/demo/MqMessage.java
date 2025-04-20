@@ -52,8 +52,13 @@ public class MqMessage extends EntityBase implements Serializable {
 
     private Integer retryCount;
     private DateTime nextRetryTime;
-
+    /**
+     * 0:未生成 1：已生产 2：已消费 3:消费失败
+     */
     private Integer status;
+    private Integer maxRetryCount;
+    private String failureReason;
+    private String errorStack;
     private String remark;
 //    private Boolean publishAck;
 //

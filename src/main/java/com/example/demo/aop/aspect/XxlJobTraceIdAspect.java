@@ -52,7 +52,7 @@ public class XxlJobTraceIdAspect {
      */
     @Before("@annotation(com.xxl.job.core.handler.annotation.XxlJob)")
     public void beforeMethod(JoinPoint joinPoint) {
-//        //sleuth 不会在xxl-job中生成traceId 和spanId
+//        //sleuth 不会在xxl-job中生成traceId 和spanId， MDC.get("traceId")为null
 //        // 注入traceId
 //        String traceId = UUID.randomUUID().toString().replace("-", "");
 //        //   TRACEID.set(traceId);

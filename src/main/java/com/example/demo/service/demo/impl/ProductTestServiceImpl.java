@@ -8,11 +8,9 @@ import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.baomidou.lock.annotation.Lock4j;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
@@ -31,24 +29,20 @@ import com.example.demo.eventbus.MyCustomEvent;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
-import com.example.demo.model.pojo.Student;
 import com.example.demo.model.request.DemoProductRequest;
-import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.service.demo.IMqMessageService;
-import com.example.demo.service.demo.IPersonService;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.service.wms.ProductService;
 import com.example.demo.utility.ConfigConst;
 import com.example.demo.utility.ExcelUtils;
 import com.example.demo.utility.MqSendUtil;
 import com.example.demo.utility.RedisKeyConfigConst;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.jdbc.SQL;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -66,14 +60,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.StopWatch;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import javax.swing.*;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -82,12 +74,10 @@ import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -1659,7 +1649,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
             if (affectRows != productTestList.size()) {
                 //事务回滚 手动回滚事务 手动提交事务
-                //事务回滚 手动回滚
+                //事务回滚 手动回滚 手动控制事务，编程式事务
                 //TransactionAspectSupport
                 //PlatformTransactionManager 参见  com.example.demo.service.demo.PersonService
                 //TransactionTemplate提供了更简洁的API来管理事务。它隐藏了底层的PlatformTransactionManager的使用
@@ -1819,4 +1809,41 @@ LockAnnotationAdvisor 实现了Ordered接口
         int m = Integer.parseInt("m");
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public synchronized void mqMessageConsume(MqMessage message) {
+        int m = Integer.parseInt("m");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer mqMessageOperation() throws JsonProcessingException {
+
+        ProductTest productTest = new ProductTest();
+        String uuid = UUID.randomUUID().toString();
+//            uuid = "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+//                    + "dssssssssssssssssssssssssssssssssssssssssss";
+        productTest.setGuid(uuid);
+        productTest.setProductName("productNameshish事务");
+        productTest.setProductStyle("productStyle");
+        productTest.setImagePath("D:\\fancky\\git\\Doc");
+        productTest.setCreateTime(LocalDateTime.now());
+        productTest.setModifyTime(LocalDateTime.now());
+        productTest.setStatus(1);
+        productTest.setDescription("setDescription_sdsdddddddddddddddd");
+        productTest.setTimestamp(LocalDateTime.now());
+        int i = baseMapper.insert(productTest);
+
+
+        String msgContent = objectMapper.writeValueAsString(productTest);
+        //rabbitMq 发送消息线程和spring事务不在同一个线程内，mq 内部抛出异常无法被spring 事务捕获，spring 无法事务回滚
+        MqMessage mqMessage = new MqMessage
+                (RabbitMQConfig.DIRECT_EXCHANGE_NAME,
+                        RabbitMQConfig.DIRECT_ROUTING_KEY,
+                        RabbitMQConfig.DIRECT_QUEUE_NAME,
+                        msgContent);
+        mqMessageService.save(mqMessage);
+
+        return 0;
+    }
 }

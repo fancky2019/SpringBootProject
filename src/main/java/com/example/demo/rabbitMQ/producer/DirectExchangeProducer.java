@@ -18,7 +18,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -101,7 +100,7 @@ public class DirectExchangeProducer {
                 correlationData.setReturned(returnedMessage);
 
                 //  rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
-                rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE, RabbitMQConfig.DIRECT_ROUTING_KEY, message, correlationData);
+                rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE_NAME, RabbitMQConfig.DIRECT_ROUTING_KEY, message, correlationData);
 
 
                 //rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE, RabbitMQConfig.DIRECT_ROUTING_KEY, mqMsg, new CorrelationData(mqMsg.getMessageId()));
@@ -163,7 +162,7 @@ public class DirectExchangeProducer {
 
         }
         MqMessage mqMessage = new MqMessage
-                (RabbitMQConfig.DIRECT_EXCHANGE,
+                (RabbitMQConfig.DIRECT_EXCHANGE_NAME,
                         RabbitMQConfig.DIRECT_ROUTING_KEY,
                         RabbitMQConfig.DIRECT_QUEUE_NAME,
                         msgContent);

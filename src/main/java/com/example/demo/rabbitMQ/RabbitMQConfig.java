@@ -64,7 +64,7 @@ public class RabbitMQConfig {
 
 
     //region DIRECT
-    public static final String DIRECT_EXCHANGE = "DirectExchangeSpringBoot";
+    public static final String DIRECT_EXCHANGE_NAME = "DirectExchangeSpringBoot";
     // 路由键支持模糊匹配，符号“#”匹配一个或多个词，符号“*”匹配不多不少一个词
     public static final String DIRECT_ROUTING_KEY = "DirectExchangeRoutingKeySpringBoot";
     public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
@@ -377,7 +377,7 @@ public class RabbitMQConfig {
          */
         Map<String, Object> map = new HashMap<>();
         map.put("x-message-ttl", RETRY_INTERVAL);
-        map.put("x-dead-letter-exchange", DIRECT_EXCHANGE);
+        map.put("x-dead-letter-exchange", DIRECT_EXCHANGE_NAME);
         map.put("x-dead-letter-routing-key", DIRECT_ROUTING_KEY);
         return new Queue(DIRECT_QUEUE_DLX, true, false, false, map);
 //
@@ -399,7 +399,7 @@ public class RabbitMQConfig {
     public DirectExchange directExchange() {
         //  this(name, true, false);(String name, boolean durable, boolean autoDelete)
         //交换机默认持久化true
-        DirectExchange directExchange = new DirectExchange(DIRECT_EXCHANGE);
+        DirectExchange directExchange = new DirectExchange(DIRECT_EXCHANGE_NAME);
         return directExchange;
     }
 
@@ -413,7 +413,7 @@ public class RabbitMQConfig {
         args.put("x-max-priority", 10);
 //        args.put("x-message-ttl", 30000);
         // 设置该Queue的死信的队列
-        args.put("x-dead-letter-exchange", DIRECT_EXCHANGE);
+        args.put("x-dead-letter-exchange", DIRECT_EXCHANGE_NAME);
         // 设置死信routingKey
         args.put("x-dead-letter-routing-key", DIRECT_ROUTING_KEY_DLX);
         //rabiitmq 默认发送给所有消费中的一个，机关集群也只会发给一个服务中的一个消费者

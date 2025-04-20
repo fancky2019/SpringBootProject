@@ -32,9 +32,32 @@ import java.util.concurrent.TimeUnit;
  * redis集群最少三台主三从。
  *
  * RedLock；集群配置最少三台机器，最好为奇数。(N/2 + 1)中成功获取锁，则获取锁成功。
- * redisson在加锁的时候，key=lockName, value=uuid + threadID, 采用set结构存储，
+ * redisson在加锁的时候，key=lockName, value=uuid + threadID, 采用hash结构存储，
  * 并包含了上锁的次数 （支持可重入）；
  * 解锁的时候通过hexists判断key和value是否存在，存在则解锁；这里不会出现误解锁
+ *
+ *
+ * redisson:
+ *客户端ID的生成与组成
+ * Redisson 客户端在启动时会自动生成一个唯一的 UUID 作为客户端ID
+ * 这个ID在整个客户端生命周期内保持不变
+ *
+ *Redis 中存储的锁是一个 Hash 结构
+ * Key: 锁名称
+ * Field: <clientId>:<threadId>
+ * Value: 重入次数
+ *
+ *同一应用的多个Redisson实例会有不同的clientId
+ *新启动的客户端会有新ID
+ * 旧客户端持有的锁需要通过看门狗超时后自动释放
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  * 持久化：rdb,aof。默认RDB,如果不丢就用aof方式。
  *
@@ -422,7 +445,13 @@ public class RedisTestController {
 
             ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
             valueOperations.set("stringKey1", "stringKeyValue1");
+            //redis 重复设置key 的值会覆盖之前的值，就像hashmap.C# dictionary 会报错。
+            String val1 = valueOperations.get("stringKey1");
+            valueOperations.set("stringKey1", "stringKeyValue12");
+            String val12 = valueOperations.get("stringKey1");
             valueOperations.set("stringKey2", "stringKeyValue2");
+
+
             try {
 
                 valueOperations.set("stringKey3", "stringKeyValue3");
