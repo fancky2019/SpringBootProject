@@ -3,10 +3,13 @@ package com.example.demo.handler;
 import com.example.demo.controller.UserController;
 import com.example.demo.model.viewModel.MessageResult;
 import feign.FeignException;
+import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -21,9 +24,29 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.UndeclaredThrowableException;
 
 /**
+ *
+ * @ControllerAdvice 可以被应用到所有标注为 @Controller 的类
+ *组合使用：@ControllerAdvice 可以与其他注解如 @ExceptionHandler、@ModelAttribute、@InitBinder 等一起使用，处理异常、共享模型数据、进行数据绑定等。
+ *
+ *
+ *Spring 默认会按照方法声明顺序执行同一类中的多个 @ModelAttribute 方法，但最可靠的方式是通过方法参数显式声明依赖关系，而不是依赖隐式的执行顺序。
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *默认只能捕捉到主线程中的异常，无法捕捉到线程池内线程抛出的异常。这是因为线程池内的线程是由线程池管理的，异常不会自动传播到主线程。
  *
  * 线程池（异步任务）中的异常 不会被 Spring 的全局异常处理器捕获，因为这些异常发生在线程池的子线程中，而 Spring 的异常处理器只作用于主线程（MVC 请求线程）。
@@ -34,19 +57,20 @@ import java.lang.reflect.UndeclaredThrowableException;
  *
  * 该类放在单独一个文件夹
  * 只能捕捉进入controller里异常的代码。
- * <p>
+ *
  * extends ResponseEntityExceptionHandler
  *
  * @ControllerAdvice :注解定义全局异常处理类
  * @ExceptionHandler :注解声明异常处理方法
  */
+@Slf4j
 @ControllerAdvice
 //@Order(Ordered.LOWEST_PRECEDENCE)
 //@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static Logger logger = LogManager.getLogger(GlobalExceptionHandler.class);
-
+    private final ThreadLocal<Long> startTimeHolder = new ThreadLocal<>();
 
     /**
      * 404无法进入此方法。404被tomcat拦截了
@@ -55,7 +79,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public MessageResult<Void> exceptionHandler(Exception ex, WebRequest request) throws Exception {
-
+//ResponseEntity.ok()
 //        if (ex instanceof FeignException) {
 //            throw ex; // 重新抛出，让Feign的Fallback处理
 //        }
@@ -132,5 +156,38 @@ public class GlobalExceptionHandler {
 //        return messageResult;
 //    }
 
+//region 耗时日志
+
+//一个类中多个方法都有  @ModelAttribute 注解，默认按出现顺序执行
+//ModelAttribute 会在 controller 之前执行，不能获得controller 耗时时间，可用aspect 或  Interceptor 或者 filter
+
+
+    @ModelAttribute
+    public void recordStartTime() {
+        startTimeHolder.set(System.currentTimeMillis());
+        log.debug("recordStartTime1");
+    }
+
+    @ModelAttribute
+    public void logAndRecordMetrics(HttpServletRequest request) {
+        log.debug("logAndRecordMetrics2");
+        Long startTime = startTimeHolder.get();
+        if (startTime != null) {
+            long duration = System.currentTimeMillis() - startTime;
+            String uri = request.getRequestURI();
+            String method = request.getMethod();
+
+            // 记录日志
+            log.debug("请求指标 || method={} || uri={} || duration={}ms", method, uri, duration);
+
+//            // 记录到Micrometer指标
+//            meterRegistry.timer("http.server.requests")
+//                    .tags("uri", uri, "method", method)
+//                    .record(duration, TimeUnit.MILLISECONDS);
+
+            startTimeHolder.remove();
+        }
+    }
+    //endregion
 
 }

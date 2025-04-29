@@ -20,11 +20,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /*
 
@@ -49,7 +53,15 @@ execution(public * com.spring.service.BusinessObject.businessService(java.lang.S
 方法可以有多个参数，但是第一个参数必须是java.lang.String类型的方法
 
 
-//日志采用ControllerAdvice,不采用Aspect
+//日志采用ControllerAdvice还是Aspect
+
+Web层日志（URL、HTTP方法、参数等） → 使用 @ControllerAdvice
+业务方法日志（Service层方法调用、执行时间等） → 使用 AOP Aspect
+异常日志 → 两者结合：@ControllerAdvice 处理HTTP异常，Aspect 处理业务异常
+安全审计日志 → 优先使用 AOP Aspect（可以精确到方法级别）
+
+
+
 
  *通配符：该通配符主要用于匹配单个单词，或者是以某个词为前缀或后缀的单词。
 ..通配符：该通配符表示0个或多个项，主要用于declaring-type-pattern和param-pattern中，如果用于declaring-type-pattern中，
@@ -504,4 +516,42 @@ public class LogAspect {
         log.error("", ex);
     }
 
+
+    private void logRequestInfo(HttpServletRequest request, ProceedingJoinPoint joinPoint) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n=== 请求信息 ===\n");
+        sb.append("URL: ").append(request.getRequestURL()).append("\n");
+        sb.append("Method: ").append(request.getMethod()).append("\n");
+        sb.append("Content-Type: ").append(request.getContentType()).append("\n");
+
+        // 获取GET参数
+        Map<String, String[]> paramMap = request.getParameterMap();
+        if (!paramMap.isEmpty()) {
+            sb.append("Parameters:\n");
+            paramMap.forEach((key, values) ->
+                    sb.append("  ").append(key).append(": ").append(Arrays.toString(values)).append("\n"));
+        }
+
+        // 获取POST请求体
+        if ("POST".equalsIgnoreCase(request.getMethod())
+                && request.getContentType() != null
+                && request.getContentType().contains("application/json")) {
+            try {
+                String body = request.getReader().lines().collect(Collectors.joining());
+                sb.append("Body: ").append(body).append("\n");
+            } catch (IOException e) {
+                log.error("读取请求体失败", e);
+            }
+        }
+
+        // 打印方法参数
+        sb.append("Method Args:\n");
+        Object[] args = joinPoint.getArgs();
+        Parameter[] parameters = ((MethodSignature) joinPoint.getSignature()).getMethod().getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            sb.append("  ").append(parameters[i].getName()).append(": ").append(args[i]).append("\n");
+        }
+
+        log.info(sb.toString());
+    }
 }

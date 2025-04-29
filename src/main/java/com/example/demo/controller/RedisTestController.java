@@ -399,6 +399,39 @@ appendfsync everysec
  */
 //endregion
 
+//region Redis Stream + Sorted Set（ZSET） 实现优先级队列 .考虑直接用ZSET 简单
+
+/*
+注：使用lua 脚本代替原子操作
+1. 实现步骤
+生产者逻辑
+写入 Stream：发送消息到 Stream，获取自动生成的 消息ID（如 "1665581234567-0"）。
+更新 ZSET：将 消息ID 和 优先级分数 存入 ZSET（分数越高优先级越高）。
+
+
+消费者逻辑
+从 ZSET 获取最高优先级的消息ID：
+根据消息ID从 Stream 读取具体内容：
+消费后删除消息（避免重复消费）：
+*/
+
+
+
+//endregion
+
+//region Redis ZSET 实现优先级队列
+    /*
+    基本实现原理
+    元素作为成员(member)：队列中的每个元素作为 ZSET 的成员
+    优先级作为分数(score)：元素的优先级对应 ZSET 的分数
+    排序规则：ZSET 会按照分数自动排序，分数越小优先级越高(或越大优先级越高，取决于你的设计)
+
+    1. 阻塞式出队
+    Redis 5.0+ 提供了 BZPOPMIN 和 BZPOPMAX 命令，可以阻塞直到有元素可用：
+     */
+   //endregion
+
+
 @RestController
 @RequestMapping("/redisTest")
 public class RedisTestController {

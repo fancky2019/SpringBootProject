@@ -503,4 +503,49 @@ ProxySQL / HAProxy：应用程序连接 ProxySQL，由 ProxySQL 负责路由到�
      */
 
     //endregion
+
+
+
+    //region  ClickHouse 、MySQL单线程处理写入  MPP架构
+
+        /*
+        MySQL 默认使用单线程处理写入操作（尤其是 InnoDB 引擎）
+        默认情况下，MySQL 的写入操作（INSERT/UPDATE/DELETE）由 单线程执行，且需要维护事务日志（redo log）、二进制日志（binlog）等，导致 I/O 和锁竞争成为瓶颈。
+        虽然支持多线程读取（通过并发连接），但写入仍依赖 行级锁 和 WAL（Write-Ahead Logging）机制，高并发写入时容易阻塞。
+
+         批次大小：官方建议 每次写入不少于 1000 行，最好 10万行以上，以减少小文件生成和后台合并（Merge）的压力
+
+
+         绝对不丢失：fsync_after_insert=1
+         推荐选择：
+            ClickHouse 24.8+：直接使用 Kafka 引擎 + exactly-once。
+            大规模实时数仓：Flink + ClickHouse（如广告点击分析、日志监控）
+
+
+             从kafka写入 clickhouse ：
+            使用ClickHouse的Kafka Engine
+            ClickHouse内置了Kafka引擎，可以直接消费Kafka数据并写入本地表。
+
+            MySQL → Flink CDC → Kafka → Flink → ClickHouse
+           Flink CDC捕获MySQL变更  -->写入Kafka中转-->Flink消费Kafka并写入ClickHouse
+
+
+         */
+
+    //endregion
+
+    //region  RBAC和多租户
+
+        /*
+    RBAC和多租户是互补而非替代的关系：
+    多租户是"横向"隔离，确保不同客户数据的物理/逻辑分离
+    RBAC是"纵向"控制，管理客户内部人员的权限分配
+    在成熟的SaaS系统设计中，应该：
+    先实施多租户隔离：建立基础的数据安全边界
+    再叠加RBAC：实现组织内部的精细化权限管理
+    最后补充ABAC（如需要）：处理更复杂的属性基控制
+          */
+
+    //endregion
+
 }
