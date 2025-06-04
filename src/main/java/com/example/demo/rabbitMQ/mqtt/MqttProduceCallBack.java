@@ -1,8 +1,10 @@
 package com.example.demo.rabbitMQ.mqtt;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
 import org.springframework.beans.factory.annotation.Value;
 
+@Slf4j
 public class MqttProduceCallBack implements MqttCallback {
 
     @Value("${spring.mqtt.client.id}")
@@ -32,8 +34,8 @@ public class MqttProduceCallBack implements MqttCallback {
         try {
             token.getMessage();
         } catch (MqttException e) {
-            throw new RuntimeException(e);
+            log.error("", e);
         }
-        System.out.println(client.getClientId()+"发布消息成功！");
+        log.info(client.getClientId()+"发布消息成功！");
     }
 }

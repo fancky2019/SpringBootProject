@@ -519,6 +519,7 @@ public class RedisTestController {
             //endregion
 
             //region Hash
+            //redis key  都是string
             HashOperations<String, String, String> hashOperations = redisTemplate.opsForHash();
             hashOperations.put("hashKey1", "hashField1", "hashValue1");
             hashOperations.put("hashKey1", "hashField12", "hashValue12");
@@ -879,6 +880,7 @@ public class RedisTestController {
     }
     //endregion
 
+    //region 从缓存读取数据，不存在添加缓存  缓存穿透 缓存击穿
     /**
      * redis 缓存穿透 缓存击穿
      *
@@ -890,6 +892,7 @@ public class RedisTestController {
         String val = productTestService.getStringKey(id);
         return MessageResult.success(val);
     }
+    //endregion
 
     /**
      * redis 本身是缓存用，此处要求强一致性当做数据库来用，应用关系数据库较为合适

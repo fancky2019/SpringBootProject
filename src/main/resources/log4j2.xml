@@ -65,7 +65,7 @@
 <!--        filePattern="logs/app-%d{yyyy-MM-dd-HH}.log.gz" 且 interval="1"，则日志会在每小时的整点（如 12:00, 13:00）进行滚动。-->
 <!--        如果 modulate="false"，则从应用启动时间开始计算，例如应用在 12:15 启动，每小时滚动一次，则下次滚动时间是 13:15。-->
         <RollingFile name="RollingFile" fileName="logs/${date:yyyy-MM}/${date:yyyy-MM-dd}/log.log"
-                     filePattern="logs/$${date:yyyy-MM}/$${date:yyyy-MM-dd}/info-%d{yyyy-MM-dd}-%i.log">
+                     filePattern="logs/$${date:yyyy-MM}/$${date:yyyy-MM-dd}/log-%d{yyyy-MM-dd}-%i.log">
             <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${log_pattern}"/>
             <Policies>
@@ -98,6 +98,7 @@
         <logger name="springfox" level="INFO"/>
 
         <!--        异步-->
+<!--        <AsyncRoot level="info">-->
         <AsyncRoot level="all">
             <appender-ref ref="Console"/>
             <appender-ref ref="RollingFile"/>

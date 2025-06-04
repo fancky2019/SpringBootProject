@@ -262,9 +262,10 @@ like查询：利用wildcard通配符查询实现，其中？和*分别代替一�
                 .withSort(SortBuilders.fieldSort("id").order(SortOrder.DESC))
                 //高亮字段显示
 //                .withHighlightFields(new HighlightBuilder.Field("product_name"))
-                .withTrackTotalHits(true)//解除最大1W条限制
+                .withTrackTotalHits(true)//解除最大1W条限制，返回命中的总行数
                 .build();
 //        nativeSearchQuery.setTrackTotalHitsUpTo(10000000);
+        //withTrackTotalHits ,但是只会返回分页（withPageable）指定的productList，默认10条
         SearchHits<DemoProduct> search = elasticsearchRestTemplate.search(nativeSearchQuery, DemoProduct.class);
         List<DemoProduct> productList = search.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
 

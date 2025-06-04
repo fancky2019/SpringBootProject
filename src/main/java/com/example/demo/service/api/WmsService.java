@@ -1,15 +1,12 @@
 package com.example.demo.service.api;
 
-import com.example.demo.model.entity.newclassadmin.UserInfo;
-import com.example.demo.model.pojo.Student;
 import com.example.demo.model.wmsservicemodel.ShipOrderInventoryDetailDto;
-import com.example.demo.service.microservice.eurekaclient.UserServiceFallBackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
+import java.util.List;
 
 
 /**
@@ -36,7 +33,7 @@ import java.math.BigInteger;
 //</dependency>
 //2、启动类@EnableFeignClients//启用feign。微服务之间调用,服务发现
 //不能识别服务中有没有请求的路径方法。
-@FeignClient(name = "WmsService", url = "${sbp.wmsurl}", fallbackFactory = WmsServiceFallbackFactoryr.class)
+@FeignClient(name = "WmsService", url = "${sbp.wmsurl}", fallbackFactory = WmsServiceFallbackFactory.class)
 //@FeignClient(value = "single-provider")//注册中心的服务名称
 public interface WmsService {
 
@@ -49,7 +46,7 @@ public interface WmsService {
     String completeShipOrder(@PathVariable("shipOrderId") BigInteger shipOrderId, @RequestHeader("Authorization") String token);
 
     @GetMapping("ShipOrder/Test")
-    String shipOrderTest(@RequestParam String test);
+    String shipOrderTest(@RequestParam("test") String test);
 
 //    参数设计：
 //    保持GET参数对象简单（不超过10个字段）
@@ -58,5 +55,15 @@ public interface WmsService {
 
     @GetMapping("/ShipOrder/CheckRelation")
     boolean checkRelation(@SpringQueryMap ShipOrderInventoryDetailDto query , @RequestHeader("Authorization") String token);
+
+//    //    String getUser(@RequestParam("name") String name);
+//    /**
+//     * 参数前要加 @RequestParam 或post @RequestBody
+//     *
+//     * @param
+//     * @return
+//     */
+//    @PostMapping("/ShipOrder/subAssignPalletsByShipOrderBatch")
+//    WmsResponse subAssignPalletsByShipOrderBatch(@RequestBody List<ShipOrderPalletRequest> dtoList, @RequestHeader("Authorization") String token) throws Throwable;
 
 }

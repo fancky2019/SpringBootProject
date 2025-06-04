@@ -16,6 +16,7 @@ import java.util.List;
 //@ConditionalOnProperty(name = "config.config-model.conditional-on-property", havingValue = "true", matchIfMissing = true)// name + havingValue 控制配置bean 是否加载
 //@ConditionalOnProperty(prefix = "config.config-model.conditional-on-property", value = "true", matchIfMissing = true)
 //// 或者可以省略prefix前缀,没有找到配置项报异常不会加载配置类
+//ConditionalOnProperty 用于根据配置文件（中的属性值来决定是否注册某个 Bean 或启用某个配置类。
 //@ConditionalOnProperty(value = "config.config-model.conditional-on-property", havingValue = "true")
 public class ImportModelTest {
     private String fistName;

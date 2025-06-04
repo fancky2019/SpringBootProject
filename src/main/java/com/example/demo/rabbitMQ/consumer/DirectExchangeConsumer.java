@@ -65,7 +65,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
             //序列化出来的 和方法传进来的一样
             String messageContentStr = new String(message.getBody());
             //  RabbitMqMessage rabbitMqMessage1 = objectMapper.readValue(messageContentStr, Person.class);
-
+            logger.info("received msg - {}", messageId);
             super.onMessage(DemoProduct.class, message, channel, (msg) -> {
                 //业务处理
                 DemoProduct person1 = msg;

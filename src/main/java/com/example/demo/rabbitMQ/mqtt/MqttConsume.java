@@ -1,14 +1,20 @@
 package com.example.demo.rabbitMQ.mqtt;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import javax.annotation.PostConstruct;
 
+@Lazy
+@ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "true")
+@Slf4j
 @Configuration
 public class MqttConsume {
     @Value("${spring.mqtt.username}")
@@ -20,7 +26,7 @@ public class MqttConsume {
     @Value("${spring.mqtt.url}")
     private String hostUrl;
 
-//    @Value("${spring.mqtt.client.id}")
+    @Value("${spring.mqtt.consumerid}")
     private String clientId="consumer-id";
 
     @Value("${spring.mqtt.default.topic}")
@@ -72,7 +78,7 @@ public class MqttConsume {
             //订阅主题
             client.subscribe(topics,qos);
         } catch (MqttException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
     }
 
@@ -83,7 +89,7 @@ public class MqttConsume {
         try {
             client.disconnect();
         } catch (MqttException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
     }
 

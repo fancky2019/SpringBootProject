@@ -7,6 +7,9 @@ import com.example.demo.service.demo.IMqMessageService;
 //import com.example.demo.utility.ApplicationContextAwareImpl;
 import com.example.demo.utility.ApplicationContextAwareImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.core.ReturnedMessage;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +32,6 @@ import org.springframework.stereotype.Component;
 public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
 
 
-
     //null
 //    @Autowired
 //    ApplicationContext applicationContext;
@@ -41,6 +43,10 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
         try {
 // s:channel error; protocol method: #method<channel.close>(reply-code=404, reply-text=NOT_FOUND - no exchange 'UnBindDirectExchange' in vhost '/', class-id=60, method-id=40)
             String msgId = correlationData.getId();
+            ReturnedMessage returnedMessage = correlationData.getReturned();
+            Message message = returnedMessage.getMessage();
+            MessageProperties messageProperties = message.getMessageProperties();
+            String messageId = messageProperties.getMessageId();
             if (ack) {
                 //发送消息时候指定的消息的id，根据此id设置消息表的消息状态为已发送
 
@@ -51,10 +57,9 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
 
                 LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
                 lambdaQueryWrapper.eq(MqMessage::getMsgId, msgId);
-                MqMessage mqMessage=   mqMessageService.getOne(lambdaQueryWrapper);
+                MqMessage mqMessage = mqMessageService.getOne(lambdaQueryWrapper);
                 mqMessage.setStatus(1);
                 mqMessageService.updateById(mqMessage);
-
 
 
 //                LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();

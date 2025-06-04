@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 public class ShipOrderInfo {
     private Long applyShipOrderId;
+    //    @Field(type = FieldType.Text, nullValue = "NULL_PLACEHOLDER")
     private String applyShipOrderCode;
     private Long applyShipOrderItemId;
     private BigDecimal applyShipOrderItemRequiredPkgQuantity;

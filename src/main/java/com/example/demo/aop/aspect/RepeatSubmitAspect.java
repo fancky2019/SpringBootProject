@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletRequest;
  * 自定义切面的优先级较高（如果没有显式指定 @Order，默认为 Ordered.LOWEST_PRECEDENCE）。
  *
  *
- *
+ *如果不在配置类中指定bean注册顺序，就在Aspect加 @Order(202) 注解指定顺序
  * 自定义的切面（默认的是Integer.MAX优先级最低）和事务切面（默认的是Integer.MAX优先级最低）优先级是一样的，
  * 但是自定义的排在后面会先执行，因为spring扫描的时候会先扫描事务相关的。
  *

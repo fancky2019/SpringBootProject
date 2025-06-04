@@ -1,6 +1,5 @@
-package com.example.demo.eventbus;
+package com.example.demo.listener.eventbus;
 
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -20,9 +19,12 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class MyEventListener {
 
     //TransactionSynchronizationManager 事务成功之后发送
-    @TransactionalEventListener //事务成功之后发送
+    @TransactionalEventListener //默认事务成功之后发送
+//    @TransactionalEventListener  (phase = TransactionPhase.AFTER_COMMIT)
 //    @EventListener  // 事务不成功也会检测到发送消息
     public void handleMyEvent(MyCustomEvent event) {
+        //ApplicationEventPublisher eventPublisher;
+        //  eventPublisher.publishEvent(event);
         System.out.println("Received custom event: " + event);
     }
 }

@@ -4,11 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
+@Lazy
 @Component
+@ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "true")
 @Slf4j
 public class MqttProduce {
 
@@ -69,7 +73,7 @@ public class MqttProduce {
 
 
         } catch (MqttException e) {
-            e.printStackTrace();
+            log.error("",e);
         }
     }
 
@@ -102,7 +106,7 @@ public class MqttProduce {
             token.waitForCompletion();
         } catch (MqttException e) {
             //失败处理
-            e.printStackTrace();
+            log.error("",e);
         }
     }
 }

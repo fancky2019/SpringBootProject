@@ -22,7 +22,6 @@ import org.elasticsearch.search.aggregations.metrics.*;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.redisson.misc.Hash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.*;
@@ -486,7 +485,7 @@ public class ShipOrderInfoServiceImpl implements ShipOrderInfoService {
         if (CollectionUtils.isNotEmpty(request.getSortFieldList())) {
             SortOrder sortOrder = null;
             for (Sort sort : request.getSortFieldList()) {
-                switch (sort.getSortOrder().toLowerCase()) {
+                switch (sort.getSortType().toLowerCase()) {
                     case "asc":
                         sortOrder = SortOrder.ASC;
                         break;

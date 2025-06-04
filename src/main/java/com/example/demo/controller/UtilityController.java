@@ -14,7 +14,6 @@ import com.example.demo.easyexcel.ExcelStyleConfig;
 import com.example.demo.easyexcel.GXDetailListVO;
 import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
 import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
-import com.example.demo.eventbus.MyCustomEvent;
 import com.example.demo.listener.UserRegisterService;
 import com.example.demo.model.dto.JacksonDto;
 import com.example.demo.model.entity.demo.DemoProduct;
@@ -34,6 +33,7 @@ import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
 import com.example.demo.model.wmsservicemodel.ShipOrderInventoryDetailDto;
 import com.example.demo.rabbitMQ.mqtt.MqttProduce;
+import com.example.demo.rabbitMQ.mqttn.MqttService;
 import com.example.demo.rocketmq.RocketmqTest;
 import com.example.demo.service.RetryService;
 import com.example.demo.service.TokenService;
@@ -66,21 +66,15 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.bus.BusProperties;
 import org.springframework.cloud.sleuth.TraceContext;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -110,14 +104,11 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
 
 /*
 在service类上加注解@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -205,7 +196,6 @@ public class UtilityController {
 
     @Value("${demo.multiEnvironment}")
     private String multiEnvironment;
-
 
     @Autowired
     RedisTemplate<String, Object> redisTemplate;
@@ -1649,8 +1639,14 @@ public class UtilityController {
         userRegisterService.registerUser("fancky");
     }
 
+//    @Autowired(required = false)  // 如果 MqttProduce 不存在，不会报错，mqttProduce=null
     @Autowired
+    @Lazy  // 只有实际使用时才会注入（如果从未使用，则不会初始化）
     private MqttProduce mqttProduce;
+
+    @Autowired
+    @Lazy  // 只有实际使用时才会注入（如果从未使用，则不会初始化）
+    private MqttService mqttService;
 
     @GetMapping(value = "/mqttTest")
     public void mqttTest(String msg) {
@@ -1664,7 +1660,12 @@ public class UtilityController {
         boolean retained = false;
         String topic = "topic1";
 
-        mqttProduce.publish(qos, retained, topic, msg);
+        //
+//        mqttProduce.publish(qos, retained, topic, msg);
+
+
+        //springboot starter 集成
+        mqttService.sendMessage( topic, msg);
     }
 
     /**

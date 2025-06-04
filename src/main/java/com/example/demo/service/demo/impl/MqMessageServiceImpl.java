@@ -2,6 +2,9 @@ package com.example.demo.service.demo.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.metadata.OrderItem;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.demo.dao.demo.MqMessageMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.MqMessage;
@@ -14,6 +17,7 @@ import com.example.demo.service.demo.IMqMessageService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.service.demo.IProductTestService;
+import com.example.demo.utility.LambdaFunctionHelper;
 import com.example.demo.utility.MqSendUtil;
 import com.example.demo.utility.RedisKeyConfigConst;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -142,7 +146,7 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 
 
     @Override
-    public PageData<MqMessageResponse> list(MqMessageRequest mqMessage) throws JsonProcessingException {
+    public PageData<MqMessageResponse> list(MqMessageRequest request) throws JsonProcessingException {
         MqMessage message = this.getById(7);
         String json = objectMapper.writeValueAsString(message);
 
@@ -165,15 +169,45 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
         //排序
 //        queryWrapper.orderByDesc(User::getAge)
 //                .orderByAsc(User::getName);
-        queryWrapper.orderByDesc(MqMessage::getId);
-        List<MqMessage> mqMessageList = this.list(queryWrapper);
+        //避免排序
+        long count = this.count(queryWrapper);
+
+
+//        int skip = request.getPageSize() * (request.getPageIndex() - 1) * 10;
+//        queryWrapper.last("limit " + skip + ",10");
+//        String limit = MessageFormat.format("limit {0} , {1}", skip, request.getPageSize());
+////        queryWrapper.last("limit "+(request.getPageIndex()-1)*10+","+(
+//        queryWrapper.orderByDesc(ShipOrder::getId).last(limit);
+
+
+//        queryWrapper.orderByDesc(MqMessage::getId).last("limit 10");
+//        List<MqMessage> mqMessageList = this.list(queryWrapper);
+
+        //注意：配置 MybatisPlusPageInterceptor
+        // 创建分页对象 (当前页, 每页大小)
+        Page<MqMessage> page = new Page<>(0, 10);
+        //排序
+        List<OrderItem> orderItems = LambdaFunctionHelper.getWithDynamicSort(request.getSortFieldList());
+////            queryWrapper.orderBy(true, true, orderItems);
+//        // ROW_NUMBER() OVER (ORDER BY id ASC, creationTime ASC) as __row_number__
+        page.setOrders(orderItems);
+        // 执行分页查询, sqlserver 使用通用表达式 WITH selectTemp AS
+        IPage<MqMessage> mqMessagePage = this.baseMapper.selectPage(page, queryWrapper);
+
+        // 获取结果   // 当前页数据
+        List<MqMessage> mqMessageList = mqMessagePage.getRecords();
+        long total = mqMessagePage.getTotal();
+
+
         List<MqMessageResponse> mqMessageResponseList = mqMessageList.stream().map(p -> {
             MqMessageResponse response = new MqMessageResponse();
             BeanUtils.copyProperties(p, response);
             return response;
         }).collect(Collectors.toList());
+
         PageData<MqMessageResponse> pageData = new PageData<>();
         pageData.setData(mqMessageResponseList);
+        pageData.setCount(count);
         return pageData;
     }
 
@@ -257,6 +291,9 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 //                queryWrapper.or(p->p.eq(MqMessage::getStatus,null));
 //                mysql null 不运算 <>
                 //<, <=, >, >=, <>  lt()，le()，gt()，ge()，ne()
+                List<Integer> idList = new ArrayList<>();
+                idList.add(1);
+                queryWrapper.in(MqMessage::getId, idList);
                 if (startQueryTime != null) {
                     queryWrapper.gt(MqMessage::getModifyTime, startQueryTime);
                 }

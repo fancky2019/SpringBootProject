@@ -69,7 +69,7 @@ Web层日志（URL、HTTP方法、参数等） → 使用 @ControllerAdvice
  */
 @Aspect
 @Component
-@Order(101)//数值越小，优先级越高
+@Order(101)//数值越小，优先级越高 如果不在配置类中指定bean注册顺序，就在Aspect加 @Order(202) 注解指定顺序
 //@Slf4j
 @Log4j2
 public class LogAspect {

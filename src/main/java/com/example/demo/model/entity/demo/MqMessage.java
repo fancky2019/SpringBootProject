@@ -20,9 +20,11 @@ import okhttp3.internal.ws.RealWebSocket;
 import org.joda.time.DateTime;
 
 /**
- * <p>
+ * 本地消息表可以和业务数据保证原子性
+ * 使用业务数据提交成功的观察者模式或者cdc 还是要落本地消息表防止发送失败，但是不能保证消息落数据库成功，
+ * 和业务数据丢失原子性
  *
- * </p>
+ *
  *
  * @author author
  * @since 2023-11-15

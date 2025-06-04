@@ -1,4 +1,4 @@
-package com.example.demo.eventbus;
+package com.example.demo.listener.eventbus;
 
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.ApplicationEvent;

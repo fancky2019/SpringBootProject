@@ -1,10 +1,12 @@
 package com.example.demo.rabbitMQ.mqtt;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+@Slf4j
 public class MqttConsumerCallBack implements MqttCallback {
 
     /**
@@ -31,11 +33,11 @@ public class MqttConsumerCallBack implements MqttCallback {
      */
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
-        System.out.println(String.format("接收消息主题 : %s",topic));
-        System.out.println(String.format("接收消息Qos : %d",message.getQos()));
+        log.info(String.format("接收消息主题 : %s",topic));
+        log.info(String.format("接收消息Qos : %d",message.getQos()));
         String msg=new String(message.getPayload());
-        System.out.println(String.format("接收消息内容 : %s",msg));
-        System.out.println(String.format("接收消息retained : %b",message.isRetained()));
+        log.info(String.format("接收消息内容 : %s",msg));
+        log.info(String.format("接收消息retained : %b",message.isRetained()));
     }
 
     /**
@@ -46,8 +48,8 @@ public class MqttConsumerCallBack implements MqttCallback {
         try {
             iMqttDeliveryToken.getMessage();
         } catch (MqttException e) {
-            throw new RuntimeException(e);
+            log.error("",e);
         }
-        System.out.println("deliveryComplete---------" + iMqttDeliveryToken.isComplete());
+        log.info("deliveryComplete---------" + iMqttDeliveryToken.isComplete());
     }
 }

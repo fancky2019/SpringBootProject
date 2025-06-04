@@ -2,14 +2,10 @@ package com.example.demo.service.api;
 
 import com.example.demo.controller.UserController;
 import com.example.demo.model.wmsservicemodel.ShipOrderInventoryDetailDto;
-import com.example.demo.service.microservice.eurekaclient.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigInteger;
@@ -24,7 +20,7 @@ import java.math.BigInteger;
 成功：返回UserServiceFallBackFactory的返回值
  */
 @Component
-public class WmsServiceFallbackFactoryr implements FallbackFactory<WmsService> {
+public class WmsServiceFallbackFactory implements FallbackFactory<WmsService> {
 
     private static Logger logger = LogManager.getLogger(UserController.class);
 

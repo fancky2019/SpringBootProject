@@ -24,6 +24,7 @@
     </parent>
 
     <properties>
+        <!--        版本匹配规则：Spring Boot 的 starter 版本号（如 3.5.0）必须与 Spring Boot 本身的版本号严格一致-->
         <!--        定义版本  <version>${mysql-connector.version}</version> -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -139,6 +140,14 @@
             <!--注意此处的依赖是SpringBoot2.0以后专用的，如果您使用的SpringBoot版本低于2.0请使用spring-cloud-starter-feign-->
             <artifactId>spring-cloud-starter-openfeign</artifactId>
             <!--              <version>3.0.3</version>-->
+
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework.cloud</groupId>-->
+<!--                    <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+
         </dependency>
 
         <!--用okhttp 代替默认的  HTTP Client，JDK 原生的 URLConnection 发送HTTP请求，没有连接池-->
@@ -706,12 +715,20 @@
         </dependency>
 
 
+
+        <!-- Spring Boot Integration Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-integration</artifactId>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.springframework.integration/spring-integration-mqtt -->
 <!--       集成了org.eclipse.paho.client.mqttv3-->
         <dependency>
             <groupId>org.springframework.integration</groupId>
             <artifactId>spring-integration-mqtt</artifactId>
-            <version>6.2.0</version>
+<!--            <version>6.2.0</version>-->
+            <version>5.5.18</version> <!-- 最后一个支持 Java 8 的版本 -->
         </dependency>
 
 
