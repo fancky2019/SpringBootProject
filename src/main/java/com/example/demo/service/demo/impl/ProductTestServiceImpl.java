@@ -1321,6 +1321,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
         //更新指定条件的 为productTest 对象的值，ID 字段除外。
         boolean re3 = this.update(updateWrapper3);
+        //            EwmsEvent event = new EwmsEvent(this, "TruckOrderComplete");
         MyCustomEvent event = new MyCustomEvent(this, busProperties.getId());
 
 //        MyCustomEvent event = new MyCustomEvent(busProperties.getId());

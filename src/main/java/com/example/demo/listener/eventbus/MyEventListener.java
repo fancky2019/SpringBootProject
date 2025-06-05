@@ -1,5 +1,6 @@
 package com.example.demo.listener.eventbus;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -18,11 +19,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 public class MyEventListener {
 
+//    @Async("threadPoolExecutor") //使用异步和调用线程不在一个线程内
     //TransactionSynchronizationManager 事务成功之后发送
     @TransactionalEventListener //默认事务成功之后发送
 //    @TransactionalEventListener  (phase = TransactionPhase.AFTER_COMMIT)
 //    @EventListener  // 事务不成功也会检测到发送消息
     public void handleMyEvent(MyCustomEvent event) {
+        //此处简单设计，失败了落表重试处理。或者重新设计本地消息表
         //ApplicationEventPublisher eventPublisher;
         //  eventPublisher.publishEvent(event);
         System.out.println("Received custom event: " + event);

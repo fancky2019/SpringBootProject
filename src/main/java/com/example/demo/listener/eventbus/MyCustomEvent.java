@@ -4,6 +4,7 @@ import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.ApplicationEvent;
 
 /**
+ * 添加依赖 spring-cloud-starter-bus-amqp
  * 自定义事件对象
  */
 public class MyCustomEvent extends RemoteApplicationEvent {
