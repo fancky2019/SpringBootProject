@@ -19,6 +19,9 @@ import java.util.UUID;
  *
  *
  * xxljob默认不会经过 Filter：因为 XXL-JOB 默认使用自己的 Netty 服务器
+ *
+ *
+ * 过滤器不用到WebMvcConfigurer 添加，拦截器需要到WebMvcConfigurer注册
  */
 @Slf4j
 @Configuration

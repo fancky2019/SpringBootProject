@@ -93,6 +93,24 @@ public class ElasticsearchRestClientConfig extends AbstractElasticsearchConfigur
             e.printStackTrace();
         }
 
+
+        /**
+         * Elasticsearch ClientConfiguration 默认连接池配置
+         * Elasticsearch 客户端（如 Java High Level REST Client 或新的 Java API Client）的默认连接池配置如下：
+         *
+         * 主要默认配置
+         * 连接池大小：
+         * 最大连接数：通常默认为 30
+         * 每个路由的最大连接数（针对特定节点的连接）：通常默认为 10
+         *
+         * 超时设置：
+         * 连接超时：默认 1秒
+         * 套接字超时：默认 30秒
+         *
+         * 重试机制：
+         * 默认会重试失败的请求（如由于节点故障）
+         * 最大重试超时：默认 3
+         */
         final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
                //127 连不上就换IP 127.0.0.1   192.168.8.85
                 .connectedTo(hostAndPort)
@@ -102,6 +120,8 @@ public class ElasticsearchRestClientConfig extends AbstractElasticsearchConfigur
                 //默认5s,批量插入超时异常： 5,000 milliseconds timeout on connection http-outgoing-0 [ACTIVE];
                 .withSocketTimeout(60000)//默认30s
                 .withConnectTimeout(10000)//默认1s
+                //                .withConnectTimeout(Duration.ofSeconds(5))
+//                .withSocketTimeout(Duration.ofSeconds(60))
                 .build();
 
         return RestClients.create(clientConfiguration).rest();

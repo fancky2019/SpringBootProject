@@ -21,6 +21,9 @@ import java.lang.reflect.Method;
 import java.util.Date;
 
 /**
+ *
+ * 过滤器不用到WebMvcConfigurer 添加，拦截器需要到WebMvcConfigurer注册
+ * 
  * HandlerInterceptor是springMVC项目中的拦截器，它拦截的目标是请求的地址，比MethodInterceptor先执行。其工作原理是当请求
  * MethodInterceptordr动态代理CGLIB
  *

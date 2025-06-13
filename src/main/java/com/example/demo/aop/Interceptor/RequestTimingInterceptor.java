@@ -7,7 +7,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+//过滤器不用到WebMvcConfigurer 添加，拦截器需要到WebMvcConfigurer注册
 @Slf4j
 @Component
 public class RequestTimingInterceptor implements HandlerInterceptor {

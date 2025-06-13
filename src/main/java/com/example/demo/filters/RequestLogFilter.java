@@ -18,7 +18,7 @@ import java.util.Map;
  * 使用Filter方案即可满足基本需求，性能开销最小且实现简单。如需更精细的监控，再考虑结合AOP :aspect 或 HandlerInterceptor
  *
  *
- *
+ *过滤器不用到WebMvcConfigurer 添加，拦截器需要到WebMvcConfigurer注册
  *
  */
 @Component

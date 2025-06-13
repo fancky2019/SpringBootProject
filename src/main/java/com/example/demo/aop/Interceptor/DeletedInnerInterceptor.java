@@ -17,7 +17,7 @@ import javax.annotation.PostConstruct;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
-
+//过滤器不用到WebMvcConfigurer 添加，拦截器需要到WebMvcConfigurer注册
 public class DeletedInnerInterceptor implements InnerInterceptor {
 
     private ArrayList<String> tableNames;

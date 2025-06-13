@@ -44,6 +44,7 @@ public class MqMessage extends EntityBase implements Serializable {
     private String msgId;
 
     private String businessKey;
+    private String businessId;
     private String msgContent;
 
     private String exchange;
@@ -51,7 +52,7 @@ public class MqMessage extends EntityBase implements Serializable {
     private String routeKey;
 
     private String queue;
-
+    private Boolean retry = true;
     private Integer retryCount;
     private DateTime nextRetryTime;
     /**

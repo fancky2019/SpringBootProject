@@ -6,7 +6,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
-
+//过滤器不用到WebMvcConfigurer 添加，拦截器需要到WebMvcConfigurer注册
 //@Component
 public class CORSFilter implements Filter {
     @Override

@@ -18,7 +18,7 @@ import java.util.Properties;
 /**
  *
  * mybatis sql执行拦截器
- *
+ *过滤器不用到WebMvcConfigurer 添加，拦截器需要到WebMvcConfigurer注册
  */
 
 //@Intercepts({
