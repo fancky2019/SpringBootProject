@@ -24,11 +24,20 @@
 <div style="height: 100px;width: 100px;background:indianred">dsdsdsdsds</div>
 <button id="btnSave" th:type="button"> click</button>
 <div id="message"></div>
+<button id="btnCheckAvailable" th:type="button"> btnCheckAvailable</button>
+<div id="result"></div>
+
 </body>
 </html>
 
-<script type="text/javascript" src="/js/user.js"></script>
 
+
+<!--读取不到-->
+<!--<script type="text/javascript" src="/js/user.js"></script>-->
+<!-- Thymeleaf方式引用静态资源 -->
+<script type="text/javascript" th:src="@{/js/user.js}"></script>
+<!--转换后的html-->
+<!--<script type="text/javascript" src="/sbp/js/user.js"></script>-->
 <script>
     let source = null;
 
@@ -56,7 +65,7 @@
          * 另一种写法：source.onmessage = function (event) {}
          */
         source.addEventListener('message', function (e) {
-            debugger;
+            // debugger;
             setMessageInnerHTML(e.data);
         });
 
@@ -100,4 +109,39 @@
     function setMessageInnerHTML(innerHTML) {
         document.getElementById('message').innerHTML += innerHTML + '<br/>';
     }
+
+
+    // 点击按钮发送GET请求
+    $("#btnCheckAvailable1").click(function () {
+        // 显示加载状态
+        $("#result").html("加载中...");
+
+        // 发送GET请求
+        $.ajax({
+            url: "http://10.100.200.32:8088/truckOrderItem/checkAvailable?projectNo=XM0713&deviceNo=2072&materialCode=P0002096844&quantity=1", // 示例API
+            type: "GET",
+            dataType: "json", // 期望返回JSON格式
+            success: function (data) {
+                debugger;
+                // 请求成功处理
+                $("#result").html(`
+                            <h3>获取成功</h3>
+                            <p>ID: ${data.traceId}</p>
+                            <p> ${JSON.stringify(data, null, 2)}</p>
+                        `);
+            },
+            error: function (xhr, status, error) {
+                // 请求失败处理
+                $("#result").html(`
+                            <h3 style="color:red">请求失败</h3>
+                            <p>状态码: ${xhr.status}</p>
+                            <p>错误信息: ${error}</p>
+                        `);
+            },
+            complete: function () {
+                // 请求完成后的回调（无论成功失败都会执行）
+                console.log("请求完成");
+            }
+        });
+    });
 </script>

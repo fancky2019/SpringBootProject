@@ -30,6 +30,7 @@ import java.util.List;
 
 
 //调试测Controller注意切换配置文件里的数据库配置:数据库RABC
+//前端地址：http://localhost:8081/sbp/user
 
 
 //@RestController:@RestController注解，相当于@Controller+@ResponseBody两个注解的结合
