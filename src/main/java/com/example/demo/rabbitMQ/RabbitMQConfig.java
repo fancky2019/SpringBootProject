@@ -47,6 +47,8 @@ public class RabbitMQConfig {
     ObjectMapper objectMapper;
     @Autowired
     ApplicationContext applicationContext;
+    @Autowired
+    PushConfirmCallback pushConfirmCallback;
 
     //    @Autowired
 //    private DemoProductService demoProductService;
@@ -177,7 +179,7 @@ public class RabbitMQConfig {
 
                 LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
                 lambdaQueryWrapper.eq(MqMessage::getMsgId, messageId);
-                MqMessage mqMessage=   mqMessageService.getOne(lambdaQueryWrapper);
+                MqMessage mqMessage = mqMessageService.getOne(lambdaQueryWrapper);
                 mqMessage.setStatus(0);
                 mqMessageService.updateById(mqMessage);
 
@@ -212,7 +214,7 @@ public class RabbitMQConfig {
 
         //消息没有生产到交换机
 //        // 消息生产确认, yml需要配置 publisher-confirms: true
-        rabbitTemplate.setConfirmCallback(new PushConfirmCallback());
+        rabbitTemplate.setConfirmCallback(pushConfirmCallback);
 
         return rabbitTemplate;
     }
@@ -221,7 +223,7 @@ public class RabbitMQConfig {
     //json 序列化，默认SimpleMessageConverter jdk 序列化
     //配置RabbitTemplate和RabbitListenerContainerFactory
     @Bean
-    public RabbitListenerContainerFactory<?> rabbitListenerContainerFactory(ConnectionFactory connectionFactory){
+    public RabbitListenerContainerFactory<?> rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         // 手动确认
@@ -232,9 +234,9 @@ public class RabbitMQConfig {
 
 
     /**
-    多线程消费:涉及到消费顺序行要将一个大队列根据业务消息id分成多个小队列
-    配置文件为默认的SimpleRabbitListenerContainerFactory 配置
-    该配置为具体的listener 指定SimpleRabbitListenerContainerFactory
+     多线程消费:涉及到消费顺序行要将一个大队列根据业务消息id分成多个小队列
+     配置文件为默认的SimpleRabbitListenerContainerFactory 配置
+     该配置为具体的listener 指定SimpleRabbitListenerContainerFactory
      */
     @Bean("multiplyThreadContainerFactory")
     public SimpleRabbitListenerContainerFactory containerFactory(ConnectionFactory connectionFactory) {

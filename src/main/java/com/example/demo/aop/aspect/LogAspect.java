@@ -408,7 +408,7 @@ public class LogAspect {
 //            String key = "repeat:" + userId + ":" + repeatToken;
             ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
             try {
-                //getRepeatToken 时候向redis 插入一个token
+                //UtilityController getRepeatToken 时候向redis 插入一个token
                 //添加重复消费redis 校验，不会存在并发同一个message
                 Object tokenObj = valueOperations.get(key);
                 if (tokenObj == null) {
@@ -433,7 +433,7 @@ public class LogAspect {
                 String operationLockKey = key + RedisKeyConfigConst.KEY_LOCK_SUFFIX;
                 //并发访问，加锁控制
                 RLock lock = redissonClient.getLock(operationLockKey);
-
+                boolean lockSuccessfully =false;
                 try {
                     //tryLock(long waitTime, long leaseTime, TimeUnit unit)
                     //获取锁等待时间
@@ -449,7 +449,7 @@ public class LogAspect {
 //                    业务完成后必须手动unlock()
                     //不设置 releaseTime（启用看门狗）
 //                    lock.lock(leaseTime, TimeUnit.SECONDS);
-                    boolean lockSuccessfully = lock.tryLock(waitTime, TimeUnit.SECONDS);
+                     lockSuccessfully = lock.tryLock(waitTime, TimeUnit.SECONDS);
 
 //                    boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
                     if (lockSuccessfully) {
@@ -470,12 +470,15 @@ public class LogAspect {
                         return MessageResult.faile("重复提交:获取锁失败");
                     }
                 } catch (InterruptedException e) {
-                    // throw  e;
-                    return MessageResult.faile(e.getMessage());
+                    //走全局异常处理
+                     throw  e;
+//                    return MessageResult.faile(e.getMessage());
                 } finally {
                     //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
                     //unlock 删除key
-                    lock.unlock();
+                    if (lockSuccessfully && lock.isHeldByCurrentThread()) {
+                        lock.unlock();
+                    }
                 }
                 result = monitor(jp, servletPath);
             } catch (Exception e) {

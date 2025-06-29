@@ -56,7 +56,9 @@ public @interface ConditionalOnProperty {
 #在竖线位置粘贴
  */
 
-
+/**
+ * @    @Value("${spring.datasource.username}") 配置文件不配置会报错，采用此种不配置就是用默认值不会报错
+ */
 @Data
 //EnableConfigurationProperties 或 Component 或 Configuration
 @Component
