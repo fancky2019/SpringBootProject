@@ -15,6 +15,7 @@ import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -58,10 +59,17 @@ public class BaseRabbitMqHandler {
 
 
     public <T> void onMessage(Class<T> tClass, Message message, Channel channel, Consumer<T> consumer) {
+        MessageProperties messageProperties = message.getMessageProperties();
+        String businessKey = messageProperties.getHeader("businessKey");
+        String businessId = messageProperties.getHeader("businessId");
+        String msgId = messageProperties.getMessageId();
+        String traceId = messageProperties.getHeader("traceId");
+        Boolean retry = messageProperties.getHeader("retry");
 
         String messageId = message.getMessageProperties().getMessageId();
         String msgContent = new String(message.getBody());
         String mqMsgIdKey = RABBIT_MQ_MESSAGE_ID_PREFIX + messageId;
+
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
 
         //添加重复消费redis 校验，不会存在并发同一个message
@@ -224,6 +232,9 @@ public class BaseRabbitMqHandler {
             mqFailLog.setCause(exceptionMsg);
             mqFailLogService.save(mqFailLog);
             //endregion
+
+            //设置过期删除key
+            redisTemplate.expire(mqMsgIdKey, EXPIRE_TIME, TimeUnit.SECONDS);
 
             //region update mqMessage
             //重试仍然没有成功，标记为消费失败。走定时任务补偿

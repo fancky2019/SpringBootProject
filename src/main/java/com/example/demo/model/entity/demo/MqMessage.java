@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import com.example.demo.rabbitMQ.RabbitMQConfig;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import okhttp3.internal.ws.RealWebSocket;
 import org.joda.time.DateTime;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * 本地消息表可以和业务数据保证原子性
@@ -36,17 +38,77 @@ import org.joda.time.DateTime;
 @ApiModel(value = "MqMessage对象", description = "")
 public class MqMessage extends EntityBase implements Serializable {
 
+//    private static final long serialVersionUID = 1L;
+//
+////    @TableId(value = "id", type = IdType.AUTO)
+////    private Integer id;
+//
+//    private String msgId;
+//
+//    private String businessKey;
+//    private String businessId;
+//    private String msgContent;
+//
+//    private String exchange;
+//
+//    private String routeKey;
+//
+//    private String queue;
+//    private Boolean retry = true;
+//    private Integer retryCount;
+//    private DateTime nextRetryTime;
+//    /**
+//     * 0:未生成 1：已生产 2：已消费 3:消费失败
+//     */
+//    private Integer status;
+//    private Integer maxRetryCount;
+//    private String failureReason;
+//    private String errorStack;
+//    private String remark;
+////    private Boolean publishAck;
+////
+////    private Boolean consumeAck;
+////
+////    private Boolean consumeFail;
+////@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+////    private LocalDateTime createTime;
+////    private LocalDateTime updateTime;
+////    private Integer version;
+//    /**
+//     * 取代 publishAck consumeAck
+//     *    0:未生成 1：已生产 2：已消费
+//     */
+//    public MqMessage() {
+//
+//    }
+//
+//    public MqMessage(String exchange, String routeKey, String queue, String msgContent) {
+//        this.msgId = UUID.randomUUID().toString();
+//        this.msgContent = msgContent;
+//        this.exchange = exchange;
+//        this.routeKey = routeKey;
+//        this.queue = queue;
+//        this.status=0;
+//        this.version=0;
+//        this.remark="";
+//        this.createTime = LocalDateTime.now();
+//        this.modifyTime = LocalDateTime.now();
+//    }
+
+
+
+
+    //WMS-ES
+
     private static final long serialVersionUID = 1L;
 
-//    @TableId(value = "id", type = IdType.AUTO)
-//    private Integer id;
 
+    //    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;
     private String msgId;
-
     private String businessKey;
     private String businessId;
     private String msgContent;
-
     private String exchange;
 
     private String routeKey;
@@ -63,19 +125,17 @@ public class MqMessage extends EntityBase implements Serializable {
     private String failureReason;
     private String errorStack;
     private String remark;
-//    private Boolean publishAck;
-//
-//    private Boolean consumeAck;
-//
-//    private Boolean consumeFail;
-//@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-//    private LocalDateTime createTime;
-//    private LocalDateTime updateTime;
-//    private Integer version;
-    /**
-     * 取代 publishAck consumeAck
-     *    0:未生成 1：已生产 2：已消费
-     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    public LocalDateTime createTime;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    public LocalDateTime modifyTime;
+    public Integer version;
+    public boolean deleted;
+    public String traceId;
+
     public MqMessage() {
 
     }
@@ -86,9 +146,9 @@ public class MqMessage extends EntityBase implements Serializable {
         this.exchange = exchange;
         this.routeKey = routeKey;
         this.queue = queue;
-        this.status=0;
-        this.version=0;
-        this.remark="";
+        this.status = 0;
+        this.version = 0;
+        this.remark = "";
         this.createTime = LocalDateTime.now();
         this.modifyTime = LocalDateTime.now();
     }
