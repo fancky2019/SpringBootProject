@@ -226,6 +226,7 @@ public class BaseRabbitMqHandler {
             //endregion
 
             //region update mqMessage
+            //重试仍然没有成功，标记为消费失败。走定时任务补偿
             messageService.updateByMsgId(messageId, 3);
             //endregion
 

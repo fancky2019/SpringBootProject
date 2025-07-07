@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 
 /**
  * 1、确认模式（confirm）：可以监听消息是否从生产者成功传递到交换。
@@ -53,12 +55,22 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
 //                从容器中获取bean
                 ApplicationContext applicationContext = ApplicationContextAwareImpl.getApplicationContext();
                 IMqMessageService mqMessageService = applicationContext.getBean(IMqMessageService.class);
-
+                //本地消息表会存在重复投递情况，消费端要做幂等处理
+                //rabbitMq 生产成功，更新小标状态失败。定时任务补偿重试，重复发送直到更新消息表更新成功
+                //可采用事务消息（推荐）
+                //使用 RocketMQ/Kafka 的事务消息 替代 RabbitMQ，它们原生支持 两阶段提交（2PC），能保证：
+                //
+                //Prepare 阶段：半消息发送到 Broker（但消费者不可见）。
+                //
+                //Commit 阶段：本地事务成功，消息正式投递；失败则回滚。
+                //
+                //但 RabbitMQ 没有原生事务消息支持，需自行实现补偿机制。
 
                 LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
                 lambdaQueryWrapper.eq(MqMessage::getMsgId, msgId);
                 MqMessage mqMessage = mqMessageService.getOne(lambdaQueryWrapper);
                 mqMessage.setStatus(1);
+                mqMessage.setModifyTime(LocalDateTime.now());
                 mqMessageService.updateById(mqMessage);
 
 
