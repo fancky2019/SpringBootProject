@@ -1,5 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.dao.demo.MqMessageMapper">
 
+    <resultMap id="BaseResultMap" type="com.example.demo.model.entity.demo.MqMessage">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="businessId" column="business_id" jdbcType="BIGINT"/>
+            <result property="businessKey" column="business_key" jdbcType="VARCHAR"/>
+            <result property="msgId" column="msg_id" jdbcType="CHAR"/>
+            <result property="msgContent" column="msg_content" jdbcType="VARCHAR"/>
+            <result property="exchange" column="exchange" jdbcType="VARCHAR"/>
+            <result property="routeKey" column="route_key" jdbcType="VARCHAR"/>
+            <result property="queue" column="queue" jdbcType="VARCHAR"/>
+            <result property="status" column="status" jdbcType="INTEGER"/>
+            <result property="retryCount" column="retry_count" jdbcType="INTEGER"/>
+            <result property="maxRetryCount" column="max_retry_count" jdbcType="INTEGER"/>
+            <result property="nextRetryTime" column="next_retry_time" jdbcType="TIMESTAMP"/>
+            <result property="failureReason" column="failure_reason" jdbcType="VARCHAR"/>
+            <result property="errorStack" column="error_stack" jdbcType="VARCHAR"/>
+            <result property="retry" column="retry" jdbcType="TINYINT"/>
+            <result property="remark" column="remark" jdbcType="VARCHAR"/>
+            <result property="version" column="version" jdbcType="INTEGER"/>
+            <result property="deleted" column="deleted" jdbcType="TINYINT"/>
+            <result property="traceId" column="trace_id" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,business_Id,business_key,
+        msg_id,msg_content,exchange,
+        route_key,queue,status,
+        retry_count,max_retry_count,next_retry_time,
+        failure_reason,error_stack,retry,
+        remark,version,deleted,
+        trace_id,create_time,modify_time
+    </sql>
 </mapper>

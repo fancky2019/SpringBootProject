@@ -13,10 +13,26 @@ import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannel
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.integration.mqtt.support.MqttHeaders;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.handler.annotation.Header;
 
 import java.util.UUID;
 
+/**
+ * MQTT 的 QoS ACK 是 通信层面的成功标志，不是业务层面的；
+ * 原生 Paho 没有暴露 ack 控制的 API，也没有设计延迟 ACK 或手动 ACK 的机制。
+ *
+ * Spring Integration 的 MqttPahoMessageDrivenChannelAdapter 封装了 Paho，但自己做了消息投递的“延迟确认”处理机制：
+ * 拦截 messageArrived()；
+ * 将消息封装成 Spring 的 Message 对象；
+ * 附加一个 MqttAckCallback；
+ * 直到你调用 ack() 才真正从内部确认消息（或标记为失败重试）。
+ * 换句话说，Spring Integration 封装了一层“手动 ACK 管理器”。
+ *
+ *
+ * 消息手动Ack  没有处理成功
+ */
 @Configuration
 @Slf4j
 public class MqttIntegrationConfig {
@@ -52,6 +68,7 @@ public class MqttIntegrationConfig {
                         mqttConfig.getSubscribe().toArray(new String[0]));
         adapter.setConverter(pahoMessageConverter);
         adapter.setQos(mqttConfig.getQos());
+        adapter.setManualAcks(true);
         adapter.setOutputChannel(mqttInputChannel());
         return adapter;
     }
@@ -79,10 +96,15 @@ public class MqttIntegrationConfig {
     }
 
     /**
+     *
      * 处理接收的消息
      * @param message
      */
-    private void processMessage(org.springframework.messaging.Message<?> message) {
+    private void processMessage(org.springframework.messaging.Message<?> message
+) {
+//        Acknowledgment acknowledgment = message.getHeaders().get("mqtt_acknowledgment", Acknowledgment.class);
+//        @Header("mqtt_acknowledgment") Acknowledgment acknowledgment
+//        @Header(MqttHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgment
         String msgId = message.getHeaders().getOrDefault("msgId", UUID.randomUUID()).toString();
         String topic = (String) message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC);
         //没有接收到
@@ -94,6 +116,7 @@ public class MqttIntegrationConfig {
         log.info("Payload: " + payload);
         log.info("Headers: " + message.getHeaders());
 
+        int m=Integer.parseInt("m");
         switch (topic)
         {
             case "test":
@@ -103,5 +126,9 @@ public class MqttIntegrationConfig {
                 log.info("default");
                 break;
         }
+
+
+        // 2. 业务成功后才手动确认
+//        acknowledgment.acknowledge();
     }
 }

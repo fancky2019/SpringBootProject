@@ -1,25 +1,19 @@
 package com.example.demo.model.entity.demo;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
-
-import java.time.LocalDateTime;
-
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-
-import java.io.Serializable;
-import java.util.UUID;
-
-import com.example.demo.rabbitMQ.RabbitMQConfig;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import okhttp3.internal.ws.RealWebSocket;
 import org.joda.time.DateTime;
-import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * 本地消息表可以和业务数据保证原子性
@@ -100,41 +94,116 @@ public class MqMessage extends EntityBase implements Serializable {
 
     //WMS-ES
 
-    private static final long serialVersionUID = 1L;
+//    /**
+//     *
+//     */
+//    @TableId(type = IdType.AUTO)
+//    private Integer id;
 
+    /**
+     *
+     */
+    private Long businessId;
 
-    //    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
-    private String msgId;
+    /**
+     * 业务唯一标识
+     */
     private String businessKey;
-    private String businessId;
+
+    /**
+     *
+     */
+    private String msgId;
+
+    /**
+     *
+     */
     private String msgContent;
+
+    /**
+     *
+     */
     private String exchange;
 
+    /**
+     *
+     */
     private String routeKey;
 
+    /**
+     *
+     */
     private String queue;
-    private Boolean retry = true;
-    private Integer retryCount;
-    private DateTime nextRetryTime;
+
     /**
      * 0:未生成 1：已生产 2：已消费 3:消费失败
      */
     private Integer status;
+
+    /**
+     * 重试次数
+     */
+    private Integer retryCount;
+
+    /**
+     * 最大重试次数
+     */
     private Integer maxRetryCount;
+
+    /**
+     *
+     */
+    private Date nextRetryTime;
+
+    /**
+     * 异常信息
+     */
     private String failureReason;
+
+    /**
+     * 异常堆栈
+     */
     private String errorStack;
+
+    /**
+     *
+     */
+    private Integer retry;
+
+    /**
+     *
+     */
     private String remark;
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    public LocalDateTime createTime;
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    public LocalDateTime modifyTime;
-    public Integer version;
-    public boolean deleted;
-    public String traceId;
+
+//    /**
+//     *
+//     */
+//    private Integer version;
+//
+//    /**
+//     *
+//     */
+//    private Integer deleted;
+//
+//    /**
+//     *
+//     */
+//    private String traceId;
+
+//    /**
+//     *
+//     */
+//    private Date createTime;
+//
+//    /**
+//     *
+//     */
+//    private Date modifyTime;
+
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
+
+
 
     public MqMessage() {
 
@@ -152,4 +221,5 @@ public class MqMessage extends EntityBase implements Serializable {
         this.createTime = LocalDateTime.now();
         this.modifyTime = LocalDateTime.now();
     }
+
 }
