@@ -43,7 +43,8 @@ public class MqttConfig {
     @Bean
     public DefaultPahoMessageConverter pahoMessageConverter() {
         DefaultPahoMessageConverter converter = new DefaultPahoMessageConverter();
-        converter.setPayloadAsBytes(false);
+//        converter.setPayloadAsBytes(false);
+        converter.setPayloadAsBytes(true);
         return converter;
     }
 }

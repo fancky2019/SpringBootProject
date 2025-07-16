@@ -87,11 +87,46 @@ public class MqttIntegrationConfig {
         return handler;
     }
 
-    // 入站消息处理流
+//    // 入站消息处理流
+//    @Bean
+//    public IntegrationFlow mqttInFlow() {
+//        return IntegrationFlows.from(mqttInputChannel())
+//                .handle(this::processMessage)
+//                .get();
+//    }
+
+//    @Bean
+//    public DefaultPahoMessageConverter pahoMessageConverter() {
+//        DefaultPahoMessageConverter converter = new DefaultPahoMessageConverter();
+//        converter.setPayloadAsBytes(true); // ✅ 关键点
+//        return converter;
+//    }
+
     @Bean
     public IntegrationFlow mqttInFlow() {
         return IntegrationFlows.from(mqttInputChannel())
-                .handle(this::processMessage)
+                .handle((payload, headers) -> {
+                    String content=new String((byte[])payload);
+                    log.info("收到消息: payload={}, headers={}", payload, headers);
+
+                    Acknowledgment ack = (Acknowledgment) headers.get("mqtt_acknowledgment");
+
+                    try {
+                        // 模拟业务处理
+                        if (payload.toString().contains("fail")) {
+                            throw new RuntimeException("模拟异常");
+                        }
+
+                        log.info("业务处理成功，手动确认ACK");
+                        if (ack != null) {
+                            ack.acknowledge();
+                        }
+                    } catch (Exception e) {
+                        log.error("处理失败，不ACK，等待重发", e);
+                        // 不调用 ack.acknowledge()
+                    }
+                    return null;
+                })
                 .get();
     }
 
