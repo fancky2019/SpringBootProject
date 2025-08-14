@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * <p>
@@ -48,7 +49,7 @@ public interface IProductTestService extends IService<ProductTest> {
 
     void repeatReadMultiTransaction() throws InterruptedException;
 
-    void repeatReadMultiTransactionUpdate() ;
+    void repeatReadMultiTransactionUpdate();
 
 
     void repeatReadFun();
@@ -69,10 +70,17 @@ public interface IProductTestService extends IService<ProductTest> {
 
     void transactionalRedission(int i) throws InterruptedException;
 
+    void transactionalRedissonForShare(BigInteger id) throws InterruptedException;
+
     void pointcutExecuteOrder();
 
     void tryThrowStackTrace();
+
     void mqMessageConsume(MqMessage message);
 
     Integer mqMessageOperation() throws JsonProcessingException;
+
+    ProductTest getByIdForShareMySql(BigInteger id);
+
+    ProductTest getByIdLastForShareMySql(BigInteger id);
 }

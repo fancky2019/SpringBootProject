@@ -115,6 +115,63 @@ public class MqSendUtil {
 
     }
 
+    /**
+     *
+     * @param lock
+     * @param lockSuccessfully
+     */
+    public void releaseLock(RLock lock, Boolean lockSuccessfully) {
+        //处理事务回调发送信息到mq
+        //boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+        // 判断当前是否存在事务,如果没有开启事务是会报错的
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            // 无事务，
+            doReleaseLock(lock, lockSuccessfully);
+            return;
+        }
+
+        //事务回调：事务同步，此处待处理， 所有事务提交了才会执行 事务回调
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCompletion(int status) {
+                //先执行事务afterCommit，然后执行afterCompletion
+                //afterCommit,afterCompletion
+                //afterCompletion 事务完成
+                // 调用父类的事务提交方法,空方法
+                //   super.afterCompletion(status);
+
+                //事务完成有可能是 回滚
+//                int STATUS_COMMITTED = 0;
+//                int STATUS_ROLLED_BACK = 1;
+//                int STATUS_UNKNOWN = 2;
+//                if (lock != null) {
+//                    log.info("release lock success");
+//                    lock.unlock();
+//                }
+
+                doReleaseLock(lock, lockSuccessfully);
+            }
+
+
+        });
+
+    }
+
+    private void doReleaseLock(RLock lock, Boolean lockSuccessfully) {
+        if (lockSuccessfully) {
+            if (lock != null) {
+                try {
+                    if (lock.isHeldByCurrentThread()) {
+                        lock.unlock();
+                    }
+                } catch (Exception e) {
+                    log.error("doReleaseLock failed: ", e);
+                }
+            }
+        }
+    }
+
+
     private void sentAsync(MqMessage mqMessage) {
         if (mqMessage == null) {
             return;

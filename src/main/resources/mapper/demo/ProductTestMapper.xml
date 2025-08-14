@@ -22,6 +22,11 @@
         where id = #{id,jdbcType=BIGINT}
     </select>
 
+    <select id="getByIdForShareMySql" parameterType="java.math.BigInteger" resultType="com.example.demo.model.entity.demo.ProductTest">
+        select *
+        from demo_product
+        where id = #{id,jdbcType=BIGINT} for share;
+    </select>
 
     <!--    useCache="true" 使用二级缓存-->
     <!--分页查询-->

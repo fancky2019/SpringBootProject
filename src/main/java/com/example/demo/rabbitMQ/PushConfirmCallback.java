@@ -43,6 +43,9 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
     @Override
     public void confirm(CorrelationData correlationData, boolean ack, String s) {
         try {
+            //生产线程和生产确认线程不是同一个线程
+            long threadId = Thread.currentThread().getId();
+            log.info("ProduceConfirm threadId - {}", threadId);
 // s:channel error; protocol method: #method<channel.close>(reply-code=404, reply-text=NOT_FOUND - no exchange 'UnBindDirectExchange' in vhost '/', class-id=60, method-id=40)
             String msgId = correlationData.getId();
             ReturnedMessage returnedMessage = correlationData.getReturned();

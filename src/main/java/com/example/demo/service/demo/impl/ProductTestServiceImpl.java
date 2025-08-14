@@ -1376,9 +1376,13 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         //如果修改id=2 ，读取的还是缓存
         updateWrapper3.eq(ProductTest::getId, 1);
 
+        //update delete insert 当前读
+        //执行任何 INSERT/UPDATE/DELETE 操作都会清空当前 SqlSession 的一级缓存
+
         //更新指定条件的 为productTest 对象的值，ID 字段除外。
         boolean re3 = this.update(updateWrapper3);
         //修改该行数据，可以读取到最新的
+
         ProductTest productTest1 = this.getById(1);
 
         int m = 0;
@@ -1756,11 +1760,14 @@ LockAnnotationAdvisor 实现了Ordered接口
         String operationLockKey = RedisKeyConfigConst.MQ_FAIL_HANDLER;
         //并发访问，加锁控制
         RLock lock = redissonClient.getLock(operationLockKey);
-
+        boolean lockSuccessfully = false;
         try {
             long waitTime = 200;
             long leaseTime = 300;
-            boolean lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+            //            lockSuccessfully = lock.tryLock();
+//            lock.tryLock(waitTime, TimeUnit.SECONDS);
+//            lock.lock(leaseTime, TimeUnit.SECONDS);
+            lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
             if (lockSuccessfully) {
 
 
@@ -1775,7 +1782,8 @@ LockAnnotationAdvisor 实现了Ordered接口
 //                Thread.sleep(3 * 1000);
                 //代码处理异常不会进入事务完成的方法，要在catch 内释放锁
 //                int m = Integer.parseInt("d");
-                mqSendUtil.releaseLock(lock);
+                //事务完成会吊钟释放锁
+//                mqSendUtil.releaseLock(lock,lockSuccessfully);
 
 
             } else {
@@ -1792,9 +1800,95 @@ LockAnnotationAdvisor 实现了Ordered接口
             //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
             //unlock 删除key
 //            lock.unlock();
+
+//            if (lockSuccessfully) {
+//                try {
+//                    if (lock.isHeldByCurrentThread()) {
+//                        lock.unlock();
+//                    }
+//                } catch (Exception e) {
+//                    log.warn("Redis check lock ownership failed: ", e);
+//                }
+//            }
+
+            mqSendUtil.releaseLock(lock, lockSuccessfully);
         }
 
 
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void transactionalRedissonForShare(BigInteger id) throws InterruptedException {
+        //不加锁产生线程安全问题：0-->1,而不是10
+//        ProductTest productTest = this.getById(2);
+//        productTest.setVersion(productTest.getVersion() + 1);
+//        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+//        updateWrapper3.set(ProductTest::getVersion, productTest.getVersion());
+//        updateWrapper3.eq(ProductTest::getId, productTest.getId());
+//        this.update(updateWrapper3);
+//        Thread.sleep(3 * 1000);
+
+
+        ProductTest productTest1 = this.getBaseMapper().selectById(id);
+
+        //redisson 锁也会产生并发问题，因为Transactional 是aop,获取锁时候事务未提交，读取的还是修改前的值
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        String operationLockKey = RedisKeyConfigConst.MQ_FAIL_HANDLER;
+        //并发访问，加锁控制
+        RLock lock = redissonClient.getLock(operationLockKey);
+        boolean lockSuccessfully = false;
+        try {
+            long waitTime = 200;
+            long leaseTime = 300;
+//            lockSuccessfully = lock.tryLock();
+//            lock.tryLock(waitTime, TimeUnit.SECONDS);
+//            lock.lock(leaseTime, TimeUnit.SECONDS);
+            lockSuccessfully = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+
+
+            if (lockSuccessfully) {
+
+                //读取还是myabtis 一级缓存和productTest1的值一样
+                ProductTest productTest2 = this.getBaseMapper().selectById(id);
+                //当前读，可以读取到最新的数据
+//                ProductTest productTest3=  this.getBaseMapper().getByIdForShareMySql(id);
+                ProductTest productTest3 = getByIdLastForShareMySql(id);
+
+                ProductTest productTest = productTest3;/// this.getById(2);
+                log.info("BeforeVersion{} - {}", id, productTest.getVersion());
+                productTest.setVersion(productTest.getVersion() + 1);
+                LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+                updateWrapper3.set(ProductTest::getVersion, productTest.getVersion());
+                updateWrapper3.eq(ProductTest::getId, productTest.getId());
+                this.update(updateWrapper3);
+                log.info("AfterVersion{} - {}", id, productTest.getVersion());
+//                Thread.sleep(3 * 1000);
+                //代码处理异常不会进入事务完成的方法，要在catch 内释放锁
+//                int m = Integer.parseInt("d");
+                //事务完成会吊钟释放锁
+//                mqSendUtil.releaseLock(lock);
+
+
+            } else {
+                //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
+                //超过waitTime ，扔未获得锁
+//                直接返回 false 的情况：
+//                当锁已经被其他线程持有，并且该锁没有设置过期时间(leaseTime)时
+//                或者锁虽然设置了 leaseTime，但剩余存活时间超过您指定的 leaseTime 参数
+                log.info("获取锁失败");
+                if (!lockSuccessfully) {
+                    // 检查锁剩余时间
+                    long remainingTTL = lock.remainTimeToLive();
+                    System.out.println("锁剩余时间: " + remainingTTL + "ms");
+                }
+            }
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            Thread.sleep(30 * 1000);
+            mqSendUtil.releaseLock(lock, lockSuccessfully);
+        }
     }
 
 
@@ -1846,5 +1940,19 @@ LockAnnotationAdvisor 实现了Ordered接口
         mqMessageService.save(mqMessage);
 
         return 0;
+    }
+
+    @Override
+    public ProductTest getByIdForShareMySql(BigInteger id) {
+        return this.getBaseMapper().getByIdForShareMySql(id);
+    }
+
+    @Override
+    public ProductTest getByIdLastForShareMySql(BigInteger id) {
+        LambdaQueryWrapper<ProductTest> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ProductTest::getId, id);
+        //此处根据 数据动态拼接 last.last  会拼接在DeletedInnerInterceptor 里拼接的语句前面
+        queryWrapper.last(" for share;");
+        return this.getBaseMapper().selectOne(queryWrapper);
     }
 }

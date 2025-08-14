@@ -194,6 +194,10 @@ public class UtilityController {
     //Lombox 的注解 @Slf4j 相当于下面语句
     private static final Logger LOGGER = LogManager.getLogger(UtilityController.class);
 
+    // 若不想配置，给默认值（可选） 默认 false，避免报错
+    @Value("${sbp.enableCopyShipOrder:false}")
+    private boolean enableCopyShipOrder;
+    //@Value 必须配置，不配置报错
     @Value("${demo.multiEnvironment}")
     private String multiEnvironment;
 
@@ -1639,7 +1643,7 @@ public class UtilityController {
         userRegisterService.registerUser("fancky");
     }
 
-//    @Autowired(required = false)  // 如果 MqttProduce 不存在，不会报错，mqttProduce=null
+    //    @Autowired(required = false)  // 如果 MqttProduce 不存在，不会报错，mqttProduce=null
     @Autowired
     @Lazy  // 只有实际使用时才会注入（如果从未使用，则不会初始化）
     private MqttProduce mqttProduce;
@@ -1665,7 +1669,7 @@ public class UtilityController {
 
 
         //springboot starter 集成
-        mqttService.sendMessage( topic, msg);
+        mqttService.sendMessage(topic, msg);
     }
 
     /**
@@ -1761,6 +1765,7 @@ public class UtilityController {
     }
 
     /**
+     *
      * 事务同步  更新覆盖 、事务传播 版本号
      * 事务aop,代码执行完长事务未提交
      * @param i
@@ -1785,6 +1790,7 @@ public class UtilityController {
     }
 
     /**
+     *
      * 解决并发下 redissonLock 释放了 事务未提交
      * @throws InterruptedException
      */
@@ -1805,6 +1811,21 @@ public class UtilityController {
 //        productTestService.transactionalRedission(1);
 
     }
+
+
+    /**
+     *
+     * 解决并发下 redissonLock 释放了 事务未提交
+     * @throws InterruptedException
+     */
+    @GetMapping(value = "/transactionalRedissonForShare/{id}")
+    public void transactionalRedissonForShare(@PathVariable BigInteger id) throws InterruptedException {
+
+        productTestService.transactionalRedissonForShare(id);
+//        productTestService.transactionalRedission(1);
+
+    }
+
 
     /**
      * 事务同步 更新覆盖 、事务传播 版本号
@@ -1877,6 +1898,17 @@ public class UtilityController {
 
 
     /**
+     *
+     * jobs命令：显示当前会话中的后台任务
+     *  bg：将暂停的进程恢复到后台：使用 bg 命令。
+     * fg：将暂停的进程恢复到前台：使用 fg 命令。
+     * Ctrl+C：通常用于终止正在前台运行的进程。
+     * Ctrl+Z ：将正在前台运行的进程暂停，并将其放入后台。
+     * Ctrl+D：通常被用来表示退出当前的shell会话。
+     *
+     *
+     *
+     *
      *
      * 在关闭 Spring Boot 服务时，通常应该使用 kill -15，而不是 kill -2
      *

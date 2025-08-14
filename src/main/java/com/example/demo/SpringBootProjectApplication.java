@@ -206,5 +206,14 @@ ingleFactory.getObject()方法都给我产生一个新的代理对象，所以�
 //        // 添加 日志监听器，使 log4j2-spring.xml 可以间接读取到配置文件的属性
 //        application.addListeners(new LoggingListener());
 //        application.run(args);
+
+        //使用 Ctrl+C  关闭doc 窗体
+        //Windows 控制台的特殊处理：点击 X 按钮会发送 CTRL_CLOSE_EVENT，而 JDK 1.8 默认不将其映射到 ShutdownHook
+        //关闭事件 注册JVM关闭钩子.总会执行，x 掉dos 窗没有执行
+        //Ctrl+F2 (Windows/Linux) 或 ⌘F2 (Mac) 终止调试会话时，确实不会执行通过
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("执行关闭钩子...注册JVM关闭钩子");
+            applicationContext.close(); // 确保Spring上下文正确关闭
+        }));
     }
 }

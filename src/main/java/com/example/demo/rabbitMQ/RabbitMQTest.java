@@ -76,6 +76,13 @@ import org.springframework.stereotype.Component;
  * 镜像队列 适合高可用场景，但吞吐量较低
  *
  *
+ *
+ *
+ * RabbitMQ 默认的消费超时时间为 30 分钟（1800000 毫秒）。如果消费者在这段时间内未对消息进行确认（ACK），RabbitMQ 会关闭该 Channel，并抛出 PRECONDITION_FAILED 异常，导致后续消息无法继续消费
+ *
+ *永久调整（需修改配置文件 rabbitmq.conf）： 参见word 文档
+ * consumer_timeout = 36000000  # 单位：毫秒
+ *
  */
 
 

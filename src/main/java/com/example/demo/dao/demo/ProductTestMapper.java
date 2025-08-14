@@ -28,6 +28,8 @@ public interface ProductTestMapper extends BaseMapper<ProductTest> {
 
     List<ProductTest> getByIds(List<BigInteger> ids);
 
+    ProductTest getByIdForShareMySql(BigInteger id);
+
     List<ProductTest> getPageData(DemoProductRequest request);
 
     List<ProductTest> getPageDataOptimization(DemoProductRequest request);

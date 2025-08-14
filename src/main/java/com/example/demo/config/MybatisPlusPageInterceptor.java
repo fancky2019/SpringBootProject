@@ -15,7 +15,7 @@ public class MybatisPlusPageInterceptor {
         interceptor.addInnerInterceptor(paginationInterceptor);
 
         // 注册自定义拦截器
-        interceptor.addInnerInterceptor(new DeletedInnerInterceptor());
+//        interceptor.addInnerInterceptor(new DeletedInnerInterceptor());
         return interceptor;
     }
 }
