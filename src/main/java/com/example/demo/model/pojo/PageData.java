@@ -8,4 +8,5 @@ import java.util.List;
 public class PageData<T> {
     private Long count;
     private List<T> data;
+    private Boolean  hasMore;
 }

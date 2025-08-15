@@ -3,10 +3,7 @@ package com.example.demo.config;
 import com.example.demo.config.ZonedDateTimeConfig.ZonedDateTimeDeserializer;
 import com.example.demo.config.ZonedDateTimeConfig.ZonedDateTimeSerializer;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -43,8 +40,8 @@ public class JacksonConfig {
         objectMapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         // 关闭时间戳模式:jackson ZonedDateTime  默认序列化是时间戳
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-
+//        全局配置忽略实体中不存在的字段  _class 字段
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         // 日期和时间格式化
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));

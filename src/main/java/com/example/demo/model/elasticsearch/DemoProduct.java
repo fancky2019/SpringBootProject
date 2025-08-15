@@ -23,7 +23,9 @@ text支持默认分词，keyword不支持分词
 IK 分词器：ik_smart:尽可能少的进行中文分词。ik_max_word:尽可能多的进行中文分词。
 analyzer = "ik_max_word"
  */
-@Document(indexName = "demo_product")
+
+//此处@Document的indexName只作为默认值，实际使用时会被覆盖
+@Document(indexName = "demo_product", createIndex = false)//// 禁用自动创建，我们将手动创建
 @Data
 public class DemoProduct implements Serializable {
     //    @Id 如果和es的id 名称不一样映射es的id.

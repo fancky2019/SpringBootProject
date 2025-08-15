@@ -64,12 +64,10 @@ public class ElasticsearchController {
         this.esDemoProductService = esDemoProductService;
     }
 
-
-    @RequestMapping("/getByProductName")
-    public MessageResult<PageData<DemoProduct>> getByProductName(@RequestBody DemoProductRequest request) {
+    @RequestMapping("/getDemoProductPageBySearchAfter")
+    public MessageResult<PageData<DemoProduct>> getDemoProductPageBySearchAfter(@RequestBody DemoProductRequest request) {
         MessageResult<PageData<DemoProduct>> message = new MessageResult<>();
         try {
-//            PageData<DemoProduct> pageData = esDemoProductService.search(request);
             PageData<DemoProduct> pageData = esDemoProductService.searchAfter(request);
             message.setData(pageData);
             // Thread.sleep(10*1000);
@@ -81,6 +79,47 @@ public class ElasticsearchController {
         return message;
 
     }
+
+    @RequestMapping("/getDemoProductPage")
+    public MessageResult<PageData<DemoProduct>> getDemoProductPage(@RequestBody DemoProductRequest request) {
+        MessageResult<PageData<DemoProduct>> message = new MessageResult<>();
+        try {
+            PageData<DemoProduct> pageData = esDemoProductService.search(request);
+            message.setData(pageData);
+            // Thread.sleep(10*1000);
+//            message = productService.getPageData(viewModel);//查看缓存问题
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        }
+        return message;
+
+    }
+
+
+    @RequestMapping("/getDemoProductPageByAlias")
+    public MessageResult<PageData<DemoProduct>> getDemoProductPageByAlias(@RequestBody DemoProductRequest request) {
+        MessageResult<PageData<DemoProduct>> message = new MessageResult<>();
+        try {
+            PageData<DemoProduct> pageData = esDemoProductService.searchByAlias(request);
+            message.setData(pageData);
+            // Thread.sleep(10*1000);
+//            message = productService.getPageData(viewModel);//查看缓存问题
+        } catch (Exception e) {
+            message.setSuccess(false);
+            message.setMessage(e.getMessage());
+        }
+        return message;
+
+    }
+
+    @PostMapping("/createDemoProduct")
+    public MessageResult<Void> createDemoProduct() throws Exception {
+        esDemoProductService.createDemoProduct();
+        return MessageResult.success();
+    }
+
+
     //get 可以在body 内设置参数，但是通常用post 方法
     @PostMapping("/getShipOrderInfoList")
     public MessageResult<PageData<ShipOrderInfo>> getShipOrderInfoList(@RequestBody ShipOrderInfoRequest request) throws Exception {
