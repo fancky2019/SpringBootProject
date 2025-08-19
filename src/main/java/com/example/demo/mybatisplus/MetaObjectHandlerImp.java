@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 
 /**
- * mybatisplus统一修改审计信息
+ * MybatisPlus统一修改审计信息MetaObjectHandlerImp
  * 处理公共的审计字段
  *
  *  更新是否指定实体才会触发。批量更新实体也会触发

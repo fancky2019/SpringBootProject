@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 /**
  * MybatisPlusInterceptor 拦截器配置了此类
- *
+ *MybatisPlus统一修改审计信息MetaObjectHandlerImp
  * 会在sql 脚本最后加了 语句。mybatis plus 有last ,也会拼接在last 后面
  */
 //过滤器不用到WebMvcConfigurer 添加，拦截器需要到WebMvcConfigurer注册

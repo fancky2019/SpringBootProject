@@ -80,9 +80,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
- * <p>
+ * mybatisPlus批量
  * 服务实现类
- * </p>
+ *
  *
  * @author author
  * @since 2022-11-17
@@ -132,14 +132,22 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
     @Override
 //    @Transactional(rollbackFor = Exception.class)
     public void mybatisPlusTest() throws InterruptedException {
+        Object proxyObj = AopContext.currentProxy();
+        IProductTestService productTestService = null;
+        if (proxyObj instanceof IProductTestService) {
+            productTestService = (IProductTestService) proxyObj;
 
+        }
 //        this.baseMapper.deleteBatchIds();
 //        this.saveEntity();
 //        saveOrUpdateBatch();
 //        updateBatchTest();
 //        queryById();
 //        queryTest();
-        updateTest();
+//        updateTest();
+//        productTestService.saveBatchTest();
+//        productTestService.updateBatchByIdTest();
+        productTestService.deleteBatchTest();
 //        page();
 //        queryParam();
 //        truncateTest();
@@ -173,6 +181,135 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         this.save(productTest);
 
     }
+
+    //region  mybatisPlus批量  updateBatchById  saveBatch saveOrUpdateBatch
+
+
+    /**
+     * 默认情况下，saveBatch() 的底层实现是：
+     * 不是真正的批量 INSERT 语句
+     * 实际上会生成多条单独的 INSERT 语句：
+     * INSERT INTO product_test (name, price) VALUES ('产品1', 100);
+     * INSERT INTO product_test (name, price) VALUES ('产品2', 200);
+     * INSERT INTO product_test (name, price) VALUES ('产品3', 300);
+     *
+     * 数据量大自定义xml
+     * INSERT INTO product_test (name, price) VALUES ().(),
+     *
+     *
+     *  SqlSession 的关系
+     * 默认行为：
+     * saveBatch 内部会获取一个 SqlSession
+     * 设置执行器类型为 BATCH
+     * 执行批量插入
+     *将多条插入语句合并执行，提高插入效率
+     * 内部使用了 SqlSession#flushStatements() 来执行批量操作
+     * 最后提交事务并关闭 session
+     *
+     *
+     * 100条 cost 70ms
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void saveBatchTest() {
+        List<ProductTest> productTestList = new ArrayList<ProductTest>();
+        ProductTest productTest = null;
+        for (int i = 0; i < 100; i++) {
+            productTest = new ProductTest();
+            productTest.setGuid(UUID.randomUUID().toString());
+            productTest.setProductName("productName");
+            productTest.setProductStyle("productStyle");
+            productTest.setImagePath("D:\\fancky\\git\\Doc");
+            productTest.setCreateTime(LocalDateTime.now());
+            productTest.setModifyTime(LocalDateTime.now());
+            productTest.setStatus(1);
+            productTest.setDescription("setDescription_sdsdddddddddddddddd");
+            productTest.setTimestamp(LocalDateTime.now());
+            productTestList.add(productTest);
+        }
+        this.saveBatch(productTestList);
+    }
+    /**
+     * 获取批处理模式的 SqlSession
+     * 循环处理每一条数据：
+     * 为每条数据生成更新SQL
+     * 添加到批处理中
+     * 达到批量大小时执行 flushStatements()
+     * 提交事务
+     * 关闭 SqlSession
+     *
+     *
+     *
+     *
+     * 耗时108ms
+     * 会更新所有字段  ,更新部分字段可以大大减少耗时
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateBatchByIdTest() {
+        List<BigInteger> ids = new ArrayList<>();
+
+        for (int i = 1; i < 1000; i++) {
+            ids.add(BigInteger.valueOf(i));
+        }
+        List<ProductTest> list = this.listByIds(ids);
+        for (int i = 0; i < list.size(); i++) {
+            ProductTest productTest = list.get(i);
+            productTest.setProductName("22batchUpdate" + i);
+        }
+
+
+        StopWatch stopWatch = new StopWatch("saveOrUpdateBatchTest");
+        stopWatch.start("BatchInsert_Trace1");
+
+//        因为mybatis返回的默认是匹配的行数，而不是受影响的行数，如何设置返回的是受影响的行数，useAffectedRows=true
+        //mysql 连接字段穿添加  &useAffectedRows=true 返回0 ，不加返回1。
+        //for循环多个update 语句以分号结束，update 执行会返回1.因为执行update id 就一条
+        //批量更新还是要加锁，避免并发访问，或者for 循环每条更新判断
+        //批量更新、批量条件更新。加锁，避免并发访问，或者for 循环每条更新判断。使用sqlSession 一次提交
+        /*
+        UPDATE demo_product  SET guid='a02a0ed4-c685-4d9a-949e-bcba60f17c97',
+product_name='22batchUpdate702',
+product_style='productStyle1200002',
+image_path='D:\\fancky\\git\\Doc',
+create_time='2023-11-03 22:29:11.394',
+modify_time='2023-11-03 22:29:11.394',
+status=1,
+description='setDescription_sdsdddddddddddddddd',
+timestamp='2023-11-03 22:29:11.0'  WHERE id=703
+
+
+SELECT id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp FROM demo_product WHERE id=703
+         */
+        //先 select,判断有没有，然后执行insert ot update
+//        boolean result1 = this.saveOrUpdateBatch(list);
+
+//        this.saveBatch()
+        boolean result = this.updateBatchById(list);
+
+        stopWatch.stop();
+        //        stopWatch.start("BatchInsert_Trace2");
+        long miils = stopWatch.getTotalTimeMillis();
+        log.info(stopWatch.shortSummary());
+
+    }
+
+    /**
+     * 执行脚本
+     * com.example.demo.dao.demo.ProductTestMapper.deleteByIds - ==>  Preparing: DELETE FROM demo_product WHERE id IN ( ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? )
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteBatchTest() {
+
+        List<BigInteger> ids = new ArrayList<>();
+
+        for (int i = 125; i < 226; i++) {
+            ids.add(BigInteger.valueOf(i));
+        }
+        boolean result = this.removeBatchByIds(ids);
+//        this.listByIds()
+    }
+
+    //endregion
+
 
     private void updateBatchTest() {
 
@@ -216,56 +353,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         this.list(queryWrapper);
     }
 
-    /**
-     * 耗时108ms
-     * 会更新所有字段  ,更新部分字段可以大大减少耗时
-     */
-    public void updateBatchByIdTest() {
-        List<BigInteger> ids = new ArrayList<>();
 
-        for (int i = 1; i < 1000; i++) {
-            ids.add(BigInteger.valueOf(i));
-        }
-        List<ProductTest> list = this.listByIds(ids);
-        for (int i = 0; i < list.size(); i++) {
-            ProductTest productTest = list.get(i);
-            productTest.setProductName("22batchUpdate" + i);
-        }
-
-
-        StopWatch stopWatch = new StopWatch("saveOrUpdateBatchTest");
-        stopWatch.start("BatchInsert_Trace1");
-
-//        因为mybatis返回的默认是匹配的行数，而不是受影响的行数，如何设置返回的是受影响的行数，useAffectedRows=true
-        //mysql 连接字段穿添加  &useAffectedRows=true 返回0 ，不加返回1。
-        //for循环多个update 语句以分号结束，update 执行会返回1.因为执行update id 就一条
-        //批量更新还是要加锁，避免并发访问，或者for 循环每条更新判断
-        //批量更新、批量条件更新。加锁，避免并发访问，或者for 循环每条更新判断。使用sqlSession 一次提交
-        /*
-        UPDATE demo_product  SET guid='a02a0ed4-c685-4d9a-949e-bcba60f17c97',
-product_name='22batchUpdate702',
-product_style='productStyle1200002',
-image_path='D:\\fancky\\git\\Doc',
-create_time='2023-11-03 22:29:11.394',
-modify_time='2023-11-03 22:29:11.394',
-status=1,
-description='setDescription_sdsdddddddddddddddd',
-timestamp='2023-11-03 22:29:11.0'  WHERE id=703
-
-
-SELECT id,guid,product_name,product_style,image_path,create_time,modify_time,status,description,timestamp FROM demo_product WHERE id=703
-         */
-        //先 select,判断有没有，然后执行insert ot update
-//        boolean result = this.saveOrUpdateBatch(list);
-
-
-        boolean result = this.updateBatchById(list);
-        stopWatch.stop();
-        //        stopWatch.start("BatchInsert_Trace2");
-        long miils = stopWatch.getTotalTimeMillis();
-        log.info(stopWatch.shortSummary());
-
-    }
 
     private void queryParam() {
         ProductTest productTest = new ProductTest();

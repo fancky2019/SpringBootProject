@@ -143,7 +143,92 @@ web 服务器：Apache nginx tomcat iis
   吞吐量：tomcat<nginx <lvs < F5
   nginx 吞吐量 5--10W
      */
+
+    //region  Keepalived 主节点恢复后的切换行为
+    /*
+    Keepalived 主节点恢复后的切换行为
+    Keepalived 在主节点恢复后是否会自动切回 VIP（虚拟 IP），取决于您的配置方式和优先级设置。以下是详细分析：
+
+    默认行为分析
+1. 未配置 nopreempt 的情况（默认）
+    主节点恢复后会自动抢回 VIP
+
+    工作原理：
+
+    当原主节点（更高优先级）恢复后，会发送 VRRP 通告
+
+    比较优先级后，VIP 会切回原主节点
+
+    这种自动切换行为称为 "抢占模式" (preemption)
+
+            2. 配置了 nopreempt 的情况
+    主节点恢复后不会自动切回 VIP
+
+    需要满足以下条件之一才会切换：
+
+    当前 MASTER 节点故障
+
+            手动触发切换
+
+    通过脚本强制切换
+
+            配置示例
+    允许自动切回（默认行为）
+    conf
+    vrrp_instance VI_1 {
+        state MASTER    # 主节点配置
+        interface eth0
+    virtual_router_id 51
+        priority 100    # 主节点优先级更高
+        advert_int 1
+        virtual_ipaddress {
+            192.168.1.100/24
+        }
+    # 不设置nopreempt即为允许抢占
+    }
+    禁止自动切回（需手动干预）
+    conf
+    vrrp_instance VI_1 {
+        state MASTER
+        interface eth0
+    virtual_router_id 51
+        priority 100
+        advert_int 1
+        nopreempt      # 关键配置：禁止抢占
+        virtual_ipaddress {
+            192.168.1.100/24
+        }
+    }
+    生产环境建议
+    高可用性优先：
+
+    不使用 nopreempt，允许自动切回
+
+    确保应用支持 VIP 切换时的连接重试
+
+    稳定性优先：
+
+    使用 nopreempt 避免频繁切换
+
+            配合监控系统实现受控切换
+
+    混合方案：
+
+    conf
+    vrrp_instance VI_1 {
+    ...
+        preempt_delay 300  # 主节点恢复后等待300秒再抢占
+    ...
+    }
+
+     */
+    //endregion
+
 //endregion
+
+
+
+
 
     //region  Keepalived使用
     /*
@@ -356,7 +441,7 @@ upstream blance {#配置服务器的分别对应的应用ip和的端口
 
 
 /*
-方法 2：Orchestrator（官方推荐）
+方法 2：Orchestrator（官方推荐） https://github.com/openark/orchestrator/  github 貌似不更新了
 Orchestrator 是一个开源的 MySQL 高可用工具，支持 主从复制（Replication） 和 Group Replication，可以自动提升新的 Master。
 
 工作流程

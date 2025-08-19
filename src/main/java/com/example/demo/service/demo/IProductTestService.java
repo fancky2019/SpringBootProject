@@ -31,7 +31,11 @@ public interface IProductTestService extends IService<ProductTest> {
 
     void importExcelProductTest(HttpServletResponse response, MultipartFile file) throws IOException;
 
+    void saveBatchTest();
+
     void updateBatchByIdTest();
+
+    void deleteBatchTest();
 
     void coverUpdateTestOne(String name) throws InterruptedException;
 

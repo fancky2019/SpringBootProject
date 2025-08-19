@@ -11,7 +11,7 @@ import java.sql.Statement;
 import java.util.Properties;
 
 /**
- *
+ *MybatisPlus统一修改审计信息MetaObjectHandlerImp
  * mybatis sql执行拦截器
  *
  *

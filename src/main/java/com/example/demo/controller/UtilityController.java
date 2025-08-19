@@ -2340,9 +2340,9 @@ public class UtilityController {
         return MessageResult.success();
     }
 
-    @GetMapping(value = "/mqMessageTest")
-    public MessageResult<String> mqMessageTest() throws Exception {
-        MqMessage mqMessage = mqMessageService.getById(85);
+    @GetMapping(value = "/mqMessageTest/{id}")
+    public MessageResult<String> mqMessageTest(@PathVariable BigInteger id ) throws Exception {
+        MqMessage mqMessage = mqMessageService.getById(id);
         mqMessageService.update(mqMessage);
         return MessageResult.success();
     }

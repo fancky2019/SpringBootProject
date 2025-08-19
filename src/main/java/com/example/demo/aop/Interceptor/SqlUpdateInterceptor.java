@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- *
+ *MybatisPlus统一修改审计信息MetaObjectHandlerImp
  * mybatis sql执行拦截器
  *过滤器不用到WebMvcConfigurer 添加，拦截器需要到WebMvcConfigurer注册
  */
