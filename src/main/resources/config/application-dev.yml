@@ -601,3 +601,12 @@ rocketmq:
 #  spring:
 #    profiles:
 #      active: ['!docs', '!documenation']
+
+# application.yml
+ftp:
+  host: 10.100.201.8
+  port: 21
+  username: fancky
+  password: Abc!123456
+  base-path: /wms/
+  passive-mode: true

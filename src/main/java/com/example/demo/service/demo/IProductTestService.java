@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.request.DemoProductRequest;
+import com.example.demo.model.request.TestRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +32,8 @@ public interface IProductTestService extends IService<ProductTest> {
     void exportDemoProductTemplate(HttpServletResponse response) throws IOException;
 
     void importExcelProductTest(HttpServletResponse response, MultipartFile file) throws IOException;
+
+    void readSpecificCell(MultipartFile[] files, TestRequest testRequest) throws Exception;
 
     void saveBatchTest();
 

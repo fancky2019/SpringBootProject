@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.aop.aspect.executeorder.PointcutExecuteOrderOne;
 import com.example.demo.aop.aspect.executeorder.PointcutExecuteOrderTwo;
+import com.example.demo.config.FtpConfig;
 import com.example.demo.dao.demo.PersonMapper;
 import com.example.demo.dao.demo.ProductTestMapper;
 import com.example.demo.easyexcel.DropDownSetField;
@@ -30,9 +31,12 @@ import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.request.DemoProductRequest;
+import com.example.demo.model.request.TestRequest;
+import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.service.demo.IMqMessageService;
 import com.example.demo.service.demo.IProductTestService;
+import com.example.demo.service.ftp.FtpService;
 import com.example.demo.service.wms.ProductService;
 import com.example.demo.utility.ConfigConst;
 import com.example.demo.utility.ExcelUtils;
@@ -42,6 +46,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
@@ -66,14 +71,19 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
@@ -123,6 +133,11 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 
     @Autowired
     private BusProperties busProperties;
+    @Autowired
+    private FtpService ftpService;
+
+    @Autowired
+    private FtpConfig ftpConfig;
 
     public ProductTestServiceImpl(ProductTestMapper productTestMapper) {
         this.productTestMapper = productTestMapper;
@@ -228,6 +243,7 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
         }
         this.saveBatch(productTestList);
     }
+
     /**
      * 获取批处理模式的 SqlSession
      * 循环处理每一条数据：
@@ -352,7 +368,6 @@ SELECT id,guid,product_name,product_style,image_path,create_time,modify_time,sta
 //        queryWrapper.ne();
         this.list(queryWrapper);
     }
-
 
 
     private void queryParam() {
@@ -1211,6 +1226,171 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         EasyExcel.write(response.getOutputStream(), ProductTest.class).sheet("表名称").doWrite(errorDatalist);
 
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void readSpecificCell(MultipartFile[] files, TestRequest testRequest) throws Exception {
+//        List<String> fileNames = saveFiles(files);
+        //获取body中的参数
+//            String value = (String)request.getAttribute("paramName");
+        String name = testRequest.getName();
+
+        if (files == null || files.length == 0) {
+            throw new Exception("files is null");
+        }
+        List<String> dataList = new ArrayList<>();
+        for (MultipartFile file : files) {
+            try (InputStream inputStream = file.getInputStream()) {
+                String targetCellValue = parseSpecificCell(inputStream, 1, 4);
+                dataList.add(targetCellValue);
+            } catch (Exception e) {
+                throw e;
+            }
+        }
+        String rootPath = ftpConfig.getBasePath();
+        String basePath = rootPath + buildDateBasedPath();
+
+
+        List<String> filePathList = new ArrayList<>();
+        String filePath = "";
+        for (MultipartFile file : files) {
+            filePath = basePath + file.getOriginalFilename();
+            Boolean success = ftpService.uploadFile(file.getBytes(), filePath);
+            filePathList.add(filePath);
+        }
+
+        //保存到本地
+//        List<String> fileNames = saveFiles(files);
+
+
+    }
+
+    /**
+     * 构建基于日期的相对路径
+     */
+    public String buildDateBasedPath() {
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd/");
+        return today.format(formatter);
+    }
+
+    //    @Async
+    public List<String> saveFiles(MultipartFile[] files) throws IOException {
+        List<String> tempFiles = new ArrayList<String>();
+        if (files != null && files.length > 0) {
+            //遍历文件
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    LocalDateTime localDateTime = LocalDateTime.now();
+                    String dateStr = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    String rootPath = System.getProperty("user.dir");
+                    String directory = rootPath + "\\uploadfiles" + "\\" + dateStr + "\\";
+//                    String directory = "\\uploadfiles" + "\\" + dateStr + "\\";
+                    File destFile = new File(directory);
+                    //判断路径是否存在,和C#不一样。她判断路径和文件是否存在
+                    if (!destFile.exists()) {
+                        destFile.mkdirs();
+                    }
+
+                    //获取文件名称
+                    String sourceFileName = file.getOriginalFilename();
+                    //写入目的文件
+                    String fileFullName = directory + sourceFileName;
+                    File existFile = new File(fileFullName);
+                    if (existFile.exists()) {
+                        existFile.delete();
+                    }
+                    //用 file.transferTo 要指定盘符，不然报错找不到文件路径
+                    //引入commons-io 依赖，用下面方法不用指定盘符
+                    file.transferTo(existFile);
+//                    FileUtils.copyInputStreamToFile(file.getInputStream(), existFile);
+                    tempFiles.add(fileFullName);
+
+                }
+            }
+        }
+        return tempFiles;
+    }
+
+    /**
+     * 解析指定单元格的值
+     * @param inputStream 文件输入流
+     * @param targetRow 目标行号（从0开始计数）
+     * @param targetColumn 目标列号（从0开始计数，E列是第4列）
+     */
+    public String parseSpecificCell(InputStream inputStream, int targetRow, int targetColumn) {
+        // 重置目标值
+//     final   String targetCellValue = null;
+
+        List<String> dataList = new ArrayList<>();
+        // 创建读取监听器
+        ReadListener<Object> listener = new ReadListener<Object>() {
+            @Override
+            public void invoke(Object data, AnalysisContext context) {
+                // 获取当前行号（从0开始）
+                int currentRowIndex = context.readRowHolder().getRowIndex();
+
+                // 检查是否是目标行（第二行，索引为1）
+                if (currentRowIndex == targetRow) {
+                    if (data instanceof Map) {
+//                        List<?> rowData = (List<?>) data;
+//                        // 检查目标列是否存在（E列是第4列，索引为4）
+//                        if (targetColumn < rowData.size()) {
+//                            Object value = rowData.get(targetColumn);
+//                            String targetCellValue1 = value != null ? value.toString() : null;
+//                            dataList.add(targetCellValue1);
+//                            System.out.println("找到目标单元格 [" + currentRowIndex + ", " + targetColumn + "] 的值: " + targetCellValue1);
+//                            // 找到后立即中断读取，提高效率
+//
+////                            System.out.println("找到目标单元格 [" + currentRowIndex + ", " + targetColumn + "] 的值: " + targetCellValue);
+////
+////                            // 找到后立即中断读取，提高效率
+////                            context.readSheetHolder().getReadWorkbookHolder().getReadCache().cleanAll();
+////                            throw new RuntimeException("找到目标值，中断读取"); // 通过异常中断，这是常用技巧
+//                        }
+
+                        Map dataMap = (Map) data;
+                        if (dataMap.keySet().contains(targetColumn)) {
+                            Object value = dataMap.get(targetColumn);
+                            String targetCellValue1 = value != null ? value.toString() : null;
+                            if (StringUtils.isEmpty(targetCellValue1)) {
+                                String msg = MessageFormat.format("Can't find cell[{0},{1}] value", currentRowIndex, targetColumn);
+                                throw new RuntimeException(msg);
+                            }
+                            dataList.add(targetCellValue1);
+
+                            log.info("parseSpecificCell [" + currentRowIndex + ", " + targetColumn + "] 的值: " + targetCellValue1);
+                        } else {
+                            String msg = MessageFormat.format("Can't find cell[{0},{1}] value", currentRowIndex, targetColumn);
+                            throw new RuntimeException(msg);
+
+                        }
+
+                    }
+
+
+                }
+            }
+
+            @Override
+            public void doAfterAllAnalysed(AnalysisContext context) {
+                if (CollectionUtils.isEmpty(dataList)) {
+                    System.out.println("未找到指定单元格的值");
+                }
+            }
+        };
+
+
+        EasyExcel.read(inputStream, listener)
+                .sheet(0) // 读取第一个sheet（Sheet1）
+                .headRowNumber(0) // 第一行是表头，从第0行开始读数据
+                .doRead();
+
+        int dataSize = dataList.size();
+        String targetCellValue = dataList.get(0);
+        return targetCellValue;
+    }
+
 
     public int batchInsertSession(List<ProductTest> dataList, List<ProductTest> errorDatalist) {
 

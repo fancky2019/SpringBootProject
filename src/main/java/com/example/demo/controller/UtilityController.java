@@ -41,6 +41,7 @@ import com.example.demo.service.api.FeignClientTest;
 import com.example.demo.service.api.WmsService;
 import com.example.demo.service.demo.*;
 import com.example.demo.service.elasticsearch.ShipOrderInfoService;
+import com.example.demo.service.ftp.FtpService;
 import com.example.demo.shiro.ShiroRedisProperties;
 import com.example.demo.sse.IResponseBodyEmitterService;
 import com.example.demo.sse.ISseEmitterService;
@@ -60,6 +61,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.net.ftp.FTPFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.redisson.api.RLock;
@@ -75,6 +77,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.*;
 import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -93,10 +96,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -273,7 +273,8 @@ public class UtilityController {
 
     @Autowired
     private FeignClientTest feignClientTest;
-
+    @Autowired
+    private FtpService ftpService;
 
     @Autowired
     private Executor threadPoolExecutor;
@@ -924,7 +925,9 @@ public class UtilityController {
     //     前台postman 设置 点击 description 右侧... 选中 content-type .在contentType设置multipart/form-data
     //表单数据：前台postman 设置json 字符串提交
     //     前台postman 设置 点击 description 右侧... 选中 content-type .在contentType设置   application/json
-
+    //files 为null ，造postman中删除重新添加保存，然后重新请求
+    //Content type 'application/octet-stream' not supported" 报错处理
+//报错处理 ：点击Bulk Edit 左侧的三点   勾选content-type  。在 content-type 那一列 json 填写application/json ，文件填写 multipart/form-data
     @PostMapping(value = "/saveFormDta")
     public ReturnResult saveFormDta(@RequestPart(value = "files", required = false) MultipartFile[] files, @RequestPart("testRequest") TestRequest testRequest) {
         ReturnResult<Void> response = new ReturnResult();
@@ -1269,6 +1272,30 @@ public class UtilityController {
 
         int size = list.size();
         return "success";
+    }
+
+
+    /**
+     * files 为null ，造postman中删除重新添加保存，然后重新请求
+     * @param files
+     * @param testRequest
+     * @return
+     * @throws Exception
+     */
+    @ApiOperation(value = "readSpecificCell")
+    @PostMapping(value = "/readSpecificCell")
+    public MessageResult readSpecificCell(@RequestPart(value = "files", required = false) MultipartFile[] files, @RequestPart("testRequest") TestRequest testRequest) throws Exception {
+        ReturnResult<Void> response = new ReturnResult();
+
+
+        this.productTestService.readSpecificCell(files, testRequest);
+//            List<String> fileNames = saveFiles(files);
+        //获取body中的参数
+//            String value = (String)request.getAttribute("paramName");
+//            String name = testRequest.getName();
+
+
+        return MessageResult.success();
     }
     //endregion
 
@@ -2341,7 +2368,7 @@ public class UtilityController {
     }
 
     @GetMapping(value = "/mqMessageTest/{id}")
-    public MessageResult<String> mqMessageTest(@PathVariable BigInteger id ) throws Exception {
+    public MessageResult<String> mqMessageTest(@PathVariable BigInteger id) throws Exception {
         MqMessage mqMessage = mqMessageService.getById(id);
         mqMessageService.update(mqMessage);
         return MessageResult.success();
@@ -2482,6 +2509,46 @@ public class UtilityController {
         productTestService.mqMessageOperation();
         return MessageResult.success();
     }
+
+    //region ftp 下载、预览，上传在readSpecificCell 方法
+
+
+    @ApiOperation(value = "ftpUploadFile")
+    @PostMapping(value = "/ftpUploadFile")
+    public MessageResult ftpUploadFile(@RequestPart(value = "files", required = false) MultipartFile[] files, @RequestPart("testRequest") TestRequest testRequest) throws Exception {
+        ReturnResult<Void> response = new ReturnResult();
+
+
+        this.ftpService.uploadFile(files);
+//            List<String> fileNames = saveFiles(files);
+        //获取body中的参数
+//            String value = (String)request.getAttribute("paramName");
+//            String name = testRequest.getName();
+
+
+        return MessageResult.success();
+    }
+
+    @GetMapping("/ftpDownloadFileResponseEntity")
+    public ResponseEntity<byte[]> ftpDownloadFileResponseEntity(@RequestParam String filePath) {
+        return ftpService.ftpDownloadFileResponseEntity(filePath);
+    }
+
+    @GetMapping("/ftpDownloadFile")
+    public void ftpDownloadFile(@RequestParam String filePath, HttpServletResponse response) {
+        ftpService.ftpDownloadFile(filePath, response);
+    }
+
+    /**
+     * 预览文件（如图片、PDF等）
+     */
+    @GetMapping("/ftpPreviewFile")
+    public ResponseEntity<byte[]> ftpPreviewFile(@RequestParam String filePath) {
+        return ftpService.ftpPreviewFile(filePath);
+
+    }
+
+    //endregion
 
 }
 
