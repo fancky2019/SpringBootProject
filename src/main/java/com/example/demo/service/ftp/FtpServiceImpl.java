@@ -363,12 +363,10 @@ public class FtpServiceImpl implements FtpService {
             if (!fileExists(filePath)) {
                 return ResponseEntity.notFound().build();
             }
-
             byte[] fileData = downloadFile(filePath);
-
+            
             // 根据文件类型设置Content-Type
             String contentType = getContentType(filePath);
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(contentType));
             headers.setContentDisposition(
@@ -440,7 +438,7 @@ public class FtpServiceImpl implements FtpService {
             response.setHeader("Content-Disposition",
                     "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
             response.setContentLengthLong(fileInfo.getSize());
-            byte[] fileData = downloadFile(filePath);
+//            byte[] fileData = downloadFile(filePath);
 
 //            // 加载到内存下载
 //            try (OutputStream outputStream = response.getOutputStream()) {

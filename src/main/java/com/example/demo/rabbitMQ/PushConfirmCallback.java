@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 
-/**
+/*
  * 1、确认模式（confirm）：可以监听消息是否从生产者成功传递到交换。
  * 2、退回模式（return）：可以监听消息是否从交换机成功传递到队列。
  * 3、消费者消息确认（Ack）：可以监听消费者是否成功处理消息。
@@ -27,7 +27,9 @@ import java.time.LocalDateTime;
 
 
 /**
+ *
  * 确保发送到交换机，不确定路由到队列
+ * 生产者 → Exchange → (路由匹配) → Queue → 消费者
  */
 @Component
 @Slf4j
@@ -40,6 +42,8 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
     //无法注入 通过容器获取
 //    @Autowired
 //    IMqMessageService mqMessageService;
+
+
     @Override
     public void confirm(CorrelationData correlationData, boolean ack, String s) {
         try {

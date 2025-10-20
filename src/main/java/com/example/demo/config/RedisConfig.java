@@ -107,6 +107,8 @@ public class RedisConfig {
     }
 
     /**
+     *
+     * redis 缓存配置
      * 配置cacheManager
      */
     @Bean
@@ -117,6 +119,9 @@ public class RedisConfig {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 // 设置缓存的默认过期时间
                 .entryTtl(Duration.ofSeconds(180))
+                //null值设置过期时间暂未实现
+                // 自定义前缀格式，redis 缓存默认::,设置：
+                .computePrefixWith(cacheName -> cacheName + ":")
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(this.jackson2JsonRedisSerializer()));
         // 不缓存空值

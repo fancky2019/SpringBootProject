@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.Student;
+import com.example.demo.model.utility.RedisKey;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.utility.ConfigConst;
@@ -416,7 +417,6 @@ appendfsync everysec
 */
 
 
-
 //endregion
 
 //region Redis ZSET 实现优先级队列
@@ -429,7 +429,7 @@ appendfsync everysec
     1. 阻塞式出队
     Redis 5.0+ 提供了 BZPOPMIN 和 BZPOPMAX 命令，可以阻塞直到有元素可用：
      */
-   //endregion
+//endregion
 
 
 @RestController
@@ -462,6 +462,13 @@ public class RedisTestController {
     @Autowired
     private RedisUtil redisUtil;
 
+    /**
+     *
+     * Hash/String 的 put/set 操作会覆盖
+     *List/Set 的 push/add 操作不会覆盖，而是追加
+     *
+     * @return
+     */
     //region redis basic operation
     @GetMapping("")
     public MessageResult<Void> redisTest() {
@@ -587,6 +594,13 @@ public class RedisTestController {
         return null;
     }
 
+    /**
+     *
+     * Hash/String 的 put/set 操作会覆盖
+     *List/Set 的 push/add 操作不会覆盖，而是追加
+     *
+     * @return
+     */
     @GetMapping("/object")
     public MessageResult<Void> redisObjectTest() {
 
@@ -841,14 +855,16 @@ public class RedisTestController {
      * 使用redisson 的配置没有成功。让redisson采用springboot的redis的配置
      */
     @RequestMapping("/testRedisson")
-    public String testRedisson() throws InterruptedException {
+    public String testRedisson() throws Exception {
+        String lockKey = "redisKey_testRedisson";
         //获取分布式锁，只要锁的名字一样，就是同一把锁
-        RLock lock = redissonClient.getLock("redisKey_testRedisson");
+        RLock lock = redissonClient.getLock(lockKey);
 
         //使用默认看门狗延期机制    this.lockWatchdogTimeout = 30000L;
         // lock.lock();
         //加锁（阻塞等待），默认过期时间是30秒。   this.lockWatchdogTimeout = 30000L;
 //        lock.lock();
+        boolean lockSuccessfully = false;
         try {
             boolean isLocked = lock.isLocked();
             if (isLocked) {
@@ -859,7 +875,7 @@ public class RedisTestController {
             //    public boolean tryLock(long waitTime, long leaseTime, TimeUnit unit)
             //注：waitTime 设置时间长一点
             //写入hash类型数据：redisKey:lock hashKey  uuid:线程id  hashValue:thread id
-            boolean lockSuccessfully = lock.tryLock(1, 30, TimeUnit.SECONDS);
+            lockSuccessfully = lock.tryLock(1, 30, TimeUnit.SECONDS);
 //            lock.lock();
 //            lock.lock(10, TimeUnit.SECONDS);
             //或者直接返回
@@ -868,12 +884,25 @@ public class RedisTestController {
             if (lockSuccessfully) {
                 logger.info(MessageFormat.format("Thread - {0} 获得锁！", Thread.currentThread().getId()));
             }
+
+            if (!lockSuccessfully) {
+                String msg = MessageFormat.format("Get lock {0} fail，wait time : {1} s", lockKey, RedisKey.INIT_INVENTORY_INFO_FROM_DB_WAIT_TIME);
+                throw new Exception(msg);
+            }
+
+            redisUtil.releaseLockAfterTransaction(lock, lockSuccessfully);
         } catch (Exception e) {
             throw e;
         } finally {
             //解锁，如果业务执行完成，就不会继续续期，即使没有手动释放锁，在30秒过后，也会释放锁
             //unlock 删除key
-            lock.unlock();
+            //非事务操作在此释放
+//            if (lockSuccessfully && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
+
+            redisUtil.releaseLock(lock, lockSuccessfully);
+
         }
 
         return "Hello Redisson!";
@@ -881,6 +910,7 @@ public class RedisTestController {
     //endregion
 
     //region 从缓存读取数据，不存在添加缓存  缓存穿透 缓存击穿
+
     /**
      * redis 缓存穿透 缓存击穿
      *

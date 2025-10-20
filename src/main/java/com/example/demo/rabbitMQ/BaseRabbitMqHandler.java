@@ -1,17 +1,13 @@
 package com.example.demo.rabbitMQ;
 
-import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.demo.model.entity.demo.MqFailLog;
-import com.example.demo.model.entity.demo.MqMessage;
+import com.example.demo.model.enums.MqMessageStatus;
 import com.example.demo.service.demo.IMqFailLogService;
 import com.example.demo.service.demo.IMqMessageService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 
-import groovy.transform.Undefined;
-import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -20,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +46,7 @@ public class BaseRabbitMqHandler {
     IMqFailLogService mqFailLogService;
 
     @Autowired
-    IMqMessageService messageService;
+    IMqMessageService mqMessageService;
 
     //    ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
@@ -221,7 +216,7 @@ public class BaseRabbitMqHandler {
             String routingKey = message.getMessageProperties().getReceivedRoutingKey();
             String exchange = message.getMessageProperties().getReceivedExchange();
             String queueName = message.getMessageProperties().getConsumerQueue();
-            //错误日志入库
+            //错误日志入库。插入消息表，不在单独设计MqFailLog
             MqFailLog mqFailLog = new MqFailLog();
             mqFailLog.setMsgContentId(id);
             mqFailLog.setExchange(exchange);
@@ -238,10 +233,11 @@ public class BaseRabbitMqHandler {
 
             //region update mqMessage
             //重试仍然没有成功，标记为消费失败。走定时任务补偿
-            messageService.updateByMsgId(messageId, 3);
+            mqMessageService.updateByMsgId(messageId, MqMessageStatus.CONSUME_FAIL.getValue());
             //endregion
 
-
+//            ThreadLocal<String> threadLocal = new ThreadLocal<>();
+//            expungeStale
         }
 
     }

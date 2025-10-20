@@ -136,7 +136,7 @@ public class MqMessage extends EntityBase implements Serializable {
     private String queue;
 
     /**
-     * 0:未生成 1：已生产 2：已消费 3:消费失败
+     * 0:未生产 1：已生产 2：已消费 3:消费失败
      */
     private Integer status;
 
@@ -146,7 +146,7 @@ public class MqMessage extends EntityBase implements Serializable {
     private Integer retryCount;
 
     /**
-     * 最大重试次数
+     * 最大重试次数.不走rabbitmq ，消息表直接作为队列。rabbitmq 不需要使用这两个字段，mq 默认重试4次
      */
     private Integer maxRetryCount;
 

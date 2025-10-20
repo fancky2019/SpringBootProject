@@ -348,10 +348,12 @@ public class LogAspect {
 //        log.info("{} - {} 处理完成,返回结果 - {}", className, methodName,objectMapper.writeValueAsString(result));
 //
 
-
+//        String operationLockKey = keyWithOutToken + RedisKeyConfigConst.KEY_LOCK_SUFFIX;
         RepeatPermission repeatPermission = method.getDeclaredAnnotation(RepeatPermission.class);
         Object result = null;
         if (repeatPermission != null) {
+            //      d/sbp/demo/demoProductTest
+//            String uri = httpServletRequest.getRequestURI();
             String apiName = repeatPermission.value();
             if (StringUtils.isEmpty(apiName)) {
                 apiName = method.getName();
@@ -405,6 +407,7 @@ public class LogAspect {
             BigInteger userId = new BigInteger("1");
 //            String uri = httpServletRequest.getRequestURI();
             String key = "repeat:" + userId + ":" + apiName;
+//            String keyWithOutToken = "repeat:" + userId + ":" + uri;
 //            String key = "repeat:" + userId + ":" + repeatToken;
             ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
             try {

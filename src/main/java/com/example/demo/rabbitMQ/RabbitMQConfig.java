@@ -53,6 +53,7 @@ public class RabbitMQConfig {
     //    @Autowired
 //    private DemoProductService demoProductService;
     //region 常量参数
+    //  x-message-ttl 参数的单位是毫秒。
     public static final int RETRY_INTERVAL = 100000;
     //region batch
     public static final String BATCH_DIRECT_EXCHANGE_NAME = "BatchSpringBoot";
@@ -212,6 +213,7 @@ public class RabbitMQConfig {
 
         //当消息路由失败时候先执行  setConfirmCallback, setReturnCallback后执行
 
+        //生产者 → Exchange → (路由匹配) → Queue → 消费者
         //消息没有生产到交换机
 //        // 消息生产确认, yml需要配置 publisher-confirms: true
         rabbitTemplate.setConfirmCallback(pushConfirmCallback);
@@ -345,6 +347,7 @@ public class RabbitMQConfig {
     @Bean("batchQueueDlx")
     public Queue batchQueueDlx() {
         Map<String, Object> map = new HashMap<>();
+        //x-message-ttl 参数的单位是毫秒。
         map.put("x-message-ttl", RETRY_INTERVAL);
         map.put("x-dead-letter-exchange", BATCH_DIRECT_EXCHANGE_NAME);
         map.put("x-dead-letter-routing-key", BATCH_DIRECT_ROUTING_KEY);
@@ -378,6 +381,7 @@ public class RabbitMQConfig {
            this(name, true, false, false);
          */
         Map<String, Object> map = new HashMap<>();
+        //x-message-ttl 参数的单位是毫秒。
         map.put("x-message-ttl", RETRY_INTERVAL);
         map.put("x-dead-letter-exchange", DIRECT_EXCHANGE_NAME);
         map.put("x-dead-letter-routing-key", DIRECT_ROUTING_KEY);
@@ -413,12 +417,13 @@ public class RabbitMQConfig {
         HashMap<String, Object> args = new HashMap<>();
         //设置队列最大优先级[0,9]，发送消息时候指定优先级
         args.put("x-max-priority", 10);
+        //  x-message-ttl 参数的单位是毫秒。
 //        args.put("x-message-ttl", 30000);
         // 设置该Queue的死信的队列
         args.put("x-dead-letter-exchange", DIRECT_EXCHANGE_NAME);
         // 设置死信routingKey
         args.put("x-dead-letter-routing-key", DIRECT_ROUTING_KEY_DLX);
-        //rabiitmq 默认发送给所有消费中的一个，机关集群也只会发给一个服务中的一个消费者
+        //rabbitmq 默认发送给所有消费中的一个，尽管集群也只会发给一个服务中的一个消费者
         args.put("x-single-active-consumer", true);
 
 

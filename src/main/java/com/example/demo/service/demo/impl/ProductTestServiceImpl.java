@@ -809,6 +809,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
     /**
      * 更新表的指定字段
+     * 批量更新指定字段
      */
     @Transactional(rollbackFor = Exception.class)
     public void updateField() throws InterruptedException {
@@ -839,6 +840,18 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 //        userService.update(null,new UpdateWrapper<User>().lambda()
 //                .set(User::getUserName,null)
 //                .eq(User::getUserId,user.getUserId()));
+
+
+//        批量更新指定字段
+//                <update id="batchUpdateItems">
+//                <foreach collection="list" item="item" separator=";">
+//                UPDATE apply_receipt_order_item
+//        SET field1 = #{item.field1},
+//        field2 = #{item.field2}
+//        WHERE id = #{item.id}
+//    </foreach>
+//                </update>
+
 
     }
 
@@ -1055,7 +1068,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         WriteSheet sheet = EasyExcel.writerSheet(0, "DemoProduct" + sheetIndex).build();
         for (int i = 1; i <= loopCount; i++) {
             request.setMaxId(maxId);
-            request.setPageIndex(i);
+            request.setPageIndex(i);//es 要-1
             request.setPageSize(stepCount);
             //getPage 会执行获取count脚本
 //            List<ProductTest> list = getPageData(request);
@@ -1234,7 +1247,6 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         //获取body中的参数
 //            String value = (String)request.getAttribute("paramName");
         String name = testRequest.getName();
-
         if (files == null || files.length == 0) {
             throw new Exception("files is null");
         }

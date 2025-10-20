@@ -986,7 +986,7 @@ public class UtilityController {
 
     //endregion
 
-    //region EasyExcel 导入导出excel
+    //region EasyExcel 导入导出excel    EasyExcel FastExce
 //    EasyExcel 不能设置数字格式、日期格式。貌似excel 中设置了数字格式 也能输入中文
     //注意：easyExcel 和easyPoi 不兼容，两个不能同时引用，否则easyExcel 下载的excel 打不开
     //     easyexcel 的性能不easypoi性能好点。
@@ -1071,6 +1071,11 @@ public class UtilityController {
         this.productTestService.exportDemoProductTemplate(httpServletResponse);
     }
 
+    /**
+     * excel 最大100W数据，读取到一批，然后分批插入。多线程读写
+     * @param file
+     * @throws IOException
+     */
     @ApiOperation(value = "importExcelProductTest")
     @PostMapping(value = "/importExcelProductTest")
     public void importExcelProductTest(MultipartFile file) throws IOException {
@@ -1520,6 +1525,38 @@ public class UtilityController {
         MessageResult<String> messageResult = new MessageResult<>();
         messageResult.setMessage("completed");
         messageResult.setData(null);
+
+        // 创建一个StopWatch实例，可以指定ID（可选）
+        StopWatch stopWatch7 = new StopWatch("任务耗时统计示例");
+
+        // 模拟第一个任务
+        stopWatch7.start("数据查询任务");
+        Thread.sleep(1000); // 模拟耗时操作，比如数据库查询
+        stopWatch7.stop();
+        System.out.println("数据查询耗时: " + stopWatch7.getLastTaskTimeMillis() + "ms");
+
+        // 模拟第二个任务
+        stopWatch7.start("数据处理任务");
+        Thread.sleep(500); // 模拟耗时操作，比如处理数据
+        stopWatch7.stop();
+        System.out.println("数据处理耗时: " + stopWatch7.getLastTaskTimeMillis() + "ms");
+
+        // 模拟第三个任务
+        stopWatch7.start("数据保存任务");
+        Thread.sleep(200); // 模拟耗时操作，比如保存数据
+        stopWatch7.stop();
+
+        // 打印详细统计信息（表格形式，包含耗时和占比）
+        System.out.println(stopWatch7.prettyPrint());
+
+        // 打印简短摘要
+        System.out.println(stopWatch7.shortSummary());
+
+        // 获取总耗时（秒）
+        System.out.println("总耗时: " + stopWatch7.getTotalTimeSeconds() + "s");
+        // 获取任务数量
+        System.out.println("任务数量: " + stopWatch7.getTaskCount());
+
         return messageResult;
 
     }
