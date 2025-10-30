@@ -344,7 +344,7 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
                 idList.add(1);
                 queryWrapper.in(MqMessage::getId, idList);
                 if (startQueryTime != null) {
-                    queryWrapper.gt(MqMessage::getModifyTime, startQueryTime);
+                    queryWrapper.ge(MqMessage::getModifyTime, startQueryTime);
                 }
 //                queryWrapper.ne(MqMessage::getStatus, 2);
                 queryWrapper.and(p -> p.isNull(MqMessage::getStatus).or(m -> m.ne(MqMessage::getStatus, 2)));

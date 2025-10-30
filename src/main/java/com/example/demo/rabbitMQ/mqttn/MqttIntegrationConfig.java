@@ -98,7 +98,7 @@ public class MqttIntegrationConfig {
 //    @Bean
 //    public DefaultPahoMessageConverter pahoMessageConverter() {
 //        DefaultPahoMessageConverter converter = new DefaultPahoMessageConverter();
-//        converter.setPayloadAsBytes(true); // ✅ 关键点
+//        converter.setPayloadAsBytes(true);
 //        return converter;
 //    }
 
@@ -106,7 +106,9 @@ public class MqttIntegrationConfig {
     public IntegrationFlow mqttInFlow() {
         return IntegrationFlows.from(mqttInputChannel())
                 .handle((payload, headers) -> {
-                    String content=new String((byte[])payload);
+                    String content = new String((byte[]) payload);
+                    //异常只会处理一次，连接不会断开
+                    int m = Integer.parseInt("m");
                     log.info("收到消息: payload={}, headers={}", payload, headers);
 
                     Acknowledgment ack = (Acknowledgment) headers.get("mqtt_acknowledgment");
@@ -135,8 +137,7 @@ public class MqttIntegrationConfig {
      * 处理接收的消息
      * @param message
      */
-    private void processMessage(org.springframework.messaging.Message<?> message
-) {
+    private void processMessage(org.springframework.messaging.Message<?> message) {
 //        Acknowledgment acknowledgment = message.getHeaders().get("mqtt_acknowledgment", Acknowledgment.class);
 //        @Header("mqtt_acknowledgment") Acknowledgment acknowledgment
 //        @Header(MqttHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgment
@@ -151,9 +152,8 @@ public class MqttIntegrationConfig {
         log.info("Payload: " + payload);
         log.info("Headers: " + message.getHeaders());
 
-        int m=Integer.parseInt("m");
-        switch (topic)
-        {
+        int m = Integer.parseInt("m");
+        switch (topic) {
             case "test":
                 log.info("test");
                 break;
