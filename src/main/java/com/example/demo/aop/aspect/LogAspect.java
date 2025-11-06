@@ -18,14 +18,18 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.math.BigInteger;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -336,17 +340,33 @@ public class LogAspect {
         Method method = methodSignature.getMethod();
         //方法参数
         Object[] args = jp.getArgs();
-
-
         String className = jp.getTarget().getClass().toString();
-//        String methodName = jp.getSignature().getName();
-//        Object[] args = jp.getArgs();
-//
-//
-        log.info("{} : {} - {} 开始处理,参数列表 - {}", uri, className, methodName, Arrays.toString(args));
-//        Object result = jp.proceed();
-//        log.info("{} - {} 处理完成,返回结果 - {}", className, methodName,objectMapper.writeValueAsString(result));
-//
+
+//        log.info("{} : {} - {} 开始处理,参数列表 - {}", uri, className, methodName, Arrays.toString(args));
+
+        // 处理参数序列化，特别处理文件上传情况
+        List<Object> loggableArgs = new ArrayList<>();
+        for (Object arg : args) {
+            if (arg instanceof MultipartFile) {
+                loggableArgs.add("File[" + ((MultipartFile) arg).getOriginalFilename() + "]");
+            } else if (arg instanceof MultipartFile[]) {
+                loggableArgs.add("Files[" + Arrays.stream((MultipartFile[]) arg)
+                        .map(MultipartFile::getOriginalFilename)
+                        .collect(Collectors.joining(",")) + "]");
+            } else if (arg instanceof HttpServletRequest || arg instanceof HttpServletResponse) {
+                // 忽略这些参数
+            } else {
+                loggableArgs.add(arg);
+            }
+        }
+
+        String argsJson = objectMapper.writeValueAsString(loggableArgs);
+        log.info("{} : {} - {} 开始处理,参数列表 - {}", uri, className, methodName, argsJson);
+
+
+
+
+
 
 //        String operationLockKey = keyWithOutToken + RedisKeyConfigConst.KEY_LOCK_SUFFIX;
         RepeatPermission repeatPermission = method.getDeclaredAnnotation(RepeatPermission.class);
@@ -435,6 +455,7 @@ public class LogAspect {
 
                 String operationLockKey = key + RedisKeyConfigConst.KEY_LOCK_SUFFIX;
                 //并发访问，加锁控制
+                //wms_es设计token和指纹两种
                 //UtilityController getRepeatToken 时候向redis 插入一个token
                 //redis token 状态删除设置过期时间操作失败，可设计token 存储在数据库和业务数据做原子操作。在业务层做判断tokens是否处理
                 RLock lock = redissonClient.getLock(operationLockKey);
