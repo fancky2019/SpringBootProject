@@ -40,7 +40,7 @@ import java.util.Date;
  * Filter:servlet采用回调的方式实现，可以获取request信息，获取不到请求的方法信息。
  * Interceptor:采用反射动态代理实现，可以获取request信息，可以获取到请求的方法名称，获取不到方法的参数信息。
  * Aspect:springboot 默认采用动态代理实现，获取不到request请求的信息，可以获取方法的参数
- * <p>
+ *
  *
  *
  * preHandle方法将在Controller处理之前调用的
@@ -51,9 +51,9 @@ import java.util.Date;
  * preHandle-->postHandle-->afterCompletion
  * preHandle return false 就不进入postHandle
  * 可以多个Interceptor
- * <p>
- * <p>
- * <p>
+ *
+ *
+ *
  * 拦截器：拦截不执行，返回false,在response中写入信息，如果有的要执行请用Aspect
  */
 //@Component

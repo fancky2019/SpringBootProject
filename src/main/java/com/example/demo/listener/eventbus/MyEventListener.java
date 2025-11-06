@@ -1,5 +1,9 @@
 package com.example.demo.listener.eventbus;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -16,6 +20,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
  * binding key中可以存在两种特殊字符 * 与 # ，用于做模糊匹配，
  * 其中 * 用于匹配一个单词， # 用于匹配多个单词（可以是零个）
  */
+@Slf4j
 @Component
 public class MyEventListener {
 
@@ -29,6 +34,39 @@ public class MyEventListener {
         //ApplicationEventPublisher eventPublisher;
         //  eventPublisher.publishEvent(event);
         System.out.println("Received custom event: " + event);
+    }
+
+
+    //multiplier 2 ,每次重试时间间隔翻倍
+    @Async("threadPoolExecutor")
+    @EventListener
+    @Retryable(
+            value = {Exception.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
+    public void handleInventoryEvent(MyCustomEvent event) {
+//        log.info("开始异步处理库存事件: {}", event.getInventoryItemDetailId());
+
+        // 业务处理逻辑
+
+
+        // 模拟业务处理
+//        processBusinessLogic(event);
+
+        log.info("异步处理库存事件完成: {}", event);
+    }
+
+    // 重试耗尽后的处理
+    @Async("threadPoolExecutor")
+    @EventListener
+    public void handleInventoryEventFallback(MyCustomEvent event) {
+        try {
+            handleInventoryEvent(event);
+        } catch (Exception e) {
+            // 重试失败后的最终处理,将消息落到消息表
+
+        }
     }
 }
 

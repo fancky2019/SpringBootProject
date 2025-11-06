@@ -31,16 +31,49 @@ public class TokenService {
     /**
      * 设计思路
      * 防止重复提交的核心是使用Token机制，主要思路如下：
-     *
      * 服务器生成唯一Token并存储在Session或缓存中
-     *
      * Token随表单返回给客户端
-     *
      * 客户端提交表单时携带Token
-     *
      * 服务器验证Token有效性并删除使用过的Token
-     *
      * 防止重复提交的核心是"一次有效"原则
+     *
+     *
+     *
+     * token 设置过期或删除失败处理：
+     * 1、业务层做兜底处理：根据数据状态字段或者业务数据校验、或者设计数据库唯一索引。
+     *                  唯一索引设计思路：前端页面跳转时候从后台获取一个单号返回前段，提交时候把这个单号带着，不同单号就是
+     *                  不同提交，
+     * 2、通用解决方案：将token状态维护写入db和业务数据作为一个原子操作。业务处理的时候从数据库取校验
+     *
+     *
+     * -- 幂等性记录表 （可以不要）
+     * CREATE TABLE idempotent_records (
+     *     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+     *     idempotency_key VARCHAR(64) UNIQUE NOT NULL,
+     *     business_key VARCHAR(64) NOT NULL, -- token_id
+     *     request_params TEXT,
+     *     response_data TEXT,
+     *     status VARCHAR(32) NOT NULL,
+     *     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     *     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+     *     INDEX idx_key (idempotency_key),
+     *     INDEX idx_business (business_key)
+     * );
+     *
+     * -- Token状态表  ，类似本地消息表 处理。处理成功的token 注意 归档处理
+     * CREATE TABLE tokens (
+     *     id VARCHAR(64) PRIMARY KEY,
+     *     token_content TEXT,
+     *     status ENUM('ACTIVE', 'PROCESSED', 'DELETED', 'CLEANUP_FAILED') DEFAULT 'ACTIVE',
+     *     process_count INT DEFAULT 0,
+     *     last_process_time TIMESTAMP NULL,
+     *     cleanup_retry_count INT DEFAULT 0,
+     *     version INT DEFAULT 0,
+     *     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     *     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+     * );
+     *
+     *
      * @param apiName
      * @return
      */

@@ -83,6 +83,7 @@ public class ThreadPoolExecutorConfig {
     @Bean(name="threadPoolExecutor")
     @Primary
     public Executor threadPoolExecutor(){
+//        ThreadPoolTaskExecutor 是sprig ThreadPoolExecutor 的封装增强
 //        ExecutorService extends Executor
         //内部使用 LinkedBlockingQueue
         //内部使用 ThreadPoolExecutor

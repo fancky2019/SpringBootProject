@@ -1604,6 +1604,8 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         //            EwmsEvent event = new EwmsEvent(this, "TruckOrderComplete");
         MyCustomEvent event = new MyCustomEvent(this, busProperties.getId());
 
+        //最好使用本地消息表
+        //发送消息的时候可能崩溃，不能保证消息被消费。如果发送成功了，还要设计消息表兜底失败的消息
 //        MyCustomEvent event = new MyCustomEvent(busProperties.getId());
         eventPublisher.publishEvent(event);
 

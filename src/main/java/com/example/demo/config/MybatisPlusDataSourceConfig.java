@@ -14,7 +14,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import javax.sql.DataSource;
-
+/**
+ * 会覆盖yml 中的mybatis-plus配置
+ */
 //@Configuration
 public class MybatisPlusDataSourceConfig {
 

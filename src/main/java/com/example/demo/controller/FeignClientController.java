@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 
 
-/*
+/**
     openfeign  http 客户单端,通过配置启用OkHttp代替默认的http
     参见SpringCloud 项目
      微服务注册到注册中心的名称一样，网关路由转发会采用负载均衡

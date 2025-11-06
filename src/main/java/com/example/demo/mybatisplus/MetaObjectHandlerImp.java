@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
  *  更新是否指定实体才会触发。批量更新实体也会触发
  *  boolean re1 = this.update(productTest, updateWrapper2);
  *
- * 指定null 不会触发：  this.update(updateWrapper3);*  this.update(null,updateWrapper3);
+ * 指定null 不会触发：  this.update(updateWrapper3);*  this.update(null,updateWrapper3);  实体类字段有 @TableField(fill = ...) 注解
  *
  *
  * 如果没进入MetaObjectHandlerImp 可在 SqlSessionFactory bean 里 配置MetaObjectHandlerImp。参见MybatisPlusDataSourceConfig

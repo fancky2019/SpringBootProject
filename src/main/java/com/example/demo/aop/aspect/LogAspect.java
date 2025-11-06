@@ -435,6 +435,8 @@ public class LogAspect {
 
                 String operationLockKey = key + RedisKeyConfigConst.KEY_LOCK_SUFFIX;
                 //并发访问，加锁控制
+                //UtilityController getRepeatToken 时候向redis 插入一个token
+                //redis token 状态删除设置过期时间操作失败，可设计token 存储在数据库和业务数据做原子操作。在业务层做判断tokens是否处理
                 RLock lock = redissonClient.getLock(operationLockKey);
                 boolean lockSuccessfully =false;
                 try {

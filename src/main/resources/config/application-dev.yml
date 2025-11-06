@@ -29,7 +29,7 @@ eureka:
 
 #mybatis 配置和mybatis-plus不一样，springbootstarter的myabtis 版本要和mybatis-plus封装的mybatis版本保持一直，
 #否则项目中同时存在的myabtis 和mybatis0plus因引用的mybatis版本不一致无法共存。
-#mybatis:
+#mybatis: 代码中 MybatisPlusDataSourceConfig 配置会覆盖此配置
 mybatis-plus:
   ##  mybatis全局配置文件
   config-location: classpath:mybatis-config.xml
