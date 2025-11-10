@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Lazy;
 
 import javax.annotation.PostConstruct;
 
-@Lazy
+//@Lazy
 @ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "true")
 @Slf4j
 @Configuration

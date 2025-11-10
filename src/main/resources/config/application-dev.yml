@@ -308,6 +308,7 @@ spring:
 
 #不依赖 spring-boot-starter-integration
 #  mqtt:
+#    enabled: true
 #    # MQTT服务地址，端口号默认11883，如果有多个，用逗号隔开
 #    url: tcp://127.0.0.1:1883
 #    # 用户名
@@ -321,7 +322,10 @@ spring:
 #    # MQTT默认的消息推送主题，实际可在调用接口是指定
 #    default:
 #      topic: topic
+
+#  spring 集成的mqtt配置
   mqtt:
+    enabled: false
     broker-url: tcp://10.100.200.43:1883
     client-id: spring-mqtt-client-id
     username: guest

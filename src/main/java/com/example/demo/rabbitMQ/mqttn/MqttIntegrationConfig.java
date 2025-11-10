@@ -2,6 +2,7 @@ package com.example.demo.rabbitMQ.mqttn;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.acks.SimpleAcknowledgment;
@@ -54,6 +55,7 @@ import java.util.UUID;
  * 支持消息重发机制
  */
 @Configuration
+@ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "false")
 @Slf4j
 public class MqttIntegrationConfig {
 

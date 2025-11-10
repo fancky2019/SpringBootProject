@@ -2,6 +2,7 @@ package com.example.demo.rabbitMQ.mqttn;
 
 import lombok.Data;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Configuration
 @ConfigurationProperties(prefix = "spring.mqtt")
+@ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "false")
 @Data
 public class MqttConfig {
     private String brokerUrl;

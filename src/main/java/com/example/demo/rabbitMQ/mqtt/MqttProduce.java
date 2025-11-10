@@ -105,6 +105,7 @@ public class MqttProduce {
             token = mqttTopic.publish(mqttMessage);
             // 等待消息发送完成
             token.waitForCompletion();
+            int m=0;
         } catch (MqttException e) {
             //失败处理
             log.error("",e);

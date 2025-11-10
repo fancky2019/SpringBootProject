@@ -18,7 +18,7 @@ public class MqttConsumerCallBack implements MqttCallback {
     }
 
     /**
-     * 消息到达的回调
+     * 消息到达的回调.单线程消费
      *
      * 文件 etc/emqx.conf 中retry_interval  duration 默认 30s 等待一个超时间隔，如果没收到应答则重传消息。
      * 默认最大数据大小：1 MB最大可配置数据大小：256 MB
@@ -30,10 +30,16 @@ public class MqttConsumerCallBack implements MqttCallback {
      * QoS 2，只交付一次。
      * 其中，使用 QoS 0 可能丢失消息，使用 QoS 1 可以保证收到消息，但消息可能重复，使用 QoS 2 可以保证消息既不丢失也不重复
      *
+     *
+     * 单线程消费
      */
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
-        Thread.sleep(30*1000);
+        //单线程消费
+//        Thread.sleep(10*1000);
+
+//        int m = Integer.parseInt("m");
+
         log.info(String.format("接收消息主题 : %s",topic));
         log.info(String.format("接收消息Qos : %d",message.getQos()));
         String msg=new String(message.getPayload());

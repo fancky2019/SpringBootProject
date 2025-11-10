@@ -1731,21 +1731,26 @@ public class UtilityController {
         String topic2 = "topic2";
         //
 
-//        mqttProduce.publish(qos, retained, topic, msg);
-//        CompletableFuture.runAsync(() -> {
-////            mqttProduce.publish(qos, retained, topic1, msg);
-//
-//            mqttService.sendMessage(topic1, msg + "_topic1");
-//        });
-//
-//        CompletableFuture.runAsync(() -> {
-////            mqttProduce.publish(qos, retained, topic2, msg);
-//            mqttService.sendMessage(topic2, msg + "_topic2");
-//        });
+//        mqttProduce.publish(qos, retained, topic1, msg);
+        CompletableFuture.runAsync(() -> {
+            if ("1".equals(msg)) {
+                mqttProduce.publish(qos, retained, topic1, msg);
+            } else {
+                mqttService.sendMessage(topic1, msg + "_topic1");
+            }
+        });
+
+        CompletableFuture.runAsync(() -> {
+            if ("1".equals(msg)) {
+                mqttProduce.publish(qos, retained, topic2, msg);
+            } else {
+                mqttService.sendMessage(topic2, msg + "_topic2");
+            }
+        });
 
 
         //springboot starter 集成
-        mqttService.sendMessage(topic1, msg);
+//        mqttService.sendMessage(topic1, msg);
     }
 
     /**
