@@ -83,6 +83,11 @@ import org.springframework.stereotype.Component;
  *永久调整（需修改配置文件 rabbitmq.conf）： 参见word 文档
  * consumer_timeout = 36000000  # 单位：毫秒
  *
+ *
+ *
+ * rabbitmq 队列之间是多线程消费，队列内是单线程
+ * 多线程消费：多个队列可以被不同的消费者同时消费
+ * 单线程消费：单个队列内的消息按顺序被消费（默认情况下）
  */
 
 

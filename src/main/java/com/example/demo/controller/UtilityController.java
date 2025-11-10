@@ -32,6 +32,7 @@ import com.example.demo.model.viewModel.ValidatorVo;
 import com.example.demo.model.vo.DownloadData;
 import com.example.demo.model.vo.UploadData;
 import com.example.demo.model.wmsservicemodel.ShipOrderInventoryDetailDto;
+import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.mqtt.MqttProduce;
 import com.example.demo.rabbitMQ.mqttn.MqttService;
 import com.example.demo.rocketmq.RocketmqTest;
@@ -1726,14 +1727,25 @@ public class UtilityController {
         int qos = 1;
         //retained = true 只会保留最后一条消息
         boolean retained = false;
-        String topic = "topic1";
-
+        String topic1 = "topic1";
+        String topic2 = "topic2";
         //
+
 //        mqttProduce.publish(qos, retained, topic, msg);
+//        CompletableFuture.runAsync(() -> {
+////            mqttProduce.publish(qos, retained, topic1, msg);
+//
+//            mqttService.sendMessage(topic1, msg + "_topic1");
+//        });
+//
+//        CompletableFuture.runAsync(() -> {
+////            mqttProduce.publish(qos, retained, topic2, msg);
+//            mqttService.sendMessage(topic2, msg + "_topic2");
+//        });
 
 
         //springboot starter 集成
-        mqttService.sendMessage(topic, msg);
+        mqttService.sendMessage(topic1, msg);
     }
 
     /**

@@ -25,6 +25,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * * rabbitmq 队列之间是多线程消费，队列内是单线程
+ *  * 多线程消费：多个队列可以被不同的消费者同时消费
+ *  * 单线程消费：单个队列内的消息按顺序被消费（默认情况下）
+ */
 @Component
 //@RabbitListener(queues = "DirectExchangeQueueSpringBoot")//参数为队列名称
 public class DirectExchangeConsumer extends BaseRabbitMqHandler {
@@ -55,6 +60,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
                             @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName) throws Exception {
         try {
+            Thread.sleep(60 * 1000);
             //  System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
             String routingKey = message.getMessageProperties().getReceivedRoutingKey();
             String exchange = message.getMessageProperties().getReceivedExchange();
@@ -66,9 +72,9 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
             String messageContentStr = new String(message.getBody());
             //  RabbitMqMessage rabbitMqMessage1 = objectMapper.readValue(messageContentStr, Person.class);
             logger.info("received msg - {}", messageId);
-            super.onMessage(DemoProduct.class, message, channel, (msg) -> {
+            super.onMessage(MqMessage.class, message, channel, (msg) -> {
                 //业务处理
-                DemoProduct person1 = msg;
+                MqMessage person1 = msg;
 //                int m = Integer.parseInt("d");
                 //    logger.info("MQ接收到消息jsonStr : " + msgContent);
 
@@ -107,6 +113,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
                             @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName) throws Exception {
         try {
+            Thread.sleep(60 * 1000);
             Object msg1 = message;
             //  System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
             int m = 0;
@@ -125,7 +132,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
 //            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 
 
-            super.onMessage(DemoProduct.class, message, channel, (msg) -> {
+            super.onMessage(MqMessage.class, message, channel, (msg) -> {
                 //业务处理
 //                Person person1 = msg;
 //                int mm = Integer.parseInt("d");
@@ -135,7 +142,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
 
         } catch (Exception e) {
 
-
+            String msg = e.getMessage();
             //死信
             // channel.basicNack(message.getMessageProperties().getDeliveryTag(), false,false);
 
@@ -158,7 +165,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
     @RabbitListener(queues = RabbitMQConfig.BATCH_DIRECT_QUEUE_NAME, containerFactory = "multiplyThreadContainerFactory")
     public void consumerByMultiThread(Message message, Channel channel) throws Exception {
         try {
-//            Thread.sleep(10000);
+            Thread.sleep(60 * 1000);
             String receivedMessage = new String(message.getBody());
 //            RabbitMqMessage rabbitMqMessage = this.objectMapper.readValue(receivedMessage, RabbitMqMessage.class);
 //            Person person = objectMapper.readValue(rabbitMqMessage.getContent(), Person.class);

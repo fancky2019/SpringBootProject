@@ -326,6 +326,8 @@ spring:
     client-id: spring-mqtt-client-id
     username: guest
     password: guest
+#    topic2/# - 多级通配符，如：topic2/level1/level2/level3
+#    topic3/+ - 单级通配符  topic3/client1
     subscribe:
        - topic1
        - topic2/#
@@ -333,7 +335,8 @@ spring:
     publish: test/outbound
     qos: 1
     completion-timeout: 5000
-    clean-session: true
+    #连接断开会话不会清除，重连会重新投递
+    clean-session: false
     keep-alive-interval: 60
 
   #    template:

@@ -33,6 +33,7 @@ public class MqttConsumerCallBack implements MqttCallback {
      */
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
+        Thread.sleep(30*1000);
         log.info(String.format("接收消息主题 : %s",topic));
         log.info(String.format("接收消息Qos : %d",message.getQos()));
         String msg=new String(message.getPayload());

@@ -117,9 +117,9 @@
         <logger name="org.camunda.bpm.engine" level="INFO"/>
         <logger name="springfox" level="INFO"/>
 
-        <!--        异步-->
+        <!--        异步   all info  。all 启动太慢 -->
 <!--        <AsyncRoot level="info">-->
-        <AsyncRoot level="all">
+        <AsyncRoot level="info">
             <appender-ref ref="Console"/>
             <appender-ref ref="RollingFile"/>
 <!--            <appender-ref ref="Mail"/>-->
