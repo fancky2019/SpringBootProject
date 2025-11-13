@@ -3,6 +3,7 @@ package com.example.demo.rabbitMQ;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.example.demo.model.entity.demo.MqMessage;
+import com.example.demo.model.enums.MqMessageStatus;
 import com.example.demo.service.demo.IMqMessageService;
 //import com.example.demo.utility.ApplicationContextAwareImpl;
 import com.example.demo.utility.ApplicationContextAwareImpl;
@@ -80,6 +81,7 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
                 mqMessage.setModifyTime(LocalDateTime.now());
                 mqMessageService.updateById(mqMessage);
 
+//                mqMessageService.updateByMsgId(msgId, MqMessageStatus.PRODUCE.getValue());
 
 //                LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();
 //                updateWrapper.set(MqMessage::getStatus, 1);

@@ -60,7 +60,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
                             @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName) throws Exception {
         try {
-            Thread.sleep(60 * 1000);
+            Thread.sleep(10 * 1000);
             //  System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
             String routingKey = message.getMessageProperties().getReceivedRoutingKey();
             String exchange = message.getMessageProperties().getReceivedExchange();
@@ -92,7 +92,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
             //  设置死信队列设置自动Ack. 否则不能进入死信队列。
             //将异常抛出，不能吞了，否则不能重试。和mybatis的事务回滚有点像，否则mybatis不能回滚。
             //  throw new AmqpRejectAndDontRequeueException(e.getMessage()) ;
-            throw e;
+//            throw e;
             // e.printStackTrace();
 //            logger.error(e.getMessage());
             //丢弃这条消息

@@ -357,9 +357,12 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 //                }
                 //0:未生成 1：已生产 2：已消费 3:消费失败
                 //未推送消息(未推送，推送失败
-                List<MqMessage> unPushList = mqMessageList.stream().filter(p -> p.getStatus() == null || p.getStatus().equals(0)).collect(Collectors.toList());
+                List<MqMessage> unPushList = mqMessageList.stream().filter(p -> (p.getStatus() == null || p.getStatus().equals(0))&&p.getSendMq()).collect(Collectors.toList());
+
                 //可设计单独的job 处理消费失败.消费失败的，才走定时任务补偿处理
                 List<MqMessage> consumerFailList = mqMessageList.stream().filter(p -> p.getStatus() != null && p.getStatus().equals(3)).collect(Collectors.toList());
+                List<MqMessage> unSendMqFailList =       mqMessageList.stream().filter(p -> !p.getSendMq()&&!Integer.valueOf(2).equals(p.getStatus())).collect(Collectors.toList());
+                consumerFailList.addAll(unSendMqFailList);
                 rePublish(unPushList);
 
                 Object proxyObj = AopContext.currentProxy();

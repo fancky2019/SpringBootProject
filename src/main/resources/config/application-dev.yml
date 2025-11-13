@@ -254,11 +254,6 @@ spring:
     redisson:
       file: classpath:redisson-config.yml
 
-#  cloud:
-#    bus:
-#      enabled: true   # # 默认启用 Spring Cloud Bus
-#      destination: springCloudBus  # 默认 Exchange 名称
-
   rabbitmq:
     ##HA镜像集群。集群配置 ip:port,ip:port 。多个配置之间用逗号隔开
     # addresses: 127.0.0.1:5673,127.0.0.1:5674,127.0.0.1:5675 #指定client连接到的server的地址，多个以逗号分隔(优先取addresses，然后再取host)
@@ -303,6 +298,24 @@ spring:
     #        acknowledge-mode: manual
     #        #默认是1
     #        prefetch: 1
+
+
+
+# Spring Cloud Bus 配置 - 与 rabbitmq 平级,未实现保存到mq
+#  cloud:
+#    bus:
+#      enabled: true
+#      destination: springCloudBus  # 交换器名称
+#      # 关键：配置 RabbitMQ 特定设置
+#      rabbit:
+#        enabled: true
+#        queues:
+#          durable: true
+#          auto-delete: false
+#          exclusive: false
+#        bindings:
+#          durable: true
+#        auto-bind: true
 
 #  # MQTT配置信息  http://10.100.200.43:18083/#/clients 账号密码  admin  public
 

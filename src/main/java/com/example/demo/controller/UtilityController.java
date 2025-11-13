@@ -74,6 +74,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.sleuth.TraceContext;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -2326,9 +2327,9 @@ public class UtilityController {
 //      RuntimeException （运行时异常）继承Exception，RuntimeException 及其子类都统称为非受检查异常
         return MessageResult.success();
     }
-
+//    private ApplicationEventPublisher eventPublisher;
     @GetMapping(value = "/eventBusTest")
-    public MessageResult<String> eventBusTest() {
+    public MessageResult<String> eventBusTest() throws Exception {
         productTestService.eventBusTest();
         return MessageResult.success();
     }

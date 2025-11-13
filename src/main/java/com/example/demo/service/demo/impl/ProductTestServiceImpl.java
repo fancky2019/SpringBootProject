@@ -26,6 +26,7 @@ import com.example.demo.easyexcel.ExcelStyleConfig;
 import com.example.demo.easyexcel.GXDetailListVO;
 import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
 import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
+import com.example.demo.listener.eventbus.CustomEvent;
 import com.example.demo.listener.eventbus.MyCustomEvent;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.Person;
@@ -1594,16 +1595,40 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void eventBusTest() {
+    public void eventBusTest() throws JsonProcessingException {
+
+        BigInteger id = BigInteger.ONE;
+        ProductTest productTest = this.getById(id);
+        productTest.setProductStyle("getProductStyle1");
         LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
-        updateWrapper3.set(ProductTest::getProductStyle, "getProductStyle1");
-        updateWrapper3.eq(ProductTest::getId, 1);
+        updateWrapper3.set(ProductTest::getProductStyle, productTest.getProductStyle());
+        updateWrapper3.eq(ProductTest::getId, productTest.getId());
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//        LocalDateTime.now().format(dateTimeFormatter);
 
         //更新指定条件的 为productTest 对象的值，ID 字段除外。
         boolean re3 = this.update(updateWrapper3);
-        //            EwmsEvent event = new EwmsEvent(this, "TruckOrderComplete");
-        MyCustomEvent event = new MyCustomEvent(this, busProperties.getId());
 
+
+        //rabbitMq 发送消息线程和spring事务不在同一个线程内，mq 内部抛出异常无法被spring 事务捕获，spring 无法事务回滚
+        //写入消息表
+
+        MqMessage mqMessage = new MqMessage
+                ("",
+                        "",
+                        "ProductTestUpdate",
+                        productTest.getId().toString());
+        mqMessage.setSendMq(false);
+        mqMessage.setBusinessId((long) productTest.getId().intValue());
+
+        mqMessageService.save(mqMessage);
+
+
+        //            EwmsEvent event = new EwmsEvent(this, "TruckOrderComplete");
+        //  busProperties.getId():  contextId, // 通常是 spring.application.name
+        CustomEvent event = new CustomEvent(this, busProperties.getId(), mqMessage);
+        log.info("ThreadId {} ,eventPublisher event", Thread.currentThread().getId());
         //最好使用本地消息表
         //发送消息的时候可能崩溃，不能保证消息被消费。如果发送成功了，还要设计消息表兜底失败的消息
 //        MyCustomEvent event = new MyCustomEvent(busProperties.getId());

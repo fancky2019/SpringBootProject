@@ -131,7 +131,7 @@ public class MqMessage extends EntityBase implements Serializable {
     private String routeKey;
 
     /**
-     *
+     *top 用，业务类型
      */
     private String queue;
 
@@ -140,6 +140,7 @@ public class MqMessage extends EntityBase implements Serializable {
      */
     private Integer status;
 
+    private Boolean sendMq;
     /**
      * 重试次数
      */
@@ -215,7 +216,7 @@ public class MqMessage extends EntityBase implements Serializable {
         this.exchange = exchange;
         this.routeKey = routeKey;
         this.queue = queue;
-        this.status = 0;
+//        this.status = 0;
         this.version = 0;
         this.remark = "";
         this.createTime = LocalDateTime.now();

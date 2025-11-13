@@ -49,7 +49,7 @@ public interface IProductTestService extends IService<ProductTest> {
 
     void deadLockTwo() throws InterruptedException;
 
-    void eventBusTest();
+    void eventBusTest() throws JsonProcessingException;
 
     void eventBusTest1();
 
