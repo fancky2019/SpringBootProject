@@ -1603,6 +1603,10 @@ public class UtilityController {
         return sseEmitterService.createSseConnect(userId);
     }
 
+    @GetMapping(value = "/pushTest/{userId}")
+    public void pushTest(@PathVariable("userId") String userId) {
+        sseEmitterService.pushTest(userId);
+    }
 
     @GetMapping(value = "/sseSendMsg")
     public void sendMsg(String userId) {

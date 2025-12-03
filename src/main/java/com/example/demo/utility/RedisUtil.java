@@ -80,8 +80,9 @@ public class RedisUtil<K, V> {
 
     public void releaseLock(RLock lock, boolean lockSuccessfully) {
         if (lockSuccessfully && lock.isHeldByCurrentThread()) {
+            String lockName = lock.getName(); // 获取锁的名称
             lock.unlock();
-            log.info("release lock success");
+            log.info("release lock success, key: {}", lockName);
         }
     }
 

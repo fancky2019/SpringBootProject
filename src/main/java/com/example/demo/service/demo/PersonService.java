@@ -12,6 +12,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.stereotype.Service;
@@ -37,7 +39,11 @@ import java.util.concurrent.CompletableFuture;
 public class PersonService implements IPersonService {
 
     private static Logger logger = LogManager.getLogger(PersonService.class);
-
+    @Autowired
+    @Lazy  // 防止循环依赖
+    private IPersonService selfProxy;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     // JdbcTransactionManager 继承DataSourceTransactionManager 实现接口 PlatformTransactionManager
 //    @Autowired
@@ -109,12 +115,13 @@ public class PersonService implements IPersonService {
      */
     @Transactional(rollbackFor = Exception.class)
     public int insert(Person person) throws JsonProcessingException {
-
+        IPersonService proxyService = applicationContext.getBean(IPersonService.class);
         //获取当前代理的实例 @EnableAspectJAutoProxy(exposeProxy = true)来暴露AOP的Proxy对象才行，否则会报异常
         //PersonService personService = (PersonService) AopContext.currentProxy();
 
         //如果不加Transactional 注解，currentProxy 是UtilityController 对象
         //加@Transactional 注解代理对象才是PersonService
+        // //AopContext.currentProxy() 返回的是当前方法调用链中的代理对象,调用这个方法的代理
         Object proxyObj = AopContext.currentProxy();
         IPersonService personService = null;
 

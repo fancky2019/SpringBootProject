@@ -33,6 +33,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -68,6 +69,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage> implements IMqMessageService {
+
+    @Autowired
+    @Lazy  // 防止循环依赖
+    private IMqMessageService selfProxy;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Autowired
     private MqSendUtil mqSendUtil;
@@ -365,6 +372,10 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
                 consumerFailList.addAll(unSendMqFailList);
                 rePublish(unPushList);
 
+                Object object = selfProxy;
+                // 从 ApplicationContext 获取代理对象
+                IMqMessageService proxyService = applicationContext.getBean(IMqMessageService.class);
+                //AopContext.currentProxy() 返回的是当前方法调用链中的代理对象,返回的是 ScheduledTasks 的代理
                 Object proxyObj = AopContext.currentProxy();
                 IMqMessageService mqMessageService = null;
                 if (proxyObj instanceof IMqMessageService) {
@@ -625,7 +636,10 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
                 //self-invocation‌（自我调用）是指在一个类的方法内部直接调用同一个类中的其他方法。
                 //@Transactional self-invocation (in effect, a method within the target object calling another method of the target object) does not lead to an actual transaction at runtime
 //            transactionalBusinessLogic();
-
+                Object object = selfProxy;
+                // 从 ApplicationContext 获取代理对象
+                IProductTestService proxyService = applicationContext.getBean(IProductTestService.class);
+                //AopContext.currentProxy() 返回的是当前方法调用链中的代理对象,返回的是 ScheduledTasks 的代理
                 //被调用方会触发事务aop, 两个方法在不同事务内
                 Object proxyObj = AopContext.currentProxy();
                 IMqMessageService mqMessageService = null;

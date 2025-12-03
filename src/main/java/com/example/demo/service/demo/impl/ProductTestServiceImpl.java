@@ -57,7 +57,9 @@ import org.redisson.api.RedissonClient;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bus.BusProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -101,7 +103,11 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, ProductTest> implements IProductTestService {
-
+    @Autowired
+    @Lazy  // 防止循环依赖
+    private IProductTestService selfProxy;
+    @Autowired
+    private ApplicationContext applicationContext;
     @Autowired
     private RedisTemplate redisTemplate;
     @Autowired
@@ -148,6 +154,10 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
     @Override
 //    @Transactional(rollbackFor = Exception.class)
     public void mybatisPlusTest() throws InterruptedException {
+        Object object = selfProxy;
+        // 从 ApplicationContext 获取代理对象
+        IProductTestService proxyService = applicationContext.getBean(IProductTestService.class);
+        //AopContext.currentProxy() 返回的是当前方法调用链中的代理对象,返回的是 ScheduledTasks 的代理
         Object proxyObj = AopContext.currentProxy();
         IProductTestService productTestService = null;
         if (proxyObj instanceof IProductTestService) {
@@ -535,7 +545,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         updateWrapper22.set(ProductTest::getProductStyle, productTest9.getProductStyle());
         updateWrapper22.set(ProductTest::getProductName, productTest9.getProductName());
         updateWrapper22.eq(ProductTest::getId, 9);
-
+//      不指定实体，  MetaObjectHandlerImp不会执行打印fill审计信息
         //数据没有做修改，影响的行数是0，不然返回1
         int affectRows = baseMapper.update(null, updateWrapper22);
 
@@ -550,6 +560,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         updateWrapper.set(ProductTest::getProductName, "update1");
         updateWrapper.eq(ProductTest::getId, 1);
         updateWrapper.eq(ProductTest::getStatus, 1);
+        //      不指定实体，  MetaObjectHandlerImp不会执行打印fill审计信息
         //如果值不改变，update 返回false.其内部根据mapper 执行的结果判断： result >= 1
         //内部调用 update(null,updateWrapperOne);
         boolean re = this.update(updateWrapper);
@@ -1633,7 +1644,10 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         //发送消息的时候可能崩溃，不能保证消息被消费。如果发送成功了，还要设计消息表兜底失败的消息
 //        MyCustomEvent event = new MyCustomEvent(busProperties.getId());
         eventPublisher.publishEvent(event);
-
+        Object object = selfProxy;
+        // 从 ApplicationContext 获取代理对象
+        IProductTestService proxyService = applicationContext.getBean(IProductTestService.class);
+        //AopContext.currentProxy() 返回的是当前方法调用链中的代理对象,返回的是 ScheduledTasks 的代理
         Object proxyObj = AopContext.currentProxy();
         IProductTestService productTestService = null;
         if (proxyObj instanceof IProductTestService) {

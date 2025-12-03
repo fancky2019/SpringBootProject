@@ -121,7 +121,8 @@ public class UserController {
      */
     @Autowired
     private List<InterfaceTest> interfaceTestList;
-
+    @Value("${sbp.enableCopyShipOrder:false}")
+    private boolean enableCopyShipOrder;
     //获取配置文件的值
     @Value("${spring.datasource.username}")
     private String username;

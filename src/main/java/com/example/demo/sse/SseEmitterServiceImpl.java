@@ -80,7 +80,9 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
 
         try {
             Object obj = SseEmitter.event().id("USER_ID").data(userId);
-            sseEmitter.send(SseEmitter.event().id("USER_ID").data(userId));
+            //SSE协议特性：客户端（Postman）在收到第一个 data: 格式的响应后，才会认为SSE连接真正建立
+            //发送一个连接成功消息SSE_CONNECTED给前端。
+            sseEmitter.send(SseEmitter.event().id("USER_ID").data("SSE_CONNECTED"));
         } catch (IOException e) {
             log.error("SseEmitterServiceImpl[createSseConnect]: 创建长链接异常，客户端ID:{}", userId, e);
             throw new Exception("创建连接异常！", e);
@@ -101,6 +103,32 @@ public class SseEmitterServiceImpl implements ISseEmitterService {
         });
 
         return sseEmitter;
+    }
+
+    //建立连接之后，发送
+    @Override
+    public void pushTest(String userId) {
+        //        try {
+//            Object obj = SseEmitter.event().id("USER_ID").data(userId);
+////            sseEmitter.send(SseEmitter.event().id("USER_ID").data(userId));
+//        } catch (Exception e) {
+//            log.error("SseEmitterServiceImpl[createSseConnect]: 创建长链接异常，客户端ID:{}", userId, e);
+//            throw new Exception("创建连接异常！", e);
+//        }
+
+
+        CompletableFuture.runAsync(() ->
+        {
+            while (true) {
+                String msg = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                try {
+                    Thread.sleep(5000);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                sendMsgToClient(userId, msg);
+            }
+        });
     }
 
     /**

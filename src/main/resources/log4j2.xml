@@ -103,7 +103,8 @@
         <!--        logger: gs.com-->
         <!--        logger: gs-->
         <!--        最后继承 root 的级别。-->
-
+        <!-- 新增：MyBatis Mapper 包路径，设置为 DEBUG 级别打印sql脚本 -->
+        <logger name="com.example.demo.dao" level="DEBUG"/>
 
 <!--        过滤框架的debug-->
         <logger name="org.springframework" level="INFO"/>
