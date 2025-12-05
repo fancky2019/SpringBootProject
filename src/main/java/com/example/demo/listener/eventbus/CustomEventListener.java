@@ -15,6 +15,10 @@ import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.Arrays;
 
 /**
  * 监听事件
@@ -38,10 +42,26 @@ public class CustomEventListener {
 
     @Autowired
     IMqMessageService mqMessageService;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+    /**
+     * @Async 线程中：当前线程没有任何事务同步器 → Spring 认为“无法开事务”
+     *@Async 异步线程：
+     * 切换了线程
+     * ThreadLocal 丢失
+     * 没有事务同步器
+     * @Transactional 无法创建事务
+     *
+     *
+     *
+     *
+     * @param event
+     * @throws Exception
+     */
 
     //multiplier 2 ,每次重试时间间隔翻倍
     @Async("threadPoolExecutor")
-    @EventListener
+//    @EventListener
 //    Spring Retry 在最后一次重试失败后才会抛出异常
     @Retryable(
             value = {Exception.class},
@@ -54,6 +74,7 @@ public class CustomEventListener {
     @TransactionalEventListener //默认事务成功之后发送
 //    @TransactionalEventListener  (phase = TransactionPhase.AFTER_COMMIT)
 //    @EventListener  // 事务不成功也会检测到发送消息
+    //    @Transactional(propagation = Propagation.REQUIRED) // @Async+@TransactionalEventListener会使service 层方法的事务失效
     public void handleMyCustomEvent(CustomEvent event) throws Exception {
         //此处简单设计，失败了落表重试处理。或者重新设计本地消息表
         //ApplicationEventPublisher eventPublisher;
@@ -67,42 +88,112 @@ public class CustomEventListener {
             log.info("messageId {} SendMq,", message.getId());
             return;
         }
+        //@Async + @Transactional 事务不生效
+        //        事务模板方法
+        // 在这里执行事务性操作
+        // 操作成功则事务提交，否则事务回滚
+        Exception e = transactionTemplate.execute(transactionStatus -> {
+            // 事务性操作
+            // 如果操作成功，不抛出异常，事务将提交
 
-        int currentAttempt = 1;
-        RetryContext retryContext = RetrySynchronizationManager.getContext();
-        if (retryContext != null) {
-            currentAttempt = retryContext != null ? retryContext.getRetryCount() + 1 : 1;
-        }
+            try {
+                //getCurrentTransactionName() 当前事务的名字（默认是 null）
+                String currentTransactionName = TransactionSynchronizationManager.getCurrentTransactionName();
+//isActualTransactionActive() 最重要、最准：真正有无事务
+//        它代表：
+//        当前线程的底层数据库连接是否在事务模式中
+//        Spring 是否在此线程中开启了 beginTransaction
+//        回滚、提交是否会生效
 
-        log.info("currentAttempt - {}", currentAttempt);
-        boolean success = true;
-        try {
-            switch (message.getQueue()) {
-                case "ProductTestUpdate":
-                    //处理业务
-                    break;
-                default:
-                    break;
-            }
-        } catch (Exception ex) {
-            //这样每次处理都会打异常信息
-            log.error("", ex);
-            success = false;
-            throw ex;
-        } finally {
-            // 获取当前重试上下文
-            if (success) {
-                //更新消息表成功2
-                mqMessageService.updateByMsgId(message.getMsgId(), MqMessageStatus.CONSUMED.getValue());
-            } else {
-                if (currentAttempt == 3) {
-                    //达到最大次数更新消息表失败3
-                    mqMessageService.updateByMsgId(message.getMsgId(), MqMessageStatus.CONSUME_FAIL.getValue());
+
+                //        true → 说明当前线程中存在一个活动的事务（Connection 被绑定到线程）
+                boolean isActualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+//        isSynchronizationActive() = 当前线程是否启用了 Spring 的事务同步机制（允许绑定资源和事务回调）。
+//        并不完全等于“是否有事务”，但通常和事务同时开启。
+                boolean isSynchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();
+
+
+                int currentAttempt = 1;
+                RetryContext retryContext = RetrySynchronizationManager.getContext();
+                if (retryContext != null) {
+                    currentAttempt = retryContext != null ? retryContext.getRetryCount() + 1 : 1;
                 }
-            }
 
-            int m = 0;
-        }
+                log.info("currentAttempt - {}", currentAttempt);
+                boolean success = true;
+                try {
+                    switch (message.getQueue()) {
+                        case "ProductTestUpdate":
+                            //处理业务
+                            break;
+                        default:
+                            break;
+                    }
+
+                    return null;
+                } catch (Exception ex) {
+                    //这样每次处理都会打异常信息
+                    log.error("", ex);
+                    success = false;
+                    return ex;
+                } finally {
+                    // 获取当前重试上下文
+                    if (success) {
+                        //更新消息表成功2
+                        try {
+                            mqMessageService.updateByMsgId(message.getMsgId(), MqMessageStatus.CONSUMED.getValue());
+                        } catch (Exception ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    } else {
+                        if (currentAttempt == 3) {
+                            //达到最大次数更新消息表失败3
+                            try {
+                                mqMessageService.updateByMsgId(message.getMsgId(), MqMessageStatus.CONSUME_FAIL.getValue());
+                            } catch (Exception ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                    }
+
+                    int m = 0;
+                }
+
+
+
+
+
+            } catch (Exception ex) {
+                log.info("executing consume message {} fail", message.getId());
+                log.error("", ex);
+                // 如果操作失败，抛出异常，事务将回滚
+                transactionStatus.setRollbackOnly();
+                return ex;
+                //此处是定时任务 ，处理异常不抛出
+//                    transactionStatus.setRollbackOnly();
+//                    throw  e;
+            }
+//        TransactionCallbackWithoutResult
+
+        });
+
+
+//        if (e != null) {
+//            //将该条事务的异常保存
+//            transactionTemplate.execute(transactionStatus -> {
+//                try {
+//                    //失败了就更新一下版本号和更新时间，根据更新时间的 索引 提高查询速度
+//                    message.setRetryCount(message.getRetryCount() + 1);
+//                    message.setFailureReason(e.getMessage());
+//                    this.update(message);
+//                    return true;
+//                } catch (Exception ex) {
+//                    log.error("", ex);
+//                    transactionStatus.setRollbackOnly();
+//                    return false;
+//                }
+//            });
+//        }
 
 
     }
@@ -111,14 +202,80 @@ public class CustomEventListener {
     @TransactionalEventListener
     public void handleCustomEvent(MyCustomEvent event) {
 
-        try {
-            Thread.sleep(10000);
-
-        } catch (Exception ex) {
-
-        }
 
         log.info("ThreadId {} ,Received custom event: {} ", Thread.currentThread().getId(), event);
+
+
+
+
+//                因为 MqMessageEventHandler 是在 @Async 的线程池线程中执行的，而
+//                @Transactional 依赖当前线程的事务同步器(TransactionSynchronizationManager.isSynchronizationActive())，
+//                但异步线程没有事务同步器，因此事务不会被创建
+
+//                mqMessageService.MqMessageEventHandler(message, MqMessageSourceEnum.EVENT);
+//                int nn = 1;
+
+
+
+
+
+
+
+
+        //@Async + @Transactional 事务不生效
+        //        事务模板方法
+        // 在这里执行事务性操作
+        // 操作成功则事务提交，否则事务回滚
+        Exception e = transactionTemplate.execute(transactionStatus -> {
+
+            // 事务性操作
+            // 如果操作成功，不抛出异常，事务将提交
+
+            try {
+
+             //do business
+
+                return null;
+            } catch (Exception ex) {
+//                log.info("executing consume message {} fail", message.getId());
+                log.error("", ex);
+                // 如果操作失败，抛出异常，事务将回滚
+                transactionStatus.setRollbackOnly();
+                return ex;
+                //此处是定时任务 ，处理异常不抛出
+//                    transactionStatus.setRollbackOnly();
+//                    throw  e;
+            }
+
+
+//        TransactionCallbackWithoutResult
+
+        });
+
+
+//                if (e != null) {
+//                    //将该条事务的异常保存
+//                    transactionTemplate.execute(transactionStatus -> {
+//                        try {
+//                            //失败了就更新一下版本号和更新时间，根据更新时间的 索引 提高查询速度
+//                            message.setRetryCount(message.getRetryCount() + 1);
+//                            message.setFailureReason(e.getMessage());
+//                            this.update(message);
+//                            return true;
+//                        } catch (Exception ex) {
+//                            log.error("", ex);
+//                            transactionStatus.setRollbackOnly();
+//                            return false;
+//                        }
+//                    });
+//                }
+
+
+
+
+
+
+
     }
 
 

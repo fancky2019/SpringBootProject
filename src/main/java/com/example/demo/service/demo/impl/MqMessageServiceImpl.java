@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigInteger;
@@ -153,6 +154,25 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
     public void updateByMsgId(String msgId, int status) throws Exception {
 //        this.updateById(mqMessage);
 //        this.update(mqMessage, new LambdaUpdateWrapper<MqMessage>().eq(MqMessage::getId, mqMessage.getId()));
+        //getCurrentTransactionName() 当前事务的名字（默认是 null）
+        String currentTransactionName = TransactionSynchronizationManager.getCurrentTransactionName();
+//isActualTransactionActive() 最重要、最准：真正有无事务
+//        它代表：
+//        当前线程的底层数据库连接是否在事务模式中
+//        Spring 是否在此线程中开启了 beginTransaction
+//        回滚、提交是否会生效
+
+
+        //        true → 说明当前线程中存在一个活动的事务（Connection 被绑定到线程）
+        boolean isActualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+//        isSynchronizationActive() = 当前线程是否启用了 Spring 的事务同步机制（允许绑定资源和事务回调）。
+//        并不完全等于“是否有事务”，但通常和事务同时开启。
+        boolean isSynchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();
+
+
+
+
+
 
         String lockKey = RedisKey.UPDATE_MQ_MESSAGE_INFO + ":" + msgId;
         //获取分布式锁，此处单体应用可用 synchronized，分布式就用redisson 锁
