@@ -1,5 +1,7 @@
 package com.example.demo.architecturedesign;
 
+import javax.swing.*;
+
 /*
 前端高可用的组合:LVS+Keepalived、Nginx+Keepalived、HAproxy+Keepalived
  */
@@ -633,4 +635,11 @@ ProxySQL / HAProxy：应用程序连接 ProxySQL，由 ProxySQL 负责路由到�
 
     //endregion
 
+    //region  登录用户名密码设计
+            /*
+             password_hash VARCHAR(255) NOT NULL,  -- BCrypt加密的前端哈希值
+    Spring Boot 项目，采用 HTTPS + 前端SHA256哈希 + 后端BCrypt存储 的方案，既安全又易于实现。
+
+             */
+    //endregion
 }

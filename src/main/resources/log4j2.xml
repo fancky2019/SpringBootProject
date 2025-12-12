@@ -65,12 +65,16 @@
 <!--        filePattern="logs/app-%d{yyyy-MM-dd-HH}.log.gz" 且 interval="1"，则日志会在每小时的整点（如 12:00, 13:00）进行滚动。-->
 <!--        如果 modulate="false"，则从应用启动时间开始计算，例如应用在 12:15 启动，每小时滚动一次，则下次滚动时间是 13:15。-->
         <RollingFile name="RollingFile" fileName="logs/current.log"
-                     filePattern="logs/%d{yyyy-MM}/%d{yyyy-MM-dd}/log-%d{yyyy-MM-dd}-%i.log.gz">
+                     filePattern="logs/%d{yyyy-MM}/%d{dd}/log-%d{yyyy-MM-dd}-%i.log.gz">
             <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${log_pattern}"/>
             <Policies>
 <!--                filePattern %d{yyyy-MM-dd-HH} %d{yyyy-MM-dd-HH}  interval 分别标识 小时 和天 间隔-->
                 <!-- 基于时间的滚动策略，interval="1" 表示每 1 滚动一次，modulate="true" 表示从 0 点开始计算。  -->
+<!--                modulate="true" 的作用是：将滚动时间调整为下一个时间间隔的边界。-->
+<!--                如果 interval="1"（每天滚动）  应用启动时间：14:30-->
+<!--                没有 modulate="true"：每天 14:30 滚动（根据应用启动时间）-->
+<!--                有 modulate="true"：每天 00:00 滚动（下一个整点时间边界）-->
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
                 <!-- 基于文件大小的滚动策略，当文件大小超过 1024MB 时也会滚动。文件大小超过 100MB 时也滚动 -->
                 <SizeBasedTriggeringPolicy size="1024 MB"/>

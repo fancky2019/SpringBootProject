@@ -234,6 +234,8 @@ public class UtilityController {
 
     @Autowired
     private IMqMessageService mqMessageService;
+    @Autowired
+    private LoginService loginService;
 
     @Autowired
     private IProductTestService productTestServiceB;
@@ -2331,7 +2333,8 @@ public class UtilityController {
 //      RuntimeException （运行时异常）继承Exception，RuntimeException 及其子类都统称为非受检查异常
         return MessageResult.success();
     }
-//    private ApplicationEventPublisher eventPublisher;
+
+    //    private ApplicationEventPublisher eventPublisher;
     @GetMapping(value = "/eventBusTest")
     public MessageResult<String> eventBusTest() throws Exception {
         productTestService.eventBusTest();
@@ -2608,6 +2611,18 @@ public class UtilityController {
     }
 
     //endregion
+
+
+    /**
+     *  redissonLock 可重入
+     * @return
+     * @throws Exception
+     */
+    @PostMapping(value = "/loginTest")
+    public MessageResult<Void> loginTest(@RequestBody TestRequest request) {
+        loginService.login(request);
+        return MessageResult.success();
+    }
 
 }
 
