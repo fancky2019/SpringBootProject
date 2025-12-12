@@ -4,4 +4,6 @@ import com.example.demo.model.request.TestRequest;
 
 public interface LoginService {
     boolean login(TestRequest request);
+
+    String encryptedPassword(String pwd);
 }

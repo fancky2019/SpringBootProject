@@ -2614,7 +2614,7 @@ public class UtilityController {
 
 
     /**
-     *  redissonLock 可重入
+     *    Spring Boot 项目，采用 HTTPS 传输 前端SHA256哈希 到后端， 后端BCrypt加密的前端哈希值存储到数据库
      * @return
      * @throws Exception
      */
@@ -2622,6 +2622,17 @@ public class UtilityController {
     public MessageResult<Void> loginTest(@RequestBody TestRequest request) {
         loginService.login(request);
         return MessageResult.success();
+    }
+
+    /**
+     *jasypt加密
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value = "/encryptedPassword")
+    public MessageResult<String> encryptedPassword(String pwd) {
+        String encryptedPassword = loginService.encryptedPassword(pwd);
+        return MessageResult.success(encryptedPassword);
     }
 
 }

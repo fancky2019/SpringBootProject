@@ -3,6 +3,9 @@ package com.example.demo.service.demo.impl;
 import com.example.demo.model.request.TestRequest;
 import com.example.demo.service.demo.LoginService;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.jasypt.encryption.StringEncryptor;
+import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,7 +15,7 @@ import java.util.UUID;
 //region  登录用户名密码设计
             /*
              password_hash VARCHAR(255) NOT NULL,  -- BCrypt加密的前端哈希值
-    Spring Boot 项目，采用 HTTPS + 前端SHA256哈希 + 后端BCrypt存储 的方案，既安全又易于实现。
+    Spring Boot 项目，采用 HTTPS 传输 前端SHA256哈希 到后端， 后端BCrypt加密的前端哈希值存储到数据库 的方案，既安全又易于实现。
 
              */
 //endregion
@@ -24,11 +27,26 @@ import java.util.UUID;
  * SHA-512      128     128字符十六进制，更安全
  * BCrypt       60      60字符Base64，密码存储推荐
  * Argon2       68      变长，密码哈希竞赛获胜者
+ *
+ *
+ * Base64 编码字符集：总共 64 个字符，所以叫 Base64。
+ *
+ * text
+ * A-Z (26个)
+ * a-z (26个)
+ * 0-9 (10个)
+ * +    (1个)
+ * /    (1个)
+ * =    (填充符，1个):它的作用是在编码数据的末尾进行填充，使编码后的字符串长度是 4 的倍数。
+ *
  */
 @Service
 public class LonginImpl implements LoginService {
 
 
+    //    private PooledPBEStringEncryptor encryptor;
+    @Autowired
+    private StringEncryptor encryptor;
     //BCrypt是一种专门用于密码哈希的安全算法 类似MD5.BCrypt内部自动加盐
 
     // 使用BCrypt，强度12（推荐） 12 是 成本因子（Cost Factor），也叫工作因子（Work Factor）。它决定了BCrypt算法的计算复杂度。
@@ -112,5 +130,27 @@ public class LonginImpl implements LoginService {
         // BCrypt会自动处理比较
         boolean match = passwordEncoder.matches(frontendHash, dbStoredHash);
         return false;
+    }
+
+
+    /**
+     * jasypt加密
+     * 引入依赖
+     *      <dependency>
+     *             <groupId>com.github.ulisesbocchio</groupId>
+     *             <artifactId>jasypt-spring-boot-starter</artifactId>
+     *             <version>2.1.2</version>
+     *         </dependency>
+     * @param pwd
+     * @return
+     */
+    @Override
+    public String encryptedPassword(String pwd) {
+        //lkK8NYWG9PaTrDFfbA3cyhJlal/mVKiY8jPV7eQtR0ary+Hc87jT1e13sggAWG5z
+        String encryptedPassword = encryptor.encrypt(pwd);
+
+        // 验证解密
+        String decrypted = encryptor.decrypt(encryptedPassword);
+        return encryptedPassword;
     }
 }
