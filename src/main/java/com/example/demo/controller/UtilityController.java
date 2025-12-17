@@ -40,6 +40,8 @@ import com.example.demo.service.RetryService;
 import com.example.demo.service.TokenService;
 import com.example.demo.service.api.FeignClientTest;
 import com.example.demo.service.api.WmsService;
+import com.example.demo.service.circularreference.ServiceA;
+import com.example.demo.service.circularreference.ServiceB;
 import com.example.demo.service.demo.*;
 import com.example.demo.service.elasticsearch.ShipOrderInfoService;
 import com.example.demo.service.ftp.FtpService;
@@ -282,6 +284,37 @@ public class UtilityController {
 
     @Autowired
     private Executor threadPoolExecutor;
+
+
+    @Autowired
+    private ServiceB serviceB;
+
+
+
+
+
+    //region  循环依赖解决办法
+    //1、字段 Lazy
+//    @Autowired
+//    @Lazy  // 只有实际使用时才会注入（如果从未使用，则不会初始化）
+//    private ServiceB ServiceB;
+
+    //2、构造函数 Lazy
+//    @Autowired
+//    public ServiceA(@Lazy ServiceB ServiceB) {
+//        this.serviceB = serviceB;
+//    }
+
+    //3、set注入
+//@Autowired
+//public void setCoordinator(ServiceCoordinator coordinator) {
+//    this.coordinator = coordinator;
+//}
+//endregion
+
+
+
+
     //bean  生命周期 参见 model--pojo--BeanLife SpringLifeCycleBean
     //初始化操作：1、实现 InitializingBean 接口
 //    public class UserController implements InitializingBean {
@@ -2633,6 +2666,17 @@ public class UtilityController {
     public MessageResult<String> encryptedPassword(String pwd) {
         String encryptedPassword = loginService.encryptedPassword(pwd);
         return MessageResult.success(encryptedPassword);
+    }
+
+    /**
+     *jasypt加密
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value = "/circularReference")
+    public MessageResult<String> circularReference() {
+        serviceB.methodB();
+        return MessageResult.success();
     }
 
 }

@@ -135,6 +135,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
 #    password: 123456
+#    jasypt-spring-boot-starte 会自动解密ENC(加密值)  。Jasypt 会自动解密 ENC(加密值) 格式的配置
     password: ENC(lkK8NYWG9PaTrDFfbA3cyhJlal/mVKiY8jPV7eQtR0ary+Hc87jT1e13sggAWG5z)  # jasypt加密的密码
 
     #    writer:

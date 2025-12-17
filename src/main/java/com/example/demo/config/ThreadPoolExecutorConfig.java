@@ -78,6 +78,9 @@ public class ThreadPoolExecutorConfig {
 
     /**
      * 异步方法上直接加 @Async("threadPoolExecutor")
+     *
+     * 不是java 标准库的 ThreadPoolExecutor
+     * spring 的 ThreadPoolTaskExecutor。spring 中建议使用 ThreadPoolTaskExecutor
      * @return
      */
     @Bean(name="threadPoolExecutor")
@@ -108,6 +111,9 @@ public class ThreadPoolExecutorConfig {
     /**
      * 不同业务使用不同线程池
      * 异步方法上直接加 @Async("threadPoolExecutor")
+     *
+     * 不是java 标准库的 ThreadPoolExecutor
+     * spring 的 ThreadPoolTaskExecutor。spring 中建议使用 ThreadPoolTaskExecutor
      * @return
      */
     @Bean(name="mqFailHandlerExecutor")
