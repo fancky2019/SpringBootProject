@@ -47,8 +47,10 @@ public class LonginImpl implements LoginService {
     //    private PooledPBEStringEncryptor encryptor;
     @Autowired
     private StringEncryptor encryptor;
+    //BCrypt生成复合字符串（算法+成本+盐+哈希）。MD5/SHA生成纯哈希值
+    //BCrypt 是一种自适应哈希函数.生成hash值 ，类似MD5 sha256 .md5 32位16进制字符
     //BCrypt是一种专门用于密码哈希的安全算法 类似MD5.BCrypt内部自动加盐
-
+    //BCrypt 生成的是自包含的、带盐的、可调节成本的哈希值，专门为安全存储密码而设计。它生成的是哈希，但比传统哈希函数更安全、更智能。
     // 使用BCrypt，强度12（推荐） 12 是 成本因子（Cost Factor），也叫工作因子（Work Factor）。它决定了BCrypt算法的计算复杂度。
     //迭代次数 = 2^成本因子
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
@@ -97,7 +99,7 @@ public class LonginImpl implements LoginService {
     private String calculateFrontendHash(String rawPassword) {
         // 前端应该使用：sha256(CLIENT_SALT + password)
         String saltedPassword = CLIENT_SALT + rawPassword;
-        // ❌ MD5（已过时，不安全）
+        // MD5（已过时，不安全）
         String md5Hash = DigestUtils.md5Hex(saltedPassword);
         return DigestUtils.sha256Hex(saltedPassword);
     }
@@ -113,7 +115,7 @@ public class LonginImpl implements LoginService {
     @Override
     public boolean login(TestRequest request) {
         String saltedPassword = CLIENT_SALT + request.getPassword();
-        // ❌ MD5（已过时，不安全）  32 字符
+        //  MD5（已过时，不安全）  32 字符
         //32个十六进制字符：f743c3e5caa458a732ec51b9f899ebad
         String md5Hash = DigestUtils.md5Hex(saltedPassword);
         //64个十六进制字符	：dc9346cb547c00b54050403aa11e8bd3f08f8337c475ffa59241c1d037f455e8

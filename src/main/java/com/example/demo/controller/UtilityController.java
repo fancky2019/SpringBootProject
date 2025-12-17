@@ -63,7 +63,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,7 +84,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
-import org.springframework.util.*;
+//import org.springframework.util.*;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Base64Utils;
+import org.springframework.util.DigestUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -534,7 +540,7 @@ public class UtilityController {
         String str = " sd 1 ";
         boolean isNullOrEmpty = StringUtils.isEmpty(str);
         //C# trim
-        String str1 = StringUtils.trimWhitespace(str);
+        String str1 = StringUtils.isEmpty(str);
         return student;
     }
 
@@ -571,7 +577,7 @@ public class UtilityController {
         String str = " sd 1 ";
         boolean isNullOrEmpty = StringUtils.isEmpty(str);
         //C# trim
-        String str1 = StringUtils.trimWhitespace(str);
+        String str1 = StringUtils.isEmpty(str);
 
         List<String> listStr = null;
         boolean collectionIsNullEmpty = CollectionUtils.isEmpty(listStr);
@@ -731,6 +737,9 @@ public class UtilityController {
         //6dff2291fe2e822de2e8068a182c4759 .32字符
         String upperStr = md5Password.toUpperCase();
         String str16 = md5Password.substring(8, 24);
+
+        //封装 MessageDigest  方法
+        String sha256Hex = org.apache.commons.codec.digest.DigestUtils.sha256Hex(password);
         return md5Password;
     }
     //endregion
