@@ -29,7 +29,8 @@ public class PointcutExecuteOrderOneAdvisor {
     @Autowired
     private HttpServletRequest httpServletRequest;
 
-    @Transactional
+    //    @Pointcut("@annotation(com.xxl.job.core.handler.annotation.XxlJob)")
+//    @Transactional
     @Pointcut("@annotation(pointcutExecuteOrderOne)")
     public void pointCut(PointcutExecuteOrderOne pointcutExecuteOrderOne) {
     }

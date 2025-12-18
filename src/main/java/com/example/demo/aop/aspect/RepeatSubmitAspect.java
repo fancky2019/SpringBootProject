@@ -77,6 +77,7 @@ public class RepeatSubmitAspect {
     @Autowired
     private HttpServletRequest httpServletRequest;
 
+    //    @Pointcut("@annotation(com.xxl.job.core.handler.annotation.XxlJob)")
 //    @Transactional
     @Pointcut("@annotation(noRepeatSubmit)")
     public void pointCut(NoRepeatSubmit noRepeatSubmit) {
