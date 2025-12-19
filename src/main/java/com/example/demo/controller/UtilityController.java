@@ -85,10 +85,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
 //import org.springframework.util.*;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.Base64Utils;
-import org.springframework.util.DigestUtils;
-import org.springframework.util.StreamUtils;
+import org.springframework.util.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -540,7 +537,7 @@ public class UtilityController {
         String str = " sd 1 ";
         boolean isNullOrEmpty = StringUtils.isEmpty(str);
         //C# trim
-        String str1 = StringUtils.isEmpty(str);
+        String str1 = StringUtils.trim(str);
         return student;
     }
 
@@ -577,7 +574,7 @@ public class UtilityController {
         String str = " sd 1 ";
         boolean isNullOrEmpty = StringUtils.isEmpty(str);
         //C# trim
-        String str1 = StringUtils.isEmpty(str);
+        String str1 = StringUtils.trim(str);
 
         List<String> listStr = null;
         boolean collectionIsNullEmpty = CollectionUtils.isEmpty(listStr);
