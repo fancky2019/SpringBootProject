@@ -60,7 +60,7 @@ public class XxlJobTraceIdAspect {
 //        MDC.put("traceId", traceId);
 //        traceId = MDC.get("traceId");
     }
-
+    // 切入带有@NoRepeatSubmit注解的方法。有@NoRepeatSubmit注解的方法才会拦截
     @Pointcut("@annotation(com.xxl.job.core.handler.annotation.XxlJob)")
     public void xxlJobPointcut() {
     }

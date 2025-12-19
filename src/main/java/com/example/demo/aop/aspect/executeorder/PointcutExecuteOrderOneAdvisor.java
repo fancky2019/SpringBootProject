@@ -29,6 +29,7 @@ public class PointcutExecuteOrderOneAdvisor {
     @Autowired
     private HttpServletRequest httpServletRequest;
 
+    //     // 切入带有@NoRepeatSubmit注解的方法。有@NoRepeatSubmit注解的方法才会拦截
     //    @Pointcut("@annotation(com.xxl.job.core.handler.annotation.XxlJob)")
 //    @Transactional
     @Pointcut("@annotation(pointcutExecuteOrderOne)")
