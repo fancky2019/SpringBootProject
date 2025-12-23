@@ -55,6 +55,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.aop.framework.AopContext;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationContext;
@@ -62,11 +63,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
@@ -103,6 +106,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, ProductTest> implements IProductTestService {
+
     @Autowired
     @Lazy  // 防止循环依赖
     private IProductTestService selfProxy;
@@ -1879,7 +1883,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
     }
 
     @Override
-//    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public void transactionalFun() {
         ProductTest productTest = this.getById(1);
 
@@ -1888,7 +1892,57 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         updateWrapper3.eq(ProductTest::getId, 1);
         boolean re3 = this.update(updateWrapper3);
 //        int m= Integer.parseInt("m");
+//        mqSendUtil.releaseLock(null,true);
+
+        boolean isActualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+
+        //spring 定时任务调用事务方法也可以开启事务
+        //true。非事务方法调用事务方法：事务方法可以开启事务
+        boolean isSynchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();
+        String threadName = Thread.currentThread().getName();
+        int m = 0;
+
     }
+
+    @Override
+    @Async("mqFailHandlerExecutor")
+    public void transactionalFunAsyncWrapper() {
+
+        //true
+        boolean proxy = AopUtils.isAopProxy(selfProxy);
+
+        // 1. 检查代理类型
+        //true
+        boolean isAopProxy = AopUtils.isAopProxy(selfProxy);
+        //false
+        boolean isCglibProxy = AopUtils.isCglibProxy(selfProxy);
+        //true
+        boolean isJdkProxy = AopUtils.isJdkDynamicProxy(selfProxy);
+        //还是开启了事务方法
+        selfProxy.transactionalFun();
+    }
+
+    /**
+     * 非事务方法调用事务方法：事务方法可以开启事务
+     */
+    @Override
+//    @Transactional(rollbackFor = Exception.class)
+    public void noTranMethodCallTranMethod() {
+
+//        ProductTest productTest = this.getById(1);
+//
+//        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+//        updateWrapper3.set(ProductTest::getVersion, 99);
+//        updateWrapper3.eq(ProductTest::getId, 1);
+//        boolean re3 = this.update(updateWrapper3);
+
+
+//        selfProxy.transactionalFun();
+//        int m= Integer.parseInt("m");
+        selfProxy.transactionalFunAsyncWrapper();
+
+    }
+
 
     /**
      * REQUIRES_NEW:开启新的事物，调用方和被调用方在不同的事务内，互不影响

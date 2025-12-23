@@ -2442,6 +2442,18 @@ public class UtilityController {
         return MessageResult.success();
     }
 
+    /**
+     * 非事务方法调用事务方法：事务方法可以开启事务
+     * @return
+     */
+    @GetMapping(value = "/noTranMethodCallTranMethod")
+    public MessageResult<Void> noTranMethodCallTranMethod() {
+        productTestService.noTranMethodCallTranMethod();
+        return MessageResult.success();
+    }
+
+
+
     @GetMapping(value = "/batchUpdateByCondition")
     public MessageResult<Void> batchUpdateByCondition() {
         productTestService.batchUpdateByCondition();

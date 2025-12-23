@@ -51,9 +51,10 @@ public class MqSendUtil {
 //                //   super.afterCompletion(status);
 //
 //                //事务完成有可能是 回滚 在事务完成之后调用（无论是提交还是回滚）
-////                int STATUS_COMMITTED = 0;
-////                int STATUS_ROLLED_BACK = 1;
-////                int STATUS_UNKNOWN = 2;
+
+            ////                int STATUS_COMMITTED = 0;
+            ////                int STATUS_ROLLED_BACK = 1;
+            ////                int STATUS_UNKNOWN = 2;
 //                if (status == 0) {
 //                    sentAsync(mqMessage);
 //                    int m=0;
@@ -167,6 +168,8 @@ public class MqSendUtil {
                 } catch (Exception e) {
                     log.error("doReleaseLock failed: ", e);
                 }
+            } else {
+                log.error("doReleaseLock failed: lock is null");
             }
         }
     }
@@ -192,9 +195,10 @@ public class MqSendUtil {
 //                //   super.afterCompletion(status);
 //
 //                //事务完成有可能是 回滚
-////                int STATUS_COMMITTED = 0;
-////                int STATUS_ROLLED_BACK = 1;
-////                int STATUS_UNKNOWN = 2;
+
+    ////                int STATUS_COMMITTED = 0;
+    ////                int STATUS_ROLLED_BACK = 1;
+    ////                int STATUS_UNKNOWN = 2;
 //                releaseLock(lock, lockSuccessfully);
 //
 //
@@ -211,7 +215,6 @@ public class MqSendUtil {
 //            log.info("release lock success");
 //        }
 //    }
-
     private void sentAsync(MqMessage mqMessage) {
         if (mqMessage == null) {
             return;

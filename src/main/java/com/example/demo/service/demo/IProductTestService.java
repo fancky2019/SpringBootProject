@@ -65,6 +65,9 @@ public interface IProductTestService extends IService<ProductTest> {
     void transactionalFunTest();
 
     void transactionalFun();
+    void transactionalFunAsyncWrapper();
+
+    void noTranMethodCallTranMethod();
 
     void transactionalFunRequiresNew();
 
