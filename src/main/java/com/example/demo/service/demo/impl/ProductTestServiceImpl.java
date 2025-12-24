@@ -107,6 +107,25 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, ProductTest> implements IProductTestService {
 
+
+    /**
+     *
+     默认jdk 动态代理：
+     Advisor 不全
+     selfProxy 触发了 early reference  先创建了一个“半成品代理”
+     不是 @Transactional 失效，而是你拿到的代理对象根本没有事务拦截器。
+     @Async + 自注入 + 提前代理暴露。
+     自注入selfProxy导致Spring在Bean创建过程中提前创建了一个不完整的代理（0 advisors）。
+
+     改成cglib 动态代理：从applicationContext获取bean可获取全部Advisor信息。
+
+     cglib配置：
+     //@EnableAspectJAutoProxy(proxyTargetClass = true)  // 1. AspectJ 代理.启动类已配置
+     @EnableTransactionManagement(order = Ordered.LOWEST_PRECEDENCE,proxyTargetClass = true)  // 事务最低优先级
+     @EnableAsync(order = Ordered.HIGHEST_PRECEDENCE,proxyTargetClass = true)  // 异步最高优先级
+     //@Primary // 指定为默认实现
+     public class ThreadPoolExecutorConfig {
+     */
     @Autowired
     @Lazy  // 防止循环依赖
     private IProductTestService selfProxy;
@@ -1885,6 +1904,8 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void transactionalFun() {
+        //从applicationContext 获取的bean 有完整的 Advisor ，selfProxy 是提前暴露的半成品Advisor不全
+        IProductTestService service = applicationContext.getBean(IProductTestService.class);
         ProductTest productTest = this.getById(1);
 
         LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
@@ -1907,7 +1928,13 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
     @Override
     @Async("mqFailHandlerExecutor")
     public void transactionalFunAsyncWrapper() {
-
+        //        异步方法内不能直接使用 AopContext.currentProxy()
+//        AopContext.currentProxy() 是线程绑定的，不能在异步线程中直接使用
+//        // AopContext内部使用ThreadLocal存储当前代理
+//        private static final ThreadLocal<Object> currentProxy = new ThreadLocal<>();
+//        异步方法内需要重新获取代理，通过 ApplicationContext.getBean()
+        //从applicationContext 获取的bean 有完整的 Advisor ，selfProxy 是提前暴露的半成品Advisor不全
+        IProductTestService service = applicationContext.getBean(IProductTestService.class);
         //true
         boolean proxy = AopUtils.isAopProxy(selfProxy);
 
@@ -1936,7 +1963,8 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
 //        updateWrapper3.eq(ProductTest::getId, 1);
 //        boolean re3 = this.update(updateWrapper3);
 
-
+        //从applicationContext 获取的bean 有完整的 Advisor ，selfProxy 是提前暴露的半成品Advisor不全
+        IProductTestService service = applicationContext.getBean(IProductTestService.class);
 //        selfProxy.transactionalFun();
 //        int m= Integer.parseInt("m");
         selfProxy.transactionalFunAsyncWrapper();

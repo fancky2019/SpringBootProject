@@ -4,6 +4,7 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.Ordered;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -15,7 +16,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
-@EnableAsync
+//@EnableAsync
+@EnableAsync(order = Ordered.HIGHEST_PRECEDENCE)
+// 必须三处都配置
+//@EnableAspectJAutoProxy(proxyTargetClass = true)  // 1. AspectJ 代理.启动类已配置
+//@EnableTransactionManagement(order = Ordered.LOWEST_PRECEDENCE,proxyTargetClass = true)  // 事务最低优先级
+//@EnableAsync(order = Ordered.HIGHEST_PRECEDENCE,proxyTargetClass = true)  // 异步最高优先级
+//@Primary // 指定为默认实现
+//值越小优先级越高，越先生效：最大让事务等其他注解优先加载，不然只有Async
+//@EnableAsync(order = Ordered.HIGHEST_PRECEDENCE)
+//@EnableAsync
 //@Primary // 指定为默认实现
 public class ThreadPoolExecutorConfig {
     //报错

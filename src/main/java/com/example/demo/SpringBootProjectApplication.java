@@ -33,8 +33,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 
-/*
+/**
  springboot SpringCloud 版本对应 https://spring.io/projects/spring-cloud#overview
+
+
+
+
+ ShiroConfiguration:defaultAdvisorAutoProxyCreator指定了 CGLIB代理。 defaultAdvisorAutoProxyCreator.setProxyTargetClass(true);
+ # application.yml
+ spring:
+ aop:
+ proxy-target-class: true
  */
 
 
@@ -51,8 +60,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @EnableCaching   //redis
 @EnableScheduling //quartz
-@EnableRabbit     //EnableRabbit
-@EnableAsync     //启用异步
+@EnableRabbit     //EnableRabbit 添加 spring-boot-starter-amqp  依赖，默认是自动开启的
+//@EnableAsync     //启用异步,在 ThreadPoolExecutorConfig 上配置
 
 //@EnableSelector
 @EnableFanckyStarter
@@ -63,6 +72,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @EnableHystrixDashboard //开启HystrixDashBoard
 @EnableCircuitBreaker//开启HystrixDashBoard
 @EnableAspectJAutoProxy(exposeProxy = true)//开启spring注解aop配置的支持，获取当前代理对象 (PersonService) AopContext.currentProxy();
+//@EnableAspectJAutoProxy(exposeProxy = true,
+//        proxyTargetClass = true)//强制使用 CGLIB 代理)//开启spring注解aop配置的支持，获取当前代理对象 (PersonService) AopContext.currentProxy();
+
 //移动到SwaggerConfig 配置文件类处理
 @EnableSwagger2  //EnableSwagger2  http://localhost:8081/swagger-ui.html
 @EnableRetry
