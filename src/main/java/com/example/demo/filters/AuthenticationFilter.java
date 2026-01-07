@@ -90,12 +90,12 @@ public class AuthenticationFilter implements Filter {
             String msg = objectMapper.writeValueAsString(messageResult);
 
             try {
-                returnJson(httpServletRequest,httpServletResponse, msg);
+                returnJson(httpServletRequest, httpServletResponse, msg);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
             try {
-                returnJson(httpServletRequest,httpServletResponse, ex.getMessage());
+                returnJson(httpServletRequest, httpServletResponse, ex.getMessage());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -104,7 +104,7 @@ public class AuthenticationFilter implements Filter {
                 messageResult.setMessage(ex.getMessage());
                 messageResult.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 String msg = objectMapper.writeValueAsString(messageResult);
-                returnJson(httpServletRequest,httpServletResponse, msg);
+                returnJson(httpServletRequest, httpServletResponse, msg);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -117,7 +117,7 @@ public class AuthenticationFilter implements Filter {
 //        System.out.println("Final status code: " + statusCode);
     }
 
-    private void returnJson(   HttpServletRequest httpServletRequest,HttpServletResponse response, String json) throws Exception {
+    private void returnJson(HttpServletRequest httpServletRequest, HttpServletResponse response, String json) throws Exception {
 
 //        response.setHeader("Access-Control-Allow-Origin", "*");
 //        response.setHeader("Cache-Control","no-cache");

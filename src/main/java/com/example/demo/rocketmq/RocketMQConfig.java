@@ -27,4 +27,11 @@ public class RocketMQConfig {
 
     public static final String TOPICB ="TopicB";
     public static final String CONSUMER_GROUP_B ="consumerGroupB";
+
+
+
+    public static final String TRANSACTION_MESSAGE_TOPIC ="TransactionMessageTopic";
+    public static final String TRANSACTION_MESSAGE_TOPIC_CONSUMER_GROUP ="TransactionMessageConsumerGroup";
+
+
 }

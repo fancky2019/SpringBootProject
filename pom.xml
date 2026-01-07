@@ -707,7 +707,12 @@
             <version>2.2.3</version>
         </dependency>
 
-
+        <!-- 在 pom.xml 中添加 -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.1.3-jre</version> <!-- 或使用与RocketMQ兼容的版本 -->
+        </dependency>
 
 <!--        缓存  For Java 11 or above, use 3.0.x otherwise use 2.9.x-->
         <!-- https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine -->

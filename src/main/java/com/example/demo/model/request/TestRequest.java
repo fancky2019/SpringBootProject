@@ -13,6 +13,14 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ *  @Valid
+ * 依赖
+ * spring-boot-starter-validation
+ *  @Valid 或者 @Validated @RequestBody OutByAssignedInfoBo requestList
+ *
+ *  @Validated 是 @Valid  的增强
+ */
 @Data
 public class TestRequest {
     @NotBlank(message = "姓名不能为空")

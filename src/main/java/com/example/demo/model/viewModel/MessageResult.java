@@ -18,6 +18,9 @@ public class MessageResult<T> implements Serializable {
     private String traceId = MDC.get("traceId");
     private T data;
 
+
+    private Long timestamp;   // 时间戳
+
     public MessageResult() {
         this.success = true;
     }
@@ -58,17 +61,28 @@ public class MessageResult<T> implements Serializable {
         return traceId;
     }
 
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public static <T> MessageResult<T> success() {
         MessageResult<T> messageResult = new MessageResult<>();
         messageResult.setSuccess(true);
         messageResult.setCode(200);
+        messageResult.setTimestamp(System.currentTimeMillis());
         return messageResult;
     }
+
     public static <T> MessageResult<T> success(T data) {
         MessageResult<T> messageResult = new MessageResult<>();
         messageResult.setSuccess(true);
         messageResult.setCode(200);
         messageResult.setData(data);
+        messageResult.setTimestamp(System.currentTimeMillis());
         return messageResult;
     }
 
@@ -77,6 +91,7 @@ public class MessageResult<T> implements Serializable {
         messageResult.setSuccess(false);
         messageResult.setCode(500);
         messageResult.setData(data);
+        messageResult.setTimestamp(System.currentTimeMillis());
         return messageResult;
     }
 
@@ -84,14 +99,16 @@ public class MessageResult<T> implements Serializable {
         MessageResult<T> messageResult = new MessageResult<>();
         messageResult.setSuccess(false);
         messageResult.setCode(500);
+        messageResult.setTimestamp(System.currentTimeMillis());
         return messageResult;
     }
 
-    public static <T> MessageResult<T> getMessageResult( T data,boolean success, int code) {
+    public static <T> MessageResult<T> getMessageResult(T data, boolean success, int code) {
         MessageResult<T> messageResult = new MessageResult<>();
         messageResult.setSuccess(success);
         messageResult.setCode(code);
         messageResult.setData(data);
+        messageResult.setTimestamp(System.currentTimeMillis());
         return messageResult;
     }
 }

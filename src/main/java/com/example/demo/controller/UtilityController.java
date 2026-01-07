@@ -2197,7 +2197,11 @@ public class UtilityController {
     @GetMapping(value = "/assertTest")
     public void assertTest(String text) {
         //不存在就扔异常，简化if 判断
+        //判 字符串  null  ""  "   "
         Assert.hasText(text, "text is empty");
+        //判  null
+//        Assert.notNull(detailRequest.getId(), "Detail id cannot be empty");
+//
     }
 
     @PostMapping(value = "/hashMapParam")
@@ -2259,6 +2263,13 @@ public class UtilityController {
     }
 
     /**
+     *
+     *
+     * 框架	        客户端取消后	                         是否继续执行	     原因分析
+     * ASP.NET Core	立即抛出 OperationCanceledException	❌ 停止执行	      使用了 HttpContext.RequestAborted 取消令牌
+     * Spring Boot	继续执行直到完成	                    ✅ 继续执行	      默认不检查客户端连接状态
+     *
+     *
      * 默认情况下，Spring MVC中的Controller方法是同步执行的。如果要进行异步处理，可以使用@Async注解或者通过自定义的TaskExecutor。
      *异步请求：在service 方法内部使用线程池，或在service方法上加@Async（要配置线程池 ：ThreadPoolExecutorConfig和配置类上添加@EnableAsync来启用异步支持）
      *
@@ -2276,6 +2287,7 @@ public class UtilityController {
     public MessageResult<Void> clientDisconnect() throws InterruptedException {
 
 
+        //false:默认同步执行
         boolean isAsyncStarted = this.httpServletRequest.isAsyncStarted();
         if (isAsyncStarted) {
             httpServletRequest.getAsyncContext().addListener(new AsyncListener() {
@@ -2317,6 +2329,52 @@ public class UtilityController {
         boolean started = this.httpServletRequest.isAsyncStarted();
         //模拟耗时任务
         Thread.sleep(60 * 1000);
+        boolean started1 = this.httpServletRequest.isAsyncStarted();
+        int n = 0;
+        return MessageResult.success();
+    }
+
+    /**
+     * 客户端取消请求，断开连接，http连接断开
+     *
+     *
+     * 框架	        客户端取消后	                         是否继续执行	     原因分析
+     * ASP.NET Core	立即抛出 OperationCanceledException	 停止执行	      使用了 HttpContext.RequestAborted 取消令牌
+     * Spring Boot	继续执行直到完成	                     继续执行	      默认不检查客户端连接状态
+     *
+     *
+     * springboot  postman取消send 后台api 还是会继续执行，结果没有返回给 postman:
+     * Postman 的 Cancel 本质上是：
+     * 客户端主动关闭 TCP 连接
+     * 它不会向服务端发送「取消请求」
+     * 它不会通知 Spring「这个请求不用处理了」
+     *
+     * 一旦进入 Controller：
+     * 请求已经被服务器接管
+     * 即使客户端断开
+     * 线程仍然继续执行业务逻辑
+     * 只是 响应写不回客户端
+     *
+     * 二、为什么「结果没返回给 Postman」？
+     * 因为：
+     * Postman 已经 断开连接
+     * Spring 在 response.getWriter().write() 或返回 ResponseBody 时
+     * 底层 Socket 已关闭
+     * Tomcat 会直接丢弃结果（有时抛 ClientAbortException）
+     *
+     *
+     *写响应时才可能感知
+     *response.getWriter().write("xxx");
+     *
+     *
+     * @return
+     * @throws InterruptedException
+     */
+    @GetMapping(value = "/clientAbortException")
+    public MessageResult<Void> clientAbortException() throws InterruptedException {
+        boolean started = this.httpServletRequest.isAsyncStarted();
+        //模拟耗时任务
+        Thread.sleep(10 * 1000);
         boolean started1 = this.httpServletRequest.isAsyncStarted();
         int n = 0;
         return MessageResult.success();
@@ -2694,6 +2752,13 @@ public class UtilityController {
     @GetMapping(value = "/circularReference")
     public MessageResult<String> circularReference() {
         serviceB.methodB();
+        return MessageResult.success();
+    }
+
+
+    @GetMapping(value = "/rocketMqTransactionMessage")
+    public MessageResult<String> rocketMqTransactionMessage() throws JsonProcessingException {
+        productTestService.rocketMqTransactionMessage();
         return MessageResult.success();
     }
 

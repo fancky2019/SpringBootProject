@@ -1,19 +1,27 @@
 package com.example.demo.rocketmq;
 
 import com.alibaba.fastjson.JSON;
+import com.example.demo.model.entity.demo.ProductTest;
+import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.RabbitMqMessage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
+import org.apache.rocketmq.client.producer.TransactionSendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.apache.rocketmq.spring.support.RocketMQHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.UUID;
 
 /**
  *
@@ -32,6 +40,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Slf4j
 @Component
 public class RocketMQProducer {
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
 
@@ -40,12 +52,12 @@ public class RocketMQProducer {
         RabbitMqMessage msg = new RabbitMqMessage(msgContent);
         //  log.warn(JSON.toJSONString(msg));
         // rocketMQTemplate.send(RocketMQConfig.TOPIC, MessageBuilder.withPayload(msg).build());
-      // 内部最终 syncSend:  SendResult sendResult = this.syncSend(destination, message);
+        // 内部最终 syncSend:  SendResult sendResult = this.syncSend(destination, message);
         //返回值丢失
 //        rocketMQTemplate.convertAndSend(RocketMQConfig.TOPIC, msg);
 
         // 自动序列化为JSON
-        SendResult sendResult=  rocketMQTemplate.syncSend(RocketMQConfig.TOPIC, msg);
+        SendResult sendResult = rocketMQTemplate.syncSend(RocketMQConfig.TOPIC, msg);
 //        单项发送
 //        rocketMQTemplate.sendOneWay(RocketMQConfig.TOPIC, msg);
         return "SUCESS";
@@ -78,7 +90,7 @@ public class RocketMQProducer {
 
     }
 
-    public SendResult sendMsg(String msgBody,String topic) {
+    public SendResult sendMsg(String msgBody, String topic) {
         try {
             RabbitMqMessage msg = new RabbitMqMessage(msgBody);
             //同步发送  timeout 时间值调大，单位ms 3000
@@ -119,6 +131,35 @@ public class RocketMQProducer {
                 int m = 0;
             }
         });
+    }
+
+
+    public void transactionMessage(ProductTest productTest) throws JsonProcessingException {
+
+        String msgBody = objectMapper.writeValueAsString(productTest);
+        RabbitMqMessage msg = new RabbitMqMessage(msgBody);
+        String uuid = msg.getMessageId();
+        // 生成事务ID
+        String transactionId = UUID.randomUUID().toString();
+        // 构建消息
+        Message<RabbitMqMessage> message = MessageBuilder
+                .withPayload(msg)
+                .setHeader(RocketMQHeaders.TRANSACTION_ID, transactionId)
+                .setHeader(RocketMQHeaders.KEYS, UUID.randomUUID().toString())
+                .setHeader("business_id", productTest.getId())
+                .setHeader(RocketMQHeaders.TOPIC, RocketMQConfig.TRANSACTION_MESSAGE_TOPIC)
+                .setHeader(RocketMQHeaders.TAGS, "ProductTest")
+                //生产环境配置：多事务消息 + 多 Producer Group + 多 Template + 多 Listener
+                .setHeader("tx_type", "PRODUCT_TEST_UPDATE")
+                .build();
+        Object arg = productTest;
+        // 发送事务消息
+        TransactionSendResult sendResult = rocketMQTemplate.sendMessageInTransaction(
+                RocketMQConfig.TRANSACTION_MESSAGE_TOPIC,
+                message,
+                arg
+        );
+
     }
 
 }

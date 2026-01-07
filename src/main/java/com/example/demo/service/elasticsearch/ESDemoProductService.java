@@ -59,7 +59,8 @@ public class ESDemoProductService {
 //    private RestHighLevelClient restHighLevelClient;
 
     /**
-     * ElasticsearchRestTemplate 内部封装了RestHighLevelClient
+     * ElasticsearchRestTemplate 内部封装了RestHighLevelClient,
+     * ElasticsearchRestTemplate 实现接口ElasticsearchOperations
      */
     @Autowired
     private ElasticsearchRestTemplate elasticsearchRestTemplate;

@@ -35,6 +35,7 @@ import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.request.TestRequest;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
+import com.example.demo.rocketmq.RocketMQProducer;
 import com.example.demo.service.demo.IMqMessageService;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.service.ftp.FtpService;
@@ -168,6 +169,9 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 
     @Autowired
     private FtpConfig ftpConfig;
+
+    @Autowired
+    RocketMQProducer rocketMQProducer;
 
     public ProductTestServiceImpl(ProductTestMapper productTestMapper) {
         this.productTestMapper = productTestMapper;
@@ -2357,5 +2361,18 @@ LockAnnotationAdvisor 实现了Ordered接口
         //此处根据 数据动态拼接 last.last  会拼接在DeletedInnerInterceptor 里拼接的语句前面
         queryWrapper.last(" for share;");
         return this.getBaseMapper().selectOne(queryWrapper);
+    }
+
+    @Override
+    public void rocketMqTransactionMessage() throws JsonProcessingException {
+        ProductTest productTest = this.getById(2);
+//        productTest.setVersion(productTest.getVersion() + 1);
+//        LambdaUpdateWrapper<ProductTest> updateWrapper3 = new LambdaUpdateWrapper<>();
+//        updateWrapper3.set(ProductTest::getVersion, productTest.getVersion());
+//        updateWrapper3.eq(ProductTest::getId, productTest.getId());
+//        this.update(updateWrapper3);
+        rocketMQProducer.transactionMessage(productTest);
+
+
     }
 }

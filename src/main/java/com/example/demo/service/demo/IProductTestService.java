@@ -108,4 +108,6 @@ Java 注解继承：
     ProductTest getByIdForShareMySql(BigInteger id);
 
     ProductTest getByIdLastForShareMySql(BigInteger id);
+
+    void rocketMqTransactionMessage() throws JsonProcessingException;
 }
