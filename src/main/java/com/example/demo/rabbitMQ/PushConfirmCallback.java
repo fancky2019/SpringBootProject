@@ -15,6 +15,7 @@ import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -57,12 +58,19 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
             Message message = returnedMessage.getMessage();
             MessageProperties messageProperties = message.getMessageProperties();
             String messageId = messageProperties.getMessageId();
+            ApplicationContext applicationContext = ApplicationContextAwareImpl.getApplicationContext();
+            IMqMessageService mqMessageService = applicationContext.getBean(IMqMessageService.class);
+            //生产失败 ack =false。消息达到最大队列长度，ack=false
             if (ack) {
                 //发送消息时候指定的消息的id，根据此id设置消息表的消息状态为已发送
 
+
+//                msgId = "cac29833-85f7-4dd7-b3a0-ed97863d37a2";
+
+
+                //更新本地消息表的状态，可优化成异步，不阻塞rabbitMq 的produce,提高性能
 //                从容器中获取bean
-                ApplicationContext applicationContext = ApplicationContextAwareImpl.getApplicationContext();
-                IMqMessageService mqMessageService = applicationContext.getBean(IMqMessageService.class);
+
                 //本地消息表会存在重复投递情况，消费端要做幂等处理
                 //rabbitMq 生产成功，更新小标状态失败。定时任务补偿重试，重复发送直到更新消息表更新成功
                 //可采用事务消息（推荐）
@@ -74,12 +82,17 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
                 //
                 //但 RabbitMQ 没有原生事务消息支持，需自行实现补偿机制。
 
-                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-                lambdaQueryWrapper.eq(MqMessage::getMsgId, msgId);
-                MqMessage mqMessage = mqMessageService.getOne(lambdaQueryWrapper);
-                mqMessage.setStatus(1);
-                mqMessage.setModifyTime(LocalDateTime.now());
-                mqMessageService.updateById(mqMessage);
+//                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+//                lambdaQueryWrapper.eq(MqMessage::getMsgId, msgId);
+//                MqMessage mqMessage = mqMessageService.getOne(lambdaQueryWrapper);
+//                mqMessage.setStatus(1);
+//                mqMessage.setModifyTime(LocalDateTime.now());
+//                mqMessageService.updateById(mqMessage);
+//
+
+
+                mqMessageService.updateByMsgIdAsync(msgId, MqMessageStatus.PRODUCE.getValue());
+
 
 //                mqMessageService.updateByMsgId(msgId, MqMessageStatus.PRODUCE.getValue());
 
@@ -92,7 +105,10 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
                 log.info("消息 - {} 发送到交换机成功！", msgId);
 //                log.info("消息 - {} 发送到交换机成功！{}", msgId,"123");
             } else {
+                //ack true 只保证发送到broker 交换机，不保证路由到具体队列。
+                //ack false rabbitMq 不会返回 ack false的原因
                 log.info("消息 - {} 发送到交换机失败！ ", msgId);
+                mqMessageService.updateByMsgIdAsync(msgId, MqMessageStatus.NOT_PRODUCED.getValue());
             }
         } catch (Exception e) {
             log.error("", e);

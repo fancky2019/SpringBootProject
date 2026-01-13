@@ -233,7 +233,8 @@ public class BaseRabbitMqHandler {
 
             //region update mqMessage
             //重试仍然没有成功，标记为消费失败。走定时任务补偿
-            mqMessageService.updateByMsgId(messageId, MqMessageStatus.CONSUME_FAIL.getValue());
+//            mqMessageService.updateByMsgId(messageId, MqMessageStatus.CONSUME_FAIL.getValue());
+            mqMessageService.updateByMsgIdAsync(messageId, MqMessageStatus.CONSUME_FAIL.getValue());
             //endregion
 
 //            ThreadLocal<String> threadLocal = new ThreadLocal<>();

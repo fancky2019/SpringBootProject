@@ -220,6 +220,78 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
         }
     }
 
+    @Async("mqFailHandlerExecutor")
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateByMsgIdAsync(String msgId, int status) throws Exception {
+//        this.updateById(mqMessage);
+//        this.update(mqMessage, new LambdaUpdateWrapper<MqMessage>().eq(MqMessage::getId, mqMessage.getId()));
+        //getCurrentTransactionName() 当前事务的名字（默认是 null）
+        String currentTransactionName = TransactionSynchronizationManager.getCurrentTransactionName();
+//isActualTransactionActive() 最重要、最准：真正有无事务
+//        它代表：
+//        当前线程的底层数据库连接是否在事务模式中
+//        Spring 是否在此线程中开启了 beginTransaction
+//        回滚、提交是否会生效
+
+
+        //        true → 说明当前线程中存在一个活动的事务（Connection 被绑定到线程）
+        boolean isActualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+//        isSynchronizationActive() = 当前线程是否启用了 Spring 的事务同步机制（允许绑定资源和事务回调）。
+//        并不完全等于“是否有事务”，但通常和事务同时开启。
+        boolean isSynchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();
+
+
+
+
+
+
+        String lockKey = RedisKey.UPDATE_MQ_MESSAGE_INFO + ":" + msgId;
+        //获取分布式锁，此处单体应用可用 synchronized，分布式就用redisson 锁
+        RLock lock = redissonClient.getLock(lockKey);
+        boolean lockSuccessfully = false;
+        try {
+
+//            lockSuccessfully = lock.tryLock(RedisKey.INIT_INVENTORY_INFO_FROM_DB_WAIT_TIME, RedisKey.INIT_INVENTORY_INFO_FROM_DB_LEASE_TIME, TimeUnit.SECONDS);
+            //  return this.tryLock(waitTime, -1L, unit); 不指定释放时间，RedissonLock内部设置-1，
+            lockSuccessfully = lock.tryLock(RedisKey.INIT_INVENTORY_INFO_FROM_DB_WAIT_TIME, TimeUnit.SECONDS);
+
+            log.info("updateByMsgId get lock {}", lockKey);
+            LambdaQueryWrapper<MqMessage> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(MqMessage::getMsgId, msgId);
+            List<MqMessage> mqMessageList = this.list(queryWrapper);
+            MqMessage mqMessage = null;
+            if (mqMessageList.size() > 0) {
+                mqMessage = mqMessageList.get(0);
+            }
+            if (mqMessage == null) {
+                throw new Exception("Can't get MqMessage by MsgId :" + mqMessage.getMsgId());
+            }
+
+            Integer oldVersion = mqMessage.getVersion();
+            mqMessage.setVersion(mqMessage.getVersion() + 1);
+            mqMessage.setStatus(status);
+            mqMessage.setModifyTime(LocalDateTime.now());
+            LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<MqMessage>();
+            updateWrapper.eq(MqMessage::getVersion, oldVersion);
+            updateWrapper.eq(MqMessage::getId, mqMessage.getId());
+            boolean re = this.update(mqMessage, updateWrapper);
+            if (!re) {
+                String message = MessageFormat.format("MqMessage update fail :id - {0} ,version - {1}", mqMessage.getId(), oldVersion);
+                throw new Exception(message);
+            }
+        } catch (Exception ex) {
+            log.error("", ex);
+            throw ex;
+        } finally {
+            //非事务操作在此释放
+//            if (lockSuccessfully && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
+            redisUtil.releaseLockAfterTransaction(lock, lockSuccessfully);
+        }
+    }
+
 
     @Override
     public PageData<MqMessageResponse> list(MqMessageRequest request) throws JsonProcessingException {

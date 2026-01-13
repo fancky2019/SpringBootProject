@@ -52,26 +52,35 @@ public class RabbitMQController {
         多线程消费：多个队列可以被不同的消费者同时消费
         单线程消费：单个队列内的消息按顺序被消费（默认情况下）
          */
-        CompletableFuture.runAsync(()->
-        {
-            MqMessage mqMessage = new MqMessage
-                    (RabbitMQConfig.DIRECT_EXCHANGE_NAME,
-                            RabbitMQConfig.DIRECT_ROUTING_KEY,
-                            RabbitMQConfig.DIRECT_QUEUE_NAME,
-                            "1");
-            rabbitMQTest.produceTest(mqMessage);
-        });
-        CompletableFuture.runAsync(()->
-        {
-            MqMessage mqMessage = new MqMessage
-                    (RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME,
-                            RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY,
-                            RabbitMQConfig.BATCH_DIRECT_QUEUE_NAME,
-                            "2");
-            rabbitMQTest.produceTest(mqMessage);
-        });
+//        CompletableFuture.runAsync(()->
+//        {
+//            MqMessage mqMessage = new MqMessage
+//                    (RabbitMQConfig.DIRECT_EXCHANGE_NAME,
+//                            RabbitMQConfig.DIRECT_ROUTING_KEY,
+//                            RabbitMQConfig.DIRECT_QUEUE_NAME,
+//                            "1");
+//            rabbitMQTest.produceTest(mqMessage);
+//        });
 
 
+//        CompletableFuture.runAsync(()->
+//        {
+//            MqMessage mqMessage = new MqMessage
+//                    (RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME,
+//                            RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY,
+//                            RabbitMQConfig.BATCH_DIRECT_QUEUE_NAME,
+//                            "2");
+//            rabbitMQTest.produceTest(mqMessage);
+//        });
+
+
+
+        MqMessage mqMessage = new MqMessage
+                (RabbitMQConfig.DIRECT_EXCHANGE_NAME,
+                        RabbitMQConfig.DIRECT_ROUTING_KEY,
+                        RabbitMQConfig.DIRECT_QUEUE_NAME,
+                        "1");
+        rabbitMQTest.produceTest(mqMessage);
 
         return MessageResult.success("complete");
     }

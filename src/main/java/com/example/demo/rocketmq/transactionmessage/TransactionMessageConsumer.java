@@ -17,6 +17,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 
+/**
+ *
+ * 建议使用本地消息表代替事务消息，稳定
+ */
 @Slf4j
 @Component
 //,messageModel = MessageModel.BROADCASTING) //默认集群模式

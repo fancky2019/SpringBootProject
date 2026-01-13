@@ -409,12 +409,38 @@ public class RabbitMQConfig {
         return directExchange;
     }
 
+    /**
+     * 修改队列信息，要把之前的队列删除，重新建队列更改才会生效
+     * @return
+     */
     @Bean
     public Queue directQueue() {
 
+//        durable=true（队列持久化）：仅保证队列的元数据在RabbitMQ重启后不丢失。
+//
+//        delivery_mode=2（消息持久化）：才决定消息内容是否写入磁盘。
         //设置死信队列的参数（交换机、路由key）
         // Queue(String name, boolean durable, boolean exclusive, boolean autoDelete, Map<String, Object> arguments)
         HashMap<String, Object> args = new HashMap<>();
+
+         //       RabbitMQ的默认行为是假设队列长度无限，
+        // ========== 强制配置 ==========
+        // 1. 最大消息数量（防止无限堆积）
+        args.put("x-max-length", 2);
+
+        // 2. 最大队列字节大小（防止大消息撑爆内存） //x-max-length 和 x-max-length-bytes 是同时生效的.队列长度限制 = min(数量限制，字节限制)
+//        args.put("x-max-length-bytes", 1024 * 1024 * 500); // 500MB
+
+        // 3. 设置消息TTL（自动清理旧消息）
+//        args.put("x-message-ttl", 24 * 60 * 60 * 1000); // 24小时
+
+        // 4. 溢出策略（推荐使用reject-publish），默认  静默drop-head策略。删除最早的，不会有任何通知
+        args.put("x-overflow", "reject-publish");
+        //----end------------
+
+
+
+
         //设置队列最大优先级[0,9]，发送消息时候指定优先级
         args.put("x-max-priority", 10);
         //  x-message-ttl 参数的单位是毫秒。

@@ -52,7 +52,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
     //rabbitmq 默认轮训向所有服务中的一个发送消息
     //多个方法绑定同一个队列MQ会轮训发送给各个方法消费
     @RabbitHandler
-    @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
+//    @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
 //    public void receivedMsg(Person messageContent,Channel channel,
     public void receivedMsg(Channel channel,
                             Message message,
@@ -108,7 +108,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
     //多个方法绑定同一个队列MQ会轮训发送给各个方法消费
     //string 接收
     @RabbitHandler
-    @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
+//    @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
     public void receivedMsg(Message message, Channel channel,
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
                             @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName) throws Exception {

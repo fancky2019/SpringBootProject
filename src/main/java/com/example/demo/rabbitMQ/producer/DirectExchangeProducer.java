@@ -98,6 +98,19 @@ public class DirectExchangeProducer {
                 //设置消息内容
                 ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
                 correlationData.setReturned(returnedMessage);
+                message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+
+//                // 1. 构建持久化消息
+//                Message message = MessageBuilder
+//                        .withBody(serialize(data))
+//                        .setDeliveryMode(MessageDeliveryMode.PERSISTENT)  // 消息持久化
+//                        .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+//                        .setCorrelationId(UUID.randomUUID().toString())
+//                        .setTimestamp(new Date())
+//                        .build();
+//
+//                // 2. 发送并等待确认
+//                CorrelationData correlationData = new CorrelationData();
 
                 //  rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
                 rabbitTemplate.convertAndSend(RabbitMQConfig.DIRECT_EXCHANGE_NAME, RabbitMQConfig.DIRECT_ROUTING_KEY, message, correlationData);
@@ -133,7 +146,19 @@ public class DirectExchangeProducer {
 
 //                rabbitTemplate.convertAndSend(DIRECT_EXCHANGE_NAME, DIRECT_ROUTING_KEY, mqMsg);
                 Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
+                message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
 
+//                // 1. 构建持久化消息
+//                Message message = MessageBuilder
+//                        .withBody(serialize(data))
+//                        .setDeliveryMode(MessageDeliveryMode.PERSISTENT)  // 消息持久化
+//                        .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+//                        .setCorrelationId(UUID.randomUUID().toString())
+//                        .setTimestamp(new Date())
+//                        .build();
+//
+//                // 2. 发送并等待确认
+//                CorrelationData correlationData = new CorrelationData();
                 String msgId = UUID.randomUUID().toString();
                 CorrelationData correlationData = new CorrelationData(msgId);
                 //设置消息内容
@@ -175,6 +200,7 @@ public class DirectExchangeProducer {
         String routingKey = mqMessage.getRouteKey();
 
         MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
         String msgId = mqMessage.getMsgId();
         //设置优先级
         messageProperties.setPriority(9);
@@ -184,7 +210,19 @@ public class DirectExchangeProducer {
       //messageId
         message.getMessageProperties().setMessageId(mqMessage.getMsgId());
 //        String messageId = message.getMessageProperties().getMessageId();
+//        message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
 
+//                // 1. 构建持久化消息
+//                Message message1 = MessageBuilder
+////                        .withBody(serialize(data))
+//                        .setDeliveryMode(MessageDeliveryMode.PERSISTENT)  // 消息持久化
+//                        .setContentType(MessageProperties.CONTENT_TYPE_JSON)//RabbitMQ 消息的 ContentType 属性是 null 或空字符串。
+//                        .setCorrelationId(msgId)
+////                        .setTimestamp(new Date())
+//                        .build();
+//
+//                // 2. 发送并等待确认
+//                CorrelationData correlationData = new CorrelationData();
         CorrelationData correlationData = new CorrelationData(msgId);
         //设置消息内容
         ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
@@ -260,7 +298,7 @@ public class DirectExchangeProducer {
 
                 //  batchingRabbitTemplate.convertAndSend(BATCH_DIRECT_EXCHANGE_NAME,BATCH_DIRECT_ROUTING_KEY,mqMsg);
                 Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
-
+                message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
                 String msgId = UUID.randomUUID().toString();
                 CorrelationData correlationData = new CorrelationData(msgId);
                 //设置消息内容
