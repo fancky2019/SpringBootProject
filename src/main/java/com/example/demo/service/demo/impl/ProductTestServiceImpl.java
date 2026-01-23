@@ -1087,7 +1087,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         builder.excelType(ExcelTypeEnum.XLSX);
         ExcelWriter writer = builder.build();
 
-
+//        SELECT COUNT(*) FROM 你的表名
         long count = this.baseMapper.selectCount(Wrappers.emptyWrapper());
 //        count = 999;
         long loopCount = count / stepCount;

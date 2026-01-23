@@ -14,6 +14,16 @@ import java.util.List;
 /*
 @import 导入第三方类库的类到ioc 容器，id 是全类名
 @bean id 是方法名
+
+
+ @bean与@Component的区别总结
+	         @Bean方法	                      @Component类
+定义方式	    方法级注解	                      类级注解
+灵活性	    高（可编程配置）	              低（声明式）
+适用场景  	第三方库、复杂配置	              业务组件
+依赖注入	    通过方法参数或调用其他@Bean方法	  通过字段/构造器
+条件化创建	支持（@Conditional）	          有限支持
+方法内new	返回的对象被Spring管理	          方法内new的对象不被管理
  */
 
 

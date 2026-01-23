@@ -15,6 +15,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -26,15 +27,28 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.*;
 import java.lang.reflect.UndeclaredThrowableException;
 
 /**
+ *
+ * @ResponseBody 的作用：把方法的返回值，直接写进 HTTP 响应体（Body），而不是当成“视图名”去解析。
+ *
+ *组合注解：RestControllerAdvice =@ControllerAdvice+@ResponseBody
+ * 纯restApi 项目用 @RestControllerAdvice，有视图的用 @ControllerAdvice
+ *
+ *
+ *
+ *
+ *
+ *
  *
  * @ControllerAdvice 可以被应用到所有标注为 @Controller 的类
  *组合使用：@ControllerAdvice 可以与其他注解如 @ExceptionHandler、@ModelAttribute、@InitBinder 等一起使用，处理异常、共享模型数据、进行数据绑定等。
  *
  *
- *Spring 默认会按照方法声明顺序执行同一类中的多个 @ModelAttribute 方法，但最可靠的方式是通过方法参数显式声明依赖关系，而不是依赖隐式的执行顺序。
+ *
+Spring 默认会按照方法声明顺序执行同一类中的多个 @ModelAttribute 方法，但最可靠的方式是通过方法参数显式声明依赖关系，而不是依赖隐式的执行顺序。
  *
  *
  *

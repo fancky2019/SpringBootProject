@@ -642,4 +642,20 @@ ProxySQL / HAProxy：应用程序连接 ProxySQL，由 ProxySQL 负责路由到�
 
              */
     //endregion
+
+
+    //region  秒杀
+            /*
+1、页面静态化：倒计时不能操作
+2、cdn
+3、nginx限流：id、ip、url
+4、redis预加载基础信息
+5：预扣账：1、redis 进行库存判断时候能扣减，并减一，然后设置订单相关信息写入redis lua 操作
+          2、生成订单：发送消息到 rabbitmq，生成订单 并扣账
+6、对账：redis 添加的订单信息是否都写入mysql
+7、订单支付：订单是否生成：1、在redis中，否则直接返回
+                       2、在redis，不在数据库，等待一段时间。超时redis key
+
+             */
+    //endregion
 }

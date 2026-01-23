@@ -1284,6 +1284,75 @@ public class UtilityController {
         response.setHeader("Content-disposition", "attachment;filename*=utf-8'zh_cn'" + fileName + ExcelTypeEnum.XLSX.getValue());
     }
 
+    //region 泛型导出
+    // ,大数据量    this.productTestService.exportByPage(httpServletResponse, request);
+    /**
+     * 指定数据源导出excel
+     *
+     * @param response
+     * @param data     导出模板，1 导出错误信息，2 导出数据
+     * @throws IOException
+     */
+    private <T> void exportExcel(HttpServletResponse response, List<T> data, Class cla, String fileName) throws Exception {
+        if (StringUtils.isEmpty(fileName)) {
+            fileName = cla.getSimpleName();
+        }
+        prepareResponds(fileName, response);
+        ServletOutputStream outputStream = response.getOutputStream();
+        // 获取改类声明的所有字段
+        Field[] fields = cla.getDeclaredFields();
+        // 响应字段对应的下拉集合
+        Map<Integer, String[]> map = new HashMap<>();
+        Field field = null;
+        // 循环判断哪些字段有下拉数据集，并获取
+        for (int i = 0; i < fields.length; i++) {
+            field = fields[i];
+            // 解析注解信息
+            DropDownSetField dropDownSetField = field.getAnnotation(DropDownSetField.class);
+            if (null != dropDownSetField) {
+                String[] sources = ResoveDropAnnotationUtil.resove(dropDownSetField);
+                if (null != sources && sources.length > 0) {
+                    map.put(i, sources);
+                }
+            }
+        }
+        //多个sheet页写入
+        ExcelWriterBuilder builder = new ExcelWriterBuilder();
+        builder.autoCloseStream(true);
+//        if (flag == 0 || flag == 2) {
+        builder.registerWriteHandler(new ExcelStyleConfig(Lists.newArrayList(20), null, null));
+        builder.head(cla);
+//        } else {
+//            builder.registerWriteHandler(new ExcelStyleConfig(null,null,null));
+//            builder.head(GXDetailListLogVO.class);
+//        }
+        String sheetName = cla.getSimpleName();
+        WriteSheet sheet1 = EasyExcel.writerSheet(0, sheetName).build();
+        builder.registerWriteHandler(new DropDownCellWriteHandler(map));
+        builder.file(outputStream);
+
+        //不能重命名，重命名就没有XLSX格式后缀
+        builder.excelType(ExcelTypeEnum.XLSX);
+        ExcelWriter writer = builder.build();
+        writer.write(data, sheet1);
+        writer.finish();
+
+        //ExcelWriter实现Closeable 接口，内部close 调用finish, finish 内会执行关闭操作
+//        outputStream.flush();
+//        outputStream.close();
+    }
+
+//    /**
+//     * 将文件输出到浏览器(导出)
+//     */
+//    private void prepareResponds(String fileName, HttpServletResponse response) throws IOException {
+//        response.setContentType("application/vnd.ms-excel");
+//        response.setCharacterEncoding("utf-8");
+//        fileName = URLEncoder.encode(fileName, "UTF-8");
+//        response.setHeader("Content-disposition", "attachment;filename*=utf-8'zh_cn'" + fileName + ExcelTypeEnum.XLSX.getValue());
+//    }
+    //endregion
+
     /**
      * 文件上传 导入excel。excel 中的列可以不和实体类字段严格匹配
      * 1. 创建excel对应的实体对象

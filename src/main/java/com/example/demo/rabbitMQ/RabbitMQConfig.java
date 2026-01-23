@@ -411,6 +411,19 @@ public class RabbitMQConfig {
 
     /**
      * 修改队列信息，要把之前的队列删除，重新建队列更改才会生效
+     *
+     *
+     * Default for virtual host参数：
+     *
+     * Auto expire : 队列生存期，单位毫秒，队列多长时间没有被使用(访问)就会被删除。换句话说就是，当队列在指定的时间内没有被使用(访问)就会被删除。
+     * Message TTL：消息生存期，单位毫秒。可以用作延迟队列，消息延迟消费等场景。
+     * Overflow behaviour：设置队列溢出行为，队列中的消息溢出后如何处理。这决定了当达到队列的最大长度时消息会发生什么。有效值是drop-head、reject-publish或reject-publish-dlx(将溢出的新消息转发到指定的死信交换机（DLX）)。仲裁队列类型仅支持drop-head。
+     * Single active consumer：表示队列是否是单一活动消费者，true时，注册的消费组内只有一个消费者消费消息，其他被忽略，false时消息循环分发给所有消费者(默认false)。
+     * Dead letter exchange：死信队列交换机名称，过期或溢出被删除（因队列长度超长或因空间超出阈值）的消息可指定发送到该交换器中。
+     * Dead letter routing key：死信消息路由键，当消息发送到死信交换器时会使用该路由键，如果不设置，则使用消息的原来的路由键值。
+     * Max length：队列最大长度，可以理解为队列可以容纳的消息的最大条数。超过该最大值，则将从队列头部开始删除消息。
+     * Max length bytes：队列消息内容占用对打空间，可以理解为队列可以容纳的消息的最大字节数，受限服务器内存大小，超过该阈值则从队列头部开始删除消息。
+     * Leader locator：设置在节点集群上声明队列前导时定位的规则。有效值为client-local(默认值)和balanced。
      * @return
      */
     @Bean
@@ -433,6 +446,10 @@ public class RabbitMQConfig {
 
         // 3. 设置消息TTL（自动清理旧消息）
 //        args.put("x-message-ttl", 24 * 60 * 60 * 1000); // 24小时
+
+        //
+
+//        队列溢出行为	队列满时处理新消息	x-overflow	drop-head (默认), reject-publish	生产者速度过快，需要保护队列不无限增长。
 
         // 4. 溢出策略（推荐使用reject-publish），默认  静默drop-head策略。删除最早的，不会有任何通知
         args.put("x-overflow", "reject-publish");
