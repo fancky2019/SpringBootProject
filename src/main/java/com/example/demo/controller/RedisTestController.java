@@ -849,6 +849,16 @@ public class RedisTestController {
     //配置集群的时候;@SpringBootApplication(exclude = {RedissonAutoConfiguration.class})
 
     /**
+     * Redisson 的分布式锁在 Redis 里是用 Hash 结构
+     *redis key :redisson:updateTruckOrder:2
+     *
+     * hash field :clientId:threadId    Redisson 客户端唯一ID（这个 JVM 实例的身份:当前 JVM 里的线程 ID
+     * hash field :47f74905-0865-48fe-973d-edd7db765977:217
+     * hash value:重入次数 = 1
+     * hash value:1
+     *
+     *
+     *
      * 单Redis节点模式
      * doc:https://github.com/redisson/redisson/wiki/%E7%9B%AE%E5%BD%95
      * <p>
