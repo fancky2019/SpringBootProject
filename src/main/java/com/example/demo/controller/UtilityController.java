@@ -293,9 +293,6 @@ public class UtilityController {
     private ServiceB serviceB;
 
 
-
-
-
     //region  循环依赖解决办法
     //1、字段 Lazy
 //    @Autowired
@@ -314,8 +311,6 @@ public class UtilityController {
 //    this.coordinator = coordinator;
 //}
 //endregion
-
-
 
 
     //bean  生命周期 参见 model--pojo--BeanLife SpringLifeCycleBean
@@ -1099,7 +1094,7 @@ public class UtilityController {
      */
     @ApiOperation(value = "exportByPage")
     @PostMapping(value = "/exportByPage")
-    public void exportByPage(@RequestBody DemoProductRequest request) throws IOException, NoSuchFieldException, IllegalAccessException {
+    public void exportByPage(@RequestBody DemoProductRequest request) throws Exception {
 
         this.productTestService.exportByPage(httpServletResponse, request);
     }
@@ -1286,6 +1281,7 @@ public class UtilityController {
 
     //region 泛型导出
     // ,大数据量    this.productTestService.exportByPage(httpServletResponse, request);
+
     /**
      * 指定数据源导出excel
      *
@@ -2578,7 +2574,6 @@ public class UtilityController {
         productTestService.noTranMethodCallTranMethod();
         return MessageResult.success();
     }
-
 
 
     @GetMapping(value = "/batchUpdateByCondition")

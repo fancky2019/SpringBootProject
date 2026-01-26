@@ -53,6 +53,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.poi.ss.formula.functions.T;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.aop.framework.AopContext;
@@ -75,6 +76,7 @@ import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.print.DocFlavor;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
@@ -82,6 +84,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.net.URLEncoder;
@@ -95,6 +98,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * mybatisPlus批量
@@ -959,6 +964,12 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
     }
     //endregion
 
+    public void exportByPage(HttpServletResponse response, DemoProductRequest request) throws Exception {
+
+
+        long count = this.baseMapper.selectCount(Wrappers.emptyWrapper());
+        exportByPage(response, request, count, ProductTest.class, (req) -> this.productTestMapper.getPageDataOptimization((DemoProductRequest) req));
+    }
     //region easyexcel 导出  分页导出
 
     /**
@@ -984,9 +995,11 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      *
      * 250 W不到3分钟
      */
-    public void exportByPage(HttpServletResponse response, DemoProductRequest request) throws IOException, NoSuchFieldException, IllegalAccessException {
 
-        String fileName = "DemoProduct_" + System.currentTimeMillis();
+    public <T extends com.example.demo.model.pojo.Page, R> void exportByPage(HttpServletResponse response, T request, long count, Class<R> cla, Function<T, List<R>> queryFunction) throws Exception {
+
+        String claSimpleName = cla.getSimpleName();
+        String fileName = claSimpleName + System.currentTimeMillis();
         prepareResponds(fileName, response);
         // 这里 需要指定写用哪个class去写
         int stepCount = 10000;
@@ -1001,7 +1014,7 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         //细化设置
         ServletOutputStream outputStream = response.getOutputStream();
         // 获取改类声明的所有字段
-        Field[] fields = ProductTest.class.getDeclaredFields();
+        Field[] fields = cla.getDeclaredFields();
 
         // 响应字段对应的下拉集合
         Map<Integer, String[]> map = new HashMap<>();
@@ -1082,13 +1095,13 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         builder.registerWriteHandler(new DropDownCellWriteHandler(map));
 //        builder.includeColumnFieldNames(includeColumnFieldNames)
         builder.file(outputStream);
-
+//        includeColumnFieldNames.stream().collect(Collectors.toMap())
         //不能重命名，重命名就没有XLSX格式后缀
         builder.excelType(ExcelTypeEnum.XLSX);
         ExcelWriter writer = builder.build();
 
 //        SELECT COUNT(*) FROM 你的表名
-        long count = this.baseMapper.selectCount(Wrappers.emptyWrapper());
+//        long count = this.baseMapper.selectCount(Wrappers.emptyWrapper());
 //        count = 999;
         long loopCount = count / stepCount;
         long remainder = count % stepCount;
@@ -1104,7 +1117,8 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         }
         int sheetIndex = 0;
         int maxId = 0;
-        WriteSheet sheet = EasyExcel.writerSheet(0, "DemoProduct" + sheetIndex).build();
+        Method getIdMethod = cla.getMethod("getId");
+        WriteSheet sheet = EasyExcel.writerSheet(0, claSimpleName + sheetIndex).build();
         for (int i = 1; i <= loopCount; i++) {
             request.setMaxId(maxId);
             request.setPageIndex(i);//es 要-1
@@ -1114,16 +1128,29 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
             //超过200W 查询要5s
 //            List<ProductTest> list =  this.productTestMapper.getPageData(request);
             //采用最大ID，可0.5s查询到结果
-            List<ProductTest> list = this.productTestMapper.getPageDataOptimization(request);
+//            List<ProductTest> list = this.productTestMapper.getPageDataOptimization(request);
+            List<R> list = queryFunction.apply(request);
             int total = i * stepCount;
             writer.write(list, sheet);
             if (total % sheetSize == 0) {
                 sheetIndex += 1;
-                sheet = EasyExcel.writerSheet(sheetIndex, "DemoProduct" + sheetIndex).build();
+                sheet = EasyExcel.writerSheet(sheetIndex, claSimpleName + sheetIndex).build();
 //                WriteSheet writeSheet = EasyExcel.writerSheet(i, "模板" + i).build();
             }
-            maxId = list.stream().map(p -> p.getId().intValue()).max(Comparator.comparing(Integer::intValue)).orElse(0);
-
+//            maxId = list.stream().map(p -> p.getId().intValue()).max(Comparator.comparing(Integer::intValue)).orElse(0);
+            // 或者使用反射（如果无法添加参数）
+            maxId = list.stream()
+                    .map(item -> {
+                        try {
+//                            Method getIdMethod = item.getClass().getMethod("getId");
+                            Object id = getIdMethod.invoke(item);
+                            return id instanceof Integer ? ((Integer) id) : 0;
+                        } catch (Exception e) {
+                            return 0;
+                        }
+                    })
+                    .max(Comparator.comparing(Integer::intValue))
+                    .orElse(0);
         }
 
 
