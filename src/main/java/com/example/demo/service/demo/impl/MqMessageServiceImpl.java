@@ -35,6 +35,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Async;
@@ -69,6 +72,9 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@Primary
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)  // 关键！强制TARGET_CLASS代理,不知道为什么是jdk 动态代理，事务不生效，否则就要在
+//接口加   @Transactional(rollbackFor = Exception.class,
 public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage> implements IMqMessageService {
 
     @Autowired
@@ -109,6 +115,9 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(MqMessage mqMessage) throws Exception {
+        boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+        // 判断当前是否存在事务,如果没有开启事务是会报错的
+        boolean isActualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
 
         String lockKey = RedisKey.UPDATE_MQ_MESSAGE_INFO + ":" + mqMessage.getId();
         //获取分布式锁，此处单体应用可用 synchronized，分布式就用redisson 锁

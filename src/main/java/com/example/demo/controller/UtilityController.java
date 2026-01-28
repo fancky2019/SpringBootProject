@@ -2826,5 +2826,11 @@ public class UtilityController {
         return MessageResult.success();
     }
 
+    @GetMapping(value = "/mqMessageUpdate")
+    public MessageResult<String> mqMessageUpdate() throws Exception {
+        mqMessageService.update(new MqMessage());
+        return MessageResult.success();
+    }
+
 }
 
