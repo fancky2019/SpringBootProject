@@ -18,6 +18,12 @@ import java.util.List;
  * @since 2023-11-15
  */
 public interface IMqMessageService extends IService<MqMessage> {
+
+    //建议 @Transactional 加载service 层的方法上
+    //    @Transactional(rollbackFor = Exception.class)
+    void transactionRepeatReadLock() throws Exception;
+
+
     void add(MqMessage mqMessage);
 
     void delete(MqMessage mqMessage);

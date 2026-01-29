@@ -73,6 +73,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -2832,5 +2833,21 @@ public class UtilityController {
         return MessageResult.success();
     }
 
+    @PostMapping(value = "/transactionRepeatReadLock")
+    public MessageResult<Void> transactionRepeatReadLock() throws Exception {
+        boolean proxy = AopUtils.isAopProxy(mqMessageService);
+
+        // 1. 检查代理类型
+        boolean isAopProxy = AopUtils.isAopProxy(mqMessageService);
+        boolean isCglibProxy = AopUtils.isCglibProxy(mqMessageService);
+        boolean isJdkProxy = AopUtils.isJdkDynamicProxy(mqMessageService);
+        //看代理是jdk 还是cglib.jdk 代理service层方法上的事务会失效，要把service设置成cglib代理 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+        //    CGLIB:    gs.com.gses.service.impl.TruckOrderItemServiceImpl$$EnhancerBySpringCGLIB$$aaef177e
+//    JDK:    MqMessageService：class = com.sun.proxy.$Proxy274
+        Class cls=mqMessageService.getClass();
+        log.info("class = {}", mqMessageService.getClass());
+        this.mqMessageService.transactionRepeatReadLock();
+        return MessageResult.success();
+    }
 }
 

@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.aop.framework.AopContext;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -47,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.math.BigInteger;
 import java.text.MessageFormat;
@@ -105,6 +107,73 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
     @Autowired
     @Lazy
     private IProductTestService productTestService;
+    @Override
+//    @Transactional(rollbackFor = Exception.class,isolation = Isolation.REPEATABLE_READ)
+    @Transactional(rollbackFor = Exception.class)
+    public void transactionRepeatReadLock() throws Exception {
+        boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+        // 判断当前是否存在事务,如果没有开启事务是会报错的
+        boolean isActualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+
+        long id = 1979084944348372994L;
+        MqMessage mqMessage = this.getById(id);
+        String lockKey = RedisKey.UPDATE_MQ_MESSAGE_INFO + ":" + id;
+        //获取分布式锁，此处单体应用可用 synchronized，分布式就用redisson 锁
+        RLock lock = redissonClient.getLock(lockKey);
+        boolean lockSuccessfully = false;
+        try {
+
+            //  return this.tryLock(waitTime, -1L, unit); 不指定释放时间，RedissonLock内部设置-1，
+            lockSuccessfully = lock.tryLock(RedisKey.INIT_INVENTORY_INFO_FROM_DB_WAIT_TIME, TimeUnit.SECONDS);
+            if (!lockSuccessfully) {
+                String msg = MessageFormat.format("Get lock {0} fail，wait time : {1} s", lockKey, RedisKey.INIT_INVENTORY_INFO_FROM_DB_WAIT_TIME);
+                throw new Exception(msg);
+            }
+            log.info("update get lock {}", lockKey);
+
+            //MyBatis 的**一级缓存（Local Cache）**就是：SqlSession 级别的缓存，默认开启，
+            // 用来缓存“同一个 SqlSession 内、相同 SQL 的查询结果”。
+            //同一个 SqlSession 里，相同 SQL 不会再查数据库，而是从缓存拿。
+
+            //CacheKey =Mapper方法ID +SQL语句 +参数值 +分页参数(RowBounds) +环境ID
+            MqMessage mqMessage1 = this.getById(id);
+
+            LambdaQueryWrapper<MqMessage> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(MqMessage::getVersion, mqMessage.getVersion());
+            queryWrapper.eq(MqMessage::getId, mqMessage.getId());
+            List<MqMessage> mqMessageList = this.list(queryWrapper);
+
+            if (CollectionUtils.isEmpty(mqMessageList)) {
+                throw new Exception("MqMessage " + id + " has been changed");
+            }
+            int n = 0;
+
+            //如果根据版本号查询失效，就执行更新校验数据有没有被其他事务更改
+            Integer oldVersion = mqMessage.getVersion();
+            mqMessage.setVersion(mqMessage.getVersion() + 1);
+            mqMessage.setLastModificationTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<MqMessage>();
+            updateWrapper.set(MqMessage::getVersion, mqMessage.getVersion());
+            updateWrapper.eq(MqMessage::getId, mqMessage.getId());
+            updateWrapper.eq(MqMessage::getVersion, oldVersion);
+            boolean re = this.update(mqMessage, updateWrapper);
+            if (!re) {
+                throw new Exception("MqMessage " + id + " has been changed");
+            }
+
+
+        } catch (Exception ex) {
+            log.error("", ex);
+            throw ex;
+        } finally {
+            //非事务操作在此释放
+//            if (lockSuccessfully && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
+            redisUtil.releaseLockAfterTransaction(lock, lockSuccessfully);
+        }
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
