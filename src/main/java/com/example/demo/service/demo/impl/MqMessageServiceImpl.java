@@ -34,6 +34,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
@@ -49,6 +50,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigInteger;
 import java.text.MessageFormat;
@@ -75,6 +77,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Primary
+//value
+//value 默认 singleton
+//@Scope(value = WebApplicationContext.SCOPE_SESSION,
+//        proxyMode = ScopedProxyMode.TARGET_CLASS)
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)  // 关键！强制TARGET_CLASS代理,不知道为什么是jdk 动态代理，事务不生效，否则就要在
 //接口加   @Transactional(rollbackFor = Exception.class,
 public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage> implements IMqMessageService {
@@ -107,6 +113,7 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
     @Autowired
     @Lazy
     private IProductTestService productTestService;
+
     @Override
 //    @Transactional(rollbackFor = Exception.class,isolation = Isolation.REPEATABLE_READ)
     @Transactional(rollbackFor = Exception.class)
@@ -151,7 +158,9 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
             //如果根据版本号查询失效，就执行更新校验数据有没有被其他事务更改
             Integer oldVersion = mqMessage.getVersion();
             mqMessage.setVersion(mqMessage.getVersion() + 1);
-            mqMessage.setLastModificationTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+//            mqMessage.setLastModificationTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            mqMessage.setModifyTime(LocalDateTime.now());
+
             LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<MqMessage>();
             updateWrapper.set(MqMessage::getVersion, mqMessage.getVersion());
             updateWrapper.eq(MqMessage::getId, mqMessage.getId());
@@ -248,10 +257,6 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
         boolean isSynchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();
 
 
-
-
-
-
         String lockKey = RedisKey.UPDATE_MQ_MESSAGE_INFO + ":" + msgId;
         //获取分布式锁，此处单体应用可用 synchronized，分布式就用redisson 锁
         RLock lock = redissonClient.getLock(lockKey);
@@ -318,10 +323,6 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 //        isSynchronizationActive() = 当前线程是否启用了 Spring 的事务同步机制（允许绑定资源和事务回调）。
 //        并不完全等于“是否有事务”，但通常和事务同时开启。
         boolean isSynchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();
-
-
-
-
 
 
         String lockKey = RedisKey.UPDATE_MQ_MESSAGE_INFO + ":" + msgId;
@@ -534,11 +535,11 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 //                }
                 //0:未生成 1：已生产 2：已消费 3:消费失败
                 //未推送消息(未推送，推送失败
-                List<MqMessage> unPushList = mqMessageList.stream().filter(p -> (p.getStatus() == null || p.getStatus().equals(0))&&p.getSendMq()).collect(Collectors.toList());
+                List<MqMessage> unPushList = mqMessageList.stream().filter(p -> (p.getStatus() == null || p.getStatus().equals(0)) && p.getSendMq()).collect(Collectors.toList());
 
                 //可设计单独的job 处理消费失败.消费失败的，才走定时任务补偿处理
                 List<MqMessage> consumerFailList = mqMessageList.stream().filter(p -> p.getStatus() != null && p.getStatus().equals(3)).collect(Collectors.toList());
-                List<MqMessage> unSendMqFailList =       mqMessageList.stream().filter(p -> !p.getSendMq()&&!Integer.valueOf(2).equals(p.getStatus())).collect(Collectors.toList());
+                List<MqMessage> unSendMqFailList = mqMessageList.stream().filter(p -> !p.getSendMq() && !Integer.valueOf(2).equals(p.getStatus())).collect(Collectors.toList());
                 consumerFailList.addAll(unSendMqFailList);
                 rePublish(unPushList);
 

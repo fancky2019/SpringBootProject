@@ -24,6 +24,10 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
+ *
+ * redis string  value 可设置null ,获取到的值也是null
+ *
+ *
  * 数据类型的首字母找对应的数据类型的操作
  * 操作命令中文文档：http://www.redis.cn/commands/lpushx.html
  * https://redis.io/commands/
@@ -509,6 +513,35 @@ public class RedisTestController {
             Boolean del = redisTemplate.delete(strVal3);
             Boolean exists = redisTemplate.hasKey(strVal3);
 
+//            Hash类型：只能对整个key设置过期时间（EXPIRE），不能对内部的field单独设置过期
+//
+//            String类型：可以单独设置每个key的过期时间
+            //                    穿透：设置个空值,待优化
+            //数据：用 Hash
+            //空值：用 String + TTL
+//            Hash类型：只能对整个key设置过期时间（EXPIRE），不能对内部的field单独设置过期
+//            String类型：可以单独设置每个key的过期时间
+            //nullKey string 类型
+//                    String nullKey = "material:null:id:" + id;
+//                    // 1. 先判断是否命中过空缓存
+//                    if (Boolean.TRUE.equals(redisTemplate.hasKey(nullKey))) {
+//                        return null;
+//                    }
+//
+//// 2. 查 hash
+//                    Material m = (Material) redisTemplate.opsForHash()
+//                            .get("material:id", id);
+//                    if (m != null) {
+//                        return m;
+//                    }
+//
+//// 3. 查 DB
+//                    Material db = materialService.getById(id);
+//                    if (db == null) {
+//                        // 缓存空值（有 TTL）
+//                        redisTemplate.opsForValue().set(nullKey, "1", 60, TimeUnit.SECONDS);
+//                        return null;
+//                    }
             redisTemplate.expire("stringKey1", 1000, TimeUnit.SECONDS);
             //endregion
 

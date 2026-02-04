@@ -80,14 +80,14 @@ public class RedisUtil<K, V> {
 
     public void releaseLock(RLock lock, boolean lockSuccessfully) {
         if (lockSuccessfully && lock.isHeldByCurrentThread()) {
+            //获取锁的名称：Redis 里的 key
+            String lockName = lock.getName();
             try {
-                //获取锁的名称：Redis 里的 key
-                String lockName = lock.getName();
                 log.info("start release lock, key: {}", lockName);
                 lock.unlock();
                 log.info("release lock success, key: {}", lockName);
             } catch (Exception e) {
-                log.error("release fail", e);
+                log.error("release fail " + lockName, e);
                 //watchdog 30s ttl  ,停止续期 自动删
 //                try {
 //                    // 不校验现成持有，直接删除key

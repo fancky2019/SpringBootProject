@@ -906,6 +906,35 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      * * 击穿：分布式锁（表名），没有取到锁，sleep(50)+重试 .获取不到锁，抛异常处理 服务器繁忙，稍后重试
      * * 穿透：分布式锁（表名）+设置一段时间的null值，没有取到锁，sleep(50)+重试
      *
+     * //                    穿透：设置个空值,待优化
+     *                     //数据：用 Hash
+     *                     //空值：用 String + TTL
+     * //            Hash类型：只能对整个key设置过期时间（EXPIRE），不能对内部的field单独设置过期
+     * //            String类型：可以单独设置每个key的过期时间
+     *                     //nullKey string 类型
+     * //                    String nullKey = "material:null:id:" + id;
+     * //                    // 1. 先判断是否命中过空缓存
+     * //                    if (Boolean.TRUE.equals(redisTemplate.hasKey(nullKey))) {
+     * //                        return null;
+     * //                    }
+     * //
+     * //// 2. 查 hash
+     * //                    Material m = (Material) redisTemplate.opsForHash()
+     * //                            .get("material:id", id);
+     * //                    if (m != null) {
+     * //                        return m;
+     * //                    }
+     * //
+     * //// 3. 查 DB
+     * //                    Material db = materialService.getById(id);
+     * //                    if (db == null) {
+     * //                        // 缓存空值（有 TTL）
+     * //                        redisTemplate.opsForValue().set(nullKey, "1", 60, TimeUnit.SECONDS);
+     * //                        return null;
+     * //                    }
+     *
+     *
+     *
      * @param id
      * @return
      * @throws Exception
