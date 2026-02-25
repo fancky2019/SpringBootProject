@@ -516,7 +516,8 @@ public class RedisTestController {
 //            Hash类型：只能对整个key设置过期时间（EXPIRE），不能对内部的field单独设置过期
 //
 //            String类型：可以单独设置每个key的过期时间
-            //                    穿透：设置个空值,待优化
+            //穿透：设置个空值,待优化
+           // 双结构缓存策略来应对缓存击穿问题
             //数据：用 Hash
             //空值：用 String + TTL
 //            Hash类型：只能对整个key设置过期时间（EXPIRE），不能对内部的field单独设置过期

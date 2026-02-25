@@ -7,6 +7,17 @@ import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * 1. 实例化 (Constructor)
+ * 2. 依赖注入 (populateBean) - @Autowired
+ * 3. 初始化前 (postProcessBeforeInitialization)
+ * 4. 初始化方法 (invokeInitMethods)
+ *       ├─ @PostConstruct
+ *       ├─ afterPropertiesSet() ：InitializingBean 接口的方法。 在所有属性注入完成后执行
+ *       └─ init-method  ： @Bean(initMethod = "customInit")
+ * 5. 初始化后 (postProcessAfterInitialization) - AOP代理在此阶段创建
+ * 6. Bean 准备就绪
+ */
 @Configuration
 public class BeanLifeTestConfig {
 

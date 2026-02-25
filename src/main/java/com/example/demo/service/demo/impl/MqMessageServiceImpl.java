@@ -33,6 +33,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -52,6 +53,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.annotation.PostConstruct;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -81,13 +83,57 @@ import java.util.stream.Collectors;
 //value 默认 singleton
 //@Scope(value = WebApplicationContext.SCOPE_SESSION,
 //        proxyMode = ScopedProxyMode.TARGET_CLASS)
-@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)  // 关键！强制TARGET_CLASS代理,不知道为什么是jdk 动态代理，事务不生效，否则就要在
+//@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)  // 强制TARGET_CLASS代理获取完整bean,或者jdk动态代理通过PostConstruct内获取完整bean
 //接口加   @Transactional(rollbackFor = Exception.class,
 public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage> implements IMqMessageService {
 
-    @Autowired
-    @Lazy  // 防止循环依赖
+    /**
+     *
+     默认jdk 动态代理：
+     Advisor 不全
+     selfProxy 触发了 early reference  先创建了一个“半成品代理”
+     不是 @Transactional 失效，而是你拿到的代理对象根本没有事务拦截器。
+     @Async + 自注入 + 提前代理暴露。
+     自注入selfProxy导致Spring在Bean创建过程中提前创建了一个不完整的代理（0 advisors）。
+
+     改成cglib 动态代理：从applicationContext获取bean可获取全部Advisor信息。
+
+
+     使用 @Lazy 后：aop 功能可能丢失
+     真实对象 ← CGLIB代理（包含Advisors） ← Lazy代理（没有Advisors） ← Spring容器Bean
+     */
+//    @Autowired
+//    @Lazy  // 防止循环依赖
+//    private IMqMessageService lazySelfProxy;
+
+
+    //     通过setter方法注入，而不是字段注入
+//    @Autowired
+//    @Lazy
+//    public void setSelfProxy(MqMessageService selfProxy) {
+//        this.selfProxy = selfProxy;
+//    }
+
+    // 声明一个实例变量来持有完整的代理对象
     private IMqMessageService selfProxy;
+    @Autowired
+    private ObjectProvider<IMqMessageService> serviceProvider;
+
+    @PostConstruct
+    public void init() {
+        //事务生效可获取完整bean
+        //生命周期顺序：实例化 → 依赖注入 → AOP代理完成 → @PostConstruct
+        //在 Bean 初始化完成后获取完整的代理
+        this.selfProxy = applicationContext.getBean(IMqMessageService.class);
+//        this.selfProxy = serviceProvider.getObject();
+        // 验证代理完整性
+        boolean isAopProxy = AopUtils.isAopProxy(selfProxy);
+        boolean isCglibProxy = AopUtils.isCglibProxy(selfProxy);
+        boolean isJdkProxy = AopUtils.isJdkDynamicProxy(selfProxy);
+        log.info("Proxy info - AOP: {}, CGLIB: {}, JDK: {}",
+                isAopProxy, isCglibProxy, isJdkProxy);
+    }
+
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -544,15 +590,15 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
                 rePublish(unPushList);
 
                 Object object = selfProxy;
-                // 从 ApplicationContext 获取代理对象
-                IMqMessageService proxyService = applicationContext.getBean(IMqMessageService.class);
-                //AopContext.currentProxy() 返回的是当前方法调用链中的代理对象,返回的是 ScheduledTasks 的代理
-                Object proxyObj = AopContext.currentProxy();
-                IMqMessageService mqMessageService = null;
-                if (proxyObj instanceof IMqMessageService) {
-                    mqMessageService = (IMqMessageService) proxyObj;
-                }
-                mqMessageService.reConsume(consumerFailList);
+//                // 从 ApplicationContext 获取代理对象
+//                IMqMessageService proxyService = applicationContext.getBean(IMqMessageService.class);
+//                //AopContext.currentProxy() 返回的是当前方法调用链中的代理对象,返回的是 ScheduledTasks 的代理
+//                Object proxyObj = AopContext.currentProxy();
+//                IMqMessageService mqMessageService = null;
+//                if (proxyObj instanceof IMqMessageService) {
+//                    mqMessageService = (IMqMessageService) proxyObj;
+//                }
+                selfProxy.reConsume(consumerFailList);
 
 
             } else {
@@ -809,15 +855,16 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 //            transactionalBusinessLogic();
                 Object object = selfProxy;
                 // 从 ApplicationContext 获取代理对象
-                IProductTestService proxyService = applicationContext.getBean(IProductTestService.class);
-                //AopContext.currentProxy() 返回的是当前方法调用链中的代理对象,返回的是 ScheduledTasks 的代理
-                //被调用方会触发事务aop, 两个方法在不同事务内
-                Object proxyObj = AopContext.currentProxy();
-                IMqMessageService mqMessageService = null;
-                if (proxyObj instanceof IMqMessageService) {
-                    mqMessageService = (IMqMessageService) proxyObj;
-                    mqMessageService.selfInvocationTransactionalBusinessLogic(i);
-                }
+//                IProductTestService proxyService = applicationContext.getBean(IProductTestService.class);
+//                //AopContext.currentProxy() 返回的是当前方法调用链中的代理对象,返回的是 ScheduledTasks 的代理
+//                //被调用方会触发事务aop, 两个方法在不同事务内
+//                Object proxyObj = AopContext.currentProxy();
+//                IMqMessageService mqMessageService = null;
+//                if (proxyObj instanceof IMqMessageService) {
+//                    mqMessageService = (IMqMessageService) proxyObj;
+//                    mqMessageService.selfInvocationTransactionalBusinessLogic(i);
+//                }
+                selfProxy.selfInvocationTransactionalBusinessLogic(i);
             } else {
                 log.info("redissonLockReentrantLock - {} get lock failed", RedisKeyConfigConst.MQ_FAIL_HANDLER);
             }

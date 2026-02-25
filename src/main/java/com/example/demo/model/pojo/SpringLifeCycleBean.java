@@ -1,5 +1,6 @@
 package com.example.demo.model.pojo;
 
+import com.example.demo.init.CommandLineImp;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +12,12 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.swing.*;
 
 /**
  * https://blog.csdn.net/qinwuxian19891211/article/details/109004197?utm_medium=distribute.wap_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-4-109004197-blog-104455686.wap_blog_relevant_default&spm=1001.2101.3001.4242.3&utm_relevant_index=5
 
-执行结果：
+ 执行结果：
  Constructor method invoked
  BeanNameAware setBeanName method inovked, name: lifeCycleBean
  BeanFactoryAware setBeanFactory method inovked, beanFactory: org.springframework.beans.factory.support.DefaultListableBeanFactory
@@ -23,7 +25,7 @@ import javax.annotation.PreDestroy;
  PostConstruct method invoked
  InitializingBean afterPropertiesSet method inovked
  customInit method invoked
----postProcessBeforeInitialization 没有执行 不知道为什么
+ ---postProcessBeforeInitialization 没有执行 不知道为什么
  PreDestroy method invoked
  DisposableBean destroy method invoked
  customDestroy method invoked
@@ -54,13 +56,11 @@ import javax.annotation.PreDestroy;
  import org.springframework.beans.factory.BeanFactoryAware;
  import org.springframework.stereotype.Component;
 
- @Component
- public class MyBean implements BeanFactoryAware {
+ @Component public class MyBean implements BeanFactoryAware {
 
  private BeanFactory beanFactory;
 
- @Override
- public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+ @Override public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
  this.beanFactory = beanFactory; // 保存 BeanFactory 实例
  System.out.println("BeanFactoryAware: BeanFactory 已注入");
  }
@@ -91,14 +91,53 @@ import javax.annotation.PreDestroy;
  推荐使用 @PostConstruct 注解来实现初始化逻辑。
 
 
+ //region 循环依赖 三级缓存
+
+ 只能解决单例模式字段注入的循环依赖 ，无法解决构造函数和原型模式的Field依赖
+ applicationContext.getBean("") 最终调用  DefaultSingletonBeanRegistry 的方法 getSingleton
+
+ bean 实例化--》初始化。
+
+
+ 三个map 缓存:第三季缓存解决动态代理问题：返回代理对象
+ 判断该Bean是否需要被动态代理，两种返回结果：
+ 不需要代理，返回未属性注入、未初始化的半成品Bean
+ 需要代理，返回未属性注入、未初始化的半成品Bean的代理对象
+
+ 1、
+ Cache of singleton objects: bean name to bean instance.
+ private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
+ 3、
+ Cache of singleton factories: bean name to ObjectFactory.
+ private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
+ 2、
+ Cache of early singleton objects: bean name to bean instance.
+ private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(16);
+
+ 一级缓存：singletonObject  存放已经经历了完整周期的Bean对象
+ 二级缓存：earlySingletonObjects 存放早期暴露出来的Bean对象，Bean的生命周期未结束
+ 三级缓存：singletonFactories 存放可以生成Bean的工厂
+ private final Map<String, Object> singletonObjects = new ConcurrentHashMap(256);
+ private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap(16);
+ private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap(16);
+
+
+ //CommandLineImp.class.getName() 不能用这种全路径名
+ //CommandLineImp
+ String name = CommandLineImp.class.getSimpleName();
+ Object obj = applicationContext.getBean("demoProductService");
+ int m = 0;
+ //        AbstractAutowireCapableBeanFactory#doCreateBean()中：
+ //endregion
 
 
 
 
- . 执行顺序
+ 执行顺序
  以下是这些接口和扩展点的执行顺序：
 
- Bean 实例化：Spring 容器通过构造函数或工厂方法创建 Bean 的实例。
+ Bean 实例化：
+ Spring 容器通过构造函数或工厂方法创建 Bean 的实例。
 
  BeanNameAware.setBeanName()：如果 Bean 实现了 BeanNameAware 接口，Spring 容器会调用 setBeanName() 方法，将 Bean 的名称注入到 Bean 中。
 
@@ -114,8 +153,35 @@ import javax.annotation.PreDestroy;
 
  BeanPostProcessor.postProcessAfterInitialization()：如果 Spring 容器中注册了 BeanPostProcessor，则会调用其 postProcessAfterInitialization() 方法，在 Bean 初始化之后执行自定义逻辑。
 
+
+ 1. 实例化 (Constructor)
+ 2. 依赖注入 (populateBean) - @Autowired
+ 3. 初始化前 (postProcessBeforeInitialization)
+ 4. 初始化方法 (invokeInitMethods)
+ ├─ @PostConstruct
+ ├─ afterPropertiesSet() ：InitializingBean 接口的方法。 在所有属性注入完成后执行
+ └─ init-method  ： @Bean(initMethod = "customInit")
+ 5. 初始化后 (postProcessAfterInitialization) - AOP代理在此阶段创建
+ 6. Bean 准备就绪
+
+ 完整生命周期顺序
+ 对于普通Bean（非BeanPostProcessor）：
+ 1、构造函数
+ 2、依赖注入（@Autowired, @Value等）
+ 3、BeanNameAware
+ 4、BeanFactoryAware
+ 5、ApplicationContextAware
+ 6、BeanPostProcessor postProcessBeforeInitialization
+ 7、@PostConstruct
+ 8、InitializingBean afterPropertiesSet
+ 9、自定义init方法
+ 10、BeanPostProcessor postProcessAfterInitialization
+ 11、Bean准备就绪
+ 12、@PreDestroy
+ 13、DisposableBean destroy
+ 14、自定义destroy方法
  */
-public class SpringLifeCycleBean implements  BeanNameAware, BeanFactoryAware, ApplicationContextAware, BeanPostProcessor, InitializingBean, DisposableBean {
+public class SpringLifeCycleBean implements BeanNameAware, BeanFactoryAware, ApplicationContextAware, BeanPostProcessor, InitializingBean, DisposableBean {
 
     /**
      * 构造函数执行完就有值
@@ -124,31 +190,31 @@ public class SpringLifeCycleBean implements  BeanNameAware, BeanFactoryAware, Ap
     private String multiEnvironment;
 
     public SpringLifeCycleBean() {
-        System.out.println("Constructor method invoked");
+        System.out.println("SpringLifeCycleBean-1:Constructor method invoked");
     }
 
 
     @Override
     public void setBeanName(String s) {
-        System.out.println("BeanNameAware setBeanName method invoked, name: " + s);
+        System.out.println("SpringLifeCycleBean-2:BeanNameAware setBeanName method invoked, name: " + s);
     }
 
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        System.out.println("BeanFactoryAware setBeanFactory method invoked, beanFactory: " + beanFactory.getClass().getName());
+        System.out.println("SpringLifeCycleBean-3:BeanFactoryAware setBeanFactory method invoked, beanFactory: " + beanFactory.getClass().getName());
     }
 
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        System.out.println("ApplicationContextAware setApplicationContext method invoked, applicationContext: " + applicationContext.getClass().getName());
+        System.out.println("SpringLifeCycleBean-4:ApplicationContextAware setApplicationContext method invoked, applicationContext: " + applicationContext.getClass().getName());
     }
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        if (beanName.equals("lifeCycleBean")) {
-            System.out.println("BeanPostProcessor postProcessBeforeInitialization method invoked, beanName: " + beanName);
+        if (beanName.equals("lifeCycleBean") || bean instanceof SpringLifeCycleBean) {
+            System.out.println("SpringLifeCycleBean:BeanPostProcessor postProcessBeforeInitialization method invoked, beanName: " + beanName);
         }
         return bean;
     }
@@ -156,45 +222,46 @@ public class SpringLifeCycleBean implements  BeanNameAware, BeanFactoryAware, Ap
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (beanName.equals("lifeCycleBean")) {
-            System.out.println("BeanPostProcessor postProcessAfterInitialization method invoked, beanName: " + beanName);
+            System.out.println("SpringLifeCycleBean:BeanPostProcessor postProcessAfterInitialization method invoked, beanName: " + beanName);
         }
 
-      return bean;
+        return bean;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        System.out.println("InitializingBean afterPropertiesSet method invoked");
+        System.out.println("SpringLifeCycleBean:InitializingBean afterPropertiesSet method invoked");
 
     }
+
     //region 类中声明注解    @PreDestroy
     @PostConstruct
     public void init() {
-        System.out.println("PostConstruct method invoked");
+        System.out.println("SpringLifeCycleBean:PostConstruct method invoked");
     }
 
 
     @PreDestroy
     public void preDestroy() {
-        System.out.println("PreDestroy method invoked");
+        System.out.println("SpringLifeCycleBean:PreDestroy method invoked");
     }
     //endregion
 
     @Override
     public void destroy() throws Exception {
-        System.out.println("DisposableBean destroy method invoked");
+        System.out.println("SpringLifeCycleBean:DisposableBean destroy method invoked");
     }
 
 
     //region 声明bean 配置时候使用
     public void customInit() {
-        System.out.println("customInit method invoked");
+        System.out.println("SpringLifeCycleBean:customInit method invoked");
     }
 
     public void customDestroy() {
-        System.out.println("customDestroy method invoked");
+        System.out.println("SpringLifeCycleBean:customDestroy method invoked");
     }
- //endregion
+    //endregion
 
 }
 
