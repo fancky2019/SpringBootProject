@@ -211,20 +211,44 @@ public class SpringLifeCycleBean implements BeanNameAware, BeanFactoryAware, App
         System.out.println("SpringLifeCycleBean-4:ApplicationContextAware setApplicationContext method invoked, applicationContext: " + applicationContext.getClass().getName());
     }
 
+    /**
+     * 当一个类实现了 BeanPostProcessor 接口时，它本身也会被作为一个特殊的 Bean 由 Spring 容器管理。但是，BeanPostProcessor 的执行时机和普通 Bean 不同：
+     * BeanPostProcessor 自身不会应用它自己的后置处理器方法（避免无限循环）
+     * BeanPostProcessor 在容器生命周期的早期就会被实例化，用于处理其他普通 Bean
+     *
+     *
+     *
+     * @param bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        if (beanName.equals("lifeCycleBean") || bean instanceof SpringLifeCycleBean) {
-            System.out.println("SpringLifeCycleBean:BeanPostProcessor postProcessBeforeInitialization method invoked, beanName: " + beanName);
-        }
+//        if (beanName.equals("lifeCycleBean")) {
+//            System.out.println("SpringLifeCycleBean:BeanPostProcessor postProcessBeforeInitialization method invoked, beanName: " + beanName);
+//        }
+
+//       非 SpringLifeCycleBean 类对象会进入此方法
         return bean;
     }
 
+    /**
+     * 当一个类实现了 BeanPostProcessor 接口时，它本身也会被作为一个特殊的 Bean 由 Spring 容器管理。但是，BeanPostProcessor 的执行时机和普通 Bean 不同：
+     * BeanPostProcessor 自身不会应用它自己的后置处理器方法（避免无限循环）
+     * BeanPostProcessor 在容器生命周期的早期就会被实例化，用于处理其他普通 Bean
+     *
+     * @param bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (beanName.equals("lifeCycleBean")) {
-            System.out.println("SpringLifeCycleBean:BeanPostProcessor postProcessAfterInitialization method invoked, beanName: " + beanName);
-        }
-
+//        if (beanName.equals("lifeCycleBean")) {
+//            System.out.println("SpringLifeCycleBean:BeanPostProcessor postProcessAfterInitialization method invoked, beanName: " + beanName);
+//        }
+//        非 SpringLifeCycleBean 类对象会进入此方法
         return bean;
     }
 
