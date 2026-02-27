@@ -448,7 +448,7 @@
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
             </exclusions>
-            <version>3.6.1</version>
+            <version>3.7.2</version>
         </dependency>
         <!-- 对zookeeper的底层api的一些封装 -->
         <!-- https://mvnrepository.com/artifact/org.apache.curator/curator-framework -->
