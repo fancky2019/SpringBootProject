@@ -54,6 +54,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.PostConstruct;
+import javax.swing.*;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -118,12 +119,17 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
     private IMqMessageService selfProxy;
     @Autowired
     private ObjectProvider<IMqMessageService> serviceProvider;
-
+//    ObjectProvider（懒加载）它注入的不是 IMqMessageService 实例，而是一个“取 Bean 的工厂”，只有你调用 getObject() 时，
+//    Spring 才真正去容器里拿 Bean。
     @PostConstruct
     public void init() {
         //事务生效可获取完整bean
         //生命周期顺序：实例化 → 依赖注入 → AOP代理完成 → @PostConstruct
         //在 Bean 初始化完成后获取完整的代理
+        //CGLIB 可以：
+        //代理所有 public/protected 方法
+        //不受接口限制
+        //避免 JDK 代理嵌套
         this.selfProxy = applicationContext.getBean(IMqMessageService.class);
 //        this.selfProxy = serviceProvider.getObject();
         // 验证代理完整性

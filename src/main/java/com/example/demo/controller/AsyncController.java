@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.concurrent.ExecutionException;
 
-/*
+/**
 作用于业务层（service）,service 层方法用async注解。
  */
 @RestController
