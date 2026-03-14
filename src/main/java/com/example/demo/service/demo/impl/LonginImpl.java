@@ -120,6 +120,7 @@ public class LonginImpl implements LoginService {
         String md5Hash = DigestUtils.md5Hex(saltedPassword);
         //64个十六进制字符	：dc9346cb547c00b54050403aa11e8bd3f08f8337c475ffa59241c1d037f455e8
         String frontendHash = DigestUtils.sha256Hex(saltedPassword);
+        //每次加密都会生成随机盐
 //        标准格式：$2a$12$盐值(22字符)哈希值(31字符)
 //        总长度：3 + 2 + 22 + 31 = 60字符
         //标识符$

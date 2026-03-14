@@ -129,9 +129,15 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
         //CGLIB 可以：
         //代理所有 public/protected 方法
         //不受接口限制
+        //多重代理不是你主动造的，是 Spring 为了同时解决「AOP + 循环依赖 + 提前暴露 Bean」被迫叠出来的结果。
+//        多重代理 = AOP + 提前拿 Bean + early reference
+
+
         //避免 JDK 代理嵌套
-        this.selfProxy = applicationContext.getBean(IMqMessageService.class);
-//        this.selfProxy = serviceProvider.getObject();
+        //使用cglib 代理
+//        this.selfProxy = applicationContext.getBean(MqMessageService.class);
+        //使用cglib 代理
+        this.selfProxy = serviceProvider.getObject();
         // 验证代理完整性
         boolean isAopProxy = AopUtils.isAopProxy(selfProxy);
         boolean isCglibProxy = AopUtils.isCglibProxy(selfProxy);

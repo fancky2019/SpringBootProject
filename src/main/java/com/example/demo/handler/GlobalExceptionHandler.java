@@ -48,7 +48,7 @@ import java.lang.reflect.UndeclaredThrowableException;
  *
  *
  *
-Spring 默认会按照方法声明顺序执行同一类中的多个 @ModelAttribute 方法，但最可靠的方式是通过方法参数显式声明依赖关系，而不是依赖隐式的执行顺序。
+ *Spring 默认会按照方法声明顺序执行同一类中的多个 @ModelAttribute 方法，但最可靠的方式是通过方法参数显式声明依赖关系，而不是依赖隐式的执行顺序。
  *
  *
  *
@@ -79,9 +79,9 @@ Spring 默认会按照方法声明顺序执行同一类中的多个 @ModelAttrib
  * @ExceptionHandler :注解声明异常处理方法
  */
 @Slf4j
-@ControllerAdvice
+@ControllerAdvice  //方法要加    @ResponseBody
 //@Order(Ordered.LOWEST_PRECEDENCE)
-//@RestControllerAdvice
+//@RestControllerAdvice  //Rest api 使用此注解
 public class GlobalExceptionHandler {
 
     private static Logger logger = LogManager.getLogger(GlobalExceptionHandler.class);

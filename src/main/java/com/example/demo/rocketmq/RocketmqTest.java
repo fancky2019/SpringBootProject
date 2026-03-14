@@ -38,36 +38,63 @@ import java.util.concurrent.CompletableFuture;
  *
  *
  *
+ *1、Broker 注册
+ * Broker 启动时会主动向 NameServer 注册自己：
+ * 自己的 IP / 端口
+ * 属于哪个 Topic
+ * 队列信息（Queue 数量等）
+ * NameServer 里就有一份：
+ * Topic → Broker 的映射表（路由表）
+ *
+ *
+ * 2、给 Producer / Consumer 提供路由信息
+ * Producer / Consumer 启动时：
+ * 先连 NameServer
+ * 查询：
+ * “这个 Topic 在哪些 Broker 上？”
+ * 拿到路由信息后
+ * 直接和 Broker 通信（不再经过 NameServer）
+ *NameServer ≠ 消息中转
+ *
+ *3、心跳 & 剔除失效 Broker
+ * Broker 定期向 NameServer 发心跳
+ * 如果：
+ * 心跳超时
+ * Broker 挂了
+ *
+ * NameServer 会把它从路由表里剔除
  *
  *
  *
+ *    NameServer作用类似Zookeeper
+ *     broker  负责消息存储
+ *
+ *     broker负责接收并存储消息,发送消息指定topic,订阅也指定topic 相当于rabbitmq的queue.rabbitmq多了个exchange的概念，消息路由
+ *
+ *     参见项目rocketmq demo
+ *
+ *      //操作界面
+ *      nameSrvAddr=127.0.0.1:7080
+ *
+ *      消息可靠性：
+ *      一、生成消息：1、同步发送，2、异步发送，回调确认机制
+ *      二、broker 1、同步刷盘，将操作系统pageCache中的数据刷新到磁盘，2、主从模式，过半从同步
+ *                  ## 默认情况为 ASYNC_FLUSH
+ *                  flushDiskType = SYNC_FLUSH
+ *      三、消费者消费确认 ConsumeConcurrentlyStatus.CONSUME_SUCCESS
  *
  *
  *
+ *Topic、Broker、MessageQueue
+ *
+ * 一个 Topic = 多个队列（MessageQueue）
+ * 队列分布在不同 Broker 上
  *
  */
 @Slf4j
 @Component
 public class RocketmqTest {
 
-    /**
-    NameServer作用类似Zookeeper
-    broker  负责消息存储
-
-    broker负责接收并存储消息,发送消息指定topic,订阅也指定topic 相当于rabbitmq的queue.rabbitmq多了个exchange的概念，消息路由
-
-    参见项目rocketmq demo
-
-     //操作界面
-     nameSrvAddr=127.0.0.1:7080
-
-     消息可靠性：
-     一、生成消息：1、同步发送，2、异步发送，回调确认机制
-     二、broker 1、同步刷盘，将操作系统pageCache中的数据刷新到磁盘，2、主从模式，过半从同步
-                 ## 默认情况为 ASYNC_FLUSH
-                 flushDiskType = SYNC_FLUSH
-     三、消费者消费确认 ConsumeConcurrentlyStatus.CONSUME_SUCCESS
-     */
 
     @Autowired
     RocketMQProducer rocketMQProducer;
