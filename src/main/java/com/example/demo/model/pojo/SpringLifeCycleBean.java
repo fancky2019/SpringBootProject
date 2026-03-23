@@ -149,6 +149,7 @@ import javax.swing.*;
          类似ApplicationContextAware ，从容其中获取bean
 
           BeanFactoryAware	ApplicationContextAware:获取对象	BeanFactory	ApplicationContext
+          ApplicationContext 接口继承了BeanFactory
  ↓
  5. 应用上下文感知 (ApplicationContextAware.setApplicationContext)
  ↓
