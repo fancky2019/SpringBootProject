@@ -134,25 +134,30 @@ import javax.swing.*;
 
 
  执行顺序
- 以下是这些接口和扩展点的执行顺序：
 
- Bean 实例化：
- Spring 容器通过构造函数或工厂方法创建 Bean 的实例。
-
- BeanNameAware.setBeanName()：如果 Bean 实现了 BeanNameAware 接口，Spring 容器会调用 setBeanName() 方法，将 Bean 的名称注入到 Bean 中。
-
- BeanFactoryAware.setBeanFactory()：如果 Bean 实现了 BeanFactoryAware 接口，Spring 容器会调用 setBeanFactory() 方法，将 BeanFactory 注入到 Bean 中。
-
- ApplicationContextAware.setApplicationContext()：如果 Bean 实现了 ApplicationContextAware 接口，Spring 容器会调用 setApplicationContext() 方法，将 ApplicationContext 注入到 Bean 中。
-
- BeanPostProcessor.postProcessBeforeInitialization()：如果 Spring 容器中注册了 BeanPostProcessor，则会调用其 postProcessBeforeInitialization() 方法，在 Bean 初始化之前执行自定义逻辑。
-
- InitializingBean.afterPropertiesSet()：如果 Bean 实现了 InitializingBean 接口，Spring 容器会调用 afterPropertiesSet() 方法，执行初始化逻辑。
-
- 自定义初始化方法（如 @PostConstruct 或 init-method）：如果 Bean 定义了其他初始化方法（如 @PostConstruct 注解或 XML 配置中的 init-method），Spring 容器会调用这些方法。
-
- BeanPostProcessor.postProcessAfterInitialization()：如果 Spring 容器中注册了 BeanPostProcessor，则会调用其 postProcessAfterInitialization() 方法，在 Bean 初始化之后执行自定义逻辑。
-
+ Bean 实例化
+ ↓
+ 1. 构造方法 (Constructor)
+ ↓
+ 2. 依赖注入 (Dependency Injection)
+ ↓
+ 3. Bean 名称感知 (BeanNameAware.setBeanName)
+ ↓
+ 4. Bean 工厂感知 (BeanFactoryAware.setBeanFactory)
+ ↓
+ 5. 应用上下文感知 (ApplicationContextAware.setApplicationContext)
+ ↓
+ 6. Bean 后置处理器前置处理 (BeanPostProcessor.postProcessBeforeInitialization)
+ ↓
+ 7. @PostConstruct 注解方法  ← 第1个初始化方法
+ ↓
+ 8. InitializingBean.afterPropertiesSet()  ← 第2个初始化方法
+ ↓
+ 9. 自定义 init-method  ← 第3个初始化方法
+ ↓
+ 10. Bean 后置处理器后置处理 (BeanPostProcessor.postProcessAfterInitialization)
+ ↓
+ Bean 就绪
 
  1. 实例化 (Constructor)
  2. 依赖注入 (populateBean) - @Autowired

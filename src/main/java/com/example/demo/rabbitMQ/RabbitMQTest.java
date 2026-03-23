@@ -146,6 +146,8 @@ import org.springframework.stereotype.Component;
  *         return bean;
  *     }
  *
+ *
+ * //使用装饰器模式会更好，代理模式倾向于访问控制。装饰器功能增强
  *     private Object proxyRabbitTemplate(RabbitTemplate rabbitTemplate) {
  *         return Proxy.newProxyInstance(
  *             rabbitTemplate.getClass().getClassLoader(),
