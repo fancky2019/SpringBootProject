@@ -141,9 +141,14 @@ import javax.swing.*;
  ↓
  2. 依赖注入 (Dependency Injection)
  ↓
- 3. Bean 名称感知 (BeanNameAware.setBeanName)
+ 3. Bean 名称感知 (BeanNameAware.setBeanName) 优先使用依赖注入：
  ↓
  4. Bean 工厂感知 (BeanFactoryAware.setBeanFactory)
+         能通过 @Autowired 解决的，就不要用 BeanFactoryAware
+         userService = beanFactory.getBean(UserService.class);
+         类似ApplicationContextAware ，从容其中获取bean
+
+          BeanFactoryAware	ApplicationContextAware:获取对象	BeanFactory	ApplicationContext
  ↓
  5. 应用上下文感知 (ApplicationContextAware.setApplicationContext)
  ↓

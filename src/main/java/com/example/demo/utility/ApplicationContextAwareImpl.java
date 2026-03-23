@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * 注释此实现类 直接在引用的地方注入  ApplicationContext applicationContext 可以访问到
 从容器中获取bean
 
- 动态获取 Bean：在无法通过依赖注入获取 Bean 的情况下（例如工具类或静态方法中），可以通过 ApplicationContextAware 获取 Bean。
+ 动态获取 Bean：在无法通过依赖注入获取 Bean 的情况下（例如非 Spring 管理的对象中使用、工具类或静态方法中），可以通过 ApplicationContextAware 获取 Bean。
 
  获取 Spring 容器中的 Bean 或访问容器功能。它的主要使用场景包括动态获取 Bean 和访问容器功能，但应避免滥用，优先使用依赖注入。
  * @author lirui
