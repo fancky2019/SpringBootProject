@@ -113,6 +113,73 @@ import org.springframework.stereotype.Component;
  *
  * 3、接收端：Sleuth 的 MessageListener 拦截消息，读取头信息并恢复 traceId 到当前线程。
  * 在消费端，Sleuth 会自动从消息头中解析出 traceId 和 spanId，并恢复到当前的日志上下文中（MDC）
+ *
+ *
+ *
+ * 拦截 RabbitTemplate :BeanPostProcessor 替换为jdk动态代理的bean到容器中
+ *
+ * import org.springframework.amqp.rabbit.core.RabbitTemplate;
+ * import org.springframework.beans.BeansException;
+ * import org.springframework.beans.factory.config.BeanPostProcessor;
+ * import org.springframework.cloud.sleuth.Tracer;
+ * import org.springframework.stereotype.Component;
+ * import java.lang.reflect.InvocationHandler;
+ * import java.lang.reflect.Method;
+ * import java.lang.reflect.Proxy;
+ *
+ * @Component
+ * public class RabbitTemplateInterceptor implements BeanPostProcessor {
+ *
+ *     private final Tracer tracer;
+ *
+ *     public RabbitTemplateInterceptor(Tracer tracer) {
+ *         this.tracer = tracer;
+ *     }
+ *
+ *     @Override
+ *     public Object postProcessAfterInitialization(Object bean, String beanName)
+ *             throws BeansException {
+ *
+ *         if (bean instanceof RabbitTemplate) {
+ *             return proxyRabbitTemplate((RabbitTemplate) bean);
+ *         }
+ *         return bean;
+ *     }
+ *
+ *     private Object proxyRabbitTemplate(RabbitTemplate rabbitTemplate) {
+ *         return Proxy.newProxyInstance(
+ *             rabbitTemplate.getClass().getClassLoader(),
+ *             rabbitTemplate.getClass().getInterfaces(),
+ *             new InvocationHandler() {
+ *                 @Override
+ *                 public Object invoke(Object proxy, Method method, Object[] args)
+ *                         throws Throwable {
+ *
+ *                     // 拦截 send 和 convertAndSend 方法
+ *                     if (method.getName().equals("send") ||
+ *                         method.getName().equals("convertAndSend")) {
+ *
+ *                         // 添加自定义逻辑
+ *                         if (tracer.currentSpan() != null) {
+ *                             String traceId = tracer.currentSpan().context().traceId();
+ *                             System.out.println("发送消息 traceId: " + traceId);
+ *
+ *                             // 如果有 Message 参数，添加 header
+ *                             for (Object arg : args) {
+ *                                 if (arg instanceof Message) {
+ *                                     ((Message) arg).getMessageProperties()
+ *                                         .setHeader("intercepted-trace-id", traceId);
+ *                                 }
+ *                             }
+ *                         }
+ *                     }
+ *
+ *                     return method.invoke(rabbitTemplate, args);
+ *                 }
+ *             }
+ *         );
+ *     }
+ * }
  */
 
 

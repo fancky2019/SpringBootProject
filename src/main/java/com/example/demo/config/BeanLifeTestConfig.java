@@ -17,6 +17,42 @@ import org.springframework.context.annotation.Configuration;
  *       └─ init-method  ： @Bean(initMethod = "customInit")
  * 5. 初始化后 (postProcessAfterInitialization) - AOP代理在此阶段创建
  * 6. Bean 准备就绪
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *BeanPostProcessor 可以用来替换或修改容器中的指定 Bean.
+ *@Component
+ * public class BeanReplacementPostProcessor implements BeanPostProcessor {
+ *
+ *     @Override
+ *     public Object postProcessAfterInitialization(Object bean, String beanName)
+ *             throws BeansException {
+ *
+ *         // 替换指定名称的Bean
+ *         if ("originalService".equals(beanName)) {
+ *             return new ReplacementService();
+ *         }
+ *
+ *         // 替换指定类型的Bean
+ *         if (bean instanceof OriginalService &&
+ *             !(bean instanceof ReplacementService)) {
+ *             return new ReplacementService();
+ *         }
+ *
+ *         return bean;
+ *     }
+ * }
+ *
+ *
+ *
  */
 @Configuration
 public class BeanLifeTestConfig {
