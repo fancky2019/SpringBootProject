@@ -102,6 +102,17 @@ import org.springframework.stereotype.Component;
  * 即使设置了durable和delivery_mode=2，消息仍可能丢失（在崩溃和刷盘间隙）
  *
  * 要确保消息不丢失，需要：持久化队列 + 持久化消息 + 发布者确认 + 手动确认 + 镜像队列的完整方案
+ *
+ *
+ *
+ * Sleuth
+ *
+ * 1、发送端：Sleuth 拦截 RabbitTemplate，将当前 traceId 写入 AMQP 消息头（如 X-B3-TraceId）。
+ *    Sleuth 会拦截所有通过 RabbitTemplate 发送的消息，自动添加标准的 B3 传播头信息。
+ * 2、传输：消息携带头信息在 RabbitMQ 中流转。
+ *
+ * 3、接收端：Sleuth 的 MessageListener 拦截消息，读取头信息并恢复 traceId 到当前线程。
+ * 在消费端，Sleuth 会自动从消息头中解析出 traceId 和 spanId，并恢复到当前的日志上下文中（MDC）
  */
 
 
