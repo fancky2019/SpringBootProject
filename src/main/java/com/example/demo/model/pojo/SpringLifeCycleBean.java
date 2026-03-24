@@ -133,6 +133,20 @@ import javax.swing.*;
 
 
 
+ BeanFactoryPostProcessor 适用场景
+ 配置中心集成：在 Bean 实例化前，从配置中心拉取配置并修改 BeanDefinition
+ 动态注册 Bean：根据条件动态注册 BeanDefinition
+ 批量修改 Bean 属性：统一修改一批 Bean 的某个属性
+ 替换 Bean 实现类：例如根据环境（dev/test/prod）替换不同的实现类
+
+ BeanPostProcessor 适用场景
+ AOP 代理：为 Bean 创建代理对象，实现横切逻辑
+ 自定义注解处理：处理自定义注解，在 Bean 初始化时注入特定逻辑
+ 属性校验：在 Bean 初始化后校验属性是否合法
+ 日志记录：为 Bean 添加统一的日志记录功能
+
+
+
  执行顺序
 
  Bean 实例化
