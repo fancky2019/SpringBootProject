@@ -47,12 +47,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class RabbitMQConfig {
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
-    ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
     @Autowired
-    PushConfirmCallback pushConfirmCallback;
-
+    private PushConfirmCallback pushConfirmCallback;
+    @Autowired
+    private TaskExecutor rabbitMQThreadPoolExecutor;
     //    @Autowired
 //    private DemoProductService demoProductService;
     //region 常量参数
@@ -225,6 +226,7 @@ public class RabbitMQConfig {
     }
 
 
+    //分区消费 = 并行消费 + 多线程
     //json 序列化，默认SimpleMessageConverter jdk 序列化
     //配置RabbitTemplate和RabbitListenerContainerFactory
     @Bean
@@ -236,42 +238,13 @@ public class RabbitMQConfig {
         factory.setMessageConverter(new Jackson2JsonMessageConverter(this.objectMapper));
 
         // 必须配置！避免线程爆炸
-        factory.setTaskExecutor(createProductionExecutor());
+        factory.setTaskExecutor(rabbitMQThreadPoolExecutor);
         return factory;
     }
 
-    /**
-     * 生产环境线程池配置
-     */
-    private TaskExecutor createProductionExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-
-        // CPU密集型任务
-        int processors = Runtime.getRuntime().availableProcessors();
-        executor.setCorePoolSize(processors*2);           // 核心线程数 = CPU核心数
-        executor.setMaxPoolSize(processors * 4);        // 最大线程数 = CPU核心数 × 2
-        executor.setQueueCapacity(1000);                 // 队列容量
-
-        // IO密集型任务
-        // executor.setCorePoolSize(processors * 2);
-        // executor.setMaxPoolSize(processors * 4);
-        // executor.setQueueCapacity(2000);
-
-        executor.setKeepAliveSeconds(60);                // 空闲线程存活时间
-        executor.setThreadNamePrefix("RabbitMQ-Executor-");    // 线程名前缀
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.initialize();
-
-        log.info("线程池配置: core={}, max={}, queue={}",
-                executor.getCorePoolSize(),
-                executor.getMaxPoolSize(),
-                executor.getQueueCapacity());
-
-        return executor;
-    }
-
 
     /**
+     * 分区消费 = 并行消费 + 多线程
      多线程消费:涉及到消费顺序行要将一个大队列根据业务消息id分成多个小队列
      配置文件为默认的SimpleRabbitListenerContainerFactory 配置
      该配置为具体的listener 指定SimpleRabbitListenerContainerFactory
@@ -473,7 +446,7 @@ public class RabbitMQConfig {
         // Queue(String name, boolean durable, boolean exclusive, boolean autoDelete, Map<String, Object> arguments)
         HashMap<String, Object> args = new HashMap<>();
 
-         //       RabbitMQ的默认行为是假设队列长度无限，
+        //       RabbitMQ的默认行为是假设队列长度无限，
         // ========== 强制配置 ==========
         // 1. 最大消息数量（防止无限堆积）
         args.put("x-max-length", 2);
@@ -491,8 +464,6 @@ public class RabbitMQConfig {
         // 4. 溢出策略（推荐使用reject-publish），默认  静默drop-head策略。删除最早的，不会有任何通知
         args.put("x-overflow", "reject-publish");
         //----end------------
-
-
 
 
         //设置队列最大优先级[0,9]，发送消息时候指定优先级

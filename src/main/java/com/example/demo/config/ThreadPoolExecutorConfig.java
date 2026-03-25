@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -15,6 +16,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * 推荐做法：按任务类型（CPU密集/IO密集/核心/非核心）分类配置 3-5 个线程池，而不是为每个业务单独配置。
+ */
 @Configuration
 //@EnableAsync
 @EnableAsync(order = Ordered.HIGHEST_PRECEDENCE)
@@ -142,6 +146,32 @@ public class ThreadPoolExecutorConfig {
         threadPoolExecutor.setThreadNamePrefix("mqFailHandler-Executor-"); // 线程名字前缀
         threadPoolExecutor.initialize();
         return threadPoolExecutor;
+    }
+
+    /**
+     * 生产环境线程池配置
+     */
+    @Bean(name="rabbitMQThreadPoolExecutor")
+    public TaskExecutor rabbitMQThreadPoolExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        // CPU密集型任务
+        int processors = Runtime.getRuntime().availableProcessors();
+        executor.setCorePoolSize(processors*2);           // 核心线程数 = CPU核心数
+        executor.setMaxPoolSize(processors * 4);        // 最大线程数 = CPU核心数 × 2
+        executor.setQueueCapacity(1000);                 // 队列容量
+
+        // IO密集型任务
+        // executor.setCorePoolSize(processors * 2);
+        // executor.setMaxPoolSize(processors * 4);
+        // executor.setQueueCapacity(2000);
+
+        executor.setKeepAliveSeconds(60);                // 空闲线程存活时间
+        executor.setThreadNamePrefix("RabbitMQ-Executor-");    // 线程名前缀
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
+
+        return executor;
     }
 }
 
