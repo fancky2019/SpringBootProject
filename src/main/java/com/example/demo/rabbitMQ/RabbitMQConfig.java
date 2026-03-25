@@ -248,8 +248,8 @@ public class RabbitMQConfig {
 
         // CPU密集型任务
         int processors = Runtime.getRuntime().availableProcessors();
-        executor.setCorePoolSize(processors);           // 核心线程数 = CPU核心数
-        executor.setMaxPoolSize(processors * 2);        // 最大线程数 = CPU核心数 × 2
+        executor.setCorePoolSize(processors*2);           // 核心线程数 = CPU核心数
+        executor.setMaxPoolSize(processors * 4);        // 最大线程数 = CPU核心数 × 2
         executor.setQueueCapacity(1000);                 // 队列容量
 
         // IO密集型任务
@@ -258,7 +258,7 @@ public class RabbitMQConfig {
         // executor.setQueueCapacity(2000);
 
         executor.setKeepAliveSeconds(60);                // 空闲线程存活时间
-        executor.setThreadNamePrefix("rabbit-prod-");    // 线程名前缀
+        executor.setThreadNamePrefix("RabbitMQ-Executor-");    // 线程名前缀
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.initialize();
 
