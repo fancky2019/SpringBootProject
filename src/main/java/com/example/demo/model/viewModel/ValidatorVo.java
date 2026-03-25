@@ -6,9 +6,10 @@ import lombok.Setter;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
+import java.math.BigDecimal;
 import java.util.List;
 
-/*
+/**
 springboot 2.4 以后hibernate-validator不支持
         <dependency>
             <groupId>org.hibernate.validator</groupId>
@@ -24,7 +25,7 @@ springboot 2.4 以后hibernate-validator不支持
 
 
 
-controller 类 的方法参数哦前加上  @Validated 注解
+controller 类 的方法参数哦前加上  @RequestBody @Validated ValidatorVo vo 注解
 
 
 
@@ -83,13 +84,18 @@ Hibernate Validator提供的校验注解：
 @Getter
 @Setter
 public class ValidatorVo {
-    @NotBlank(message ="姓名不能为空")
+//    @NotNull :验证对象不能为 null。验证字段值不能为 null（但可以是空字符串、空集合、0 等）
+
+    @NotBlank(message ="姓名不能为空")//字符串不能为 null、不能为空字符串、不能只包含空白字符。
     private String name;
     @Min(value = 1,message = "年龄必须是大于1的数字")
     private  Integer age;
+//    @Positive(message = "价格必须为正数")
+    @Positive(message =  "price must be positive")
+    private BigDecimal price;
     @Email(message = "邮箱不能为空")
     private  String email;
-    @NotEmpty(message = "子女不能为空")
+    @NotEmpty(message = "子女不能为空")//方案1: 集合必须有元素（不能为空）集合不能为 null 且 size > 0
     private List<String> children;
     private String address;
 
