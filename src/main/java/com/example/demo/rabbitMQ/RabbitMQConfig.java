@@ -21,12 +21,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * rabbitMQ安装目录C:\Program Files\RabbitMQ Server\rabbitmq_server-3.10.5\sbin 下控制台执行命令
@@ -231,7 +234,40 @@ public class RabbitMQConfig {
         // 手动确认
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         factory.setMessageConverter(new Jackson2JsonMessageConverter(this.objectMapper));
+
+        // 必须配置！避免线程爆炸
+        factory.setTaskExecutor(createProductionExecutor());
         return factory;
+    }
+
+    /**
+     * 生产环境线程池配置
+     */
+    private TaskExecutor createProductionExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        // CPU密集型任务
+        int processors = Runtime.getRuntime().availableProcessors();
+        executor.setCorePoolSize(processors);           // 核心线程数 = CPU核心数
+        executor.setMaxPoolSize(processors * 2);        // 最大线程数 = CPU核心数 × 2
+        executor.setQueueCapacity(1000);                 // 队列容量
+
+        // IO密集型任务
+        // executor.setCorePoolSize(processors * 2);
+        // executor.setMaxPoolSize(processors * 4);
+        // executor.setQueueCapacity(2000);
+
+        executor.setKeepAliveSeconds(60);                // 空闲线程存活时间
+        executor.setThreadNamePrefix("rabbit-prod-");    // 线程名前缀
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
+
+        log.info("线程池配置: core={}, max={}, queue={}",
+                executor.getCorePoolSize(),
+                executor.getMaxPoolSize(),
+                executor.getQueueCapacity());
+
+        return executor;
     }
 
 
@@ -243,15 +279,16 @@ public class RabbitMQConfig {
     @Bean("multiplyThreadContainerFactory")
     public SimpleRabbitListenerContainerFactory containerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConcurrentConsumers(5);  //设置并发消费线程数
-        factory.setMaxConcurrentConsumers(5); //最大发消费线程数
+        factory.setConcurrentConsumers(10);  //设置并发消费者数量。RabbitMQ 会创建 10 个独立的消费者连接/线程
+        factory.setMaxConcurrentConsumers(50); //最大发消费线程数,消息积压时候会动态扩到50个消费者
 //        消息状态：ready:准备发送给消费之
 //        unacked:发送给消费者消费还没有ack
 //        total：总消息数量=ready+unacked
         //每次预取10条信息放在线程的消费队列里，该线程还是1条一条从从该线程的缓冲队列里取消费。直到
         //缓冲队列里的消息消费完，再从mq的队列里取。
         // 调试可到mq插件查看 ready unacked 消息数量，打印消费者消费线程的消息id
-        factory.setPrefetchCount(10);
+        //每个消费者一次可以预取 100 条消息到本地缓存
+        factory.setPrefetchCount(100);
         // 是否重回队列
 //        factory.setDefaultRequeueRejected(true);
         // 手动确认
