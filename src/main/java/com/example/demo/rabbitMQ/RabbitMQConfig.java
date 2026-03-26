@@ -41,6 +41,15 @@ import java.util.concurrent.ThreadPoolExecutor;
  *
  *
  * 声明RabbitMQ的交换机、队列、并将相应的队列、交换机、RoutingKey绑定。
+ *
+ * 分区消费 = 并行消费 + 多线程
+ * 从原队列中取出消息，按业务ID重新分发到多个分区队列。这是一个数据迁移的过程。
+ *
+ *
+ *
+ *
+ *
+ *
  */
 @Configuration
 @Slf4j
@@ -245,6 +254,7 @@ public class RabbitMQConfig {
 
     /**
      * 分区消费 = 并行消费 + 多线程
+     * 从原队列中取出消息，按业务ID重新分发到多个分区队列。这是一个数据迁移的过程。
      多线程消费:涉及到消费顺序行要将一个大队列根据业务消息id分成多个小队列
      配置文件为默认的SimpleRabbitListenerContainerFactory 配置
      该配置为具体的listener 指定SimpleRabbitListenerContainerFactory
@@ -476,6 +486,20 @@ public class RabbitMQConfig {
         args.put("x-dead-letter-routing-key", DIRECT_ROUTING_KEY_DLX);
         //rabbitmq 默认发送给所有消费中的一个，尽管集群也只会发给一个服务中的一个消费者
         args.put("x-single-active-consumer", true);
+
+//        设置 x-single-active-consumer=true 开启单活模式，不设置则默认是轮询模式
+//        true	多个消费者订阅同一队列时，只有一个活跃消费者处理消息，其他作为备份；活跃者故障时自动切换	需要保证消息顺序消费 + 高可用性
+//        false（默认）	多个消费者轮流消费消息（Round-robin 轮询），所有消费者同时工作	提升吞吐量，不要求严格顺序
+//                         所有消费者同时活跃
+//                         消息依次轮流分发（Round-robin 轮询）给各个消费者
+//                        每个消息只被一个消费者处理（不像 Fanout 交换机那样广播）
+//
+//        实际应用建议
+//        场景	            推荐模式	                           理由
+//        高吞吐量，不关心顺序	默认轮询模式	                      多个消费者并行处理，充分利用资源
+//        需要顺序消费	    SAC 模式	                          单一消费者保证顺序
+//        需要顺序 + 高可用	SAC 模式	                          主备切换，防止单点故障
+//        需要顺序 + 高吞吐	Super Streams + 分区	              分区内顺序，跨分区并行
 
 
         //sac:单活队列
