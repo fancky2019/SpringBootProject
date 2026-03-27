@@ -16,6 +16,8 @@ import org.apache.poi.ss.formula.functions.T;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
@@ -108,12 +110,12 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
     //多个方法绑定同一个队列MQ会轮训发送给各个方法消费
     //string 接收
     @RabbitHandler
-//    @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
+    @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
     public void receivedMsg(Message message, Channel channel,
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
                             @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName) throws Exception {
         try {
-            Thread.sleep(60 * 1000);
+//            Thread.sleep(60 * 1000);  Message
             Object msg1 = message;
             //  System.out.println("DirectExchange Queue:" + DIRECT_QUEUE_NAME + " receivedMsg: " + receivedMessage);
             int m = 0;
@@ -132,13 +134,19 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
 //            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 
 
-            super.onMessage(MqMessage.class, message, channel, (msg) -> {
+//            super.onMessage(MqMessage.class, message, channel, (msg) -> {
+//                try {
+//                    Thread.sleep(10 * 1000);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+
                 //业务处理
 //                Person person1 = msg;
 //                int mm = Integer.parseInt("d");
                 //    logger.info("MQ接收到消息jsonStr : " + msgContent);
 
-            });
+//            });
 
         } catch (Exception e) {
 
@@ -162,7 +170,7 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
     //多个方法绑定同一个队列MQ会轮训发送给各个方法消费
     //多线程消费，prefetch 没起作用，每个线程每次消费一条
     @RabbitHandler
-    @RabbitListener(queues = RabbitMQConfig.BATCH_DIRECT_QUEUE_NAME, containerFactory = "multiplyThreadContainerFactory")
+//    @RabbitListener(queues = RabbitMQConfig.BATCH_DIRECT_QUEUE_NAME, containerFactory = "multiplyThreadContainerFactory")
     public void consumerByMultiThread(Message message, Channel channel) throws Exception {
         try {
             Thread.sleep(60 * 1000);

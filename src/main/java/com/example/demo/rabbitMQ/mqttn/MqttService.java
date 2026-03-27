@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-@Service
-@ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "false")
+//@Service
+//@ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "false")
 public class MqttService {
 
     private static final Logger log = LoggerFactory.getLogger(MqttService.class);

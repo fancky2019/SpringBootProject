@@ -245,7 +245,13 @@ public class RabbitMQConfig {
         // 手动确认
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         factory.setMessageConverter(new Jackson2JsonMessageConverter(this.objectMapper));
-
+        //覆盖配置文件的配置
+//        单消费者，prefetch=1	完全阻塞	                       所有后续消息停止消费 ❌
+//        单消费者，prefetch>1	部分阻塞	                       已预取消息继续处理，新消息不接收 ⚠️
+//        多消费者，prefetch=1	单个消费者阻塞	其                  他消费者正常处理 ✅
+//        多消费者，prefetch>1	单个消费者部分阻塞	                其他消费者正常处理，阻塞消费者无法接收新消息 ⚠️
+        //1个ack 不成功会停止消费，后续消息无法消费
+        factory.setPrefetchCount(1);
         // 必须配置！避免线程爆炸
         factory.setTaskExecutor(rabbitMQThreadPoolExecutor);
         return factory;

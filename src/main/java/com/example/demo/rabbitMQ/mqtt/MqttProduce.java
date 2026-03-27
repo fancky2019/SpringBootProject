@@ -40,7 +40,7 @@ public class MqttProduce {
     /**
      * 在bean初始化后连接到服务器
      */
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         connect();
     }

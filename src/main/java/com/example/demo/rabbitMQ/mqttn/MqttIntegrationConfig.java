@@ -54,8 +54,8 @@ import java.util.UUID;
  * 客户端重连后可以继续接收未确认的消息
  * 支持消息重发机制
  */
-@Configuration
-@ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "false")
+//@Configuration
+//@ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "false")
 @Slf4j
 public class MqttIntegrationConfig {
 

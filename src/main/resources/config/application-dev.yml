@@ -291,8 +291,8 @@ spring:
           max-attempts: 3
           #重试间隔时间（单位毫秒）
           initial-interval: 2000
-        #公平分发模式 默认是1
-        prefetch: 30
+        #公平分发模式 默认是1,否则消费失败，没有ack还会继续消费到30个。默认 prefetch = 250。1个 unacked 不成功会停止消费，后续消息无法消费
+        prefetch: 1
         #默认 auto，不然消费异常业务ack掉。尽管配置重新入队auto还是会重试入队之后ack掉
         acknowledge-mode: manual
         #消费异常的数据重新入队。

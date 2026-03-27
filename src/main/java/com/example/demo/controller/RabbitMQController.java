@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -34,7 +36,7 @@ public class RabbitMQController {
     private DemoProductService demoProductService;
 
     @GetMapping("")
-    public MessageResult<String> rabbitMQTest() {
+    public MessageResult<String> rabbitMQTest() throws InterruptedException {
 
         /*
           1、将消息和数据库业务对象一起提交
@@ -73,15 +75,22 @@ public class RabbitMQController {
 //            rabbitMQTest.produceTest(mqMessage);
 //        });
 
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formatted = now.format(formatter);
+
+        for (int i = 0; i < 260; i++) {
 
 
-        MqMessage mqMessage = new MqMessage
-                (RabbitMQConfig.DIRECT_EXCHANGE_NAME,
-                        RabbitMQConfig.DIRECT_ROUTING_KEY,
-                        RabbitMQConfig.DIRECT_QUEUE_NAME,
-                        "1");
-        rabbitMQTest.produceTest(mqMessage);
-
+            String msgContent = System.currentTimeMillis() + "";
+            MqMessage mqMessage = new MqMessage
+                    (RabbitMQConfig.DIRECT_EXCHANGE_NAME,
+                            RabbitMQConfig.DIRECT_ROUTING_KEY,
+                            RabbitMQConfig.DIRECT_QUEUE_NAME,
+                            msgContent);
+            rabbitMQTest.produceTest(mqMessage);
+            Thread.sleep(5);
+        }
         return MessageResult.success("complete");
     }
 

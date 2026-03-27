@@ -12,9 +12,9 @@ import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 
 import java.util.List;
 
-@Configuration
-@ConfigurationProperties(prefix = "spring.mqtt")
-@ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "false")
+//@Configuration
+//@ConfigurationProperties(prefix = "spring.mqtt")
+//@ConditionalOnProperty(name = "spring.mqtt.enabled", havingValue = "false")
 @Data
 public class MqttConfig {
     private String brokerUrl;
