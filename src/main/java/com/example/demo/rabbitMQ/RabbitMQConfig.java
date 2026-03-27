@@ -8,9 +8,11 @@ import com.example.demo.service.demo.IMqMessageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.batch.SimpleBatchingStrategy;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -18,6 +20,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,6 +57,34 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 @Slf4j
 public class RabbitMQConfig {
+    @Value("${spring.rabbitmq.host:localhost}")
+    private String host;
+
+    @Value("${spring.rabbitmq.port:5672}")
+    private int port;
+
+    @Value("${spring.rabbitmq.username:guest}")
+    private String username;
+
+    @Value("${spring.rabbitmq.password:guest}")
+    private String password;
+
+    @Value("${spring.rabbitmq.virtual-host:/}")
+    private String virtualHost;
+
+    @Value("${spring.rabbitmq.publisher-confirm-type:CORRELATED}")
+    private String publisherConfirmType;
+
+    @Value("${spring.rabbitmq.publisher-returns:true}")
+    private boolean publisherReturns;
+
+    /**
+     * 获取集群地址配置
+     * 可以从配置文件中读取 spring.rabbitmq.addresses
+     */
+    @Value("${spring.rabbitmq.addresses:}")
+    private String clusterAddresses;
+
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -143,6 +174,55 @@ public class RabbitMQConfig {
 
 //    @Autowired
 //    private ConnectionFactory connectionFactory;
+
+//    /**
+//     * 配置 ConnectionFactory
+//     * 支持单节点和集群配置
+//     */
+//    @Bean
+//    public ConnectionFactory connectionFactory() {
+//        CachingConnectionFactory factory;
+//
+//        // 检查是否配置了集群地址
+//
+//        if (StringUtils.isNotEmpty(this.clusterAddresses)) {
+//            // 集群模式：使用 addresses 配置
+//            factory = new CachingConnectionFactory();
+//            factory.setAddresses(clusterAddresses);
+//            log.info("RabbitMQ 集群模式，地址: {}", clusterAddresses);
+//        } else {
+//            // 单节点模式：使用 host + port
+//            factory = new CachingConnectionFactory(host, port);
+//            log.info("RabbitMQ 单节点模式，host: {}, port: {}", host, port);
+//        }
+//
+//        // 基础配置
+//        factory.setUsername(username);
+//        factory.setPassword(password);
+//        factory.setVirtualHost(virtualHost);
+//
+//        // 连接超时设置（毫秒）
+//        factory.setConnectionTimeout(30000);
+//
+//        // 心跳超时（秒），建议设置为 60 秒
+//        factory.setRequestedHeartBeat(60);
+//
+//        // Channel 缓存大小
+//        factory.setChannelCacheSize(25);
+//
+//        // 连接缓存模式
+//        factory.setCacheMode(CachingConnectionFactory.CacheMode.CHANNEL);
+//
+//        // 添加连接监听器
+//        factory.addConnectionListener(new RabbitMQConnectionListener());
+//
+//        // 添加 Channel 监听器（可选）
+//        factory.addChannelListener(new RabbitMQChannelListener());
+//
+//        log.info("RabbitMQ ConnectionFactory 初始化完成");
+//        return factory;
+//    }
+
 
     //@Bean注解的方法的参数可以任意加，反射会自动添加对应参数
     @Bean
@@ -464,8 +544,8 @@ public class RabbitMQConfig {
 
         //       RabbitMQ的默认行为是假设队列长度无限，
         // ========== 强制配置 ==========
-        // 1. 最大消息数量（防止无限堆积）
-        args.put("x-max-length", 2);
+        // 1. 最大消息数量（防止无限堆积），修改队列的属性要把之前的队列删除否则不生效
+//        args.put("x-max-length", 2);
 
         // 2. 最大队列字节大小（防止大消息撑爆内存） //x-max-length 和 x-max-length-bytes 是同时生效的.队列长度限制 = min(数量限制，字节限制)
 //        args.put("x-max-length-bytes", 1024 * 1024 * 500); // 500MB

@@ -79,7 +79,7 @@ public class RabbitMQController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formatted = now.format(formatter);
 
-        for (int i = 0; i < 260; i++) {
+        for (int i = 0; i < 8; i++) {
 
 
             String msgContent = System.currentTimeMillis() + "";

@@ -1,10 +1,7 @@
-package com.example.demo.config;
+package com.example.demo.config.jackson;
 
-import com.example.demo.config.ZonedDateTimeConfig.ZonedDateTimeDeserializer;
-import com.example.demo.config.ZonedDateTimeConfig.ZonedDateTimeSerializer;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;

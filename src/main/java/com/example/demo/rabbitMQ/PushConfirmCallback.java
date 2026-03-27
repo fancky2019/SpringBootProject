@@ -47,7 +47,7 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
 
 
     @Override
-    public void confirm(CorrelationData correlationData, boolean ack, String s) {
+    public void confirm(CorrelationData correlationData, boolean ack, String reason) {
         try {
             //生产线程和生产确认线程不是同一个线程
             long threadId = Thread.currentThread().getId();

@@ -18,10 +18,12 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * rabbitmq默认消息、队列、交换机都是持久化：
@@ -207,7 +209,7 @@ public class DirectExchangeProducer {
         messageProperties.setMessageId(msgId);
         //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
         Message message = new Message(mqMessage.getMsgContent().getBytes(), messageProperties);
-      //messageId
+        //messageId
         message.getMessageProperties().setMessageId(mqMessage.getMsgId());
 //        String messageId = message.getMessageProperties().getMessageId();
 //        message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
@@ -231,7 +233,16 @@ public class DirectExchangeProducer {
         //Spring Boot 整合 RabbitMQ 默认是异步的。你可以使用 RabbitTemplate 来发送消息，并通过回调来确认消息是否成功发送
 //      //默认异步调用 ：事务机制和 confirm 机制，事务机制是同步的， confirm 机制是异步的
         //// 显式开启确认模式（即使默认是同步）
-        rabbitTemplate.send(exchange, routingKey, message, correlationData);
+
+
+        try {
+
+
+            rabbitTemplate.send(exchange, routingKey, message, correlationData);
+
+        } catch (Exception ex) {
+            log.error("", ex);
+        }
 
 
         //同步发送： 同步发送并获取返回消息（RPC模式）。性能较低（受网络延迟影响）
@@ -241,7 +252,6 @@ public class DirectExchangeProducer {
         //
         //默认超时时间为 5 秒（可通过 setReplyTimeout 修改）  rabbitTemplate.setReplyTimeout(10000); // 10秒超时
 //        rabbitTemplate.convertSendAndReceive(exchange, routingKey, message, correlationData);
-
 
 
         //同步调用
@@ -254,6 +264,7 @@ public class DirectExchangeProducer {
 //        }
 
     }
+
 
     //region batch
 
