@@ -224,6 +224,7 @@ public class RabbitMQConfig {
 //    }
 
 
+    //自定义bean 会导致自动装配的bean 的yml中配置失效
     //@Bean注解的方法的参数可以任意加，反射会自动添加对应参数
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
@@ -542,14 +543,19 @@ public class RabbitMQConfig {
         // Queue(String name, boolean durable, boolean exclusive, boolean autoDelete, Map<String, Object> arguments)
         HashMap<String, Object> args = new HashMap<>();
 
+
+//        内存水位线	当 RabbitMQ 节点内存使用量超过阈值时，会阻塞所有消息发布	默认 0.4（可用内存的 40%）
+//        磁盘水位线	当可用磁盘空间低于阈值时，会阻塞所有消息发布	默认 50 MB（v3.12+ 改为 1 GB）
+
         //       RabbitMQ的默认行为是假设队列长度无限，
         // ========== 强制配置 ==========
-        // 1. 最大消息数量（防止无限堆积），修改队列的属性要把之前的队列删除否则不生效
-//        args.put("x-max-length", 2);
+        // 1.限制队列中消息的数量。 最大消息数量（防止无限堆积），修改队列的属性要把之前的队列删除否则不生效
+//        args.put("x-max-length", 500000);//50W
 
-        // 2. 最大队列字节大小（防止大消息撑爆内存） //x-max-length 和 x-max-length-bytes 是同时生效的.队列长度限制 = min(数量限制，字节限制)
-//        args.put("x-max-length-bytes", 1024 * 1024 * 500); // 500MB
+        // 2. x-max-length-bytes	限制队列中所有消息的总大小。最大队列字节大小（防止大消息撑爆内存） //x-max-length 和 x-max-length-bytes 是同时生效的.队列长度限制 = min(数量限制，字节限制)
+//        args.put("x-max-length-bytes", 1024 *1024 * 1024 * 50); // 50GB
 
+        //x-max-length、x-max-length-bytes这两个限制只计算队列中“待消费”的消息，已经被消费者拉取但还未确认（Unacked）的消息不计算在内。
         // 3. 设置消息TTL（自动清理旧消息）
 //        args.put("x-message-ttl", 24 * 60 * 60 * 1000); // 24小时
 

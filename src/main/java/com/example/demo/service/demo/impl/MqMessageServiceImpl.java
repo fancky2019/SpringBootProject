@@ -649,6 +649,10 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
         });
     }
 
+    /**
+     * 待优化成redisson
+     * @param mqMessageList
+     */
     private synchronized void publish(List<MqMessage> mqMessageList) {
 
         log.info("start executing publish");

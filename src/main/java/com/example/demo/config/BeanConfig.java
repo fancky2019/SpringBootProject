@@ -20,6 +20,9 @@ import org.springframework.context.annotation.Primary;
  * 变量名匹配（默认行为） → 最低优先级
  *
  * 如果既没有 @Qualifier 也没有 @Primary，Spring 会尝试按变量名匹配 Bean（若变量名与某个 Bean 名称一致）。
+ *
+ *
+ * 自定义bean 会导致自动装配的bean 的yml中配置失效
  */
 
 @Configuration

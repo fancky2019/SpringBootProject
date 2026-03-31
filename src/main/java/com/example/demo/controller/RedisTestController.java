@@ -435,6 +435,23 @@ appendfsync everysec
      */
 //endregion
 
+//region redis-cli shutdown
+
+//    # 强制保存（即使没有配置 RDB）
+//redis-cli SHUTDOWN SAVE
+            /*
+当执行 redis-cli shutdown 时，Redis 会按以下顺序执行：
+
+停止所有客户端连接
+
+执行 RDB 保存（如果至少配置了一个 save 点）
+
+刷新 AOF 文件（如果启用了 AOF）
+
+退出服务器
+     */
+//endregion
+
 
 @RestController
 @RequestMapping("/redisTest")

@@ -10,6 +10,7 @@ import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rabbitMQ.RabbitMqMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.formula.functions.T;
@@ -17,26 +18,39 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * * rabbitmq 队列之间是多线程消费，队列内是单线程
  *  * 多线程消费：多个队列可以被不同的消费者同时消费
  *  * 单线程消费：单个队列内的消息按顺序被消费（默认情况下）
  */
+@Slf4j
 @Component
 //@RabbitListener(queues = "DirectExchangeQueueSpringBoot")//参数为队列名称
 public class DirectExchangeConsumer extends BaseRabbitMqHandler {
     @Autowired
     private ObjectMapper objectMapper;
+
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+
     private static Logger logger = LogManager.getLogger(DirectExchangeConsumer.class);
 
 //    public static final String DIRECT_QUEUE_NAME = "DirectExchangeQueueSpringBoot";
@@ -113,7 +127,8 @@ public class DirectExchangeConsumer extends BaseRabbitMqHandler {
     @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE_NAME)//参数为队列名称
     public void receivedMsg(Message message, Channel channel,
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
-                            @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName) throws Exception {
+                            @Header(AmqpHeaders.CONSUMER_QUEUE) String queueName,
+                            @Header(AmqpHeaders.DELIVERY_TAG) long tag) throws Exception {
         try {
 //            Thread.sleep(60 * 1000);  Message
             Object msg1 = message;
