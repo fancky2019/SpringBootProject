@@ -116,7 +116,7 @@ public class MqMessage extends EntityBase implements Serializable {
     private String msgId;
 
     /**
-     *
+     *json  串
      */
     private String msgContent;
 

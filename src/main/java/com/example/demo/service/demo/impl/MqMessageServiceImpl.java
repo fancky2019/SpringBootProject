@@ -119,7 +119,8 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
     private IMqMessageService selfProxy;
     @Autowired
     private ObjectProvider<IMqMessageService> serviceProvider;
-//    ObjectProvider（懒加载）它注入的不是 IMqMessageService 实例，而是一个“取 Bean 的工厂”，只有你调用 getObject() 时，
+
+    //    ObjectProvider（懒加载）它注入的不是 IMqMessageService 实例，而是一个“取 Bean 的工厂”，只有你调用 getObject() 时，
 //    Spring 才真正去容器里拿 Bean。
     @PostConstruct
     public void init() {
@@ -361,7 +362,13 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
         }
     }
 
-    @Async("mqFailHandlerExecutor")
+    /**
+     * 要同步更新防止乱序
+     * @param msgId
+     * @param status
+     * @throws Exception
+     */
+//    @Async("mqFailHandlerExecutor")
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateByMsgIdAsync(String msgId, int status) throws Exception {
@@ -382,51 +389,71 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 //        并不完全等于“是否有事务”，但通常和事务同时开启。
         boolean isSynchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();
 
+        Exception e = transactionTemplate.execute(transactionStatus -> {
+            try {
 
-        String lockKey = RedisKey.UPDATE_MQ_MESSAGE_INFO + ":" + msgId;
-        //获取分布式锁，此处单体应用可用 synchronized，分布式就用redisson 锁
-        RLock lock = redissonClient.getLock(lockKey);
-        boolean lockSuccessfully = false;
-        try {
+
+                String lockKey = RedisKey.UPDATE_MQ_MESSAGE_INFO + ":" + msgId;
+                //获取分布式锁，此处单体应用可用 synchronized，分布式就用redisson 锁
+                RLock lock = redissonClient.getLock(lockKey);
+                boolean lockSuccessfully = false;
+                try {
 
 //            lockSuccessfully = lock.tryLock(RedisKey.INIT_INVENTORY_INFO_FROM_DB_WAIT_TIME, RedisKey.INIT_INVENTORY_INFO_FROM_DB_LEASE_TIME, TimeUnit.SECONDS);
-            //  return this.tryLock(waitTime, -1L, unit); 不指定释放时间，RedissonLock内部设置-1，
-            lockSuccessfully = lock.tryLock(RedisKey.INIT_INVENTORY_INFO_FROM_DB_WAIT_TIME, TimeUnit.SECONDS);
+                    //  return this.tryLock(waitTime, -1L, unit); 不指定释放时间，RedissonLock内部设置-1，
+                    lockSuccessfully = lock.tryLock(RedisKey.INIT_INVENTORY_INFO_FROM_DB_WAIT_TIME, TimeUnit.SECONDS);
+                    if (!lockSuccessfully) {
+                        String msg = MessageFormat.format("Get lock {0} fail，wait time : {1} s", lockKey, RedisKey.INIT_INVENTORY_INFO_FROM_DB_WAIT_TIME);
+                        throw new Exception(msg);
+                    }
+                    log.info("updateByMsgId get lock {}", lockKey);
+                    LambdaQueryWrapper<MqMessage> queryWrapper = new LambdaQueryWrapper<>();
+                    queryWrapper.eq(MqMessage::getMsgId, msgId);
+                    List<MqMessage> mqMessageList = this.list(queryWrapper);
+                    MqMessage mqMessage = null;
+                    if (mqMessageList.size() > 0) {
+                        mqMessage = mqMessageList.get(0);
+                    }
+                    if (mqMessage == null) {
+                        throw new Exception("Can't get MqMessage by MsgId :" + msgId);
+                    }
 
-            log.info("updateByMsgId get lock {}", lockKey);
-            LambdaQueryWrapper<MqMessage> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(MqMessage::getMsgId, msgId);
-            List<MqMessage> mqMessageList = this.list(queryWrapper);
-            MqMessage mqMessage = null;
-            if (mqMessageList.size() > 0) {
-                mqMessage = mqMessageList.get(0);
-            }
-            if (mqMessage == null) {
-                throw new Exception("Can't get MqMessage by MsgId :" + mqMessage.getMsgId());
-            }
-
-            Integer oldVersion = mqMessage.getVersion();
-            mqMessage.setVersion(mqMessage.getVersion() + 1);
-            mqMessage.setStatus(status);
-            mqMessage.setModifyTime(LocalDateTime.now());
-            LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<MqMessage>();
-            updateWrapper.eq(MqMessage::getVersion, oldVersion);
-            updateWrapper.eq(MqMessage::getId, mqMessage.getId());
-            boolean re = this.update(mqMessage, updateWrapper);
-            if (!re) {
-                String message = MessageFormat.format("MqMessage update fail :id - {0} ,version - {1}", mqMessage.getId(), oldVersion);
-                throw new Exception(message);
-            }
-        } catch (Exception ex) {
-            log.error("", ex);
-            throw ex;
-        } finally {
-            //非事务操作在此释放
+                    Integer oldVersion = mqMessage.getVersion();
+                    mqMessage.setVersion(mqMessage.getVersion() + 1);
+                    mqMessage.setStatus(status);
+                    mqMessage.setModifyTime(LocalDateTime.now());
+                    LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<MqMessage>();
+                    updateWrapper.eq(MqMessage::getVersion, oldVersion);
+                    updateWrapper.eq(MqMessage::getId, mqMessage.getId());
+                    boolean re = this.update(mqMessage, updateWrapper);
+                    if (!re) {
+                        String message = MessageFormat.format("MqMessage update fail :id - {0} ,version - {1}", mqMessage.getId(), oldVersion);
+                        throw new Exception(message);
+                    }
+                } catch (Exception ex) {
+                    log.error("", ex);
+                    throw ex;
+                } finally {
+                    //非事务操作在此释放
 //            if (lockSuccessfully && lock.isHeldByCurrentThread()) {
 //                lock.unlock();
 //            }
-            redisUtil.releaseLockAfterTransaction(lock, lockSuccessfully);
-        }
+                    redisUtil.releaseLockAfterTransaction(lock, lockSuccessfully);
+                }
+
+
+                return null;
+            } catch (Exception ex) {
+                log.info("updateByMsgId {} fail", msgId);
+                log.error("", ex);
+                // 如果操作失败，抛出异常，事务将回滚
+                transactionStatus.setRollbackOnly();
+                return ex;
+                //此处是定时任务 ，处理异常不抛出
+//                    transactionStatus.setRollbackOnly();
+//                    throw  e;
+            }
+        });
     }
 
 

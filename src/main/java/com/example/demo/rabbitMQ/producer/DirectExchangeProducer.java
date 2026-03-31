@@ -22,8 +22,11 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * rabbitmq默认消息、队列、交换机都是持久化：
@@ -45,6 +48,10 @@ public class DirectExchangeProducer {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplateManualConfirmCallback;
+
 
     @Autowired
     private BatchingRabbitTemplate batchingRabbitTemplate;
@@ -97,9 +104,6 @@ public class DirectExchangeProducer {
                 Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
                 String msgId = UUID.randomUUID().toString();
                 CorrelationData correlationData = new CorrelationData(msgId);
-                //设置消息内容
-                ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
-                correlationData.setReturned(returnedMessage);
                 message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
 
 //                // 1. 构建持久化消息
@@ -163,9 +167,6 @@ public class DirectExchangeProducer {
 //                CorrelationData correlationData = new CorrelationData();
                 String msgId = UUID.randomUUID().toString();
                 CorrelationData correlationData = new CorrelationData(msgId);
-                //设置消息内容
-                ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
-                correlationData.setReturned(returnedMessage);
                 //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
                 rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
                 Thread.sleep(1);
@@ -226,9 +227,11 @@ public class DirectExchangeProducer {
 //                // 2. 发送并等待确认
 //                CorrelationData correlationData = new CorrelationData();
         CorrelationData correlationData = new CorrelationData(msgId);
-        //设置消息内容
-        ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
-        correlationData.setReturned(returnedMessage);
+//        ReturnedMessage 是 RabbitMQ 在消息无法路由时通过 ReturnsCallback 回调返回的
+//        手动设置会覆盖真实的状态，导致无法正确判断消息是否真的被路由
+//        //设置消息内容
+//        ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
+//        correlationData.setReturned(returnedMessage);
 //        Spring Boot 集成 Elasticsearch 可以是同步的也可以是异步的。默认情况下，Spring Data Elasticsearch 的操作是同步的，意味着在执行索引、搜索等操作时，当前线程会阻塞直到操作完成。
         //Spring Boot 整合 RabbitMQ 默认是异步的。你可以使用 RabbitTemplate 来发送消息，并通过回调来确认消息是否成功发送
 //      //默认异步调用 ：事务机制和 confirm 机制，事务机制是同步的， confirm 机制是异步的
@@ -312,9 +315,11 @@ public class DirectExchangeProducer {
                 message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
                 String msgId = UUID.randomUUID().toString();
                 CorrelationData correlationData = new CorrelationData(msgId);
-                //设置消息内容
-                ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
-                correlationData.setReturned(returnedMessage);
+//                ReturnedMessage 是 RabbitMQ 在消息无法路由时通过 ReturnsCallback 回调返回的
+//                手动设置会覆盖真实的状态，导致无法正确判断消息是否真的被路由
+//                //设置消息内容
+//                ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
+//                correlationData.setReturned(returnedMessage);
 
 
                 batchingRabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
@@ -387,5 +392,76 @@ public class DirectExchangeProducer {
 
     }
     //endregion
+
+
+    /**
+     * 同步发送消息（使用 CorrelationData.getFuture() 方式）
+     * @param
+     * @return 是否发送成功
+     * @throws Exception 发送异常
+     */
+    public boolean sendOrderedMessageSync(MqMessage mqMessage) throws Exception {
+
+
+        String exchange = mqMessage.getExchange();
+        String routingKey = mqMessage.getRouteKey();
+
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+        String msgId = mqMessage.getMsgId();
+        //设置优先级
+        messageProperties.setPriority(9);
+        messageProperties.setMessageId(msgId);
+        //发送时间戳
+        messageProperties.setTimestamp(new Date());
+
+        //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
+        Message message = new Message(mqMessage.getMsgContent().getBytes(), messageProperties);
+        //messageId
+        message.getMessageProperties().setMessageId(mqMessage.getMsgId());
+
+        // 1. 创建 CorrelationData，使用业务ID作为标识
+        CorrelationData correlationData = new CorrelationData(msgId);
+
+        //设置消息内容
+        ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
+        correlationData.setReturned(returnedMessage);
+
+        // 2. 发送消息
+        rabbitTemplateManualConfirmCallback.send(exchange, routingKey, message, correlationData);
+
+        // 3. 同步等待 Broker 的 confirm 确认（最多等待5秒）
+        try {
+            // getFuture() 返回 CompletableFuture<CorrelationData.Confirm>
+            // 调用 get() 方法阻塞等待确认结果
+            //等待最多 5 秒 来接收 broker 的确认（ACK/NACK）。
+            //如果 5 秒内没有收到确认 → 抛出 TimeoutException
+            CorrelationData.Confirm confirm = correlationData.getFuture().get(5, TimeUnit.SECONDS);
+           //5 秒内没收到确认，不能说明消息没发送成功，实际消息最终发送到队列，造成消息重复投递。业务层做幂等处理。
+            if (confirm.isAck()) {
+                // 4. 发送成功，更新消息状态
+//                updateSuccess(orderMessage);
+                System.out.println("消息发送成功: " + msgId);
+                return true;
+            } else {
+                // 发送失败，Broker 返回 nack
+                System.err.println("消息发送失败: " + confirm.getReason());
+//                updateFailed(orderMessage, confirm.getReason());
+                return false;
+            }
+
+        } catch (TimeoutException e) {
+            // 超时未收到确认
+            System.err.println("消息发送超时: " + msgId);
+//            updateTimeout(orderMessage);
+            return false;
+        } catch (Exception e) {
+            // 其他异常
+            System.err.println("消息发送异常: " + e.getMessage());
+//            updateFailed(orderMessage, e.getMessage());
+            throw e;
+        }
+    }
+
 
 }

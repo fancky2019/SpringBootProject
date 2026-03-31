@@ -4,6 +4,7 @@ package com.example.demo.rabbitMQ;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.example.demo.model.entity.demo.MqMessage;
+import com.example.demo.model.enums.MqMessageStatus;
 import com.example.demo.service.demo.IMqMessageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -230,7 +231,10 @@ public class RabbitMQConfig {
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         //公平分发模式在Spring-amqp中是默认的
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMandatory(true);//新版加此句
+//        当消息 无法从 Exchange 路由到任何 Queue 时：
+//        mandatory = false（默认）   消息直接丢弃（悄无声息）
+//        mandatory = true         触发 ReturnCallback
+        rabbitTemplate.setMandatory(true);
 
         //json 序列化，默认SimpleMessageConverter jdk 序列化,需要配置objectMapper，
         // 默认objectMapper LocalDateTime列化有问题，可以在字段上配置JsonDeserialize 参见RabbitMqMessage
@@ -261,8 +265,16 @@ public class RabbitMQConfig {
             // json 序列化，默认SimpleMessageConverter jdk 序列化
             try {
 
-                String failedMessage = new String(returnedMessage.getMessage().getBody());
-                rabbitMqMessage = objectMapper.readValue(failedMessage, RabbitMqMessage.class);
+//                String failedMessage = new String(returnedMessage.getMessage().getBody());
+//                rabbitMqMessage = objectMapper.readValue(failedMessage, RabbitMqMessage.class);
+
+                 rabbitMqMessage =
+                        (RabbitMqMessage) rabbitTemplate.getMessageConverter()
+                                .fromMessage(returnedMessage.getMessage());
+
+                messageId = returnedMessage.getMessage()
+                        .getMessageProperties()
+                        .getMessageId();
                 messageId = rabbitMqMessage.getMessageId();
 
                 //没有路由到队列的设置未生产成功
@@ -272,11 +284,7 @@ public class RabbitMQConfig {
 //                updateWrapper.eq(MqMessage::getMsgId, messageId);//条件
 //                mqMessageService.update(updateWrapper);
 
-                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-                lambdaQueryWrapper.eq(MqMessage::getMsgId, messageId);
-                MqMessage mqMessage = mqMessageService.getOne(lambdaQueryWrapper);
-                mqMessage.setStatus(0);
-                mqMessageService.updateById(mqMessage);
+                mqMessageService.updateByMsgIdAsync(messageId, MqMessageStatus.NOT_PRODUCED.getValue());
 
 
             } catch (Exception e) {
@@ -315,6 +323,36 @@ public class RabbitMQConfig {
         return rabbitTemplate;
     }
 
+    @Bean
+    public RabbitTemplate rabbitTemplateManualConfirmCallback(ConnectionFactory connectionFactory) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMandatory(true);
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter(this.objectMapper));
+        rabbitTemplate.setReturnsCallback(returnedMessage ->
+        {
+            String exchange = returnedMessage.getExchange();
+            String routingKey = returnedMessage.getRoutingKey();
+            int replyCod = returnedMessage.getReplyCode();
+            String replyText = returnedMessage.getReplyText();
+            String messageId = "";
+
+            try {
+
+                 messageId = returnedMessage.getMessage()
+                        .getMessageProperties()
+                        .getMessageId();
+
+                //没有路由到队列的设置未生产成功
+                IMqMessageService mqMessageService = applicationContext.getBean(IMqMessageService.class);
+                mqMessageService.updateByMsgIdAsync(messageId, MqMessageStatus.NOT_PRODUCED.getValue());
+
+            } catch (Exception e) {
+                log.info("", e);
+            }
+            log.info("消息 - {} 路由到队列失败.", messageId);
+        });
+        return rabbitTemplate;
+    }
 
     //分区消费 = 并行消费 + 多线程
     //json 序列化，默认SimpleMessageConverter jdk 序列化

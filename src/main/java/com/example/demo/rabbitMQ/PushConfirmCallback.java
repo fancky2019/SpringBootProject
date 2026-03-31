@@ -108,7 +108,7 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
                 //ack true 只保证发送到broker 交换机，不保证路由到具体队列。
                 //ack false rabbitMq 不会返回 ack false的原因
                 log.info("消息 - {} 发送到交换机失败！ ", msgId);
-//                mqMessageService.updateByMsgIdAsync(msgId, MqMessageStatus.NOT_PRODUCED.getValue());
+                mqMessageService.updateByMsgIdAsync(msgId, MqMessageStatus.NOT_PRODUCED.getValue());
             }
         } catch (Exception e) {
             log.error("", e);
