@@ -13,11 +13,14 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.ReturnedMessage;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 
 
@@ -45,6 +48,34 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
 //    @Autowired
 //    IMqMessageService mqMessageService;
 
+//    // 声明一个实例变量来持有完整的代理对象
+//    private IMqMessageService mqMessageService;
+//    @Autowired
+//    private ObjectProvider<IMqMessageService> serviceProvider;
+//    @PostConstruct
+//    public void init() {
+//        //事务生效可获取完整bean
+//        //生命周期顺序：实例化 → 依赖注入 → AOP代理完成 → @PostConstruct
+//        //在 Bean 初始化完成后获取完整的代理
+//        //CGLIB 可以：
+//        //代理所有 public/protected 方法
+//        //不受接口限制
+//        //多重代理不是你主动造的，是 Spring 为了同时解决「AOP + 循环依赖 + 提前暴露 Bean」被迫叠出来的结果。
+////        多重代理 = AOP + 提前拿 Bean + early reference
+//
+//
+//        //避免 JDK 代理嵌套
+//        //使用cglib 代理
+////        this.selfProxy = applicationContext.getBean(MqMessageService.class);
+//        //使用cglib 代理
+//        this.mqMessageService = serviceProvider.getObject();
+//        // 验证代理完整性
+//        boolean isAopProxy = AopUtils.isAopProxy(mqMessageService);
+//        boolean isCglibProxy = AopUtils.isCglibProxy(mqMessageService);
+//        boolean isJdkProxy = AopUtils.isJdkDynamicProxy(mqMessageService);
+//        log.info("Proxy info - AOP: {}, CGLIB: {}, JDK: {}",
+//                isAopProxy, isCglibProxy, isJdkProxy);
+//    }
 
     @Override
     public void confirm(CorrelationData correlationData, boolean ack, String reason) {
@@ -54,10 +85,12 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
             log.info("ProduceConfirm threadId - {}", threadId);
 // s:channel error; protocol method: #method<channel.close>(reply-code=404, reply-text=NOT_FOUND - no exchange 'UnBindDirectExchange' in vhost '/', class-id=60, method-id=40)
             String msgId = correlationData.getId();
-            ReturnedMessage returnedMessage = correlationData.getReturned();
-            Message message = returnedMessage.getMessage();
-            MessageProperties messageProperties = message.getMessageProperties();
-            String messageId = messageProperties.getMessageId();
+//            ReturnedMessage returnedMessage = correlationData.getReturned();
+//            Message message = returnedMessage.getMessage();
+//            MessageProperties messageProperties = message.getMessageProperties();
+//            String messageId = messageProperties.getMessageId();
+
+
             ApplicationContext applicationContext = ApplicationContextAwareImpl.getApplicationContext();
             IMqMessageService mqMessageService = applicationContext.getBean(IMqMessageService.class);
             //生产失败 ack =false。消息达到最大队列长度，ack=false
@@ -82,25 +115,8 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
                 //
                 //但 RabbitMQ 没有原生事务消息支持，需自行实现补偿机制。
 
-//                LambdaQueryWrapper<MqMessage> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-//                lambdaQueryWrapper.eq(MqMessage::getMsgId, msgId);
-//                MqMessage mqMessage = mqMessageService.getOne(lambdaQueryWrapper);
-//                mqMessage.setStatus(1);
-//                mqMessage.setModifyTime(LocalDateTime.now());
-//                mqMessageService.updateById(mqMessage);
-//
-
-
+                mqMessageService.updateByMsgId(msgId, MqMessageStatus.PRODUCE.getValue());
 //                mqMessageService.updateByMsgIdAsync(msgId, MqMessageStatus.PRODUCE.getValue());
-
-
-//                mqMessageService.updateByMsgId(msgId, MqMessageStatus.PRODUCE.getValue());
-
-//                LambdaUpdateWrapper<MqMessage> updateWrapper = new LambdaUpdateWrapper<>();
-//                updateWrapper.set(MqMessage::getStatus, 1);
-//                updateWrapper.eq(MqMessage::getMsgId, msgId);//条件
-//                mqMessageService.update(updateWrapper);
-
                 //更新本地消息表，消息已经发送到mq
                 log.info("消息 - {} 发送到交换机成功！", msgId);
 //                log.info("消息 - {} 发送到交换机成功！{}", msgId,"123");

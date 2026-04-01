@@ -84,7 +84,7 @@ import java.util.stream.Collectors;
 //value 默认 singleton
 //@Scope(value = WebApplicationContext.SCOPE_SESSION,
 //        proxyMode = ScopedProxyMode.TARGET_CLASS)
-//@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)  // 强制TARGET_CLASS代理获取完整bean,或者jdk动态代理通过PostConstruct内获取完整bean
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)  // 强制TARGET_CLASS代理获取完整bean,或者jdk动态代理通过PostConstruct内获取完整bean
 //接口加   @Transactional(rollbackFor = Exception.class,
 public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage> implements IMqMessageService {
 
@@ -122,7 +122,7 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 
     //    ObjectProvider（懒加载）它注入的不是 IMqMessageService 实例，而是一个“取 Bean 的工厂”，只有你调用 getObject() 时，
 //    Spring 才真正去容器里拿 Bean。
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         //事务生效可获取完整bean
         //生命周期顺序：实例化 → 依赖注入 → AOP代理完成 → @PostConstruct
@@ -368,7 +368,7 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
      * @param status
      * @throws Exception
      */
-//    @Async("mqFailHandlerExecutor")
+    @Async("mqFailHandlerExecutor")
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateByMsgIdAsync(String msgId, int status) throws Exception {
@@ -391,6 +391,19 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 
         Exception e = transactionTemplate.execute(transactionStatus -> {
             try {
+                String currentTransactionName1 = TransactionSynchronizationManager.getCurrentTransactionName();
+//isActualTransactionActive() 最重要、最准：真正有无事务
+//        它代表：
+//        当前线程的底层数据库连接是否在事务模式中
+//        Spring 是否在此线程中开启了 beginTransaction
+//        回滚、提交是否会生效
+
+
+                //        true → 说明当前线程中存在一个活动的事务（Connection 被绑定到线程）
+                boolean isActualTransactionActive1 = TransactionSynchronizationManager.isActualTransactionActive();
+//        isSynchronizationActive() = 当前线程是否启用了 Spring 的事务同步机制（允许绑定资源和事务回调）。
+//        并不完全等于“是否有事务”，但通常和事务同时开启。
+                boolean isSynchronizationActive1 = TransactionSynchronizationManager.isSynchronizationActive();
 
 
                 String lockKey = RedisKey.UPDATE_MQ_MESSAGE_INFO + ":" + msgId;

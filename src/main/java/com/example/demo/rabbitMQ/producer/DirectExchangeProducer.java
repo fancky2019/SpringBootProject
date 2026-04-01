@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.viewModel.Person;
+import com.example.demo.rabbitMQ.CorrelationDataTag;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -103,7 +104,8 @@ public class DirectExchangeProducer {
 //                MessageProperties  有消息id
                 Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
                 String msgId = UUID.randomUUID().toString();
-                CorrelationData correlationData = new CorrelationData(msgId);
+//                CorrelationData correlationData = new CorrelationData(msgId);
+                CorrelationDataTag correlationData = new CorrelationDataTag(msgId, message);
                 message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
 
 //                // 1. 构建持久化消息
@@ -166,7 +168,8 @@ public class DirectExchangeProducer {
 //                // 2. 发送并等待确认
 //                CorrelationData correlationData = new CorrelationData();
                 String msgId = UUID.randomUUID().toString();
-                CorrelationData correlationData = new CorrelationData(msgId);
+//                CorrelationData correlationData = new CorrelationData(msgId);
+                CorrelationDataTag correlationData = new CorrelationDataTag(msgId, message);
                 //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
                 rabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
                 Thread.sleep(1);
@@ -226,7 +229,8 @@ public class DirectExchangeProducer {
 //
 //                // 2. 发送并等待确认
 //                CorrelationData correlationData = new CorrelationData();
-        CorrelationData correlationData = new CorrelationData(msgId);
+//        CorrelationData correlationData = new CorrelationData(msgId);
+        CorrelationDataTag correlationData = new CorrelationDataTag(msgId, message);
 //        ReturnedMessage 是 RabbitMQ 在消息无法路由时通过 ReturnsCallback 回调返回的
 //        手动设置会覆盖真实的状态，导致无法正确判断消息是否真的被路由
 //        //设置消息内容
@@ -314,13 +318,13 @@ public class DirectExchangeProducer {
                 Message message = new Message(objectMapper.writeValueAsString(person).getBytes(), new MessageProperties());
                 message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
                 String msgId = UUID.randomUUID().toString();
-                CorrelationData correlationData = new CorrelationData(msgId);
+//                CorrelationData correlationData = new CorrelationData(msgId);
 //                ReturnedMessage 是 RabbitMQ 在消息无法路由时通过 ReturnsCallback 回调返回的
 //                手动设置会覆盖真实的状态，导致无法正确判断消息是否真的被路由
 //                //设置消息内容
 //                ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
 //                correlationData.setReturned(returnedMessage);
-
+                CorrelationDataTag correlationData = new CorrelationDataTag(msgId, message);
 
                 batchingRabbitTemplate.send(RabbitMQConfig.BATCH_DIRECT_EXCHANGE_NAME, RabbitMQConfig.BATCH_DIRECT_ROUTING_KEY, message, correlationData);
             } catch (JsonProcessingException e) {
@@ -421,11 +425,11 @@ public class DirectExchangeProducer {
         message.getMessageProperties().setMessageId(mqMessage.getMsgId());
 
         // 1. 创建 CorrelationData，使用业务ID作为标识
-        CorrelationData correlationData = new CorrelationData(msgId);
-
-        //设置消息内容
-        ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
-        correlationData.setReturned(returnedMessage);
+//        CorrelationData correlationData = new CorrelationData(msgId);
+        CorrelationDataTag correlationData = new CorrelationDataTag(msgId, message);
+//        //设置消息内容。手动设置的 ReturnedMessage 会被实际回调时的返回值覆盖
+//        ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
+//        correlationData.setReturned(returnedMessage);
 
         // 2. 发送消息
         rabbitTemplateManualConfirmCallback.send(exchange, routingKey, message, correlationData);
@@ -437,7 +441,7 @@ public class DirectExchangeProducer {
             //等待最多 5 秒 来接收 broker 的确认（ACK/NACK）。
             //如果 5 秒内没有收到确认 → 抛出 TimeoutException
             CorrelationData.Confirm confirm = correlationData.getFuture().get(5, TimeUnit.SECONDS);
-           //5 秒内没收到确认，不能说明消息没发送成功，实际消息最终发送到队列，造成消息重复投递。业务层做幂等处理。
+            //5 秒内没收到确认，不能说明消息没发送成功，实际消息最终发送到队列，造成消息重复投递。业务层做幂等处理。
             if (confirm.isAck()) {
                 // 4. 发送成功，更新消息状态
 //                updateSuccess(orderMessage);

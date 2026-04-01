@@ -79,7 +79,7 @@ public class RabbitMQController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formatted = now.format(formatter);
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 1; i++) {
 
 
             String msgContent = System.currentTimeMillis() + "";
@@ -88,6 +88,8 @@ public class RabbitMQController {
                             RabbitMQConfig.DIRECT_ROUTING_KEY,
                             RabbitMQConfig.DIRECT_QUEUE_NAME,
                             msgContent);
+            mqMessage.setBusinessId(1L);
+            mqMessage.setMsgId("221ad02d-9532-4b71-bbb4-6eaa9039f861");
             rabbitMQTest.produceTest(mqMessage);
             Thread.sleep(5);
         }
