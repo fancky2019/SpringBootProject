@@ -445,23 +445,23 @@ public class DirectExchangeProducer {
             if (confirm.isAck()) {
                 // 4. 发送成功，更新消息状态
 //                updateSuccess(orderMessage);
-                System.out.println("消息发送成功: " + msgId);
+                log.info("消息发送成功: " + msgId);
                 return true;
             } else {
                 // 发送失败，Broker 返回 nack
-                System.err.println("消息发送失败: " + confirm.getReason());
+                log.info("消息发送失败: " + confirm.getReason());
 //                updateFailed(orderMessage, confirm.getReason());
                 return false;
             }
 
         } catch (TimeoutException e) {
             // 超时未收到确认
-            System.err.println("消息发送超时: " + msgId);
+            log.info("消息发送超时: " + msgId);
 //            updateTimeout(orderMessage);
             return false;
         } catch (Exception e) {
             // 其他异常
-            System.err.println("消息发送异常: " + e.getMessage());
+            log.error("消息发送异常: ", e);
 //            updateFailed(orderMessage, e.getMessage());
             throw e;
         }
