@@ -398,6 +398,37 @@ public class DirectExchangeProducer {
     //endregion
 
 
+    public void produceMqMessage(MqMessage mqMessage, MessageProperties messageProperties) {
+        String exchange = mqMessage.getExchange();
+        String routingKey = mqMessage.getRouteKey();
+        if (messageProperties == null) {
+            messageProperties = new MessageProperties();
+        }
+
+        String msgId = mqMessage.getMsgId();
+        //设置优先级
+        messageProperties.setPriority(9);
+        messageProperties.setMessageId(msgId);
+        messageProperties.setTimestamp(new Date());
+        messageProperties.setHeader("businessId", mqMessage.getBusinessId().toString());
+        messageProperties.setHeader("businessKey", mqMessage.getBusinessKey());
+        messageProperties.setHeader("traceId", mqMessage.getTraceId());
+        messageProperties.setHeader("retry", mqMessage.getRetry());
+        messageProperties.setHeader("queueName", mqMessage.getQueue());
+        messageProperties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+        //发送时候带上 CorrelationData(UUID.randomUUID().toString()),不然生产确认的回调中CorrelationData为空
+        Message message = new Message(mqMessage.getMsgContent().getBytes(), messageProperties);
+        CorrelationDataTag correlationData = new CorrelationDataTag(msgId, message);
+        //设置消息内容
+//        ReturnedMessage returnedMessage = new ReturnedMessage(message, 0, "", "", "");
+//        correlationData.setMessage(returnedMessage);
+        log.info("BeforeRabbitTemplateSend msgId - {},businessKey - {} ,businessId - {}", mqMessage.getMsgId(), mqMessage.getBusinessKey(), mqMessage.getBusinessId());
+        rabbitTemplate.send(exchange, routingKey, message, correlationData);
+        log.info("AfterRabbitTemplateSend msgId - {},businessKey - {} ,businessId - {}", mqMessage.getMsgId(), mqMessage.getBusinessKey(), mqMessage.getBusinessId());
+
+
+    }
+
     /**
      * 同步发送消息（使用 CorrelationData.getFuture() 方式）
      * @param

@@ -96,7 +96,7 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
             //生产失败 ack =false。消息达到最大队列长度，ack=false
             if (ack) {
                 //发送消息时候指定的消息的id，根据此id设置消息表的消息状态为已发送
-
+                log.info("消息 - {} 发送到交换机成功！", msgId);
 
 //                msgId = "cac29833-85f7-4dd7-b3a0-ed97863d37a2";
 
@@ -118,7 +118,7 @@ public class PushConfirmCallback implements RabbitTemplate.ConfirmCallback {
                 mqMessageService.updateByMsgId(msgId, MqMessageStatus.PRODUCE.getValue());
 //                mqMessageService.updateByMsgIdAsync(msgId, MqMessageStatus.PRODUCE.getValue());
                 //更新本地消息表，消息已经发送到mq
-                log.info("消息 - {} 发送到交换机成功！", msgId);
+
 //                log.info("消息 - {} 发送到交换机成功！{}", msgId,"123");
             } else {
                 //ack true 只保证发送到broker 交换机，不保证路由到具体队列。

@@ -70,7 +70,7 @@ public class BeanLifeTestConfig {
         return new BeanLife();
     }
 
-
+    //Bean 内使用@PostConstruct  @PreDestroy ，声明Bean不需要指定 initMethod 和 destroyMethod
     @Bean(destroyMethod = "customDestroy", initMethod = "customInit")
     public SpringLifeCycleBean lifeCycleBean(){
         SpringLifeCycleBean lifeCycleBean = new SpringLifeCycleBean();

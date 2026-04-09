@@ -9,11 +9,13 @@ import com.example.demo.dao.demo.MqMessageMapper;
 import com.example.demo.model.entity.demo.DemoProduct;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
+import com.example.demo.model.enums.MqMessageStatus;
 import com.example.demo.model.pojo.PageData;
 import com.example.demo.model.request.MqMessageRequest;
 import com.example.demo.model.response.MqMessageResponse;
 import com.example.demo.model.utility.RedisKey;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
+import com.example.demo.rabbitMQ.producer.DirectExchangeProducer;
 import com.example.demo.service.demo.IMqMessageService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -61,9 +63,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -172,6 +172,10 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
     @Autowired
     @Lazy
     private IProductTestService productTestService;
+
+    @Autowired
+    private DirectExchangeProducer directExchangeProducer;
+
 
     @Override
 //    @Transactional(rollbackFor = Exception.class,isolation = Isolation.REPEATABLE_READ)
@@ -689,21 +693,100 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
         });
     }
 
-    /**
-     * 待优化成redisson
-     * @param mqMessageList
-     */
-    private synchronized void publish(List<MqMessage> mqMessageList) {
+//    /**
+//     * 待优化成redisson
+//     * @param mqMessageList
+//     */
+//    private synchronized void publish(List<MqMessage> mqMessageList) {
+//
+//        log.info("start executing publish");
+//        try {
+//            for (MqMessage message : mqMessageList) {
+//                mqSendUtil.send(message);
+//            }
+//        } catch (Exception ex) {
+//            log.error("", ex);
+//        }
+//    }
 
+    private void publish(List<MqMessage> mqMessageList) {
         log.info("start executing publish");
+
+        String operationLockKey = RedisKeyConfigConst.MQ_PUBLISH;
+        //并发访问，加锁控制，此方法内没有事务操作。可以用try finally 释放资源 否则用 MqSendUtil releaseLock 方法
+        RLock lock = redissonClient.getLock(operationLockKey);
+        boolean lockSuccessfully = false;
         try {
-            for (MqMessage message : mqMessageList) {
-                mqSendUtil.send(message);
+
+            lockSuccessfully = lock.tryLock();
+            if (!lockSuccessfully) {
+                log.info("get lock {} fail", RedisKeyConfigConst.MQ_PUBLISH);
             }
-        } catch (Exception ex) {
-            log.error("", ex);
+
+//异步发送不保证顺序
+//        try {
+//            for (MqMessage message : mqMessageList) {
+//                MqMessage dbMessage = this.getById(message.getId());
+//                //已发送了
+//                if (!dbMessage.getStatus().equals(MqMessageStatus.NOT_PRODUCED.getValue())) {
+//                    continue;
+//                }
+//                log.info("rePublish MqMessage id {} msgId {}", message.getId(), message.getMsgId());
+//                mqSendUtil.send(message);
+//            }
+//        } catch (Exception ex) {
+//            log.error("", ex);
+//        }
+
+
+            // 根据 businessId 分组,组内有序，key顺序不定
+            //        Map<Long, List<MqMessage>> groupedMap = mqMessageList.stream()
+            //                .collect(Collectors.groupingBy(MqMessage::getBusinessId));
+            // 注意：groupingBy 默认会保持每组内元素的相对顺序
+            // 因为使用的是 ArrayList，它会按遇到元素的顺序添加
+            Map<Long, List<MqMessage>> groupedMap = mqMessageList.stream()
+                    .collect(Collectors.groupingBy(
+                            MqMessage::getBusinessId,
+                            LinkedHashMap::new,
+                            Collectors.toList()  // ArrayList 保持添加顺序
+                    ));
+            for (Long businessId : groupedMap.keySet()) {
+                List<MqMessage> groupMessageList = groupedMap.get(businessId);
+                //保证有序使用同步发送，组之间不保证顺序
+                if (groupMessageList.size() > 1) {
+                    for (MqMessage message : groupMessageList) {
+                        boolean success = directExchangeProducer.sendOrderedMessageSync(message);
+                        log.info("Publish msg {} {}", message.getMsgId(), success ? "success" : "fail");
+                        //待优化成批量更新db
+                        try {
+                            if (success) {
+                                IMqMessageService mqMessageService = applicationContext.getBean(IMqMessageService.class);
+                                mqMessageService.updateByMsgId(message.getMsgId(), MqMessageStatus.PRODUCE.getValue());
+                                log.info("update msg {} produce", message.getMsgId());
+                            } else {
+                                IMqMessageService mqMessageService = applicationContext.getBean(IMqMessageService.class);
+                                mqMessageService.updateByMsgId(message.getMsgId(), MqMessageStatus.NOT_PRODUCED.getValue());
+                                log.info("update msg {} produce fail", message.getMsgId());
+                            }
+                        } catch (Exception ex) {
+                            //业务层会处理重复消费问题
+                            log.info("update msg {} status fail", message.getMsgId());
+                        }
+                    }
+                } else {
+                    directExchangeProducer.produceMqMessage(groupMessageList.get(0), null);
+                }
+            }
+
+
+        } catch (Exception e) {
+            // throw  e;
+            log.error("", e);
+        } finally {
+            redisUtil.releaseLock(lock, lockSuccessfully);
         }
     }
+
 
     /**
      * 处理消费失败

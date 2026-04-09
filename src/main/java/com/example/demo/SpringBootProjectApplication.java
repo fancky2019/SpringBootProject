@@ -120,9 +120,45 @@ spring.lifecycle.timeout-per-shutdown-phase=60s
             会生成bean
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 
+// 这个lambda表达式就是放入三级缓存的ObjectFactory
+addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
+
+原始对象、代理对象：代理对象要代理原始对象
+
+动态代理提前创建：
+在正常的非循环依赖流程中，这个工厂可能永远不会被调用。Bean会按部就班地走完属性填充、初始化，然后在初始化后阶段由 AbstractAutoProxyCreator 正常生成代理。
+但是，一旦发生循环依赖（比如B需要A），“提前触发”的开关就被按下了：
+
+正常流程（无循环依赖）： AOP处理器在“初始化后”阶段才工作。
+“提前触发”流程（有循环依赖）： AOP处理器在B需要A的这一刻就被调用了。
+
+初始化后 (postProcessAfterInitialization) - AOP代理在此阶段创建
+三级缓存通过 ObjectFactory 将代理的生成时机，从“固定的初始化后阶段”动态地提前到“被其他Bean需要的那个瞬间”。
+
+代理是在由Spring生命周期中的“初始化后”阶段创建，在spring 属性赋值之后创建，二级缓存拿到的是没有代理的半成品
+
+二级缓存只能解决普通对象的循环依赖，而三级缓存通过引入“对象工厂”解决了 AOP 代理对象在循环依赖场景下的正确生成与注入问题。
 	三级缓存不是二级缓存：
-如果没有AOP的话确实可以两级缓存就可以解决循环依赖的问题，如果加上AOP，两级缓存是无法解决的，不可能每次执行s
-ingleFactory.getObject()方法都给我产生一个新的代理对象，所以还要借助另外一个缓存来保存产生的代理对象
+三级缓存引入了 singletonFactories（对象工厂），存储一个能生成对象（原始或代理）的工厂方法，延迟到真正需要时才生成。
+解决 AOP 代理对象的循环依赖：通过 singletonFactories 存储的 ObjectFactory，在循环依赖发生时提前生成代理对象，
+保证相互依赖的 Bean 拿到的都是增强后的代理，而非原始对象，从而避免事务、日志等 AOP 功能失效。
+
+
+
+问题	                     两级缓存的答案	                                  三级缓存的答案
+代理由谁创建？	             由Spring生命周期中的“初始化后”阶段创建。  	          同上。但三级缓存提供了“按需提前创建”的机制。
+二级缓存存什么？	         存原始对象（半成品）                  。	         在三级缓存方案中，二级缓存用于存放提前生成的代理对象（早期单例）。
+为什么两级缓存失败？	     因为代理的创建时机（初始化阶段）                      三级缓存中的ObjectFactory允许在循环依赖发生的时刻（即其他Bean需要它的时候），
+                                                                          提前触发代理的生成，保证了所有依赖方拿到的都是最终形态（原始或代理）。
+                          晚于其他Bean进行属性填充的时机
+                       。导致其他Bean拿到的是原始对象，而不是最终的代理。
+
+
+一句话总结二级缓存只是个仓库，它不创建代理。代理在初始化阶段创建，这个时机对解决带AOP的循环依赖来说太晚了。	三级缓存通过工厂模式，将代理的创建时机从“固定的初始化后”提前到“被需要时”，从而完美解决了问题。
+
+
+
+所以，你的理解是对的：二级缓存本身不创建代理，它的存储能力也无法改变代理创建的时机问题。 这正是Spring引入三级缓存，通过工厂模式来控制代理生成时机的根本原因。
 
 
 
@@ -209,6 +245,15 @@ ingleFactory.getObject()方法都给我产生一个新的代理对象，所以�
 一级缓存 singletonObjects	完整初始化后的 Bean，正常单例使用
 二级缓存 earlySingletonObjects	解决普通字段注入循环依赖，但拿不到代理
 三级缓存 singletonFactories	解决代理 Bean 的循环依赖，保证 AOP/事务/异步生效
+
+
+
+
+缓存级别	名称                 	存储内容         	       作用
+一级缓存	singletonObjects	    完全初始化好的 Bean（成品）	   最终供业务使用的 Bean 实例
+二级缓存	earlySingletonObjects	提前暴露的半成品 Bean	       已实例化但未完成属性填充和初始化
+三级缓存	singletonFactories	    ObjectFactory 工厂	       存储能生成 Bean 实例的工厂对象
+
          */
         //endregion
 

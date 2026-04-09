@@ -150,13 +150,9 @@ import javax.swing.*;
  执行顺序
 
  Bean 实例化
- ↓
  1. 构造方法 (Constructor)
- ↓
  2. 依赖注入 (Dependency Injection)
- ↓
  3. Bean 名称感知 (BeanNameAware.setBeanName) 优先使用依赖注入：
- ↓
  4. Bean 工厂感知 (BeanFactoryAware.setBeanFactory)
          能通过 @Autowired 解决的，就不要用 BeanFactoryAware
          userService = beanFactory.getBean(UserService.class);
@@ -164,21 +160,16 @@ import javax.swing.*;
 
           BeanFactoryAware	ApplicationContextAware:获取对象	BeanFactory	ApplicationContext
           ApplicationContext 接口继承了BeanFactory
- ↓
  5. 应用上下文感知 (ApplicationContextAware.setApplicationContext)
- ↓
  6. Bean 后置处理器前置处理 (BeanPostProcessor.postProcessBeforeInitialization)
- ↓
  7. @PostConstruct 注解方法  ← 第1个初始化方法
- ↓
  8. InitializingBean.afterPropertiesSet()  ← 第2个初始化方法
- ↓
  9. 自定义 init-method  ← 第3个初始化方法
- ↓
  10. Bean 后置处理器后置处理 (BeanPostProcessor.postProcessAfterInitialization)
- ↓
- Bean 就绪
 
+
+
+ Bean 就绪
  1. 实例化 (Constructor)
  2. 依赖注入 (populateBean) - @Autowired
  3. 初始化前 (postProcessBeforeInitialization)
@@ -205,6 +196,12 @@ import javax.swing.*;
  12、@PreDestroy
  13、DisposableBean destroy
  14、自定义destroy方法
+
+
+
+
+ //Bean 内使用@PostConstruct  @PreDestroy ，声明Bean不需要指定 initMethod 和 destroyMethod
+ @Bean(destroyMethod = "customDestroy", initMethod = "customInit")
  */
 public class SpringLifeCycleBean implements BeanNameAware, BeanFactoryAware, ApplicationContextAware, BeanPostProcessor, InitializingBean, DisposableBean {
 
