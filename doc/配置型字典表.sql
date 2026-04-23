@@ -1,3 +1,11 @@
+
+
+固定的值放在字典表，枚举值等涉及变更的不要放在字典表，要多处维护，直接放在代码中。
+
+
+
+
+
 CREATE TABLE `sys_dictionary` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `dict_type` varchar(50) NOT NULL COMMENT '字典类型（如：order_status）',

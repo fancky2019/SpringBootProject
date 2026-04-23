@@ -4,11 +4,13 @@ import com.example.demo.model.viewModel.Person;
 import lombok.Data;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 @Data
+//@Component
 ////如果不配置，不报错，对象没有值
 @ConfigurationProperties(prefix = "config.config-model") //prefix= "配置项"   读取并与 bean 绑定。
 
@@ -22,6 +24,7 @@ public class ImportModelTest {
     private String fistName;
     private  String address;
     private BigDecimal salary;
+//    @Value("${redis-stream.api-names}"),// Spring 默认不支持直接注入 List
     private String[] array;
     private List<String> pets;
     private HashMap<String,String> maps;

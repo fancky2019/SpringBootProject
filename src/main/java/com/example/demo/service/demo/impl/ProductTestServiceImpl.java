@@ -1023,6 +1023,10 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
      * select * from demo_product  where 1=1 limit 2180000  ,5000
      *
      * 250 W不到3分钟
+     *
+     *
+     *
+     * EasyExcel 默认的 URL 类型会下载图片并嵌入，如果你想要的是纯文本链接，直接使用 String 类型就可
      */
 
     public <T extends com.example.demo.model.pojo.Page, R> void exportByPage(HttpServletResponse response, T request, long count, Class<R> cla, Function<T, List<R>> queryFunction) throws Exception {

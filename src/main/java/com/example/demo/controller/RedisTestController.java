@@ -1,9 +1,13 @@
 package com.example.demo.controller;
 
+import com.example.demo.listener.redis.RedisStreamHandlerBeanName;
+import com.example.demo.listener.redis.RedisStreamProducer;
+import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.pojo.Student;
 import com.example.demo.model.utility.RedisKey;
 import com.example.demo.model.viewModel.MessageResult;
+import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.service.demo.IProductTestService;
 import com.example.demo.utility.ConfigConst;
 import com.example.demo.utility.RedisUtil;
@@ -480,8 +484,22 @@ public class RedisTestController {
 
     @Autowired
     private RedissonClient redissonClient;
+
     @Autowired
     private RedisUtil redisUtil;
+
+
+    @Autowired
+    private RedisStreamProducer redisStreamProducer;
+
+
+
+
+
+
+
+
+
 
     /**
      *
@@ -534,7 +552,7 @@ public class RedisTestController {
 //
 //            String类型：可以单独设置每个key的过期时间
             //穿透：设置个空值,待优化
-           // 双结构缓存策略来应对缓存击穿问题
+            // 双结构缓存策略来应对缓存击穿问题
             //数据：用 Hash
             //空值：用 String + TTL
 //            Hash类型：只能对整个key设置过期时间（EXPIRE），不能对内部的field单独设置过期
@@ -1086,5 +1104,18 @@ end
         DefaultRedisScript<String> script = new DefaultRedisScript<>(luaScript, String.class);
         List<String> keys = Arrays.asList(productKey);
         return redisTemplateType.execute(script, keys);
+    }
+
+
+    @RequestMapping("/stream")
+    public MessageResult<Void> stream() throws Exception {
+
+        MqMessage mqMessage = new MqMessage
+                (RabbitMQConfig.DIRECT_EXCHANGE_NAME,
+                        RabbitMQConfig.DIRECT_ROUTING_KEY,
+                        RedisStreamHandlerBeanName.USER_SERVICE,
+                        System.currentTimeMillis()+"");
+        redisStreamProducer.sendMessage(RedisStreamHandlerBeanName.USER_SERVICE,mqMessage);
+        return MessageResult.success();
     }
 }

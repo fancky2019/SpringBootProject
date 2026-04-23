@@ -543,7 +543,7 @@ config:
     fist-Name: fancky
     address: 上海市
     salary: 20
-    array: #数组 、List
+    array: #数组 、List // Spring 默认不支持直接注入 List .@Value("${redis-stream.api-names}")
       - cat
       - dog
       - pig
@@ -560,6 +560,17 @@ config:
         age: 29
     conditional-on-property: false
     age: 18
+
+redis-stream:
+# 暂时用beanName
+  stream-keys: # 要监听的流名称列表  // Spring 默认不支持直接注入 List .@Value("${redis-stream.api-names}")
+    - user-api
+    - order-api
+    - payment-api
+  # 组名：按业务模块划分
+  group-name: processor-group-1      # 消费者组名称
+  # 消费者名：包含实例标识，便于排查问题
+  consumer-name: consumer-1        # 消费者实例名称
 
 ##项目fancky-spring-boot-starter 配置
 fanckytest:
