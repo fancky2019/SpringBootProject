@@ -108,6 +108,8 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -1065,13 +1067,14 @@ public class UtilityController {
         }
     }
 
-    private List<DownloadData> data() {
+    private List<DownloadData> data() throws MalformedURLException {
         List<DownloadData> list = ListUtils.newArrayList();
         for (int i = 0; i < 10; i++) {
             DownloadData data = new DownloadData();
             data.setString("字符串" + i);
             data.setDate(new Date());
             data.setDoubleData(0.56);
+            data.setUrlImage(new URL("http://10.100.202.113:8032/upload/20251022141126669/微信图片_202510221-4.jpg"));
             list.add(data);
         }
         return list;
