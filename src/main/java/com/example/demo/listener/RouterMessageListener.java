@@ -97,20 +97,25 @@ public class RouterMessageListener implements StreamListener<String, ObjectRecor
     @Override
     public void onMessage(ObjectRecord<String, MqMessage> message) {
         String streamKey = message.getStream();
-        MqMessage value = message.getValue();
-
+        MqMessage mqMessage = message.getValue();
+        RecordId recordId = message.getId();
+        String groupName = redisStreamConfig.getGroupName();
         try {
-            RedisStreamHandler handler = handlerMap.get(streamKey);
-            if (handler != null) {
-                handler.handle(message.getValue());
-                // 手动 ACK
-//                acknowledge(message);
-            } else {
-                log.warn("未找到对应的处理器: apiName={}", streamKey);
-            }
+            doHandler(streamKey, mqMessage, groupName, recordId);
         } catch (Exception e) {
             log.error("处理消息失败: stream={}, error={}", streamKey, e.getMessage(), e);
             // 不 ACK，消息会留在 PEL 中等待重试
+        }
+    }
+
+    private void doHandler(String streamKey, MqMessage mqMessage, String groupName, RecordId recordId) {
+        RedisStreamHandler handler = handlerMap.get(streamKey);
+        if (handler != null) {
+            handler.handle(mqMessage);
+            // 手动 ACK
+            acknowledge(streamKey, groupName, recordId);
+        } else {
+            log.warn("未找到对应的处理器: apiName={}", streamKey);
         }
     }
 
@@ -128,16 +133,32 @@ public class RouterMessageListener implements StreamListener<String, ObjectRecor
      * Redis Stream 没有“只删除已 ACK 消息”的原生能力
      * Kafka 可以：按 offset 删除、按消费进度控制
      *
-     *  Redis Stream 做不到：❌ 按 ACK 精确删除、❌ 自动 GC 已消费数据
-     * @param message 消息对象
+     *  Redis Stream 做不到： 按 ACK 精确删除、 自动 GC 已消费数据
+     *
+     *
+     *
+     *
+     *
+     * 消息在Stream中未被消费	    XLEN查看总消息数；XINFO STREAM查看length
+     * 消息在PEL中待确认	        XPENDING查看详情；XINFO GROUPS查看pending计数
+     * 消息已ACK	                不在PEL中；仍在Stream中（除非被XTRIM或XDEL删除）
+     *
+     *
+     *
+     * @param streamKey
+     * @param recordId
      */
-    private void acknowledge(ObjectRecord<String, MqMessage> message) {
-        String streamKey = message.getStream();
-        RecordId recordId = message.getId();
+    private void acknowledge(String streamKey, String groupName, RecordId recordId) {
+//        String streamKey = message.getStream();
+//        RecordId recordId = message.getId();
         try {
 
-            String groupName = redisStreamConfig.getGroupName();
+//            String groupName = redisStreamConfig.getGroupName();
             // 执行 ACK
+
+
+            //ack 和delete 可以封装lua脚本处理，但是lua脚本只能保证原子性执行操作成功，
+            // 不能保证ack成功，delete删除了数据（数据可能不存在等情况）
 
             // acknowledge 方法返回 Long，表示实际确认的消息数量
             Long ackCount = stringRedisTemplate.opsForStream()
@@ -154,6 +175,10 @@ public class RouterMessageListener implements StreamListener<String, ObjectRecor
 
                 if (delCount != null && delCount > 0) {
                     log.info("删除成功: streamKey={}, recordId={}", streamKey, recordId);
+                } else {
+                    //此临时队列不再生产，
+                    //删除失败的记录，过段时间PendingMessage 数量是0时候，删除整个redis  key 释放内存
+                    log.warn("删除失败: streamKey={}, recordId={}", streamKey, recordId);
                 }
 
             } else {
@@ -186,23 +211,26 @@ public class RouterMessageListener implements StreamListener<String, ObjectRecor
     private void claimTimeoutMessages(String streamKey, String groupName, String consumerName) {
 
         try {
-            // 1️⃣ 先获取超时的 pending 消息ID列表
+            //先获取超时的 pending 消息ID列表
             // 获取所有 Pending 消息（最多100条）
             long maxPendingCount = 100;
             PendingMessages pending = stringRedisTemplate.opsForStream()
                     .pending(streamKey, groupName, Range.unbounded(), maxPendingCount);
 
             if (pending == null || pending.isEmpty()) {
+
+                //此临时队列不再生产，
+                //删除失败的记录，过段时间PendingMessage 数量是0时候，删除整个redis  key 释放内存
                 return;
             }
 
-            // 2️⃣ 收集需要认领的消息ID
+            //收集需要认领的消息ID
             List<RecordId> messageIds = new ArrayList<>();
             for (PendingMessage message : pending) {
                 messageIds.add(message.getId());
             }
 
-            // 3️⃣ 批量认领:认领超时(CLAIM_TIMEOUT_MS)的消息
+            //批量认领:认领超时(CLAIM_TIMEOUT_MS)的消息
 //            claim 执行后，消息的 idle_time（空闲时间）被重置为 0
             List<MapRecord<String, Object, Object>> records =
                     stringRedisTemplate.opsForStream()
@@ -218,22 +246,16 @@ public class RouterMessageListener implements StreamListener<String, ObjectRecor
                 return;
             }
 
-            // 4️⃣ 处理认领的消息
+            // 处理认领的消息
             for (MapRecord<String, Object, Object> record : records) {
                 try {
-
-                   MqMessage mqMessage = new MqMessage();
+                    MqMessage mqMessage = new MqMessage();
                     Map mapVal = record.getValue();
                     mqMessage.toMessage(mapVal);
-
+                    RecordId recordId=record.getId();
                     // 执行业务逻辑
-//                    handle(mqMessage);
-
-                    // ACK 确认
-                    stringRedisTemplate.opsForStream().acknowledge(streamKey, groupName, record.getId());
-
+                    doHandler(streamKey, mqMessage, groupName, recordId);
                     log.info("重试成功: {}", record.getId());
-
                 } catch (Exception e) {
                     log.error("重试失败: {}", record.getId(), e);
                     // 不 ACK，消息会重新进入 PEL，下次继续认领
@@ -244,53 +266,6 @@ public class RouterMessageListener implements StreamListener<String, ObjectRecor
             log.error("claimTimeoutMessages 执行异常: stream={}, group={}", streamKey, groupName, e);
         }
     }
-
-
-    /**
-     * 认领超时未 ACK 的消息（实现重试）
-     */
-    private void claimTimeoutMessages1(String streamKey, String groupName, String consumerName) {
-
-        try {
-
-            // ⚠️ 直接批量 claim（核心优化点）
-            List<MapRecord<String, Object, Object>> records =
-                    stringRedisTemplate.opsForStream()
-                            .claim(
-                                    streamKey,
-                                    groupName,
-                                    consumerName,
-                                    Duration.ofMillis(CLAIM_TIMEOUT_MS), // idle threshold
-                                    RecordId.of("0-0") // 起始点（批量模式）
-                            );
-
-            if (records == null || records.isEmpty()) {
-                return;
-            }
-
-            for (MapRecord<String, Object, Object> record : records) {
-
-                try {
-                    // ✔ 重新处理
-//                    handle(record);
-
-                    // ✔ ACK
-                    stringRedisTemplate.opsForStream()
-                            .acknowledge(streamKey, groupName, record.getId());
-
-                    log.info("重试成功: {}", record.getId());
-
-                } catch (Exception e) {
-                    log.error("重试失败: {}", record.getId(), e);
-                    // ❗不ACK → 下轮继续 claim
-                }
-            }
-
-        } catch (Exception e) {
-            log.error("claim定时任务异常", e);
-        }
-    }
-
 
 }
 
