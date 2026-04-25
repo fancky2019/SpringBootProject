@@ -46,19 +46,17 @@ public class RetryService {
      *
      */
     //指定重试失败的异常处理方法，不指定recover 会随表找一个@Recover方法
-//    @Async("threadPoolExecutor") //@Async 导致@Retryable 重试失效
+//    @Async("threadPoolExecutor") //@Async 导致@Retryable 重试失效。RetryContext=null
     @Retryable(value = Exception.class, recover = "recoveryFun", maxAttempts = 3, backoff = @Backoff(delay = 2000L, multiplier = 2))
     public MessageResult<Void> test(Object obj) {
 //        @Retryable = 同步阻塞的重试机制，不是异步并发。
-
-        // 获取当前重试上下文
-        RetryContext context = RetrySynchronizationManager.getContext();
-
-        // 获取重试次数（从0开始，0表示第一次执行）
-        int retryCount = context.getRetryCount();
+        int retryCount = 0;
+//        // 获取当前重试上下文. @Async 获取不到
+//        RetryContext context = RetrySynchronizationManager.getContext();
+//        // 获取重试次数（从0开始，0表示第一次执行）
+//        retryCount = context.getRetryCount();
 
         log.info("currentThread: {} ,RetryTime - {}", Thread.currentThread().getName(), retryCount);
-
         int n = Integer.parseInt("m");
         return MessageResult.success();
     }
@@ -85,7 +83,7 @@ public class RetryService {
      */
     @Recover
     public MessageResult<Void> recoveryFun(Exception e, Object obj) throws Exception {
-        String errMsg= e.getMessage();
+        String errMsg = e.getMessage();
 
         log.info("recoveryFun param obj 重试最终 RetryTime-" + e.getMessage());
 
