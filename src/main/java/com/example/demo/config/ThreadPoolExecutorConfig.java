@@ -116,7 +116,7 @@ public class ThreadPoolExecutorConfig {
         threadPoolExecutor.setThreadPriority(Thread.MAX_PRIORITY);
         threadPoolExecutor.setDaemon(false);
         threadPoolExecutor.setKeepAliveSeconds(3000);// 线程空闲时间
-        threadPoolExecutor.setThreadNamePrefix("test-Executor-"); // 线程名字前缀
+        threadPoolExecutor.setThreadNamePrefix("Thread-Pool-"); // 线程名字前缀
 //        threadPoolExecutor.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy()); // 拒绝策略
         threadPoolExecutor.initialize();
         return threadPoolExecutor;

@@ -1883,7 +1883,7 @@ public class UtilityController {
     @GetMapping(value = "/retryTest")
     public MessageResult<Void> retryTest(String msg) {
         /*
-        启动类添加 @EnableRetry,1.2.1 不要制定版本号，maven 最新的可能jdk 版本不匹配
+        1、启动类添加 @EnableRetry,  1.2.1 不要制定版本号，maven 最新的可能jdk 版本不匹配
         proxyTargetClass 默认基于JDK 动态代理
 
 
@@ -1894,8 +1894,9 @@ public class UtilityController {
         </dependency>
          */
 
-
-        return retryService.test(5);
+        log.info("currentThread: {}", Thread.currentThread().getName());
+        retryService.test(5);
+        return MessageResult.success();
     }
 
     //region @Import
@@ -2847,7 +2848,7 @@ public class UtilityController {
         //看代理是jdk 还是cglib.jdk 代理service层方法上的事务会失效，要把service设置成cglib代理 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
         //    CGLIB:    gs.com.gses.service.impl.TruckOrderItemServiceImpl$$EnhancerBySpringCGLIB$$aaef177e
 //    JDK:    MqMessageService：class = com.sun.proxy.$Proxy274
-        Class cls=mqMessageService.getClass();
+        Class cls = mqMessageService.getClass();
         log.info("class = {}", mqMessageService.getClass());
         this.mqMessageService.transactionRepeatReadLock();
         return MessageResult.success();
