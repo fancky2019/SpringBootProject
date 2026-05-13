@@ -48,9 +48,10 @@
 
         // 建立连接,132.230.50.130 传承实际ip
         source = new EventSource('http://localhost:8081/sbp/utility/sseConnect/' + userId);
+        // source = new EventSource('http://10.100.202.113:8088/api/truckOrder/sseConnect' + userId);
         // source = new EventSource('http://localhost:8081/sbp/utility/createResponseBodyEmitterConnect/' + userId);
         setMessageInnerHTML("连接用户=" + userId);
-        debugger;
+        // debugger;
         /**
          * 连接一旦建立，就会触发open事件
          * 另一种写法：source.onopen = function (event) {}

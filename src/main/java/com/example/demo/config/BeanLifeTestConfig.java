@@ -53,6 +53,16 @@ import org.springframework.context.annotation.Configuration;
  *
  *
  *
+ * ComponentConfiguration 配置类  Full 模式（默认）、 Lite 模式
+ *触发 Lite 模式的几种情况
+ *
+ * 1、你把配置类标记为 @Component（或者普通类通过 @Import 引入）
+ * → 自动退化成 Lite 模式
+ * 2、在 @Configuration 上显式关闭 CGLIB 代理：
+ *
+ *
+ * Full 模式（默认 @Configuration）
+ *
  */
 @Configuration
 public class BeanLifeTestConfig {
