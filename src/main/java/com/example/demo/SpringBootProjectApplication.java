@@ -115,6 +115,9 @@ spring.lifecycle.timeout-per-shutdown-phase=60s
         ConfigurableApplicationContext applicationContext =
                 SpringApplication.run(SpringBootProjectApplication.class, args);
 
+
+//        *事件发布/订阅模式（最推荐）解决循环依赖设计：A调用B类服务，改成A类发布事件，B类订阅
+
         /*
            populateBean(beanName, mbd, instanceWrapper);
             会生成bean
