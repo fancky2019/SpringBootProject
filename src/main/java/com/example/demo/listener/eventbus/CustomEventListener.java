@@ -14,6 +14,9 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -44,6 +47,7 @@ public class CustomEventListener {
     IMqMessageService mqMessageService;
     @Autowired
     private TransactionTemplate transactionTemplate;
+
     /**
      * @Async 线程中：当前线程没有任何事务同步器 → Spring 认为“无法开事务”
      *@Async 异步线程：
@@ -60,18 +64,27 @@ public class CustomEventListener {
      */
 
     //multiplier 2 ,每次重试时间间隔翻倍
-    @Async("threadPoolExecutor")
-//    @EventListener
-//    Spring Retry 在最后一次重试失败后才会抛出异常
-    @Retryable(
-            value = {Exception.class},
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 1000, multiplier = 2)
-    )
+//    @Async("threadPoolExecutor")
+////    @EventListener
+////    Spring Retry 在最后一次重试失败后才会抛出异常
+//    @Retryable(
+//            value = {Exception.class},
+//            maxAttempts = 3,
+//            backoff = @Backoff(delay = 1000, multiplier = 2)
+//    )
+
+
+    //和发布者保持原子性：方式一
+    //会在当前事务内执行，与发布者在同一个事务中。
+//    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)  // 关键：指定BEFORE_COMMIT
+
+//    和发布者保持原子性：方式二
+    @EventListener
+    @Transactional(propagation = Propagation.REQUIRED)  // 加入发布者事务
 
     //    @Async("threadPoolExecutor") //使用异步和调用线程不在一个线程内
     //TransactionSynchronizationManager 事务成功之后发送
-    @TransactionalEventListener //默认事务成功之后发送
+//    @TransactionalEventListener //默认事务成功之后发送
 //    @TransactionalEventListener  (phase = TransactionPhase.AFTER_COMMIT)
 //    @EventListener  // 事务不成功也会检测到发送消息
     //    @Transactional(propagation = Propagation.REQUIRED) // @Async+@TransactionalEventListener会使service 层方法的事务失效
@@ -84,10 +97,16 @@ public class CustomEventListener {
 //        int m = Integer.parseInt("m");
         //处理完更新本地消息表，处理完成
         MqMessage message = event.getMsg();
+        if (true) {
+            throw new Exception("sdsd");
+//            return;
+        }
         if (message.getSendMq()) {
             log.info("messageId {} SendMq,", message.getId());
             return;
         }
+
+
         //@Async + @Transactional 事务不生效
         //        事务模板方法
         // 在这里执行事务性操作
@@ -160,9 +179,6 @@ public class CustomEventListener {
                 }
 
 
-
-
-
             } catch (Exception ex) {
                 log.info("executing consume message {} fail", message.getId());
                 log.error("", ex);
@@ -206,20 +222,12 @@ public class CustomEventListener {
         log.info("ThreadId {} ,Received custom event: {} ", Thread.currentThread().getId(), event);
 
 
-
-
 //                因为 MqMessageEventHandler 是在 @Async 的线程池线程中执行的，而
 //                @Transactional 依赖当前线程的事务同步器(TransactionSynchronizationManager.isSynchronizationActive())，
 //                但异步线程没有事务同步器，因此事务不会被创建
 
 //                mqMessageService.MqMessageEventHandler(message, MqMessageSourceEnum.EVENT);
 //                int nn = 1;
-
-
-
-
-
-
 
 
         //@Async + @Transactional 事务不生效
@@ -233,7 +241,7 @@ public class CustomEventListener {
 
             try {
 
-             //do business
+                //do business
 
                 return null;
             } catch (Exception ex) {
@@ -269,11 +277,6 @@ public class CustomEventListener {
 //                        }
 //                    });
 //                }
-
-
-
-
-
 
 
     }

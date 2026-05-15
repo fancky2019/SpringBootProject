@@ -63,6 +63,8 @@ import org.springframework.cloud.bus.BusProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Async;
@@ -75,6 +77,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.print.DocFlavor;
 import javax.servlet.ServletOutputStream;
@@ -111,6 +114,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, ProductTest> implements IProductTestService {
 
 
@@ -1694,6 +1698,20 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void eventBusTest() throws JsonProcessingException {
+        boolean isSynchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();
+        boolean isTxActive = TransactionSynchronizationManager.isActualTransactionActive();
+        // 关键检查：当前对象是否是代理
+        boolean isProxy = AopUtils.isAopProxy(this);
+        boolean isCglib = AopUtils.isCglibProxy(this);
+        boolean isJdk = AopUtils.isJdkDynamicProxy(this);
+        log.info("=== 代理检查 ===");
+        log.info("isAopProxy: {}", isProxy);
+        log.info("isCglibProxy: {}", isCglib);
+        log.info("isJdkDynamicProxy: {}", isJdk);
+        log.info("this.getClass(): {}", this.getClass().getName());
+
+
+        PlatformTransactionManager transactionManager = applicationContext.getBean(PlatformTransactionManager.class);
 
         BigInteger id = BigInteger.ONE;
         ProductTest productTest = this.getById(id);
@@ -1731,6 +1749,12 @@ SELECT  id,guid,product_name,product_style,image_path,create_time,modify_time,st
         //发送消息的时候可能崩溃，不能保证消息被消费。如果发送成功了，还要设计消息表兜底失败的消息
 //        MyCustomEvent event = new MyCustomEvent(busProperties.getId());
         eventPublisher.publishEvent(event);
+
+
+        if (true) {
+            return;
+        }
+
         Object object = selfProxy;
         // 从 ApplicationContext 获取代理对象
         IProductTestService proxyService = applicationContext.getBean(IProductTestService.class);

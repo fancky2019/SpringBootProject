@@ -26,6 +26,7 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -54,7 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
 //@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @SpringBootApplication(exclude = {RedissonAutoConfiguration.class})//不排除， redis 将采用redisson
 //@SpringBootApplication
-
 //@MapperScan("com.example.demo.dao")
 //类不在主目录下需要指定扫描类完全限定名同时要加主类路径
 //@ComponentScan(basePackages = {"com.example.fanckyspringbootstarter",
