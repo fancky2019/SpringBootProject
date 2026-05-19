@@ -197,8 +197,8 @@ spring:
     database: 0
 
     #    单机
-    # 远程服务器地址  redisson 的配置会覆盖此配置。
-    host: 127.0.0.1
+    # 远程服务器地址  redisson 的配置会覆盖此配置。 127.0.0.1 10.100.200.213
+    host: 10.100.200.213
     # 远程服务器端口
     port: 6379
 
@@ -217,7 +217,7 @@ spring:
 
 
     # 集群配置也用此处写正确的密码
-    password: fancky123456
+#    password: fancky123456
     # 链接超时时间（毫秒）
     timeout: 30000
 
@@ -506,8 +506,8 @@ sbp:
   ESCertPath: D:\work\dev\ES\elk\elasticsearch-8.8.2\config\certs\http_ca.crt
   wmsurl: http://localhost:9000/api/app
   authority: http://10.100.200.43:9001/api/app
-#  hostAndPort: 10.100.200.43:9200
-  hostAndPort: 127.0.0.1:9200
+  hostAndPort: 10.100.200.213:9200
+#  hostAndPort: 127.0.0.1:9200
 elasticjob:
   tracing:
     type: RDB  #日志跟踪，利用springboot的数据库配置，在数据库建两张表 job_execution_log和job_status_trace_log
