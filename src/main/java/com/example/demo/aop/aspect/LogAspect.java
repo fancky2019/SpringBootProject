@@ -493,7 +493,8 @@ public class LogAspect {
 //                        return obj;
                     } else {
                         //如果controller是void 返回类型，此处返回 MessageResult<Void>  也不会返回给前段
-                        //超过waitTime ，扔未获得锁
+                        //超过waitTime ，扔未获得锁l
+                        log.info("重复提交:获取锁失败");
                         return MessageResult.faile("重复提交:获取锁失败");
                     }
                 } catch (InterruptedException e) {

@@ -304,6 +304,11 @@ spring:
     #        #默认是1
     #        prefetch: 1
 
+  cloud:
+    stream:
+      bindings:
+        springCloudBusInput:
+          group: bus-group
 
 
 # Spring Cloud Bus 配置 - 与 rabbitmq 平级,未实现保存到mq
