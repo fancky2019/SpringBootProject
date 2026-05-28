@@ -78,7 +78,7 @@ public class SwaggerConfig {
                 .title("Swagger Test App Restful API")
                 .description("swagger test app restful api")
                 .termsOfServiceUrl("https://github.com/geekxingyun")
-                .contact(new Contact("技术宅星云","https://xingyun.blog.csdn.net","fairy_xingyun@hotmail.com"))
+                .contact(new Contact("Swagger","Swagger.com","Swagger.com"))
                 .version("1.0")
                 .build();
     }

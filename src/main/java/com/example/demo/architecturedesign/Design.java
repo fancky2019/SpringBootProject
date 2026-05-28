@@ -333,7 +333,7 @@ upstream blance {#配置服务器的分别对应的应用ip和的端口
     /*
      主主互为主从+keepalived :
      主主+keepalived  masterA和masterB互为主从，keepalived vip保证A写，B同步A，B和slave之间同步，slave会有延迟
-     两台机器都装keepalived 、mysq,  java通过vip访问mysql 。两台mysql 互为主从
+     两台机器都装keepalived 、mysql,  java通过vip访问mysql 。两台mysql 互为主从
 
       MHA :会尝试保存故障主库的 binlog，但无法保证 100% 数据一致性。建议结合半同步复制使用。
      主从：master--- keepalive--vip-- mysqlA 和mysqlB
