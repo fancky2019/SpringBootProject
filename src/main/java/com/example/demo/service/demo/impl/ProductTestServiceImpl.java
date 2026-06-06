@@ -28,11 +28,13 @@ import com.example.demo.easyexcel.ResoveDropAnnotationUtil;
 import com.example.demo.easyexcel.handler.DropDownCellWriteHandler;
 import com.example.demo.listener.eventbus.CustomEvent;
 import com.example.demo.listener.eventbus.MyCustomEvent;
+import com.example.demo.model.converter.ProductTestConverter;
 import com.example.demo.model.entity.demo.MqMessage;
 import com.example.demo.model.entity.demo.Person;
 import com.example.demo.model.entity.demo.ProductTest;
 import com.example.demo.model.request.DemoProductRequest;
 import com.example.demo.model.request.TestRequest;
+import com.example.demo.model.response.ProductTestResponse;
 import com.example.demo.model.viewModel.MessageResult;
 import com.example.demo.rabbitMQ.RabbitMQConfig;
 import com.example.demo.rocketmq.RocketMQProducer;
@@ -182,6 +184,11 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
     @Autowired
     RocketMQProducer rocketMQProducer;
 
+
+    @Autowired
+    private ProductTestConverter productTestConverter;
+
+
     public ProductTestServiceImpl(ProductTestMapper productTestMapper) {
         this.productTestMapper = productTestMapper;
     }
@@ -209,8 +216,8 @@ public class ProductTestServiceImpl extends ServiceImpl<ProductTestMapper, Produ
 //        updateTest();
 //        productTestService.saveBatchTest();
 //        productTestService.updateBatchByIdTest();
-        productTestService.deleteBatchTest();
-//        page();
+//        productTestService.deleteBatchTest();
+        page();
 //        queryParam();
 //        truncateTest();
 //        deleteTableDataTest();
@@ -460,7 +467,7 @@ SELECT id,guid,product_name,product_style,image_path,create_time,modify_time,sta
         List<ProductTest> productTestList = productTestPage.getRecords();
         long total = productTestPage.getTotal();
 
-
+        List<ProductTestResponse> responseList = productTestConverter.toResponseList(productTestList);
 
         /*
         需要配置 MybatisPlusPageInterceptor 拦截器，否则是查询所有

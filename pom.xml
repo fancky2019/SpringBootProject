@@ -35,6 +35,7 @@
         <!--         下面pom 会配置spring-cloud统一的依赖管理-->
         <spring-cloud.version>2021.0.8</spring-cloud.version>
         <junit-jupiter.version>5.10.0</junit-jupiter.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
     </properties>
 
 
@@ -811,6 +812,42 @@
 <!--            <scope>test</scope>-->
 <!--            scope    compile (默认)作用范围：所有阶段（编译、测试、运行）-->
         </dependency>
+
+
+
+
+
+        <!-- MapStruct 核心 -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+
+        <!-- MapStruct 注解处理器，编译时自动生成实现类 -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${mapstruct.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
