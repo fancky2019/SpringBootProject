@@ -5,35 +5,109 @@ server:
   servlet:
     #设置项目名称，注意配置文件 dev、tes、prod的配置
     context-path: /sbp
-
+    #multipart:
+    #max-file-size: 1024MB
+    #max-request-size: 1024MB
+  shutdown: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
 eureka:
   client:
     # 下面两句不注册到注册中心。Eureka会默认把自己注册到注册中心：http://localhost:8761/eureka/
     registerWithEureka: false
     fetchRegistry: false
 
+#mybatis:
+#  configuration:
+#    local-cache-scope: session # 确保是 session(默认值)
+#    cache-enabled: false       # 临时关闭二级缓存测试
+
+
+
+
 #公共配置与profiles选择无关 mapperLocations指的路径是src/main/resources
 #mapper路径和实体对象路径
 #要配置mybatis不然mybatis有可能无法Invalid bound statement问题
-mybatis:
-  #  Mapper文件存放的位置
-  mapperLocations: classpath:mapper/**/*.xml
-  #  实体类所在的包
-  typeAliasesPackage: com.example.demo.model.entity
 
-#mybatis 分页
-pagehelper:
-  ##  mysql、sqlserver2012，没找到sqlserver2008版本的
-  helperDialect: sqlserver2012
-  reasonable: true
-  supportMethodsArguments: true
-  params: count=countSql
+#mybatis 配置和mybatis-plus不一样，springbootstarter的myabtis 版本要和mybatis-plus封装的mybatis版本保持一直，
+#否则项目中同时存在的myabtis 和mybatis0plus因引用的mybatis版本不一致无法共存。
+#mybatis: 代码中 MybatisPlusDataSourceConfig 配置会覆盖此配置
+mybatis-plus:
+  ##  mybatis全局配置文件
+  config-location: classpath:mybatis-config.xml
+  #  Mapper文件存放的位置，多了层文件夹，默认不用配置
+  mapper-locations: classpath:mapper/**/*.xml
+  #  实体类所在的包
+  type-aliases-package: com.example.demo.model.entity
+  #  M_Str1  默认命中mStr1  和 mybatis-config.xml 只能保留一个配置
+  #  configuration:
+  #下划线转驼峰,默认true
+  #    map-underscore-to-camel-case: false #默认true
+
+  #配置日志  打印sql语句 。config-location和configuration 不能同时存在
+  #NoLoggingImpl不打印日志，StdOutImpl(默认)打印日志在控制台，不会打印到日志文件中。slf4j.Slf4jImpl 输出到日志文件
+  #debug 查看日志通过mybatis log plugin
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl   #不配置由log4j2控制 ，会打印在控制台和日志
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+#配置日志  打印sql语句
+#mybatis-plus:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+##mybatis 分页 pageHelper插件4.0.0以后的版本支持自动识别使用的数据库
+#pagehelper:
+#  ##  mysql、sqlserver2012，没找到sqlserver2008版本的
+#  helperDialect: sqlserver2012
+#  reasonable: true
+#  supportMethodsArguments: true
+#  params: count=countSql
+
+#默认log
+#logging:
+#  # log4j2 path没起作用.logback的配置
+# # path:
+#  file: logs/log.log
+#log4j2 配置,log4j2.xml不能和log4j2.yml同时存在，否则都会生效  log4j2.xml logback-spring.xml
+logging:
+  config: classpath:log4j2.xml
+  #mybatis-plus 日志级别配置，不用配置level，会打印sql日志到控制台和文件. log4j2 配置AsyncRoot level="all  name="org.mybatis"
+#  level:
+##    com.baomidou.mybatisplus: DEBUG
+#    com:
+#      baomidou:
+#        mybatisplus: DEBUG
+#      example:
+#        demo:
+#          dao: DEBUG
 
 #开发配
-
 spring:
+  #  循环引用 :允许循环引用（Spring Boot 2.6+默认false） 本项目没生效， wmsEs 生效
+  #  main:
+  #    allow-circular-references: true
+
+  lifecycle:
+    #默认30s #  server.shutdown=graceful: GRACEFUL # GRACEFUL/IMMEDIATE (默认:IMMEDIATE)
+    timeout-per-shutdown-phase: 60s
+
+  #  #默认cglib 代理，设置jdk 动态代理 false
+  #  aop:
+  #    proxy-target-class: true
+  #swagger 3配置 建议使用springdoc 代替swagger
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  main:
+    allow-circular-references: true
+  #  main:
+  #    allow-bean-definition-overriding: true #当遇到相同名字的时候，是否允许覆盖注册 bean
   application:
-    name: SpringBootProject
+    name: springBootProject
+    jackson: # 无法处理LocalDateTime格式化问题，使用代码配置类 time-zone: GMT+8
+      date-format: yyyy-MM-dd HH:mm:ss
+      time-zone: UTC
+  #      default-property-inclusion: non_null
   thymeleaf:
   #    view:
   #      prefix: /
@@ -44,21 +118,28 @@ spring:
   #  resources:
   #    static-locations: classpath:/
 
+  #默认redis 缓存，ehcache本地缓存
+  #  cache:
+  #    redis:
+  #      cache-null-values: true  #默认缓存null值解决缓存穿透
   datasource:
-    # sqlserver
-    url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS
-    #url: jdbc:sqlserver://localhost:1433;DatabaseName=RABC
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    username: sa
-    password: 123456
-
-    #    #mysql
-    #    #具体参见类DynamicDataSourceAspect 说明
-    #    #不用此默认，默认就是写库,多数据源用jdbcUrl，不是url,spring 默认用的是url，用多数据源用url会报错。
-    #    url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-    #    driver-class-name: com.mysql.cj.jdbc.Driver
-    #    username: root
+    #    # sqlserver
+    #    url: jdbc:sqlserver://10.100.200.43;DatabaseName=GensongWms3DB;trustServerCertificate=true
+    #    url: jdbc:sqlserver://localhost:1433;DatabaseName=WMS
+    #    #url: jdbc:sqlserver://localhost:1433;DatabaseName=RABC
+    #    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    #    username: sa
     #    password: 123456
+
+    #mysql
+    #具体参见类DynamicDataSourceAspect 说明 加上时区不然保存到数据库少8h &serverTimezone=Asia/Shanghai
+    #不用此默认，默认就是写库,多数据源用jdbcUrl，不是url,spring 默认用的是url，用多数据源用url会报错。 &failOverReadOnly=false
+    url: jdbc:mysql://127.0.0.1:3306/demo?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&allowMultiQueries=true&rewriteBatchedStatements=true&useAffectedRows=true&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    #    password: 123456
+    #    jasypt-spring-boot-starte 会自动解密ENC(加密值)  。Jasypt 会自动解密 ENC(加密值) 格式的配置
+    password: ENC(lkK8NYWG9PaTrDFfbA3cyhJlal/mVKiY8jPV7eQtR0ary+Hc87jT1e13sggAWG5z)  # jasypt加密的密码
 
     #    writer:
     #      jdbcUrl: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
@@ -101,74 +182,189 @@ spring:
     # Hikari will use the above plus the following to setup connection pooling
     hikari:
       minimum-idle: 5
-      maximum-pool-size: 15
-      auto-commit: true
-      idle-timeout: 30000
+      maximum-pool-size: 100
+      auto-commit: true #默认 true .OrderManagerService 代码异常，spring自动回滚，或者手动回滚。否则正常自动提交.连接池中的连接将在每个事务结束时自动提交
+      idle-timeout: 60000
       #pool-name: HikariCP-Demo
       max-lifetime: 1800000
-      connection-timeout: 30000
+      connection-timeout: 600000
+      connection-init-sql: SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ
       #connection-test-query: SELECT 1
 
-
-
   redis:
-    #  数据库索引
-    database: 5
-    # 远程服务器地址
-    host: 192.168.5.89
+    ##单机
+    #  数据库索引  redisson 的配置会覆盖此配置。
+    database: 0
+
+    #    单机
+    # 远程服务器地址  redisson 的配置会覆盖此配置。 127.0.0.1 10.100.200.213
+    host: 10.100.200.213
     # 远程服务器端口
     port: 6379
-    # 验证码
-    password: fancky123456
-    jedis:
+
+
+    #    #配置集群，自动写入集群
+    #    ##集群 注意：密码用上面密码配置 127.0.0.1:7001,127.0.0.1:7002,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005,127.0.0.1:7006 #集群节点
+    #    cluster:
+    #      nodes:
+    #        - 127.0.0.1:7000
+    #        - 127.0.0.1:7001
+    #        - 127.0.0.1:7002
+    #        - 127.0.0.1:7003
+    #        - 127.0.0.1:7004
+    #        - 127.0.0.1:7005
+    #      max-redirects: 3
+
+
+    # 集群配置也用此处写正确的密码
+    #    password: fancky123456
+    # 链接超时时间（毫秒）
+    timeout: 30000
+
+    #Spring Boot 项目中，默认的 Redis 客户端是 Lettuce。Lettuce 是一个高性能的、基于 Netty 的 Redis 客户端，支持同步、异步和响应式编程模型。
+    #redis连接池 lettuce、jedis。连接池 单机配置。默认集成lettuce
+    #    jedis:
+    lettuce:
       pool:
         # 最大空闲连接
-        max-idle: 8
+        max-idle: 64
         # 最小空闲链接
         min-idle: 0
         # 最大连接数（负数表示没有限制）
-        max-active: 8
+        max-active: 64
         # 最大阻塞等待时间（负数表示没有限制）
         max-wait: 0
-    # 链接超时时间（毫秒）
-    timeout: 50
+
+
+    #    ##集群 注意：密码用上面密码配置
+    #    cluster:
+    #      nodes:
+    #        - 127.0.0.1:7000
+    #        - 127.0.0.1:7001
+    #        - 127.0.0.1:7002
+    #        - 127.0.0.1:7003
+    #        - 127.0.0.1:7004
+    #      max-redirects: 3
+
+    #    ##哨兵 密码用上面密码配置
+    #    sentinel:
+    #      master: mymaster
+    #      nodes:
+    #        - 127.0.0.1:60001
+    #        - 127.0.0.1:60002
+    #        - 127.0.0.1:60003
+
+
+    #springboot 配置未成功，参见代码的配置
+    redisson:
+      file: classpath:redisson-config.yml
 
   rabbitmq:
+    ##HA镜像集群。集群配置 ip:port,ip:port 。多个配置之间用逗号隔开
+    # addresses: 127.0.0.1:5673,127.0.0.1:5674,127.0.0.1:5675 #指定client连接到的server的地址，多个以逗号分隔(优先取addresses，然后再取host)
+
     host: 127.0.0.1
     port: 5672
-    username: fancky
-    password: 123456
-    #发布确认
-    publisher-confirms: true
+    username: guest
+    password: guest
+    #发布确认 publisher-confirms已经修改为publisher-confirm-type，
+    #publisher-confirms: true
+    publisher-confirm-type: CORRELATED
     # 开启发送失败退回
     publisher-returns: true
     template:
       #设置为 true 后 消费者在消息没有被路由到合适队列情况下会被return监听，而不会自动删除
       mandatory: true
-    virtual-host: /
+    virtual-host: /   #    virtual-host: wms_es_dev  #rabbit 管理界面要在admin中添加次虚拟机并设置用户有这个Vhost的权限
     #开启手动Axk,手动无法自动加入死信队列，可以重试指定次数。
     #设置成默认的自动Ack,springboot会加入死信队列，一定设置死信队列。
     #    listener.simple.acknowledge-mode: manual
     listener:
+      #全局SimpleRabbitListenerContainerFactory 配置
       simple:
         retry:
           #是否开启消费者重试（为false时关闭消费者重试，这时消费端代码异常会一直重复收到消息）
-          enabled: true
-          #最大重试次数（包括执行一次，实际重试两次。1+2=3）
+          #默认false ,不采用spring自带的重试，自己设计死信队列达到重试次数入库
+          enabled: false
+          #最大重试次数（包括执行一次，实际重试两次。1+2=3），达到重试次数不再消费，
+          #不能在代码中吞噬异常否则无法重试，类似数据库事务
           max-attempts: 3
           #重试间隔时间（单位毫秒）
           initial-interval: 2000
-        #公平分发模式 默认是1
-        prefetch: 30
-        #acknowledge-mode: manual
-        #消费异常的数据进入死信队列
-        default-requeue-rejected: false
+        #公平分发模式 默认是1,否则消费失败，没有ack还会继续消费到30个。默认 prefetch = 250。1个 unacked 不成功会停止消费，后续消息无法消费
+        prefetch: 1
+        #默认 auto，不然消费异常业务ack掉。尽管配置重新入队auto还是会重试入队之后ack掉
+        acknowledge-mode: manual
+        #消费异常的数据重新入队。
+    #        default-requeue-rejected: true
+
     #    listener:
     #      direct:
     #        acknowledge-mode: manual
     #        #默认是1
     #        prefetch: 1
 
+  cloud:
+    stream:
+      bindings:
+        springCloudBusInput:
+          group: bus-group
+
+
+  # Spring Cloud Bus 配置 - 与 rabbitmq 平级,未实现保存到mq
+  #  cloud:
+  #    bus:
+  #      enabled: true
+  #      destination: springCloudBus  # 交换器名称
+  #      # 关键：配置 RabbitMQ 特定设置
+  #      rabbit:
+  #        enabled: true
+  #        queues:
+  #          durable: true
+  #          auto-delete: false
+  #          exclusive: false
+  #        bindings:
+  #          durable: true
+  #        auto-bind: true
+
+  #  # MQTT配置信息  http://10.100.200.43:18083/#/clients 账号密码  admin  public
+
+  #不依赖 spring-boot-starter-integration
+  #  mqtt:
+  #    enabled: true
+  #    # MQTT服务地址，端口号默认11883，如果有多个，用逗号隔开
+  #    url: tcp://127.0.0.1:1883
+  #    # 用户名
+  #    username: guest
+  #    # 密码
+  #    password: guest
+  #    consumerid: id_dev_consumerid
+  #    # 客户端id(不能重复)
+  #    client:
+  #      id: provider-id
+  #    # MQTT默认的消息推送主题，实际可在调用接口是指定
+  #    default:
+  #      topic: topic
+
+  #  spring 集成的mqtt配置
+  mqtt:
+    enabled: false
+    broker-url: tcp://10.100.200.43:1883
+    client-id: spring-mqtt-client-id
+    username: guest
+    password: guest
+    #    topic2/# - 多级通配符，如：topic2/level1/level2/level3
+    #    topic3/+ - 单级通配符  topic3/client1
+    subscribe:
+      - topic1
+      - topic2/#
+      - topic3/+
+    publish: test/outbound
+    qos: 1
+    completion-timeout: 5000
+    #连接断开会话不会清除，重连会重新投递
+    clean-session: false
+    keep-alive-interval: 60
 
   #    template:
   #      mandatory: true
@@ -199,23 +395,88 @@ spring:
     consumer:
       group-id: springbootKafkaConsumer
       enable-auto-commit: false
+      #      Latest （默认）
+      auto-offset-reset: earliest
       # 禁用自动提交下面也注释。springboot会自动管理提交
       # auto-commit-interval: 1000
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
         #max-poll-records: 10
-        #fetch-max-wait:
-        #listener:
+      #fetch-max-wait:
+      #listener:
       #手动提交模式
       #ack-mode: manual
 
-#Feign  开启熔断
+  #  fanckytest:
+  #    host: 127.0.0.1
+  #    port: 8082
+
+
+## rabbitmq相关配置，暴露bus刷新点
+#management:
+#  endpoints: #暴露bus刷新配置的端点
+#    web:
+#      exposure:
+#        include: 'bus-refresh'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # 暴露所有 Actuator 端点
+  endpoint:
+    health:
+      show-details: always  # 允许查看健康检查的详细信息
+
+
+
+#camunda 官网配置
+#https://docs.camunda.org/manual/7.9/user-guide/spring-boot-integration/configuration/#camunda-engine-properties
+camunda.bpm:
+  # 配置账户密码来访问Camunda自带的管理界面
+  admin-user:
+    id: demo
+    password: demo
+  #    firstName: Demo
+  filter:
+    create: All tasks
+    #禁止自动部署resources下面的bpmn文件
+  auto-deployment-enabled: false
+    #禁止index跳转到Camunda自带的管理界面，默认true
+  #    webapp:
+  #      index-redirect-enabled: false
+
+#Feign  开启熔断。参见项目spring-cloud-nacos
 #注意：节点不在spring内
 #如果页面显示异常信息，说明熔断没有开启成功
 feign:
+
+  #  #携带token,未验证
+  #  oauth2:
+  #    # 开启Oauth支持，这样就会在请求头中携带Token了
+  #    enabled: true
+  #    # 同时开启负载均衡支持
+  #    load-balanced: true
+  #  默认超时值
+  #  connectTimeout：10 秒（10,000 毫秒）
+  #  readTimeout：60 秒（60,000 毫秒）
+  # 设置 feign 超时时间:超时异常
+  client:
+    config:
+      # default、service-provider-two，指定服务名称可以设置单个服务的超时时间
+      default:
+        connectTimeout: 6000
+        readTimeout: 6000
+  #  circuitbreaker:
+  #    enabled: true  # 启用 Resilience4j 熔断（替代 Hystrix）
   hystrix:
     enabled: true
-
+  httpclient:
+    connection-timeout: 2000  #单位ms,默认2000
+    max-connections: 200 #线程池最大连接数
+    enabled: false
+  okhttp: #用okhttp 代替默认的Client，JDK 原生的 URLConnection 发送HTTP请求，没有连接池
+    enabled: true
 ribbon:
   OkToRetryOnAllOperations: false #对所有操作请求都进行重试,默认false
   ReadTimeout: 5000   #负载均衡超时时间，默认值5000
@@ -234,13 +495,7 @@ hystrix:
           thread:
             timeoutInMilliseconds: 10000 #断路器超时时间，默认1000ms
 
-#默认log
-#logging:
-#  #  path没起作用
-# # path:
-#  file: logs/log.log
-logging:
-  config: classpath:log4j2.yml
+
 swagger2:
   enable: true #false (或者在pro环境下不写此配置):禁用就打不开swagger网页
 knife4j:
@@ -253,4 +508,164 @@ cron: '0/8 * * * * ?'
 
 sbp:
   ordermigratedbtoolurl: http://localhost:8101
+  ESCertPath: D:\work\dev\ES\elk\elasticsearch-8.8.2\config\certs\http_ca.crt
+  wmsurl: http://localhost:9000/api/app
+  authority: http://10.100.200.43:9001/api/app
+  hostAndPort: 10.100.200.213:9200
+#  hostAndPort: 127.0.0.1:9200
+elasticjob:
+  tracing:
+    type: RDB  #日志跟踪，利用springboot的数据库配置，在数据库建两张表 job_execution_log和job_status_trace_log
+  regCenter:
+    serverLists: localhost:2181
+    namespace: elasticjob-lite-springboot
+  jobs:
+    simpleJob: #job名称不能重复
+      elasticJobClass: com.example.demo.jobs.SpringBootSimpleJob
+      #      cron: 0/20 * * * * ?   #秒分钟小时
+      cron: 0 0 * * * ?   #秒分钟小时:每小时触发一次
+      shardingTotalCount: 3 #3个分片，三台机器执行次任务
+      shardingItemParameters: 0=Beijing,1=Shanghai,2=Guangzhou
+      job-parameter: fanckytest
+      overwrite: true #否则job接收不到参数
+      props:
+        script.command.line: "echo SCRIPT Job: "
+    testSimpleJob:
+      elasticJobClass: com.example.demo.jobs.TestSimpleJob
+      cron: 0 0 * * * ?   #秒分钟小时:每小时触发一次
+      shardingTotalCount: 1
+      overwrite: true #否则job接收不到参数
+  dump:
+    port: 9889
+    enabled: true
 
+
+
+#配置文件不要用駝峰写法 单词全小写或者用短横线连接 如：config.configmodel 或config.config-model
+#在竖线位置粘贴
+config:
+  configmodel:
+    fist-Name: fancky
+    address: 上海市
+    salary: 20
+    array: #数组 、List // Spring 默认不支持直接注入 List .@Value("${redis-stream.api-names}")
+      - cat
+      - dog
+      - pig
+    pets: [ cat,dog,pig ]    #List
+    maps: { k1: v1,k2: 12 } #map写法
+    persons: #d对象数组
+      - { name: 张三,age: 12 }
+      - { name: li,age: 13 }
+      - name: fancky1
+        age: 27
+      - name: fancky2
+        age: 28
+      - name: fancky3
+        age: 29
+    conditional-on-property: false
+    age: 18
+
+redis-stream:
+  # 暂时用beanName
+  stream-keys: # 要监听的流名称列表  // Spring 默认不支持直接注入 List .@Value("${redis-stream.api-names}")
+    - user-api
+    - order-api
+    - payment-api
+  # 组名：按业务模块划分
+  group-name: processor-group-1      # 消费者组名称
+  # 消费者名：包含实例标识，便于排查问题
+  consumer-name: consumer-1        # 消费者实例名称
+
+##项目fancky-spring-boot-starter 配置
+fanckytest:
+  host: 192.168.5.7
+  port: 8888
+
+xxl:
+  job:
+    accessToken: default_token
+    admin:
+      #      addresses: http://xxljob.com:8182/xxl-job-admin
+      addresses: http://127.0.0.1:8182/xxl-job-admin
+    executor:
+      address:
+      appname: springBootProject
+      ip:
+      logpath: /data/applogs/xxl-job/jobhandler
+      logretentiondays: 30
+      port: 9999
+
+
+##mybatis log 日志显示配置
+#mybatis-plus:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+##
+##mybatis:
+##  configuration:
+##    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+gx:
+  jwt:
+    JWTSecretKey: GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk
+  encrypt:
+    allowlist: /login;/logout
+
+#rocketmq:
+#   name-server: 127.0.0.1:9876 # 访问地址
+#   producer:
+#      group: Pro_Group # 必须指定group
+#      send-message-timeout: 3000 # 消息发送超时时长，默认3s
+#      retry-times-when-send-failed: 3 # 同步发送消息失败重试次数，默认2
+#      retry-times-when-send-async-failed: 3 # 异步发送消息失败重试次数，默认2
+
+rocketmq:
+  #nameservice服务器地址（多个以英文逗号隔开）
+  name-server: 127.0.0.1:9876
+  #生产者配置
+  producer:
+    group: my-group  # 指定发送者组名
+    send-message-timeout: 30000 # 发送消息超时时间，单位：毫秒。默认为 3000 。
+    compress-message-body-threshold: 4096 # 消息压缩阀值，当消息体的大小超过该阀值后，进行消息压缩。默认为 4 * 1024B
+    max-message-size: 4194304 # 消息体的最大允许大小。。默认为 4 * 1024 * 1024B
+    retry-times-when-send-failed: 2 # 同步发送消息时，失败重试次数。默认为 2 次。
+    retry-times-when-send-async-failed: 2 # 异步发送消息时，失败重试次数。默认为 2 次。
+    retry-next-server: false # 发送消息给 Broker 时，如果发送失败，是否重试另外一台 Broker
+
+
+#springfox:
+#  documentation:
+#    base-url: http://example.com/api/v2/api-docs
+#    host: http://example.com
+#    path: /
+#  spring:
+#    profiles:
+#      active: ['!docs', '!documenation']
+
+# application.yml
+ftp:
+  host: 10.100.201.8
+  port: 21
+  username: fancky
+  password: Abc!123456
+  base-path: /wms/
+  passive-mode: true
+
+
+# application.yml
+# 配置Jasypt加密器
+jasypt:
+  encryptor:
+    #    如果获取不到环境变量 JASYPT_ENCRYPTOR_PASSWOR就使用默认值 default-secret-key。
+    # 加密密钥，实际生产环境应该通过环境变量传递java -jar myapp.jar --jasypt.encryptor.password=my-secret-key
+
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:default-secret-key}
+    # 加密算法
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    # IV生成器
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+    # 盐生成器
+    salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
+    # 输出格式
+    string-output-type: base64

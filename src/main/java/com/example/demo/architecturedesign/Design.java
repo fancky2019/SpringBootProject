@@ -14,7 +14,7 @@ public class Design {
     服务：nginx 反向代理
     redis: lua 脚本实现写入至少有一个副本写入
     rabbitMq:仲裁队列（不能实现水平扩容问题）取代镜像队列
-    mysql:keepalived(vip)+半同步复制（不要全同步复制性能差）+GTID
+    mysql:keepalived(vip)+半同步复制（不要全同步复制性能差）+GTID  .两台机器
     */
 
     //endregion
