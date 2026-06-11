@@ -14,6 +14,21 @@ import java.text.MessageFormat;
 import java.util.concurrent.ExecutionException;
 
 
+/**
+ *
+ * Kafka 在分配副本时，会遵循一条硬性规则：同一个分区的多个副本，必须分布在不同的 Broker 上。
+ *
+ * 以 3 个节点、3 个分片、3 个副本的 Topic 为例：
+ *
+ * Broker	分区 0	分区 1	分区 2
+ * Broker A	Leader	Follower	Follower
+ * Broker B	Follower	Leader	Follower
+ * Broker C	Follower	Follower	Leader
+ *
+ *
+ *
+ */
+
 //@Component
 public class KafkaProducerClient {
 

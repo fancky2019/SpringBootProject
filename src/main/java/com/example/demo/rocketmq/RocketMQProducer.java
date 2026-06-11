@@ -36,6 +36,12 @@ import java.util.UUID;
  * 最终一致性 + 高吞吐 → 异步发送 + 回调补偿（如记录失败消息到DB）。
  * 可容忍丢失 + 极致性能 → 单向发送。
  *
+ *
+ *
+ * RocketMQ在 DLedger 模式下，3个节点的集群中，每个节点都拥有完整的数据.类似rabbitmq的仲裁队列
+ *
+ *
+ * 
  */
 @Slf4j
 @Component
