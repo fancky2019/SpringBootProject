@@ -49,6 +49,10 @@ public class MybatisController {
 
     //region 一级缓存、二级缓存
     /**
+     *
+     *
+     *一级缓存缓存key
+     *CacheKey =Mapper方法ID +SQL语句 +参数值 +分页参数(RowBounds) +环境ID
      *一级缓存更新机制
      * 当执行更新操作（INSERT、UPDATE、DELETE）时，MyBatis 会自动清空一级缓存，这是为了确保数据的一致性。具体表现为：
      * 更新操作会清空所属的命名空间缓存：

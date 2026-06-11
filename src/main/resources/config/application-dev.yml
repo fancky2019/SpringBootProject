@@ -260,11 +260,13 @@ spring:
       file: classpath:redisson-config.yml
 
   rabbitmq:
-    ##HA镜像集群。集群配置 ip:port,ip:port 。多个配置之间用逗号隔开
+    # 集群配置（优先级高） 4.0 使用仲裁队列     #HA镜像集群。集群配置 ip:port,ip:port 。多个配置之间用逗号隔开
     # addresses: 127.0.0.1:5673,127.0.0.1:5674,127.0.0.1:5675 #指定client连接到的server的地址，多个以逗号分隔(优先取addresses，然后再取host)
+    addresses: 127.0.0.1:5672
+    # 单节点配置（优先级低，会被忽略）
+#    host: 127.0.0.1
+#    port: 5672
 
-    host: 127.0.0.1
-    port: 5672
     username: guest
     password: guest
     #发布确认 publisher-confirms已经修改为publisher-confirm-type，

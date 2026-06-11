@@ -205,6 +205,7 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
             // 用来缓存“同一个 SqlSession 内、相同 SQL 的查询结果”。
             //同一个 SqlSession 里，相同 SQL 不会再查数据库，而是从缓存拿。
 
+            //一级缓存缓存key
             //CacheKey =Mapper方法ID +SQL语句 +参数值 +分页参数(RowBounds) +环境ID
             MqMessage mqMessage1 = this.getById(id);
 

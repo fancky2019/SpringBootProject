@@ -19,6 +19,7 @@ import org.springframework.amqp.rabbit.core.BatchingRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -268,7 +269,7 @@ public class RabbitMQConfig {
 //                String failedMessage = new String(returnedMessage.getMessage().getBody());
 //                rabbitMqMessage = objectMapper.readValue(failedMessage, RabbitMqMessage.class);
 
-                 rabbitMqMessage =
+                rabbitMqMessage =
                         (RabbitMqMessage) rabbitTemplate.getMessageConverter()
                                 .fromMessage(returnedMessage.getMessage());
 
@@ -338,7 +339,7 @@ public class RabbitMQConfig {
 
             try {
 
-                 messageId = returnedMessage.getMessage()
+                messageId = returnedMessage.getMessage()
                         .getMessageProperties()
                         .getMessageId();
 
@@ -405,6 +406,9 @@ public class RabbitMQConfig {
 
 //        //json 序列化，默认SimpleMessageConverter jdk 序列化
 //        factory.setMessageConverter(new Jackson2JsonMessageConverter());
+
+
+//        factory.setGlobalQos(false);  // 仲裁队列要设置关键：必须设置为 false
         return factory;
     }
 
@@ -759,4 +763,57 @@ public class RabbitMQConfig {
 
 
     //endregion
+
+    //region 仲裁队列
+
+    @Bean
+    public Queue quorumQueue() {
+        /*
+         Raft 过半选举至少要求三个节点
+
+
+        仲裁队列
+        设置 x-queue-type: quorum
+     	强制 durable=true
+        设置 globalQos=false
+
+
+        globalQos：默认值true，待确认
+        */
+
+
+        Map<String, Object> args = new HashMap<>();
+        // 1. 指定队列类型为仲裁队列（必须）
+        args.put("x-queue-type", "quorum");
+        // 2. 可选：设置初始副本数，建议设置为集群节点数（默认集群节点数自动决定）
+        //指定仲裁队列（Quorum Queue）在集群中的初始副本数量，也就是该队列的数据会在多少个节点上各保存一份
+        args.put("x-quorum-initial-group-size", 3);
+
+//        args.put("x-dead-letter-exchange", "my-dlx-exchange");      // 死信交换机
+//        args.put("x-dead-letter-routing-key", "my-dlq.routing.key"); // 死信路由键
+//        args.put("x-message-ttl", 60000);
+
+//        仲裁队列强制要求 durable=true
+        return QueueBuilder.durable("my-quorum-queue") // durable 必须为 true
+                .withArguments(args)
+                .build();
+    }
+
+    @Bean
+    public DirectExchange quorumExchange() {
+        return ExchangeBuilder.directExchange("my-quorum-exchange")
+                .durable(true)
+                .build();
+    }
+
+    @Bean
+    public Binding quorumBinding(Queue quorumQueue, DirectExchange quorumExchange) {
+        return BindingBuilder.bind(quorumQueue)
+                .to(quorumExchange)
+                .with("quorum.routing.key");
+    }
+
+    //endregion
+
+
 }
