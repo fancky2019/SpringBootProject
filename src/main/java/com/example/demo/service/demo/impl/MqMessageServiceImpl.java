@@ -740,6 +740,7 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
 //        }
 
 
+            //rabbitmq顺序发送，businessId同步发送+异步发送
             // 根据 businessId 分组,组内有序，key顺序不定
             //        Map<Long, List<MqMessage>> groupedMap = mqMessageList.stream()
             //                .collect(Collectors.groupingBy(MqMessage::getBusinessId));

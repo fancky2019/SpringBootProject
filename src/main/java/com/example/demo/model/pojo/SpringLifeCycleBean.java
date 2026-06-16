@@ -190,15 +190,16 @@ import javax.swing.*;
  6、BeanPostProcessor postProcessBeforeInitialization
  7、@PostConstruct
  8、InitializingBean afterPropertiesSet
- 9、自定义init方法
+ 9、自定义init方法   init-method  ： @Bean(initMethod = "customInit")
  10、BeanPostProcessor postProcessAfterInitialization
  11、Bean准备就绪
  12、@PreDestroy
  13、DisposableBean destroy
- 14、自定义destroy方法
+ 14、自定义destroy方法  @Bean(initMethod = "customInit", destroyMethod = "customDestroy")
 
 
-
+ 初始化	@PostConstruct	Bean 初始化后执行
+ 销毁	@PreDestroy	    Bean 销毁前执行
 
  //Bean 内使用@PostConstruct  @PreDestroy ，声明Bean不需要指定 initMethod 和 destroyMethod
  @Bean(destroyMethod = "customDestroy", initMethod = "customInit")

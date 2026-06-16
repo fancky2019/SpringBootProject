@@ -11,6 +11,31 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  *
+ *NameServer :服务注册与发现、路由信息存储：
+ * Broker 启动时：集群中的每个 Broker 节点（Master 或 Slave）在启动时，都会向所有的 NameServer 进行注册，报告自己的 IP 地址、端口号和它存储的 Topic 信息。
+ *
+ * NameServer  “路由表”  topic 对应的broker
+ *
+ *
+ *Broker  负责真实的消息存储、转发和查询。
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  *
  部署模式	                  最小节点数	特点	适用场景

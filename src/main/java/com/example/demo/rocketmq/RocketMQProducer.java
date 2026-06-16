@@ -41,6 +41,8 @@ import java.util.UUID;
  * RocketMQ在 DLedger 模式下，3个节点的集群中，每个节点都拥有完整的数据.类似rabbitmq的仲裁队列
  *
  *
+ * 有序性：发送时候单现成、分区有序
+ *
  * 
  */
 @Slf4j
