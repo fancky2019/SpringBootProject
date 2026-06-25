@@ -115,6 +115,23 @@ import java.util.concurrent.CompletableFuture;
  * 一个 Topic = 多个队列（MessageQueue）
  * 队列分布在不同 Broker 上
  *
+ *
+ *
+ *
+ * 选主：
+ * 自动选主模式：必须显式开启
+ * 要想实现自动选主，无论是使用较早的 DLedger 模式还是更新的 Controller 模式，都必须显式开启对应的配置，这不是默认行为。
+ *
+ * DLedger 模式：需要在 Broker 的配置文件中，将 enableDLegerCommitLog 设置为 true，并配置 DLedger 相关的组和节点信息。
+ *
+ * Controller 模式（RocketMQ 5.0+）：这是目前官方推荐的新方案。需要在 Broker 端设置 enableControllerMode=true，并指定 Controller 的地址；同时在 NameServer 或独立的 Controller 组件中启用 Controller 功能。在这种模式下，你甚至不需要再手动指定 brokerId 和 brokerRole，这些角色会由 Controller 组件自动分配和协调。
+ *
+ *
+ *5.0+ 官方推荐的 Controller 模式
+ * # 关键：开启 Controller 模式
+ * enableControllerMode = true
+ * # 指向所有 Controller 的地址，多个用分号隔开
+ * controllerAddr = 127.0.0.1:9877;127.0.0.1:9878;127.0.0.1:9879
  */
 @Slf4j
 @Component
