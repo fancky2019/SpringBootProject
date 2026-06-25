@@ -456,6 +456,15 @@ appendfsync everysec
      */
 //endregion
 
+//region redis 脑裂
+    /*
+    redis选主：3主3从。集群设置开启 min-replicas-to-write 1 和 min-replicas-max-lag 10 这两个参数。
+    从节点选举候选者，其他主节点推举候选者成为主节点，过半选举
+    需要“多数派”主节点：Redis 集群的故障转移，必须由超过半数（N/2 + 1）的主节点投票同意才能进行。如果只有 2 台机器，意味着最多只能有 2 个主节点。当其中 1 台宕机或网络隔离时，剩下的 1 个主节点无法独自完成“过半”投票，集群将无法进行自动故障转移。
+
+需要足够的从节点：防脑裂的配置 min-replicas-to-write 1，要求每个主节点至少有 1 个从节点保持实时同步。要实现这个要求，3 台机器是最小单位。例如，将 Master A 放在机器1，它的从节点 Slave A 放在机器2，这样任何一台机器故障，都不会让主从同时失联。
+     */
+//endregion
 
 @RestController
 @RequestMapping("/redisTest")
